@@ -1,6 +1,6 @@
 # AIA-05 — Base de Conhecimento e Recuperação dos Agentes | Proposta funcional v0.1
 
-> **Situação:** somente planejamento documental; decisões AIA05-D01 a D10 **ABERTAS** para avaliação.  
+> **Situação:** diretrizes AIA05-D01 a D10 **APROVADAS FUNCIONALMENTE em 2026-11-06**; detalhes técnicos e implementação permanecem bloqueados.  
 > **Data:** 2026-11-06. **Projeto:** Imagine AI Agents (serviço compartilhado).  
 > **Precedência:** AIA-01 D01–D08, AIA-02 D01–D10, AIA-03 D01–D10 e AIA-04 D01–D10 aprovadas funcionalmente; arquitetura técnica, custos, integração e implementação seguem bloqueados.
 
@@ -145,7 +145,7 @@ Feedback pode gerar **proposta de atualização de fonte**, seguida de revisão 
 
 A implementação física, bancos, vetores, índices e APIs dependem de decisões técnicas e avaliações posteriores.
 
-## 12. Matriz AIA05-D01 a D10 — propostas para aprovação
+## 12. Matriz AIA05-D01 a D10 — diretrizes funcionais aprovadas
 
 | ID | Tema | Alternativa A — Recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -160,11 +160,11 @@ A implementação física, bancos, vetores, índices e APIs dependem de decisõe
 | AIA05-D09 | Qualidade | Testes e feedback supervisionados, sem autoalteração de políticas ou uso indevido de dados no treinamento | Aprendizado irrestrito com documentos privados |
 | AIA05-D10 | MVP | FAQ/texto/PDF textual com processamento limitado e piloto CRM | Todos os formatos, conectores, imagem/áudio e crawling no lançamento |
 
-**AIA05-D01 a D10 permanecem ABERTAS.** Recomendações não são aprovação nem autorização para execução.
+**AIA05-D01 a D10 APROVADAS FUNCIONALMENTE em 2026-11-06 pelo responsável.** A aprovação não autoriza programação, ingestão de arquivos reais, tratamento de dados privados, contratação, infraestrutura, testes reais ou deploy.
 
 ## 13. Critérios documentais e integrações pendentes
 
-- [ ] AIA05-D01 a D10 aprovadas ou corrigidas pelo responsável.
+- [x] AIA05-D01 a D10 aprovadas funcionalmente pelo responsável em 2026-11-06.
 - [ ] Matriz de propriedade, ACL, compartilhamento, classificação e retenção conciliada com AIA-11.
 - [ ] Dados dinâmicos e ferramentas conciliados com AIA-04/AIA-12.
 - [ ] Separação entre base, memória e treinamento documentada com AIA-02/06.
