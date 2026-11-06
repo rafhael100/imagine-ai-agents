@@ -1,7 +1,7 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-06  
-**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 aprovado funcionalmente (D01–D10); AIA-10 aprovado funcionalmente (D01–D10); AIA-11 aprovado funcionalmente (D01–D10); AIA-12 aprovado funcionalmente (D01–D10); os doze módulos possuem diretrizes funcionais aprovadas. A revisão transversal AIA-R01 está aprovada documentalmente (R01-D01–D08); os 11 gates técnicos continuam abertos. R02/S01 aprovado documentalmente (D01–D10); R02/S02 aprovado documentalmente (D01–D10); R02/S03 aprovado documentalmente (D01–D10); R02/S04 aprovado documentalmente (D01–D10); R02/S05 aprovado documentalmente (D01–D10); os cinco recortes S01–S05 foram ratificados documentalmente. AIA-R02/R01 aprovado documentalmente (D01–D08); R02/R02 está em proposta documental v0.1, com decisões D01–D10 abertas para avaliação. Todos R01-G01 a G11 permanecem abertos. Implementação permanece bloqueada.  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 aprovado funcionalmente (D01–D10); AIA-10 aprovado funcionalmente (D01–D10); AIA-11 aprovado funcionalmente (D01–D10); AIA-12 aprovado funcionalmente (D01–D10); os doze módulos possuem diretrizes funcionais aprovadas. A revisão transversal AIA-R01 está aprovada documentalmente (R01-D01–D08); os 11 gates técnicos continuam abertos. R02/S01 aprovado documentalmente (D01–D10); R02/S02 aprovado documentalmente (D01–D10); R02/S03 aprovado documentalmente (D01–D10); R02/S04 aprovado documentalmente (D01–D10); R02/S05 aprovado documentalmente (D01–D10); os cinco recortes S01–S05 foram ratificados documentalmente. AIA-R02/R01 aprovado documentalmente (D01–D08); R02/R02 aprovado documentalmente (D01–D10); R02/R03 será proposto em branch separada. Todos R01-G01 a G11 permanecem abertos. Implementação permanece bloqueada.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
@@ -55,7 +55,7 @@
 
 - AIA-R02/R01: diretrizes R02-R01-D01 a D08 **aprovadas documentalmente em 2026-11-06**; documento `docs/AIA-R02-R01-CONSOLIDACAO-SEGURANCA-CONTRATOS.md`. Conflitos C01–C08 exigem contratos técnicos; R01-G01 a G11 abertos. Sem homologação ou programação.
 
-- AIA-R02/R02: proposta `docs/AIA-R02-R02-CONTRATOS-CONFIANCA-ESCOPOS-CRM.md` na branch `docs/aia-r02-r02-contratos-confianca-crm-2026-11-06`; R02-R02-D01 a D10 abertas, com contratos conceituais de confiança e escopo para CRM→AIA→CRM. R01-G01 a G11 e CORE/SEG/AUT do CRM preservados; sem código, SQL, ALLOW ou testes reais.
+- AIA-R02/R02: diretrizes R02-R02-D01 a D10 **aprovadas documentalmente em 2026-11-06**; documento `docs/AIA-R02-R02-CONTRATOS-CONFIANCA-ESCOPOS-CRM.md`. R01-G01 a G11 e CORE/SEG/AUT do CRM preservados; sem código, SQL, ALLOW ou testes reais.
 
 ## Propostas complementares em avaliação
 
@@ -106,7 +106,9 @@
 - [ ] Conciliar tecnicamente estados, alçadas, idempotência e confirmação com CRM e AIA-04/07/08/10/12; R01-G03/G04/G06/G08 seguem abertos.
 - [x] Aprovar documentalmente R02-R01-D01 a D08 (2026-11-06).
 - [ ] Detalhar e homologar conflitos C01–C08, com evidências e contratos cruzados entre produtos, sem fechar gates por inferência.
-- [ ] Revisar R02-R02-D01 a D10 — contratos detalhados de confiança, escopos e efeitos do piloto CRM (ainda não aprovado).
+- [x] Aprovar documentalmente R02-R02-D01 a D10 (2026-11-06).
+- [ ] Conciliar contratos com papéis/ACL oficiais do CRM e homologar gates em decisões separadas.
+- [ ] Revisar R02/R03 — Máquina de Estados, Alçadas, Efeitos e Reconciliação (ainda não aprovado).
 - [ ] Manter R01-G01 a G11 abertos e sujeitos à homologação específica.
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
