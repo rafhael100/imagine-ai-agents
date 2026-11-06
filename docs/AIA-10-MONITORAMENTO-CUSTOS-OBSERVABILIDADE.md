@@ -1,6 +1,6 @@
 # AIA-10 — Monitoramento, Custos e Observabilidade | Proposta funcional v0.1
 
-> **Situação:** planejamento documental; decisões **AIA10-D01 a D10 ABERTAS** para aprovação.  
+> **Situação:** diretrizes **AIA10-D01 a D10 APROVADAS FUNCIONALMENTE em 2026-11-06**; requisitos técnicos, fornecedores, programação e implantação permanecem bloqueados.  
 > **Data de referência:** 2026-11-06.  
 > **Precedência:** AIA-01 a AIA-09 possuem diretrizes funcionais aprovadas. A arquitetura técnica, fornecedores, custos específicos e implementação continuam bloqueados.
 
@@ -167,7 +167,7 @@ A ausência de métricas não é evidência de saúde. Perda de telemetria deve 
 
 Nomes, bancos, formatos de métricas, stack, ferramentas, provedores e preços continuam em estudo.
 
-## 12. Matriz AIA10-D01 a D10 — propostas para aprovação
+## 12. Diretrizes AIA10-D01 a D10 — aprovadas funcionalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -182,13 +182,13 @@ Nomes, bancos, formatos de métricas, stack, ferramentas, provedores e preços c
 | AIA10-D09 | Privacidade | Logs minimizados, acesso auditado, retenção por finalidade e controle de derivados | Guardar prompts e dados privados ilimitadamente |
 | AIA10-D10 | MVP | Métricas de execução, tokens, custo, erro, limites e alertas básicos no piloto CRM | Observabilidade e cobrança complexas de todos os produtos desde o lançamento |
 
-**AIA10-D01 a D10: ABERTAS, aguardando aprovação funcional do responsável.**
+**AIA10-D01 a D10: APROVADAS FUNCIONALMENTE em 2026-11-06 pelo responsável.** A aprovação não autoriza coleta de telemetria real, contratação, configuração de provedores, programação, acesso a dados de clientes, testes reais ou deploy.
 
 ## 13. Casos de teste documentais e critérios futuros
 
 Cenários: execução do CRM com erro e consumo parcial; dois tenants concorrentes esgotando limites; duplicação de evento de consumo; preço do provedor atualizado; API não informa uso; fatura divergente; ferramenta executada apesar de timeout; aprovação de excedente expirada; alerta crítico sem entrega; painel exibindo dados de outro tenant; métricas ausentes; revogação de acesso a relatório; mudança de status após reconciliação.
 
-- [ ] AIA10-D01 a D10 aprovadas ou corrigidas explicitamente pelo responsável.
+- [x] AIA10-D01 a D10 aprovadas funcionalmente pelo responsável em 2026-11-06.
 - [ ] Dicionário de eventos, estados e custo com AIA-03/04/07/08/12 definido.
 - [ ] Política de métricas, ACL, LGPD, retenção e auditoria conciliada com AIA-11.
 - [ ] Regras e prazos de alertas/incidentes, responsabilidades e resposta definidos.
