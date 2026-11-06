@@ -1,6 +1,6 @@
 # AIA-R02/S05 — Estados, Aprovações, Idempotência e Reconciliação | Proposta documental v0.1
 
-> **Estado:** proposta documental preliminar, **R02-S05-D01 a D10 ABERTAS** para avaliação do responsável.  
+> **Estado:** diretrizes **R02-S05-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06**, exclusivamente preliminares; os gates R01-G01 a G11 e CORE/SEG/AUT do CRM permanecem abertos.  
 > **Data:** 2026-11-06. **Repositório:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01 e R02/S01 a S04 ratificados exclusivamente documentalmente.  
 > **Gates:** R01-G01 a G11 TODOS ABERTOS, particularmente G03, G04, G06 e G08. CORE/SEG/AUT e demais gates do CRM preservados. Nenhum código, ALLOW, SQL, testes reais, infraestrutura, credencial ou deploy autorizado.
@@ -171,7 +171,7 @@ As evidências devem distinguir **custo técnico**, **consumo de crédito comerc
 
 A tabela define cenários de homologação **futura**; nenhum teste funcional real está autorizado ou foi executado.
 
-## 11. Matriz R02-S05-D01 a D10 — propostas para aprovação
+## 11. Diretrizes R02-S05-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -186,7 +186,7 @@ A tabela define cenários de homologação **futura**; nenhum teste funcional re
 | R02-S05-D09 | Auditoria e custos | Histórico técnico minimizado, distinguir tentativas/efeitos/créditos, conciliar eventos | Logs livres, cobrança por callback duplicado |
 | R02-S05-D10 | MVP CRM | Detalhar primeiro resumo/classificação sem mutação e tarefa idempotente sob autorização do CRM | Autonomia ampla e escrita irrestrita desde o piloto |
 
-**R02-S05-D01 a D10: ABERTAS**, aguardando aprovação **documental preliminar** do responsável. A aprovação não fecha R01-G01 a G11, não escolhe fila/banco/event bus/protocolo e não autoriza código ou efeitos reais.
+**R02-S05-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Ratificação apenas **documental preliminar**, sem fechar R01-G01 a G11, escolher fila, banco, event bus ou protocolo e sem autorizar código, testes funcionais ou efeitos reais.
 
 ## 12. Matriz de dependências e gates de homologação futuros
 
@@ -205,7 +205,7 @@ A tabela define cenários de homologação **futura**; nenhum teste funcional re
 
 ## 13. Critérios de aprovação documental e próximos passos
 
-- [ ] R02-S05-D01 a D10 revisadas e aprovadas ou ajustadas pelo responsável.
+- [x] R02-S05-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Conciliar semântica de estados e aprovação com AIA-04/07/08/10/12 e contrato CRM.
 - [ ] Definir critérios futuros de idempotência, validade, concorrência e confirmação de efeito.
 - [ ] Definir contrato de reconciliação e limites para estados indeterminados.
