@@ -1,7 +1,7 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-06  
-**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 a ser planejado separadamente. Implementação permanece bloqueada.  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 em proposta documental v0.1, D01–D10 aguardam aprovação. Implementação permanece bloqueada.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
@@ -25,6 +25,8 @@
 
 - AIA-04: diretrizes AIA04-D01 a D10 **aprovadas funcionalmente em 2026-11-06**. Documento `docs/AIA-04-FERRAMENTAS-INTEGRACOES.md`; sem implementação, credenciais ou integrações reais.
 
+- AIA-05: proposta `docs/AIA-05-BASE-CONHECIMENTO-RAG.md` na branch `docs/aia-05-base-conhecimento-2026-11-06`; decisões D01–D10 pendentes, sem ingestão real, indexação, código ou despesas.
+
 ## Propostas complementares em avaliação
 
 - Serviço compartilhado de agentes, com administração interna central e configuração limitada nos produtos.
@@ -43,7 +45,7 @@
 - [ ] Detalhar AIA-03: provedores e modelos específicos, contratos, privacidade, custos e critérios técnicos.
 - [x] Aprovar funcionalmente AIA04-D01 a D10 (2026-11-06).
 - [ ] Detalhar aspectos técnicos de AIA-04 e homologação de contratos/ferramentas.
-- [ ] Revisar AIA-05 — Base de Conhecimento dos Agentes (ainda não aprovado).
+- [ ] Revisar AIA05-D01 a D10 — Base de Conhecimento, fontes, segregação, RAG e governança.
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
 - [ ] Definir provedores, modelos, abstração, contingência e custos.
