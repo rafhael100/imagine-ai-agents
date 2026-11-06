@@ -1,6 +1,6 @@
 # AIA-R02/R04 — Dados, Auditoria, Retenção e Privacidade nos Fluxos e Efeitos | Proposta documental v0.1
 
-> **Situação:** proposta exclusivamente documental; decisões **R02-R04-D01 a D10 ABERTAS** para análise do responsável.  
+> **Situação:** diretrizes **R02-R04-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente preliminares; R01-G01 a G11 e CORE/SEG/AUT do CRM permanecem abertos.  
 > **Data de referência:** 2026-11-06. **Projeto:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01, R02/S01–S05 e R02/R01–R03 ratificados **somente documentalmente**.  
 > **Bloqueios:** R01-G01 a G11 permanecem TODOS ABERTOS (especialmente G05/G06/G07/G08/G10); CORE/SEG/AUT e gates próprios do CRM continuam abertos. Este documento não aprova prazos específicos, base legal por fluxo, fornecedor, infraestrutura, integração real, código, SQL, ALLOW, testes funcionais, despesas ou deploy.
@@ -149,7 +149,7 @@ As respostas futuras deverão prever **detecção, bloqueio, preservação de ev
 
 São **cenários propostos**, não testes executados. Critérios eliminatórios de AIA-09 ainda aguardam homologação.
 
-## 11. Matriz R02-R04-D01 a D10 — propostas para decisão
+## 11. Diretrizes R02-R04-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -164,11 +164,11 @@ São **cenários propostos**, não testes executados. Critérios eliminatórios 
 | R02-R04-D09 | Incidentes e auditoria | Resposta a vazamentos, retenção indevida, log impróprio e falhas de expurgo com evidência mínima | Repetir execução e descartar incidentes |
 | R02-R04-D10 | Primeiro recorte | Planejar dados mínimos de resumo/classificação/tarefa no CRM, sem dados reais nem fornecedores nesta etapa | Ingestão global de produtos e memória permanente desde o MVP |
 
-**R02-R04-D01 a D10: ABERTAS**, aguardando ratificação **documental preliminar** do responsável. A decisão não escolhe prazo de retenção, provedor, base legal, infraestrutura, modelo ou política contratual real; não fecha os gates.
+**R02-R04-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Ratificação exclusivamente documental preliminar, sem escolher prazos de retenção, provedores, bases legais específicas, infraestrutura, modelos ou políticas contratuais reais. Os gates permanecem abertos; sem programação, SQL, ALLOW, testes reais ou deploy.
 
 ## 12. Pendências e homologação futura
 
-- [ ] R02-R04-D01 a D10 revisadas e aprovadas ou ajustadas pelo responsável.
+- [x] R02-R04-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Inventário final de dados e riscos por fluxo com classificação, responsáveis e bases jurídicas revisados.
 - [ ] Mapa de origem/derivados, ACL, política de correção/eliminação, retenção, backups e restauração validado com produtos.
 - [ ] Contrato de evidência da aprovação e de confirmação de efeito reconciliado com AIA-R02/R03 e AIA-08/10/11.
