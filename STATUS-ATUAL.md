@@ -1,7 +1,7 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-06  
-**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 aprovado funcionalmente (D01–D10); AIA-10 aprovado funcionalmente (D01–D10); AIA-11 aprovado funcionalmente (D01–D10); AIA-12 em proposta documental v0.1, D01–D10 pendentes de revisão. Implementação permanece bloqueada.  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 aprovado funcionalmente (D01–D10); AIA-10 aprovado funcionalmente (D01–D10); AIA-11 aprovado funcionalmente (D01–D10); AIA-12 aprovado funcionalmente (D01–D10); os doze módulos possuem diretrizes funcionais aprovadas e aguardam consolidação técnica documental. Implementação permanece bloqueada.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
@@ -39,7 +39,7 @@
 
 - AIA-11: diretrizes AIA11-D01 a D10 **aprovadas funcionalmente em 2026-11-06**; documento `docs/AIA-11-GOVERNANCA-SEGURANCA-AUDITORIA.md`. Sem implementação de controles, testes reais ou programação.
 
-- AIA-12: proposta `docs/AIA-12-SDK-APIS-CONTRATOS-PRODUTOS.md` na branch `docs/aia-12-sdk-contratos-produtos-2026-11-06`; D01–D10 abertas, sem endpoints, SDK, integrações ou programação real.
+- AIA-12: diretrizes AIA12-D01 a D10 **aprovadas funcionalmente em 2026-11-06**; documento `docs/AIA-12-SDK-APIS-CONTRATOS-PRODUTOS.md`. Sem endpoints, SDK, integrações ou programação real.
 
 ## Propostas complementares em avaliação
 
@@ -73,7 +73,9 @@
 - [ ] Detalhar AIA-10: eventos, correlação, custos, limites, alertas, privacidade e conciliação.
 - [x] Aprovar funcionalmente AIA11-D01 a D10 (2026-11-06).
 - [ ] Detalhar AIA-11: responsabilidade jurídica, matriz de risco, retenção, contratos de segurança, auditoria e incidentes.
-- [ ] Revisar e decidir AIA12-D01 a D10 — SDK, APIs, eventos, contratos, autorização e integração.
+- [x] Aprovar funcionalmente AIA12-D01 a D10 (2026-11-06).
+- [ ] Detalhar tecnicamente AIA-12, schemas, identidade, integrações e compatibilidade.
+- [ ] Realizar revisão cruzada e consolidação documental AIA-R01 dos 12 módulos.
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
 - [ ] Definir provedores, modelos, abstração, contingência e custos.
