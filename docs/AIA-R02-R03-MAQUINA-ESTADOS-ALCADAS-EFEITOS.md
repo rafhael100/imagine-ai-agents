@@ -1,6 +1,6 @@
 # AIA-R02/R03 — Máquina de Estados, Alçadas, Efeitos e Reconciliação | Proposta documental v0.1
 
-> **Situação:** planejamento documental preliminar; **R02-R03-D01 a D10 ABERTAS** para deliberação do responsável.  
+> **Situação:** diretrizes **R02-R03-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente preliminares; R01-G01 a G11 e gates CORE/SEG/AUT do CRM permanecem abertos.  
 > **Data de referência:** 2026-11-06. **Repositório:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01, R02/S01 a S05, R02/R01 e R02/R02 aprovados exclusivamente como diretrizes documentais preliminares.  
 > **Restrições:** R01-G01 a G11 permanecem TODOS ABERTOS, em especial G03/G04/G06/G07/G08. CORE/SEG/AUT e demais gates do CRM permanecem intactos. Este documento não autoriza código, ALLOW, SQL, APIs reais, credenciais, testes funcionais, despesas, infraestrutura ou deploy.
@@ -215,7 +215,7 @@ Empresa fica suspensa após intenção e antes da ferramenta: novos passos são 
 
 **Tabela documental:** não foram executados testes reais; cenários serão critérios de homologação posterior com dados sintéticos.
 
-## 12. Matriz R02-R03-D01 a D10 — propostas para decisão
+## 12. Diretrizes R02-R03-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -230,11 +230,11 @@ Empresa fica suspensa após intenção e antes da ferramenta: novos passos são 
 | R02-R03-D09 | Auditoria/custos | Eventos versionados, trilha mínima e separação de tentativa, efeito, uso técnico e crédito comercial | Logs livres e contagem comercial por callback |
 | R02-R03-D10 | MVP e gates | Contratos de resumo/classificação sugeridos e tarefa idempotente do CRM, mantendo todos os gates abertos | Autonomia de escrita ampla e desenvolvimento imediato |
 
-**R02-R03-D01 a D10: ABERTAS para aprovação documental preliminar.** Não foram escolhidos estado físico, banco, event bus, garantia transacional, SQL, framework, endpoints ou TTLs; não há homologação nem autorização de implementação.
+**R02-R03-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Ratificação apenas documental preliminar. Não foram escolhidos estado físico, banco, event bus, garantia transacional, SQL, framework, endpoints ou TTLs; os gates permanecem abertos, sem homologação nem autorização de implementação, testes reais ou deploy.
 
 ## 13. Evidências pendentes e próximos passos
 
-- [ ] Avaliar e aprovar/corrigir R02-R03-D01 a D10.
+- [x] R02-R03-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Confrontar estados e alçadas com critérios oficiais e papéis do CRM (sem modificar repositório CRM).
 - [ ] Formalizar esquemas e semântica de concorrência, transição terminal, replay, retentativa e recuperação.
 - [ ] Documentar owner de `intent/effect`, prova de confirmação e mecanismo de consulta/reconciliação no backend CRM.
