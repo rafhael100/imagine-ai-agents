@@ -1,7 +1,7 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-06  
-**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 aprovado funcionalmente (D01–D10); AIA-10 aprovado funcionalmente (D01–D10); AIA-11 aprovado funcionalmente (D01–D10); AIA-12 aprovado funcionalmente (D01–D10); os doze módulos possuem diretrizes funcionais aprovadas. A revisão transversal AIA-R01 está aprovada documentalmente (R01-D01–D08); os 11 gates técnicos continuam abertos. R02/S01 aprovado documentalmente (D01–D10); R02/S02 aprovado documentalmente (D01–D10); R02/S03 aprovado documentalmente (D01–D10); R02/S04 aprovado documentalmente (D01–D10); R02/S05 aprovado documentalmente (D01–D10); os cinco recortes S01–S05 foram ratificados documentalmente e aguardam revisão transversal AIA-R02/R01. Todos R01-G01 a G11 permanecem abertos. Implementação permanece bloqueada.  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 aprovado funcionalmente (D01–D10); AIA-10 aprovado funcionalmente (D01–D10); AIA-11 aprovado funcionalmente (D01–D10); AIA-12 aprovado funcionalmente (D01–D10); os doze módulos possuem diretrizes funcionais aprovadas. A revisão transversal AIA-R01 está aprovada documentalmente (R01-D01–D08); os 11 gates técnicos continuam abertos. R02/S01 aprovado documentalmente (D01–D10); R02/S02 aprovado documentalmente (D01–D10); R02/S03 aprovado documentalmente (D01–D10); R02/S04 aprovado documentalmente (D01–D10); R02/S05 aprovado documentalmente (D01–D10); os cinco recortes S01–S05 foram ratificados documentalmente. AIA-R02/R01 encontra-se em proposta de revisão transversal com D01–D08 abertas. Todos R01-G01 a G11 permanecem abertos. Implementação permanece bloqueada.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
@@ -53,6 +53,8 @@
 
 - AIA-R02/S05: diretrizes R02-S05-D01 a D10 **aprovadas documentalmente em 2026-11-06**; documento `docs/AIA-R02-S05-ESTADOS-APROVACOES-IDEMPOTENCIA.md`. Sem programação, autorização real ou fechamento de gates.
 
+- AIA-R02/R01: proposta de consolidação `docs/AIA-R02-R01-CONSOLIDACAO-SEGURANCA-CONTRATOS.md` na branch `docs/aia-r02-r01-consolidacao-seguranca-2026-11-06`; decisões R02-R01-D01 a D08 abertas, conflitos C01–C08 e gates R01-G01 a G11 ainda pendentes. Sem homologação ou programação.
+
 ## Propostas complementares em avaliação
 
 - Serviço compartilhado de agentes, com administração interna central e configuração limitada nos produtos.
@@ -100,7 +102,7 @@
 - [ ] Detalhar categorias, bases legais, contratos de terceiros, retenção e expurgo com validação de responsáveis; R01-G05 permanece aberto.
 - [x] Aprovar documentalmente R02-S05-D01 a D10 (2026-11-06).
 - [ ] Conciliar tecnicamente estados, alçadas, idempotência e confirmação com CRM e AIA-04/07/08/10/12; R01-G03/G04/G06/G08 seguem abertos.
-- [ ] Revisar consolidação AIA-R02/R01 — Segurança e Contratos S01–S05 (ainda não aprovada).
+- [ ] Revisar R02-R01-D01 a D08 — consolidação transversal de segurança, contratos e pendências S01–S05 (ainda não aprovada).
 - [ ] Manter R01-G01 a G11 abertos e sujeitos à homologação específica.
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
