@@ -1,6 +1,6 @@
 # AIA-R02/R06 — Síntese de Segurança e Matriz de Evidências para Gates Técnicos | Proposta documental v0.1
 
-> **Estado:** proposta em revisão; **R02-R06-D01 a D08 ABERTAS** para decisão do responsável.
+> **Estado:** diretrizes **R02-R06-D01 a D08 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente preliminares. Os gates R01-G01 a G11 e CORE/SEG/AUT do CRM continuam abertos.
 > **Data de referência:** 2026-11-06. **Repositório:** `rafhael100/imagine-ai-agents`.
 > **Precedência:** AIA-01 a AIA-12 aprovados **funcionalmente**; AIA-R01, AIA-R02/S01 a S05 e AIA-R02/R01 a R05 aprovados **documentalmente**, com registros na `main`.
 > **Condição vinculante:** R01-G01 a G11 TODOS ABERTOS; CORE/SEG/AUT e demais bloqueios próprios do CRM preservados. A aprovação desta proposta não autoriza testes reais, código, SQL, ALLOW, credenciais, contratação, infraestrutura, alterações em outros repositórios ou deploy.
@@ -99,7 +99,7 @@ O piloto proposto continua restrito ao fluxo **CRM → AIA → CRM**: leitura de
 
 Não autoriza: mudança genérica de registros, importações, exclusões, redistribuição de leads, envio de mensagens, campanhas, alteração de orçamento, contratação/pagamento, integração de todos os produtos, acesso direto SQL ou automações de clientes dentro do n8n central.
 
-## 8. Matriz de decisões R02-R06-D01 a D08 — propostas
+## 8. Diretrizes R02-R06-D01 a D08 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -112,11 +112,11 @@ Não autoriza: mudança genérica de registros, importações, exclusões, redis
 | R02-R06-D07 | Próxima fase | Autorizar somente **planejamento documental da arquitetura AIA-R03**, com alternativas avaliadas sem provisionamento | Selecionar infraestrutura e implantar imediatamente |
 | R02-R06-D08 | Liberação técnica | Código, testes reais, credenciais, compras e deploy requerem autorizações futuras expressas e específicas | Considerar este documento uma ordem de implementação |
 
-**R02-R06-D01 a D08: todas ABERTAS** para decisão do responsável, exclusivamente **documental preliminar**. Este PR é rascunho e não deve ser integrado sem nova aprovação.
+**R02-R06-D01 a D08: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Aprovação exclusivamente **documental preliminar**, sem fechar R01-G01 a G11 ou CORE/SEG/AUT, sem executar testes, emitir credenciais, escolher tecnologia, programar ou implantar.
 
 ## 9. Pendências para avaliação e sequência
 
-- [ ] Aprovar/alterar R02-R06-D01 a D08.
+- [x] R02-R06-D01 a D08 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Designar formalmente funções técnicas e revisores antes da homologação efetiva.
 - [ ] Confirmar matriz de permissões e recursos com documentação oficial CRM e responsáveis, preservando seus gates.
 - [ ] Harmonizar contratos de dados, efeitos, alçadas, custos e APIs com os produtos.
