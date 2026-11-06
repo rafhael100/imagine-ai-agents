@@ -1,6 +1,6 @@
 # AIA-09 — Laboratório, Testes e Avaliação dos Agentes | Proposta funcional v0.1
 
-> **Situação:** proposta documental para avaliação, **AIA09-D01 a D10 ABERTAS**.  
+> **Situação:** **AIA09-D01 a D10 APROVADAS FUNCIONALMENTE em 2026-11-06** pelo responsável. Testes reais, implementação e implantação permanecem bloqueados.  
 > **Data:** 2026-11-06. **Projeto:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-08 possuem diretrizes funcionais aprovadas. Não existe autorização de programação, testes funcionais reais, contratação, uso de APIs pagas ou deploy.
 
@@ -150,7 +150,7 @@ Falhas de qualidade e performance devem ter limiares definidos por caso de uso *
 
 A stack, a armazenagem e os identificadores físicos não foram definidos.
 
-## 12. Propostas AIA09-D01 a D10 — pendentes
+## 12. Diretrizes AIA09-D01 a D10 — aprovadas funcionalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -165,11 +165,11 @@ A stack, a armazenagem e os identificadores físicos não foram definidos.
 | AIA09-D09 | Interface | Central Imagine + simulação limitada nos produtos, sem efeitos externos | Editor de testes e ferramentas irrestrito ao cliente |
 | AIA09-D10 | MVP | Suíte de regressão do agente CRM: respostas, dados, permissões, tool calling, erros e custo | Benchmarks multimodais completos desde a primeira entrega |
 
-**AIA09-D01 a D10: ABERTAS — nenhuma aprovação funcional presumida.**
+**AIA09-D01 a D10: APROVADAS FUNCIONALMENTE em 2026-11-06.** Os gates de homologação técnica, limites, implementação, testes reais, consumo e deploy permanecem abertos.
 
 ## 13. Critérios documentais e gates pendentes
 
-- [ ] AIA09-D01 a D10 analisadas e aprovadas ou ajustadas.
+- [x] AIA09-D01 a D10 aprovadas funcionalmente pelo responsável em 2026-11-06.
 - [ ] Matriz de severidade, limiares por cenário/produto e responsáveis aprovada.
 - [ ] Política de dados, LGPD, segregação e retenção alinhada a AIA-11.
 - [ ] Contratos de execução e evidências alinhados a AIA-07/08/10/12.
