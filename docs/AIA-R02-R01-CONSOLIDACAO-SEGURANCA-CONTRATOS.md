@@ -1,6 +1,6 @@
 # AIA-R02/R01 — Consolidação Transversal de Segurança e Contratos (S01 a S05) | Proposta documental v0.1
 
-> **Situação:** proposta de revisão transversal; decisões **R02-R01-D01 a D08 ABERTAS** para avaliação do responsável.  
+> **Situação:** diretrizes **R02-R01-D01 a D08 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente preliminares; R01-G01 a G11 e gates CORE/SEG/AUT do CRM permanecem abertos.  
 > **Data de referência:** 2026-11-06.  
 > **Precedência verificada:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01-D01 a D08 e AIA-R02/S01, S02, S03, S04 e S05 (D01–D10 de cada) ratificados **exclusivamente documentalmente** na `main`.  
 > **Impedimentos:** R01-G01 a G11 permanecem TODOS ABERTOS; CORE/SEG/AUT e demais gates do CRM não se alteram. Sem código, SQL, ALLOW, testes reais, autenticação real, APIs, credenciais, contratados pagos, VPS ou deploy.
@@ -144,7 +144,7 @@ Casos são **propostos**; não há execução de testes reais nem afirmação de
 
 Títulos futuros são **sugestões de trabalho**, não decisões aprovadas; a sequência exata ainda é objeto de avaliação.
 
-## 8. Matriz R02-R01-D01 a D08 — decisões propostas
+## 8. Diretrizes R02-R01-D01 a D08 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -157,11 +157,11 @@ Títulos futuros são **sugestões de trabalho**, não decisões aprovadas; a se
 | R02-R01-D07 | Gates e homologação | Manter R01-G01 a G11 e CORE/SEG/AUT abertos até contratos técnicos, provas e aprovação específica | Fechar gates automaticamente por revisão documental |
 | R02-R01-D08 | Sequência controlada | Detalhar contratos críticos, dados e homologação antes de arquitetura/MVP e implementação autorizada | Iniciar programação ou deploy por aprovação desta revisão |
 
-**R02-R01-D01 a D08: ABERTAS**, aguardando aprovação **documental preliminar** do responsável. Nenhum gate foi encerrado; sem homologação técnica, legal ou comercial e sem autorização de desenvolvimento.
+**R02-R01-D01 a D08: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Ratificação exclusivamente **documental preliminar**. Nenhum gate R01-G01 a G11 ou CORE/SEG/AUT do CRM foi encerrado; sem homologação técnica, legal ou comercial e sem autorização de desenvolvimento.
 
 ## 9. Critérios de aceite e restrições desta proposta
 
-- [ ] Avaliar/ratificar ou corrigir R02-R01-D01 a D08.
+- [x] R02-R01-D01 a D08 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Revisar conflitos C01–C08 com responsáveis técnicos e donos dos produtos antes de fechar contratos.
 - [ ] Harmonizar a matriz de escopos CRM com a documentação oficial de papéis e autorização do próprio CRM, sem tocar seus repositórios.
 - [ ] Definir responsabilidades e evidências de autenticação, revalidação, autorização e aprovação com exemplos sintéticos.
@@ -173,4 +173,4 @@ Títulos futuros são **sugestões de trabalho**, não decisões aprovadas; a se
 
 **Proteções imutáveis:** não alterar `main`, PRs, CORE/SEG/AUT ou implementação de CRM/Portal/Performance AI/Universidade; não criar ALLOW, SQL, APIs, credenciais ou contas, não instalar n8n/servidores/Cloudflare, não contratar modelos ou APIs e não executar testes funcionais reais.
 
-**Próxima recomendação:** após aprovação desta revisão, especificar `R02/R02` — contratos detalhados de confiança e escopos para o piloto CRM — sem supor fechamento dos gates.
+**Próxima recomendação:** com a revisão documental ratificada, especificar `R02/R02` — contratos detalhados de confiança e escopos para o piloto CRM — sem supor fechamento dos gates.
