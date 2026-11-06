@@ -34,3 +34,42 @@ Construir a camada compartilhada de **configuração, execução supervisionada 
 Revisar/aprovar limites do serviço, contratos entre produtos, proteção de dados, estratégias de modelos/provedores, custos, licenciamento, MVP e critérios de aceite.
 
 **Regra:** a publicação documental neste repositório não autoriza programação, alterações nos demais repositórios, despesas, infraestrutura ou deploy.
+
+## FT01-F1-01 — domínio mockado (2026-11-06)
+
+Primeiro lote autorizado: oito modelos em `src/Domain`, contratos locais em
+`src/Contracts`, três mocks determinísticos em `src/Mocks` e dez casos sintéticos
+em `tests/Unit/run.php`. Nenhum contrato é homologado com CRM. Todos os dados de
+exemplo são marcados `SYNTHETIC`; o prefixo é convenção de teste, não sanitização
+nem prova de identidade. Não fornecer dados reais.
+
+Requisito de sintaxe: PHP 8.1+ já disponível (não há Composer nem bibliotecas).
+No diretório do repositório, executar localmente:
+
+```sh
+php tests/Unit/run.php
+```
+
+O runner usa autoload local e verificações explícitas, com código de saída 1 em
+falha. Não usa rede, banco ou serviços. **Neste ambiente PHP não está instalado:
+nenhum teste PHP ou lint PHP foi executado; compatibilidade ainda não verificada.**
+Nenhum runtime ou dependência foi instalado para contornar a restrição.
+
+O contexto contém produto, tenant, principal, finalidade, recurso e `mock-v1`.
+Aprovação usa relógio inteiro fornecido pelo chamador e vincula intenção material
+imutável. Deduplicação é volátil, por produto/tenant/chave, com igualdade exata de
+material e contexto; não oferece atomicidade ou recuperação. O estado global de
+run não confirma efeito. `CONFIRMADO` exige prova **sintética** do fake, sem valor
+para o CRM real. Sugestões ignoram instruções contidas no texto de entrada e não
+dispõem de capacidade de escrita. Uso técnico não implementa crédito/faturamento.
+
+Vocabulário mínimo de run: `RECEBIDA → EXECUTANDO ↔ AGUARDANDO`, com saídas
+terminais `CONCLUIDA`, `FALHOU`, `CANCELADA`. É um recorte local dos documentos,
+não a máquina definitiva de R02/R03. Não há compensação, fila, persistência,
+callback, expiração de run ou reconciliação oficial. Status indeterminado permanece
+indeterminado; nenhum retry produz novo efeito nesse fake.
+
+Pendências: executar lint e os dez casos em ambiente autorizado com PHP já
+existente; revisar os contratos simulados e homologar contratos reais separadamente.
+R01-G01 a G11 e CORE/SEG/AUT CRM permanecem abertos. F1-02, merge e deploy exigem
+nova autorização.

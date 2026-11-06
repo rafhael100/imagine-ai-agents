@@ -174,3 +174,40 @@
 - [ ] Autorizar implementação em branch separada.
 
 **Bloqueio:** sem programação, deploy, migração, mudanças em outros repositórios ou consumo pago de APIs sem autorização.
+
+## Execução restrita FT01-F1-01 — 2026-11-06
+
+Registro atual deste lote prevalece sobre descrições históricas de ausência de
+código/testes autorizados acima. Executor: Codex, ambiente gerenciado `/workspace`.
+Autorização expressa do responsável nesta conversa e ordem F1-01 ratificada.
+
+- Repositório: `rafhael100/imagine-ai-agents`.
+- Base existente: `dev/ft01-aia-core-mocks-2026-11-06`.
+- Filha existente: `dev/ft01-f1-01-domain-mocks-2026-11-06`.
+- SHA inicial comum de main/base/filha: `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`.
+- Preflight: `gh auth status` autenticado como `rafhael100`, permissão ADMIN,
+  `git ls-remote` confirmou as três refs; `git push --dry-run` retornou
+  `Everything up-to-date`. Checkout local rastreia a filha existente; nenhuma
+  branch remota foi recriada, sobrescrita ou forçada.
+- Leitura: AGENTS, README, STATUS, PR #70, AIA-FT01 (proposta e ordem),
+  R03/R02, R04/S01–S02 e R02/R03. Árvore inicialmente limpa, apenas documental.
+- Entrega: oito modelos puros e erro local em `src/Domain`; três interfaces em
+  `src/Contracts`; três mocks em `src/Mocks`; runner com dez casos em
+  `tests/Unit/run.php`; README e este registro. AGENTS e demais documentos intactos.
+- PHP: `php -v` retornou `php: command not found` (127). **Zero testes unitários
+  executados e zero lint PHP executado.** Dez casos escritos, todos não executados.
+  Nenhuma versão de runtime verificada e nenhuma instalação realizada, conforme
+  seção 1 da ordem executiva. Compatibilidade sintática/alvo PHP 8.1+ pendente.
+- Verificação disponível: revisão estática do diff e `git diff --check`;
+  não equivale a validação de execução PHP ou segurança do produto.
+- Limites: fixtures fixas, igualdade material por bytes, relógio explícito,
+  idempotência volátil sem concorrência, prova de efeito somente sintética;
+  contexto não autenticado e políticas locais não substituem ACL CRM.
+- Pendências: revisão do draft filha → base e execução futura de lint/testes
+  em PHP previamente disponível e autorizado. Commits e URL do draft serão
+  informados no relatório final/GitHub, sem merge.
+- R01-G01 a G11 TODOS ABERTOS; CORE/SEG/AUT CRM preservados. Sem APIs reais,
+  dados pessoais, credenciais de serviços de produto, Composer, SQL, ALLOW,
+  instalação, serviços pagos, VPS/Cloudflare/n8n, deploy ou início F1-02.
+  GitHub usado exclusivamente no versionamento autorizado. Main, base e demais
+  repositórios não recebem alterações deste lote.
