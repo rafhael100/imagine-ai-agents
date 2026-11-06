@@ -1,6 +1,6 @@
 # AIA-R01 — Consolidação Transversal e Gates de Arquitetura | Proposta v0.1
 
-> **Situação:** revisão documental preliminar, **R01-D01 a D08 abertas** para manifestação do responsável.  
+> **Situação:** diretrizes de consolidação **R01-D01 a D08 APROVADAS DOCUMENTALMENTE em 2026-11-06**. Todos os gates R01-G01 a G11, homologações técnicas e autorização de implementação permanecem abertos.  
 > **Data:** 2026-11-06.  
 > **Marco verificado:** AIA-01 (D01–D08) e AIA-02 a AIA-12 (D01–D10 cada) aprovados **somente funcionalmente** e incorporados à `main`.  
 > **Bloqueio:** esta revisão NÃO autoriza código, APIs reais, SQL, testes funcionais, despesas, mudanças em outros repositórios, provisionamento nem deploy.
@@ -96,7 +96,7 @@ Os identificadores R02–R05 são **nomes propostos de trabalhos transversais**,
 
 Critérios de entrega não negociáveis propostos: tenant isolation, escopos mínimos, observabilidade básica, custo/limite por empresa, erro tipado, testes negativos, rollback e evidência de autorização. Não implica autorização de implementação nem cronograma de deploy.
 
-## 8. Matriz de decisões R01-D01 a D08 para aprovação
+## 8. Diretrizes documentais R01-D01 a D08 — aprovadas
 
 | ID | Decisão | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -109,7 +109,7 @@ Critérios de entrega não negociáveis propostos: tenant isolation, escopos mí
 | R01-D07 | Dados e memória | Definir ACL, origem, segregação e retenção antes de ingestão ou persistência | Centralizar cópias integrais de dados sem escopo |
 | R01-D08 | Liberação de desenvolvimento | Exigir autorização futura específica por etapa/branch/PR e manter `main`, outros repos e VPS inalterados | Tratar esta revisão como ordem de implementação |
 
-**R01-D01 a D08: todas ABERTAS, aguardando aprovação do responsável.** Esta revisão não fecha os 11 gates, não escolhe tecnologia, não homologa contratos, não autoriza despesas e não libera programação.
+**R01-D01 a D08: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Esta ratificação **não fecha nenhum dos 11 gates R01-G01 a G11**, não escolhe tecnologia, não homologa contratos, não autoriza despesas nem libera programação.
 
 ## 9. Riscos de decisões prematuras
 
@@ -122,6 +122,6 @@ Critérios de entrega não negociáveis propostos: tenant isolation, escopos mí
 
 ## 10. Próxima decisão a solicitar
 
-Recomenda-se ratificar **R01-D01 a D08 como diretrizes documentais de consolidação**, deixando todos os gates R01-G01 a G11 e todas as homologações técnicas em aberto. Em seguida, elaborar **R02/S01 — Matriz de Identidade, Autorização, Segregação e Fluxos entre Produtos** para avaliação por etapas, sem programação.
+**R01-D01 a D08 foram ratificadas documentalmente.** Todos os gates R01-G01 a G11 e as homologações técnicas continuam abertos. Próximo detalhamento: **R02/S01 — Matriz de Identidade, Autorização, Segregação e Fluxos entre Produtos**, para avaliação por etapas, sem programação.
 
 **Imutáveis até nova autorização:** `main` dos demais repositórios, alterações de CRM/Portal/Performance/Universidade, VPS/servidores, credenciais, SQL, integrações reais, testes funcionais, contratos pagos e deploy.
