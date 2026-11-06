@@ -211,3 +211,31 @@ Autorização expressa do responsável nesta conversa e ordem F1-01 ratificada.
   instalação, serviços pagos, VPS/Cloudflare/n8n, deploy ou início F1-02.
   GitHub usado exclusivamente no versionamento autorizado. Main, base e demais
   repositórios não recebem alterações deste lote.
+
+## Revalidação solicitada do PR #71 — 2026-11-06
+
+- Executor: Codex, ambiente gerenciado `/workspace`; exclusivamente na filha
+  `dev/ft01-f1-01-domain-mocks-2026-11-06`, árvore inicialmente limpa.
+- Código sob validação: `b55a42b612ad4937e496327401502a2ae3011ac9`.
+  PR #71 confirmado OPEN/DRAFT, filha e base corretas.
+- `command -v php php8.1 php8.2 php8.3 php8.4 php8.5`: nenhum executável
+  encontrado (saída vazia).
+- Verificação dos padrões `/usr/bin/php*`, `/usr/local/bin/php*`,
+  `/opt/php*/bin/php`, `/opt/php/*/bin/php`: nenhum runtime encontrado.
+- Busca adicional por arquivos `php` ou `php8.[1-9]` em `/usr/bin`,
+  `/usr/local/bin`, `/opt` e `/workspace`: nenhum resultado.
+- `php -v`: **FAIL na disponibilidade do runtime**, código de saída **127**,
+  `/bin/bash: line 1: php: command not found`. Versão PHP não verificável.
+- Lint PHP: **NÃO EXECUTADO**; dez casos de `tests/Unit/run.php`:
+  **TODOS NÃO EXECUTADOS**. Nenhum resultado PASS/FAIL de código é atribuído.
+  Não foi possível determinar necessidade de correções pela execução.
+- Nenhuma instalação, dependência, container ou ambiente alternativo utilizado.
+  Nenhuma alteração de código. Apenas este registro documental na filha.
+- `git diff --check`: PASS para a atualização documental.
+- Pendência: executar sintaxe de todos os arquivos PHP em `src/` e `tests/`
+  e `php tests/Unit/run.php` quando houver PHP 8.1+ previamente instalado
+  no ambiente autorizado. PR permanece rascunho, validação de runtime bloqueada.
+- Sem merge, F1-02, deploy, alteração de main/base ou outros repositórios,
+  acesso CRM/VPS/Cloudflare/n8n/APIs reais de produto. GitHub restrito ao
+  versionamento e registro no PR autorizado.
+- R01-G01 a G11 TODOS ABERTOS; CORE/SEG/AUT CRM permanecem abertos.
