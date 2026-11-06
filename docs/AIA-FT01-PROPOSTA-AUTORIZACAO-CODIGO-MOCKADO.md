@@ -1,6 +1,6 @@
 # AIA-FT01 — Proposta de Autorização Controlada do Primeiro Código Mockado | v0.1
 
-> **ESTADO: PROPOSTA DOCUMENTAL NÃO APROVADA.** As decisões **FT01-D01 a D10 estão ABERTAS**. Este arquivo **NÃO AUTORIZA CODIFICAÇÃO, TESTES, DEPENDÊNCIAS, ACESSOS OU DEPLOY**.
+> **ESTADO: FT01-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente como diretrizes preliminares. A autorização executiva **FT01-F1-01 NÃO FOI CONCEDIDA**. Este arquivo **NÃO AUTORIZA CODIFICAÇÃO, TESTES, DEPENDÊNCIAS, ACESSOS OU DEPLOY**.
 > **Data:** 2026-11-06. **Repositório permitido se houver futura aprovação:** `rafhael100/imagine-ai-agents`.
 > **Precedência:** AIA-01–AIA-12 funcionais, AIA-R01, AIA-R02/S01–S05/R01–R06, AIA-R03/S01–S05/R01–R02 e AIA-R04/S01–S02 ratificados somente em caráter documental; **nenhum gate técnico homologado**.
 > **Preservar:** R01-G01 a G11 **TODOS ABERTOS**, CORE/SEG/AUT CRM e demais gates próprios do CRM **ABERTOS**, `main` de todos os repositórios, infraestrutura, credenciais, contratos e dados privados.
@@ -96,7 +96,7 @@ Se houver falha de Git autenticado, ferramentas indisponíveis, risco de overwri
 
 Rollback neste lote = descartar alterações do **ramo isolado** mediante procedimento autorizado e preservar registros auditáveis; **não tocar em tarefas ou dados CRM**, já que nenhuma integração com efeito real é permitida.
 
-## 8. Decisões FT01-D01 a D10 — propostas, NÃO APROVADAS
+## 8. Diretrizes FT01-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -111,11 +111,11 @@ Rollback neste lote = descartar alterações do **ramo isolado** mediante proced
 | **FT01-D09** | Gates | Manter R01-G01 a G11 e CORE/SEG/AUT CRM abertos; mocks não fecham gates | Declarar integração/segurança homologadas pelos testes puros |
 | **FT01-D10** | Próximo ato | Após aprovar o **plano documental** FT01, pedir expressamente **“Autorizo FT01-F1-01 nos limites ...”** antes de orientar Codex a programar | Codificar apenas por aceite documental genérico |
 
-**FT01-D01 a D10: TODAS ABERTAS**. Aprovação de alternativas A como diretrizes documentais não vale como autorização da execução F1-01. A eventual autorização de código deverá ser **explícita e inequívoca**, mencionar repositório, branch, escopo e testes permitidos.
+**FT01-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Isso não autoriza **FT01-F1-01**, nem código, testes, acesso, instalações ou deploy. A eventual autorização executiva de código deverá ser **explícita e inequívoca**, mencionando repositório, branch, escopo e testes permitidos; R01-G01 a G11 e CORE/SEG/AUT permanecem abertos.
 
 ## 9. Pendências para liberação específica futura
 
-- [ ] Revisar FT01-D01 a D10 e decidir política do primeiro lote.
+- [x] FT01-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06, sem autorizar a execução de F1-01.
 - [ ] Escolher formalmente a linguagem inicial para este mock, verificar versão/licença e dependências; **não decidir stack de produção por inferência**.
 - [ ] Ratificar escopo de arquivos e limites de ambiente/branch, sob Codex com acesso validado.
 - [ ] Decidir explicitamente se testes unitários sintéticos ficam permitidos durante F1-01.
@@ -123,6 +123,6 @@ Rollback neste lote = descartar alterações do **ramo isolado** mediante proced
 - [ ] Preservar `main`, docs/PRs e outros repositórios, e todos os 11 gates.
 - [ ] Exigir nova decisão para qualquer dependência de Composer, PHP runtime, infraestrutura, APIs, CRM real ou gastos além dos limites permitidos.
 
-**Próximo passo recomendado:** validar esta proposta e solicitar **aprovação documental FT01-D01 a D10**. Depois, se desejado, emitir um comando preciso de **autorização FT01-F1-01** ao Codex para o primeiro lote mockado. Nenhuma das etapas é automática.
+**Próximo passo recomendado:** preparar e submeter ao responsável o comando preciso de **autorização executiva FT01-F1-01** para o primeiro lote mockado. O aceite documental FT01-D01 a D10 já foi dado, mas não concede permissão para programar. Nenhuma etapa é automática.
 
 **Registro:** documentação ≠ homologação ≠ autorização de código ≠ teste de integração ≠ produção.
