@@ -1,13 +1,14 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-05  
-**Fase:** repositório privado criado, organização documental inicial.  
+**Fase:** fundação documental inicial; AIA-01 em proposta para revisão em branch separada (sem implementação).  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
 
 - Repositório privado criado e acesso administrativo/escrita verificado.
-- Documentação inicial em publicação; nenhuma implementação autorizada.
+- Documentação inicial publicada; nenhuma implementação autorizada.
+- Proposta AIA-01 v0.1 escrita em `docs/AIA-01-CATALOGO-AGENTES.md` na branch `docs/aia-01-catalogo-2026-11-05`, com D01–D08 abertas e aguardando aprovação.
 - Nenhum deploy ou provisionamento de infraestrutura executado por este projeto.
 - Nenhuma alteração autorizada nos repositórios CRM, Portal, Performance AI ou Universidade.
 
@@ -28,6 +29,7 @@
 ## Gates abertos
 
 - [x] Criar e confirmar repositório privado no GitHub.
+- [ ] Revisar AIA-01 v0.1, decidir D01–D08 e autorizar (ou não) merge documental.
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
 - [ ] Definir provedores, modelos, abstração, contingência e custos.
