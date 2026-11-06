@@ -1,7 +1,7 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-06  
-**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 aprovado funcionalmente (D01–D10); AIA-10 aprovado funcionalmente (D01–D10); AIA-11 seguirá em proposta independente. Implementação permanece bloqueada.  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 aprovado funcionalmente (D01–D10); AIA-10 aprovado funcionalmente (D01–D10); AIA-11 aprovado funcionalmente (D01–D10); AIA-12 será proposto separadamente. Implementação permanece bloqueada.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
@@ -37,6 +37,8 @@
 
 - AIA-10: diretrizes AIA10-D01 a D10 **aprovadas funcionalmente em 2026-11-06**; documento `docs/AIA-10-MONITORAMENTO-CUSTOS-OBSERVABILIDADE.md`. Sem coleta de telemetria real, código, despesas ou integração.
 
+- AIA-11: diretrizes AIA11-D01 a D10 **aprovadas funcionalmente em 2026-11-06**; documento `docs/AIA-11-GOVERNANCA-SEGURANCA-AUDITORIA.md`. Sem implementação de controles, testes reais ou programação.
+
 ## Propostas complementares em avaliação
 
 - Serviço compartilhado de agentes, com administração interna central e configuração limitada nos produtos.
@@ -67,7 +69,9 @@
 - [ ] Detalhar critérios técnicos de avaliação, datasets sintéticos, métricas, gates e evidências de AIA-09.
 - [x] Aprovar funcionalmente AIA10-D01 a D10 (2026-11-06).
 - [ ] Detalhar AIA-10: eventos, correlação, custos, limites, alertas, privacidade e conciliação.
-- [ ] Revisar AIA-11 — Governança, Segurança e Auditoria (ainda não aprovado).
+- [x] Aprovar funcionalmente AIA11-D01 a D10 (2026-11-06).
+- [ ] Detalhar AIA-11: responsabilidade jurídica, matriz de risco, retenção, contratos de segurança, auditoria e incidentes.
+- [ ] Revisar AIA-12 — APIs, Contratos e Integração com Produtos Imagine (ainda não aprovado).
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
 - [ ] Definir provedores, modelos, abstração, contingência e custos.
