@@ -1,6 +1,6 @@
 # AIA-03 — Modelos de IA, Provedores e Roteamento | Proposta funcional v0.1
 
-> **Status:** planejamento documental para revisão. AIA03-D01–D10 **não aprovadas**.  
+> **Status:** AIA03-D01–D10 **aprovadas funcionalmente em 2026-11-06** pelo responsável; detalhes técnicos e implementação seguem bloqueados.  
 > **Data:** 2026-11-06. **Escopo:** núcleo compartilhado Imagine AI Agents.  
 > **Precedência:** AIA-01 (D01–D08) e AIA-02 (D01–D10) já aprovados funcionalmente; gates técnicos e implementação seguem bloqueados.
 
@@ -121,7 +121,7 @@ Cada configuração modelo-provedor deve ter:
 
 Nomes, stack, schema e contratos são sugestões; nenhuma implementação aprovada.
 
-## 11. Decisões AIA03-D01 a D10 — propostas para aprovação
+## 11. Diretrizes funcionais aprovadas — AIA03-D01 a D10
 
 | ID | Tema | Opção A — Recomendada | Alternativa B |
 |---|---|---|---|
@@ -136,14 +136,14 @@ Nomes, stack, schema e contratos são sugestões; nenhuma implementação aprova
 | AIA03-D09 | Qualidade | Homologação com testes de tarefa, custo, segurança e resiliência | Seleção por preço ou marketing do fornecedor |
 | AIA03-D10 | Primeira entrega | MVP só com texto, extração estruturada, sumarização e tool calling necessários ao piloto CRM | Incluir todas as modalidades e fine-tuning desde o MVP |
 
-**Todas as decisões AIA03-D01 a D10 permanecem abertas.** Nenhum fornecedor, modelo comercial, preço, contrato, região ou stack técnica foi escolhido/contratado.
+**AIA03-D01 a D10: APROVADAS FUNCIONALMENTE em 2026-11-06.** Nenhum fornecedor, modelo comercial, preço, contrato, região ou stack técnica foi escolhido/contratado. A aprovação não autoriza programação, integração, testes reais nem deploy.
 
 ## 12. Casos de exceção e critérios documentais
 
 Casos: dois tenants com políticas diferentes, provedor não homologado, finalidade incompatível, API de provedor indisponível, saldo insuficiente, mudança de preço, modelo descontinuado, contagem divergente, retries e resposta estruturada inválida, operação externa pendente, fallback com risco de transferência internacional.
 
 Critérios a revisar:
-- [ ] AIA03-D01 a D10 aprovadas ou corrigidas pelo responsável.
+- [x] AIA03-D01 a D10 aprovadas funcionalmente pelo responsável em 2026-11-06.
 - [ ] Matriz de elegibilidade por produto, tarefa, dados e política definida.
 - [ ] Contratos de privacidade, segurança, limites e versionamento especificados.
 - [ ] Estratégia de medição/contingência alinhada a AIA-08/10/11/12.
