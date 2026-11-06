@@ -1,6 +1,6 @@
 # AIA-11 — Governança, Segurança, Privacidade e Auditoria | Proposta funcional v0.1
 
-> **Situação:** planejamento exclusivamente documental. **AIA11-D01 a D10 ABERTAS** para aprovação funcional.  
+> **Situação:** diretrizes **AIA11-D01 a D10 APROVADAS FUNCIONALMENTE em 2026-11-06**; critérios jurídicos e técnicos, programação e implantação continuam pendentes.  
 > **Data:** 2026-11-06. **Projeto:** Imagine AI Agents.  
 > **Precedência:** diretrizes AIA-01 a AIA-10 aprovadas funcionalmente; contratos, arquitetura técnica, custos, licenciamento, homologação e execução continuam pendentes. Não programar nem implantar por força deste documento.
 
@@ -156,7 +156,7 @@ Estados propostos: `DETECTADO -> CLASSIFICADO -> CONTIDO -> INVESTIGANDO -> CORR
 
 Nomes e tecnologia permanecem abertos.
 
-## 13. Propostas AIA11-D01 a D10 — aguardam aprovação
+## 13. Diretrizes AIA11-D01 a D10 — aprovadas funcionalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -171,13 +171,13 @@ Nomes e tecnologia permanecem abertos.
 | AIA11-D09 | Interface/controle | Painel interno Imagine restrito + transparência/gestão local por produto | Painel global que expõe dados de todos os tenants |
 | AIA11-D10 | MVP | Controles mínimos verificáveis: isolamento, ACL, segredos, auditoria, retenção e resposta a incidentes no piloto CRM | Adiar segurança e governança para após o lançamento |
 
-**AIA11-D01 a D10: ABERTAS, aguardando aprovação funcional explícita do responsável.** Nenhum prazo legal específico, stack, arquitetura de armazenamento, contrato ou fornecedor foi aprovado.
+**AIA11-D01 a D10: APROVADAS FUNCIONALMENTE em 2026-11-06 pelo responsável.** Nenhum prazo legal específico, stack, arquitetura de armazenamento, contrato ou fornecedor foi aprovado. Não há autorização para programação, testes reais, integrações ou deploy.
 
 ## 14. Critérios de aceite documental e gates
 
 Cenários de validação: lead de outra empresa, agente tentando editar políticas, acesso revogado com job na fila, memória eliminada reaparecendo após restauração, fornecedor não homologado, documento com prompt injection, token vazado em log, auditor consultando dados não autorizados, aprovação expirada, ação financeira sem alçada, chamada externa com resultado indeterminado e dados do CRM visíveis no Portal sem contrato.
 
-- [ ] AIA11-D01 a D10 revisadas e aprovadas ou corrigidas.
+- [x] AIA11-D01 a D10 aprovadas funcionalmente pelo responsável em 2026-11-06.
 - [ ] Matriz de responsabilidade entre núcleo e produtos aceita.
 - [ ] Contratos de autorização, rastreabilidade e privacidade reconciliados com AIA-04/07/08/10/12.
 - [ ] Políticas de LGPD, categorias, prazos e terceiros detalhadas por fluxo, com responsáveis legais.
