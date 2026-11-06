@@ -1,7 +1,7 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-06  
-**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 será planejado em branch separada. Implementação permanece bloqueada.  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 em proposta documental v0.1, D01–D10 abertas para revisão. Implementação permanece bloqueada.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
@@ -23,6 +23,8 @@
 
 - AIA-03: diretrizes AIA03-D01 a D10 **aprovadas funcionalmente em 2026-11-06**; documento `docs/AIA-03-MODELOS-PROVEDORES-ROTEAMENTO.md`. Fornecedor, modelo, preço, contrato, orçamento, stack e implementação permanecem sem aprovação.
 
+- AIA-04: proposta `docs/AIA-04-FERRAMENTAS-INTEGRACOES.md` na branch `docs/aia-04-ferramentas-integracoes-2026-11-06`. D01–D10 pendentes, sem código, credenciais ou integrações reais.
+
 ## Propostas complementares em avaliação
 
 - Serviço compartilhado de agentes, com administração interna central e configuração limitada nos produtos.
@@ -39,7 +41,7 @@
 - [ ] Detalhar e validar aspectos técnicos de AIA-02, incluindo segurança, interfaces e testes.
 - [x] Aprovar funcionalmente AIA03-D01 a D10 (2026-11-06).
 - [ ] Detalhar AIA-03: provedores e modelos específicos, contratos, privacidade, custos e critérios técnicos.
-- [ ] Revisar AIA-04 — Ferramentas e Integrações dos Agentes (ainda não aprovado).
+- [ ] Revisar AIA04-D01 a D10 — Ferramentas, integrações, riscos e execução segura.
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
 - [ ] Definir provedores, modelos, abstração, contingência e custos.
