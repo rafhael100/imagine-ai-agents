@@ -1,6 +1,6 @@
 # AIA-R04/S01 — Contratos Técnicos Mínimos do MVP CRM: Operações, Campos, Erros e Confirmações | Proposta documental v0.1
 
-> **Situação:** especificação **conceitual de contrato, ainda em proposta**; decisões **R04-S01-D01 a D10 ABERTAS** para avaliação do responsável.  
+> **Situação:** diretrizes **R04-S01-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, apenas como contratos conceituais preliminares. R01-G01 a G11 e CORE/SEG/AUT do CRM continuam abertos.  
 > **Data:** 2026-11-06. **Projeto:** Imagine AI Agents, com **CRM Imagine como proprietário das operações e dos dados**.  
 > **Precedência:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01, AIA-R02/S01–S05, AIA-R02/R01–R06 e AIA-R03/S01–S05/R01 ratificados **somente documentalmente**.  
 > **Bloqueios:** **R01-G01 a G11 TODOS ABERTOS**; CORE/SEG/AUT e demais gates CRM **ABERTOS**. Não há API, schema, token, permissão real, credencial, código, SQL, ALLOW, teste funcional, dado pessoal real, consumo pago ou deploy autorizado.
@@ -172,7 +172,7 @@ Todos os casos estão **propostos/sem execução e sem evidência**; devem ser d
 
 **CORE/SEG/AUT CRM e demais gates de implementação permanecem abertos**, sem alteração de repositório CRM por este documento.
 
-## 12. Matriz R04-S01-D01 a D10 — propostas para decisão
+## 12. Diretrizes R04-S01-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -187,11 +187,11 @@ Todos os casos estão **propostos/sem execução e sem evidência**; devem ser d
 | R04-S01-D09 | Homologação bilateral | Confrontar proposta com matriz oficial do CRM, aprovar schemas/casos por responsável e preservar gates | Considerar estes nomes APIs reais já homologadas |
 | R04-S01-D10 | Próximo recorte | Detalhar versões, schemas e negativas em documentos posteriores, mantendo código/testes/ALLOW/SQL bloqueados | Criar endpoints, permissões e implantar imediatamente |
 
-**R04-S01-D01 a D10: ABERTAS para avaliação exclusivamente documental preliminar do responsável.** Não se aprovam endpoints, payloads, SQL, ALLOW, contratos executáveis, mudanças no CRM, testes reais, chaves, infraestrutura ou deploy.
+**R04-S01-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Aprovação exclusivamente preliminar: não homologa APIs, schemas, endpoints, payloads, SQL, ALLOW, contratos executáveis, mudanças no CRM, testes reais, credenciais, infraestrutura, fornecedor ou deploy; R01-G01 a G11 e CORE/SEG/AUT continuam abertos.
 
 ## 13. Critérios de saída documental e sequência futura
 
-- [ ] Avaliar e ratificar/corrigir R04-S01-D01 a D10.
+- [x] R04-S01-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Validar nomes, campos, direitos, fluxo de plano e papéis **com documentação oficial do CRM**, sem alterá-la.
 - [ ] Definir versões e formatos de operações e erros, incluindo obrigações da API CRM, com aceite **bilateral** e sem API funcional ainda.
 - [ ] Especificar contrato de autorização/revogação e ferramenta de leitura do CRM sob escopo mínimo.
