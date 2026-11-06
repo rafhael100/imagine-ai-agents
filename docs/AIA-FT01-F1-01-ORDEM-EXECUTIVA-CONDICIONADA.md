@@ -1,20 +1,20 @@
-# AIA-FT01/F1-01 — Autorização Executiva Condicionada e Ordem ao Codex | Proposta v0.1
+# AIA-FT01/F1-01 — Autorização Executiva Restrita | Ratificada v0.1
 
-> **ESTADO: PROPOSTA DOCUMENTAL NÃO AUTORIZADA PARA EXECUÇÃO.** Este arquivo, sua publicação e o eventual merge do PR documental **NÃO autorizam execução de Codex ou criação de código**. Necessária uma **autorização específica adicional** do responsável, mencionando `FT01-F1-01`, repositório, branches, escopo e testes.
+> **ESTADO: FT01-F1-01 EXPRESSAMENTE AUTORIZADO PELO RESPONSÁVEL em 2026-11-06**, com aprovação do PR #70. Limites: **somente PHP mockado, testes unitários locais sintéticos e branches isoladas**, sem CRM real, dados privados, APIs, credenciais, SQL/ALLOW, dependências instaladas, despesas, infraestrutura, merge de código ou deploy. Gates R01-G01 a G11 e CORE/SEG/AUT CRM seguem abertos.
 >
 > **Data:** 2026-11-06. **Repositório:** `rafhael100/imagine-ai-agents`. **Fundamento documental:** AIA-FT01 (FT01-D01–D10 aprovadas documentalmente), AIA-R03/R02, AIA-R04/S01–S02.
 >
 > **Bloqueios intocados:** R01-G01 a G11 TODOS ABERTOS, CORE/SEG/AUT e demais gates CRM ABERTOS; nada de API/SQL/ALLOW/CRM real, contas, credenciais, dados privados, n8n, provedores, VPS/Cloudflare, gastos ou deploy.
 
-## 1. O que a autorização futura poderá liberar
+## 1. Escopo estritamente autorizado do F1-01
 
 **Somente o lote `FT01-F1-01`**, com objetivo de construir um primeiro domínio de execução **simulado e não operacional**, sujeito às restrições do AIA-FT01 ratificado. Não é autorização de integração CRM↔AIA, de implementação da arquitetura inteira, de filas/bancos reais, de serviços IA ou de produção.
 
 **Tecnologia para este lote exclusivamente:** PHP sem frameworks nem bibliotecas de terceiros, organizado de forma compatível com possível Laravel futuro. **Não fixa linguagem da plataforma em produção**. Criar código sem instalar Composer, Laravel, PHP ou serviços. Caso PHP não esteja disponível no ambiente autorizado, escrever somente o que for possível sem baixar dependências e reportar testes não executados.
 
-**Permissão de testes a constar na autorização específica:** testes unitários **locais e sintéticos**, usando apenas o PHP já disponível, **sem rede, banco, API real ou dependências baixadas**. Proibidos testes de integração, testes em VPS e homologação de segurança real. Se o ambiente não possuir PHP ou houver restrição de execução, não buscar acesso alternativo nem instalar PHP: registrar o impedimento.
+**Permissão de testes expressamente concedida em 2026-11-06:** testes unitários **locais e sintéticos**, usando apenas o PHP já disponível, **sem rede, banco, API real ou dependências baixadas**. Proibidos testes de integração, testes em VPS e homologação de segurança real. Se o ambiente não possuir PHP ou houver restrição de execução, não buscar acesso alternativo nem instalar PHP: registrar o impedimento.
 
-## 2. Branches de código FUTURAS — não criar antes de autorização
+## 2. Branches de código autorizadas — criar após preflight
 
 1. **Branch base de desenvolvimento:** `dev/ft01-aia-core-mocks-2026-11-06`, criada a partir da SHA atual de `main` somente após preflight e autorização formal.
 2. **Branch filha do lote:** `dev/ft01-f1-01-domain-mocks-2026-11-06`, derivada da branch base.
@@ -23,7 +23,7 @@
 
 Se branch já existir ou base divergir, parar e solicitar decisão, sem sobrescrever refs ou alterar o histórico.
 
-## 3. Preflight do Codex — somente após autorização FT01-F1-01
+## 3. Preflight obrigatório do executor — FT01-F1-01 autorizado
 
 - Confirmar Git autenticado de leitura **e escrita** no repositório exato, branch `main` e SHA atual; não assumir que conectividade de navegador equivale a `git push` autenticado.
 - Ler obrigatoriamente `AGENTS.md`, `README.md`, `STATUS-ATUAL.md`, `docs/AIA-FT01-PROPOSTA-AUTORIZACAO-CODIGO-MOCKADO.md`, os recortes R03/R02 e R04/S01-S02, e esta ordem.
@@ -32,7 +32,7 @@ Se branch já existir ou base divergir, parar e solicitar decisão, sem sobrescr
 - Se Git autenticado falhar, documentar `Access is denied`/erro efetivo e **parar antes de criar qualquer arquivo de código ou branch**; não usar credenciais alternativas, clones substitutos ou bypass de gates.
 - Registrar a SHA e plano de alterações no relatório de execução. Não iniciar com pressupostos de que ACL, esquemas ou endpoints do CRM existam.
 
-## 4. Escopo positivo FUTURO de F1-01
+## 4. Escopo positivo autorizado de F1-01
 
 A primeira atividade deve permanecer pequena, reversível e **puramente local**:
 
@@ -74,24 +74,24 @@ Relatório final com: repositório/branch pai/filha e SHA; arquivos criados/modi
 
 Se não conseguir criar PR pelo GitHub, informar o impedimento real e não alegar entrega concluída; **não executar merge**. Lote F1-02 exige decisão posterior.
 
-## 7. Autorização específica sugerida para o responsável — AINDA NÃO DADA
+## 7. Autorização expressa concedida pelo responsável
 
-O responsável pode emitir textualmente, em novo turno:
+O responsável emitiu em 2026-11-06 autorização expressa equivalente ao texto de escopo a seguir:
 
 > **Autorizo expressamente a execução do AIA-FT01-F1-01**, exclusivamente no repositório `rafhael100/imagine-ai-agents`, criando, após preflight Git autenticado, as branches `dev/ft01-aia-core-mocks-2026-11-06` (base a partir de `main`) e `dev/ft01-f1-01-domain-mocks-2026-11-06` (filha). Autorizo somente PHP puro com modelos de domínio, interfaces e mocks locais determinísticos em `src/Domain`, `src/Contracts` e `src/Mocks`; fixtures e **testes unitários locais sintéticos** em `tests/Unit`, mais atualizações de `README.md` e `STATUS-ATUAL.md`. Não autorizo dependências instaladas, SQL, ALLOW, APIs reais, integração CRM, credenciais, dados reais, provedores pagos, redes/VPS/Cloudflare/n8n, testes de integração, alteração da `main`, merge ou deploy. Criar PR draft da branch filha para a branch base e apresentar diff, SHA, testes efetivamente executados e bloqueios. R01-G01 a G11 e CORE/SEG/AUT do CRM permanecem abertos. Se o acesso Git autenticado ou pré-requisitos falharem, interromper e relatar, sem contorno.
 
-Essa declaração não deve ser inferida de um simples `aprovado` dirigido às decisões documentais FT01-D01 a D10. **Apenas a autorização expressa executiva**, depois da revisão desta proposta, permite passar a ordem F1-01 ao Codex.
+**O responsável autorizou expressamente FT01-F1-01 no turno posterior à aprovação de FT01-D01 a D10.** A aprovação executiva limita-se a este lote; o executor deve informar sua identidade/ferramenta real e não alegar que o Codex executou se não houver ferramenta Codex. Sem merge em `main`, integração real ou fechamento de gates.
 
 ## 8. Checklist e dependências
 
-- [ ] Responsável avaliar o recorte executável e a autorização específica F1-01 (NÃO AUTORIZADA).
-- [ ] Confirmar linguagem PHP puro somente para mock, sem fixar stack final.
-- [ ] Confirmar permissão expressa de testes unitários sintéticos.
-- [ ] Confirmar branch base/filha, escopo de arquivos, revisão e política de interrupção.
+- [x] Responsável aprovou PR #70 e autorizou expressamente FT01-F1-01 em 2026-11-06.
+- [x] Confirmada linguagem PHP puro somente para mock, sem fixar stack final.
+- [x] Confirmada permissão expressa de testes unitários locais sintéticos.
+- [x] Confirmadas branch base/filha, superfícies permitidas e política de revisão/stop conditions.
 - [ ] Verificar Git, main SHA, licenças de eventuais componentes e disponibilidade local; sem instalar nada previamente.
-- [ ] Executar Codex **somente após** autorização expressa; antes disso não criar branches de código.
+- [ ] Executar FT01-F1-01 com preflight Git autenticado, registrar executor efetivo, commits e resultados; sem criar branch se preflight falhar.
 - [ ] Preservar R01-G01–G11 TODOS ABERTOS e CRM CORE/SEG/AUT ABERTOS, sem homologação cruzada.
 - [ ] Não usar dados reais, credenciais, serviços externos, APIs pagas, infraestrutura ou deploy.
 - [ ] Exigir nova decisão para a etapa F1-02, qualquer instalação e qualquer merge.
 
-**Estado vinculante:** este documento é uma **proposta de comando** e não uma ordem executada. Aprovação de diretrizes documentais FT01 não concede permissão de programação.
+**Estado vinculante:** o responsável **autorizou a execução restrita de FT01-F1-01 em 2026-11-06**. A execução ainda depende de preflight e registro verificável; aprovação não autoriza merge de código, deploy, uso de serviços reais ou F1-02.
