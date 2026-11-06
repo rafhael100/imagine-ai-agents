@@ -1,6 +1,6 @@
 # AIA-06 — Contexto, Memória e Continuidade dos Agentes | Proposta funcional v0.1
 
-> **Situação:** proposta documental para avaliação; **AIA06-D01 a D10 ABERTAS**.  
+> **Situação:** diretrizes **AIA06-D01 a D10 APROVADAS FUNCIONALMENTE em 2026-11-06**. Detalhes técnicos e implementação seguem bloqueados.  
 > **Data:** 2026-11-06.  
 > **Precedência:** AIA-01 a AIA-05 possuem diretrizes funcionais aprovadas; não há autorização geral de programação, integrações, testes reais, gastos nem deploy.
 
@@ -149,7 +149,7 @@ Fluxos:
 
 Nomes, storage, tecnologia, provedor e schemas estão em aberto.
 
-## 12. Decisões AIA06-D01 a D10 — propostas para aprovação
+## 12. Diretrizes AIA06-D01 a D10 — aprovadas funcionalmente
 
 | ID | Tema | Alternativa A — Recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -164,13 +164,13 @@ Nomes, storage, tecnologia, provedor e schemas estão em aberto.
 | AIA06-D09 | Melhoria e qualidade | Feedback e revisão supervisionados; detectar erros e conflitos | Memória se autocorrige sem validação |
 | AIA06-D10 | MVP | Contexto de sessão + resumo/histórico autorizado do CRM; memória derivada controlada apenas quando necessária | Memória global longa em todos os produtos desde o MVP |
 
-**AIA06-D01 a D10: ABERTAS, aguardando aprovação explícita do responsável.**
+**AIA06-D01 a D10: APROVADAS FUNCIONALMENTE em 2026-11-06 pelo responsável.** Aprovação limitada a diretrizes; não autoriza programação, alterações nos sistemas, acesso a dados reais, testes, integrações, despesas ou deploy.
 
 ## 13. Casos de avaliação e aceitação documental
 
 Cenários: dois tenants com nomes iguais; usuário sem acesso ao lead; sessão retomada após expiração; resumo incorreto; memória com dado sensível; autorização revogada; conta do CRM desativada; cache com documento excluído; aprovação de campanha expirou; conflito entre informação lembrada e status real; perda de conexão após ação já executada; recuperação após backup; produto com login independente.
 
-- [ ] D01–D10 avaliadas e aprovadas/corrigidas.
+- [x] AIA06-D01 a D10 aprovadas funcionalmente pelo responsável em 2026-11-06.
 - [ ] Matriz de fontes, permissões e responsabilidades dos produtos revisada.
 - [ ] Política de dados, sensibilidade e retenção conciliada com AIA-11.
 - [ ] Interfaces de consulta/correção/exclusão detalhadas com os produtos.
