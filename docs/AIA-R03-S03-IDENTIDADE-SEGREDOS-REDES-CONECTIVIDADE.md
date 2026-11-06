@@ -1,6 +1,6 @@
 # AIA-R03/S03 — Identidade, Segredos, Redes e Conectividade Técnica | Proposta documental v0.1
 
-> **Situação:** proposta de arquitetura documental; **R03-S03-D01 a D10 ABERTAS** para deliberação do responsável.  
+> **Situação:** diretrizes **R03-S03-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente como orientações preliminares; os gates R01-G01 a G11 e CORE/SEG/AUT do CRM permanecem abertos.  
 > **Data:** 2026-11-06. **Projeto:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01, AIA-R02/S01–S05, AIA-R02/R01–R06 e AIA-R03/S01–S02 aprovados exclusivamente como **diretrizes documentais preliminares**.  
 > **Gates:** R01-G01 a G11 TODOS ABERTOS, especialmente G01, G02, G05, G08, G09, G10 e G11. CORE/SEG/AUT e demais gates próprios do CRM também abertos.  
@@ -142,7 +142,7 @@ A seleção de região, VPS, endereço de rede, DNS, fornecedor, topologia físi
 
 Os casos são **exemplos documentais não executados**; não há evidência operacional nem gate fechado.
 
-## 11. Matriz R03-S03-D01 a D10 — decisões propostas
+## 11. Diretrizes R03-S03-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -157,11 +157,11 @@ Os casos são **exemplos documentais não executados**; não há evidência oper
 | R03-S03-D09 | Segurança/continuidade | Falha segura de validação, observabilidade minimizada e plano de revogação/incidente antes de produção | Fallback permissivo em falhas de rede/identidade |
 | R03-S03-D10 | Fase e escolhas | Avaliar mecanismos, ferramentas, fornecedores e custos em etapa própria, sem chaves ou configurações agora | Emitir credenciais, abrir redes e implantar com esta aprovação |
 
-**R03-S03-D01 a D10: ABERTAS para aprovação documental preliminar.** Não se escolhe neste recorte OAuth2, OIDC, mTLS, PKI, Vault, provedor, ferramenta de IAM, firewall, VPN, topologia física ou tecnologia de rede.
+**R03-S03-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Ratificação exclusivamente documental preliminar, sem escolher OAuth2, OIDC, mTLS, PKI, Vault, provedor, IAM, firewall, VPN ou topologia física; sem emitir credenciais, programar, configurar rede, autorizar SQL/ALLOW, testar sistemas reais, fechar gates ou implantar.
 
 ## 12. Pendências e próximos detalhamentos
 
-- [ ] Revisar/ratificar R03-S03-D01 a D10 como diretrizes documentais preliminares.
+- [x] R03-S03-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Conciliar identidade, trust boundaries e delegação com papéis/ACL oficiais do CRM, sem mudar CORE/SEG/AUT.
 - [ ] Preparar matriz técnica futura de emissores, audiência, ambiente, revogação, TTL e replay sob critérios homologados.
 - [ ] Comparar tecnologias de IAM, canal e segredos com custo, operação, auditoria e recuperação, sem emitir chaves.
