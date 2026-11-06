@@ -1,7 +1,7 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-06  
-**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 a ser planejado separadamente. Implementação permanece bloqueada.  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 será planejado em branch separada. Implementação permanece bloqueada.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
@@ -21,6 +21,8 @@
 
 - AIA-02: diretrizes AIA02-D01 a D10 **aprovadas funcionalmente em 2026-11-06**; documento `docs/AIA-02-INSTRUCOES-PERSONALIDADE-REGRAS.md`; sem autorização de implementação.
 
+- AIA-03: diretrizes AIA03-D01 a D10 **aprovadas funcionalmente em 2026-11-06**; documento `docs/AIA-03-MODELOS-PROVEDORES-ROTEAMENTO.md`. Fornecedor, modelo, preço, contrato, orçamento, stack e implementação permanecem sem aprovação.
+
 ## Propostas complementares em avaliação
 
 - Serviço compartilhado de agentes, com administração interna central e configuração limitada nos produtos.
@@ -35,7 +37,9 @@
 - [ ] Definir/validar os critérios técnicos detalhados de AIA-01 e integrações antes da implementação.
 - [x] Aprovar funcionalmente AIA02-D01 a D10 (2026-11-06).
 - [ ] Detalhar e validar aspectos técnicos de AIA-02, incluindo segurança, interfaces e testes.
-- [ ] Revisar AIA-03 — Modelos de IA e Provedores (ainda não aprovado).
+- [x] Aprovar funcionalmente AIA03-D01 a D10 (2026-11-06).
+- [ ] Detalhar AIA-03: provedores e modelos específicos, contratos, privacidade, custos e critérios técnicos.
+- [ ] Revisar AIA-04 — Ferramentas e Integrações dos Agentes (ainda não aprovado).
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
 - [ ] Definir provedores, modelos, abstração, contingência e custos.
