@@ -1,6 +1,6 @@
 # AIA-02 — Instruções, Personalidade e Regras de Agentes | Proposta funcional v0.1
 
-> **Situação:** rascunho documental; AIA02-D01 a D10 abertas para aprovação do responsável.  
+> **Situação:** AIA02-D01 a D10 aprovadas funcionalmente pelo responsável em 2026-11-06; requisitos técnicos e implementação ainda não autorizados.  
 > **Data:** 2026-11-06. **Escopo:** Imagine AI Agents, sem programação, testes reais, despesas ou deploy.  
 > **Precedência:** respeitar AIA-01 (D01–D08 aprovadas funcionalmente), decisões específicas de cada produto e gates técnicos em aberto.
 
@@ -143,7 +143,7 @@ Schemas, nomes físicos, linguagem e armazenamento continuam decisões técnicas
 - Limites por tokens, custo e tempo com degradação controlada e sem ações duplicadas.
 - Auditoria que permita investigar resultados sem reter desnecessariamente informações pessoais ou segredos.
 
-## 12. Decisões propostas para aprovação do responsável
+## 12. Diretrizes funcionais aprovadas pelo responsável
 
 | ID | Tema | Proposta A (recomendada) | Alternativa |
 | --- | --- | --- | --- |
@@ -158,11 +158,11 @@ Schemas, nomes físicos, linguagem e armazenamento continuam decisões técnicas
 | AIA02-D09 | Privacidade | Minimização por empresa e finalidade; logs sem segredos; rastrear versões | Compartilhar contextos sem segregação |
 | AIA02-D10 | Lançamento | MVP com instrução base, personalidade, versões e cenários de teste no piloto CRM | Editor irrestrito/multiagente desde a primeira entrega |
 
-**Situação de AIA02-D01 a D10: ABERTAS — sem aprovação funcional até manifestação do responsável.**
+**Situação de AIA02-D01 a D10: APROVADAS FUNCIONALMENTE em 2026-11-06.** As alternativas não foram adotadas. Permanecem abertos os critérios de implementação técnica, segurança detalhada, aceite e deploy.
 
-## 13. Critérios para conclusão funcional (ainda abertos)
+## 13. Critérios de detalhamento e implementação (ainda abertos)
 
-- [ ] Aprovação explícita ou ajustes em AIA02-D01 a D10.
+- [x] Aprovação funcional explícita de AIA02-D01 a D10 em 2026-11-06.
 - [ ] Campos editáveis e imutáveis por perfil/produto revisados.
 - [ ] Limites de composição, fontes externas e regras duras acordados.
 - [ ] Histórico, revisões, aprovação e rollback documentados.
