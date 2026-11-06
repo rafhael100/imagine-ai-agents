@@ -1,7 +1,7 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-06  
-**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 será planejado em branch independente. Implementação permanece bloqueada.  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 está em proposta documental v0.1, com D01–D10 abertas para revisão. Implementação permanece bloqueada.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
@@ -27,6 +27,8 @@
 
 - AIA-05: diretrizes AIA05-D01 a D10 **aprovadas funcionalmente em 2026-11-06**; documento `docs/AIA-05-BASE-CONHECIMENTO-RAG.md`. Sem ingestão real, indexação, código ou despesas.
 
+- AIA-06: proposta `docs/AIA-06-CONTEXTO-MEMORIA.md` na branch `docs/aia-06-contexto-memoria-2026-11-06`; decisões D01–D10 pendentes, sem memória real, código, custos ou integração.
+
 ## Propostas complementares em avaliação
 
 - Serviço compartilhado de agentes, com administração interna central e configuração limitada nos produtos.
@@ -47,7 +49,7 @@
 - [ ] Detalhar aspectos técnicos de AIA-04 e homologação de contratos/ferramentas.
 - [x] Aprovar funcionalmente AIA05-D01 a D10 (2026-11-06).
 - [ ] Detalhar aspectos técnicos de AIA-05, retenção, ACL, indexação e homologação de dados.
-- [ ] Revisar AIA-06 — Contexto e Memória dos Agentes (ainda não aprovado).
+- [ ] Revisar e decidir AIA06-D01 a D10 — Contexto, memória, continuidade e retenção.
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
 - [ ] Definir provedores, modelos, abstração, contingência e custos.
