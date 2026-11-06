@@ -1,6 +1,6 @@
 # AIA-R02/R02 — Contratos Detalhados de Confiança e Escopos do Piloto CRM | Proposta documental v0.1
 
-> **Estado:** proposta de contratos documentais **R02-R02-D01 a D10 ABERTAS** para avaliação.
+> **Estado:** diretrizes **R02-R02-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente como orientações preliminares; todos os gates R01-G01 a G11 e CORE/SEG/AUT do CRM permanecem abertos.
 > **Data:** 2026-11-06. **Repositório:** rafhael100/imagine-ai-agents.
 > **Precedência:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01, AIA-R02/S01–S05 e AIA-R02/R01 ratificados apenas documentalmente.
 > **Bloqueios:** R01-G01 a G11 e todos os gates CORE/SEG/AUT do CRM permanecem ABERTOS. Não há autorização para código, SQL, ALLOW, credenciais, APIs, uso real de dados, testes funcionais, despesas, VPS ou deploy.
@@ -154,7 +154,7 @@ Os cenários são **propostos**, não provas de teste executado.
 - Resolver conflitos C01–C08 de R02/R01 e gates R01-G01/G02/G03/G04/G05/G06/G07/G08 antes de qualquer integração funcional.
 - Nenhum desses pontos fica homologado automaticamente por aprovar esta proposta.
 
-## 11. Matriz R02-R02-D01 a D10 — propostas para decisão
+## 11. Diretrizes R02-R02-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -169,11 +169,11 @@ Os cenários são **propostos**, não provas de teste executado.
 | R02-R02-D09 | Privacidade e auditoria | Dados minimizados, ACL em resultados/status/logs, erros seguros e trilha auditável | Logs indiscriminados ou resultados visíveis entre tenants |
 | R02-R02-D10 | Limites do piloto | Planejar leitura/sugestão e tarefa controlada no CRM, com contratos técnicos posteriores, sem código agora | Integração ampla e ALLOW já liberados |
 
-**R02-R02-D01 a D10: ABERTAS** para avaliação documental preliminar do responsável. Não equivalem à homologação técnica, fechamento de gate ou permissão CRM implementada.
+**R02-R02-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Ratificação exclusivamente documental preliminar, sem homologação técnica, fechamento de gates R01-G01 a G11 ou CORE/SEG/AUT, concessão de permissão CRM, implementação, ALLOW, SQL, testes reais ou deploy.
 
 ## 12. Gates e próximos passos
 
-- [ ] R02-R02-D01 a D10 analisadas e aprovadas ou alteradas documentalmente.
+- [x] R02-R02-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Matriz oficial de papéis, autorização e recursos do CRM confirmada pelo produto, preservando CORE/SEG/AUT e outros gates.
 - [ ] Contrato lógico de identidade, claims, validação, revogação e mapeamentos especificado, sem criar credenciais.
 - [ ] Schemas e erros/versionamento de leitura, sugestão, gravação e tarefa definidos em contrato próprio, sem API real.
