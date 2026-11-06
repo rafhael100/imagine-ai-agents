@@ -1,6 +1,6 @@
 # AIA-01 — Catálogo Central de Agentes | Proposta funcional v0.1
 
-> **Situação:** proposta documental para revisão, sem aprovação funcional automática e sem autorização de programação.  
+> **Situação:** diretrizes AIA01-D01 a D08 aprovadas funcionalmente em 2026-11-06; detalhes técnicos, integrações e autorização de programação continuam pendentes.  
 > **Data:** 2026-11-05. **Repositório:** `rafhael100/imagine-ai-agents`.  
 > **Relacionamentos:** AIA-02 (instruções/regras), AIA-03 (modelos), AIA-04 (ferramentas), AIA-05/06 (conhecimento/memória), AIA-07 (execução), AIA-08 (aprovações), AIA-09 (testes), AIA-10/11 (custos/auditoria), AIA-12 (contratos entre produtos).
 
@@ -131,9 +131,9 @@ Segredos de integração devem ficar em mecanismo seguro de credenciais gerencia
 
 Não há endpoints ou mensagens efetivamente implementados neste documento.
 
-## 12. Matriz de decisões propostas (pendentes de aprovação)
+## 12. Matriz de decisões funcionais aprovadas (2026-11-06)
 
-| ID | Tema | Proposta A (recomendada) | Alternativa |
+| ID | Tema | Diretriz funcional aprovada | Alternativa não adotada |
 | --- | --- | --- | --- |
 | AIA01-D01 | Catálogo | Templates oficiais Imagine + instâncias configuráveis nos produtos | Agentes criados inteiramente por cada cliente |
 | AIA01-D02 | Administração | Central técnica interna compartilhada + telas locais | Uma central única para todos os usuários, com SSO desde o início |
@@ -144,7 +144,7 @@ Não há endpoints ou mensagens efetivamente implementados neste documento.
 | AIA01-D07 | Lançamento | Um piloto no CRM com qualificação de lead e ações de baixo risco | Lançamento simultâneo em todos os produtos |
 | AIA01-D08 | Ciclo de vida | Distinguir rascunho, teste, publicação, pausa, bloqueio e desativação | Ativo/inativo apenas |
 
-**Todas D01–D08 estão ABERTAS.** A recomendação não constitui autorização do responsável.
+**AIA01-D01 a D08: APROVADAS FUNCIONALMENTE em 2026-11-06, por confirmação do responsável na conversa de planejamento.** Esta aprovação não valida detalhes técnicos, não implica contratação de provedores, nem libera implementação, integrações, testes ou deploy.
 
 ## 13. Fluxos de exceção e segurança
 
@@ -163,7 +163,7 @@ Não há endpoints ou mensagens efetivamente implementados neste documento.
 - [ ] Matriz de papéis e responsabilidades revisada.
 - [ ] Publicação/rollback e critérios de reaprovação definidos.
 - [ ] Contratos com AIA-02, 04, 08, 10, 11 e 12 delimitados.
-- [ ] D01–D08 submetidas e aprovadas explicitamente.
+- [x] D01–D08 aprovadas como diretrizes funcionais em 2026-11-06.
 - [ ] Gate de implementação continua fechado até aprovação adicional da arquitetura e MVP.
 
 ## 15. Próximos artefatos após revisão
