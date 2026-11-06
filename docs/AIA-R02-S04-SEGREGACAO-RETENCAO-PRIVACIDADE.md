@@ -1,6 +1,6 @@
 # AIA-R02/S04 — Segregação, Retenção, Privacidade e Conformidade de Dados | Proposta documental v0.1
 
-> **Estado:** proposta documental; decisões **R02-S04-D01 a D10 ABERTAS** para avaliação do responsável.  
+> **Estado:** diretrizes **R02-S04-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06**, exclusivamente preliminares; R01-G01 a G11 e todos os gates CORE/SEG/AUT do CRM permanecem abertos.  
 > **Data:** 2026-11-06. **Projeto:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-12 com diretrizes funcionais aprovadas; AIA-R01-D01 a D08 e R02-S01/S02/S03-D01 a D10 ratificadas **apenas documentalmente**.  
 > **Bloqueios:** R01-G01 a G11 continuam todos abertos, inclusive G05; gates CORE/SEG/AUT e demais decisões próprias do CRM continuam abertos. Nenhum código, ALLOW, SQL, tratamento real, credencial, contrato, teste funcional, alteração em outro repositório ou deploy autorizado.
@@ -156,7 +156,7 @@ Nenhum modelo/provedor, cláusula, região, API, cotação ou licenciamento é a
 
 Estes são casos de aceitação **documentais**, não resultados de teste.
 
-## 12. Matriz R02-S04-D01 a D10 — propostas para decisão
+## 12. Diretrizes R02-S04-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -171,11 +171,11 @@ Estes são casos de aceitação **documentais**, não resultados de teste.
 | R02-S04-D09 | Incidentes/auditoria | Registrar eventos mínimos, acessos, negativas, incidentes e falhas de expurgo com privacidade | Logs irrestritos sem rastreabilidade de acesso |
 | R02-S04-D10 | MVP | Matriz de dados do piloto CRM com leitura/resumo e derivados mínimos; sem dados reais nesta fase documental | Ingestão multicanal e memória global desde a primeira etapa |
 
-**R02-S04-D01 a D10: ABERTAS para aprovação documental preliminar.** Nenhum prazo de retenção, contrato de provedor, arquitetura de armazenamento, base legal de fluxo ou tecnologia está homologado; não implementar.
+**R02-S04-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Nenhum prazo de retenção, contrato de provedor, arquitetura de armazenamento, base legal de fluxo ou tecnologia está homologado; sem autorização de programação, testes reais, ALLOW, SQL, dados privados ou deploy.
 
 ## 13. Dependências e próximos detalhamentos
 
-- [ ] R02-S04-D01 a D10 aprovadas/revisadas pelo responsável.
+- [x] R02-S04-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Inventário por produto/fluxo, base legal e responsabilidades revisto com responsáveis internos/jurídicos.
 - [ ] Mapeamento de dados e derivados à matriz de acesso R02/S01–S03 e AIA-05/06/11.
 - [ ] Políticas concretas de retenção, expurgo, backups e restauração por classe/produto.
