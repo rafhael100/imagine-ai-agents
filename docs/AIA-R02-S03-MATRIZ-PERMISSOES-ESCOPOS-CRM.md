@@ -1,6 +1,6 @@
 # AIA-R02/S03 — Matriz de Permissões e Escopos do CRM | Proposta documental v0.1
 
-> **Estado:** proposta documental preliminar; **R02-S03-D01 a D10 ABERTAS** para decisão do responsável.  
+> **Estado:** diretrizes **R02-S03-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06**, exclusivamente preliminares; R01-G01 a G11 e todos os gates CORE/SEG/AUT do CRM permanecem abertos.  
 > **Data:** 2026-11-06. **Repositório:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01-D01 a D08, R02-S01-D01 a D10 e R02-S02-D01 a D10 aprovados apenas documentalmente.  
 > **Gates:** R01-G01 a G11 permanecem TODOS abertos. A documentação **não aprova nem modifica gates CORE/SEG/AUT do CRM**, incluindo decisões pendentes de autorização e isolamento. Não há autorização de código, ALLOW, SQL, testes reais, credenciais ou deploy.
@@ -149,7 +149,7 @@ A solução física de schemas, log, banco, tokens e transporte não está homol
 
 **Não incluído automaticamente:** campanhas Meta/Google, orçamento de mídia, faturamento, cobrança, alteração de plano, exclusão de lead, envio de WhatsApp/e-mail, mesclagem de empresas, importações massivas, execução de automações livres de cliente em n8n, mudança de dono de lead, agente com privilégios globais ou escrita genérica via SQL.
 
-## 12. Matriz R02-S03-D01 a D10 — propostas para avaliação
+## 12. Diretrizes R02-S03-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -164,11 +164,11 @@ A solução física de schemas, log, banco, tokens e transporte não está homol
 | R02-S03-D09 | Auditoria/segurança | Negação por padrão, erros seguros, registro mínimo, revalidação e isolamento | Aprovar ações por prompt, sem trilha |
 | R02-S03-D10 | Primeiro recorte | Piloto documental CRM: leitura, resumo, classificação sugerida e tarefa controlada; sem código nesta fase | Habilitar todas as operações de todos os produtos |
 
-**R02-S03-D01 a D10: ABERTAS para aprovação documental preliminar.** Escopos, papéis e nomes de ferramentas são conceituais, sem ALLOW, grants, APIs, SQL ou autorização funcional no CRM.
+**R02-S03-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Escopos, papéis e nomes de ferramentas continuam conceituais; nenhum ALLOW, grant, API, SQL, autorização funcional ou alteração de gates no CRM foi aprovado.
 
 ## 13. Dependências e próximos gates
 
-- [ ] R02-S03-D01 a D10 aprovadas ou corrigidas pelo responsável.
+- [x] R02-S03-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Confrontar a matriz com os papéis/escopos reais, regras de atribuição e estrutura de recursos do CRM, quando essa documentação for homologada no próprio projeto.
 - [ ] Completar contrato de confiança de R02/S02 e mapeamento de organizações de R02/S01.
 - [ ] Formalizar autorização de leitura/histórico, gravação de resumo e criação de tarefa no backend CRM com critérios de aceite por recurso.
