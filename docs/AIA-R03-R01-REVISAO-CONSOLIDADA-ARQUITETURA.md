@@ -1,6 +1,6 @@
 # AIA-R03/R01 — Revisão Consolidada da Arquitetura Técnica, Pendências e Gates | Proposta documental v0.1
 
-> **Estado:** revisão de arquitetura **DOCUMENTAL EM PROPOSTA**; **R03-R01-D01 a D08 ABERTAS** para aprovação preliminar.  
+> **Estado:** diretrizes **R03-R01-D01 a D08 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável; ratificação exclusivamente preliminar. R01-G01 a G11 e CORE/SEG/AUT do CRM seguem abertos.  
 > **Data de referência:** 2026-11-06. **Projeto:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01; AIA-R02/S01–S05; AIA-R02/R01–R06; e AIA-R03/S01–S05 aprovados **exclusivamente documentalmente**.  
 > **Gates:** **R01-G01 a G11 TODOS ABERTOS**, especialmente G01/G02/G03/G05/G06/G08/G09/G10/G11. CORE/SEG/AUT e demais gates próprios do CRM permanecem **abertos**.  
@@ -157,7 +157,7 @@ A sequência exata depende do estágio dos projetos e de validações de respons
 
 **Não objetivos:** executar uma prova de conceito, instalar bibliotecas, escolher a região de produção, criar banco, desenhar schema SQL definitivo, criar permissões, configurar Cloudflare/n8n, instalar agentes, conceder acesso a dados privados ou automatizar atividades do CRM/Portal neste turno.
 
-## 9. Matriz R03-R01-D01 a D08 — decisões propostas
+## 9. Diretrizes R03-R01-D01 a D08 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -170,11 +170,11 @@ A sequência exata depende do estágio dos projetos e de validações de respons
 | **R03-R01-D07** | Próxima especificação | Priorizar **contratos técnicos bilaterais do MVP CRM + matriz de tecnologia/custo** somente documental, sem selecionar stack no ato | Pular contratos e iniciar instalação/integração |
 | **R03-R01-D08** | Liberação operacional | Código, SQL/ALLOW, testes reais, credenciais, compras, VPS/n8n/Cloudflare e deploy exigem autorizações explícitas futuras | Tratar aprovação desta revisão como ordem de implementação |
 
-**R03-R01-D01 a D08: TODAS ABERTAS** para ratificação **documental preliminar** do responsável. Nenhuma delas autoriza iniciar desenvolvimento ou fechar gates técnicos.
+**R03-R01-D01 a D08: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** A ratificação é estritamente documental preliminar: não homologa stack, fornecedor, arquitetura, custos ou contratos técnicos; não fecha R01-G01 a G11 nem CORE/SEG/AUT e não autoriza código, SQL, ALLOW, testes reais, credenciais, despesas ou deploy.
 
 ## 10. Checklist e próximos marcos
 
-- [ ] Revisar e ratificar/ajustar R03-R01-D01 a D08.
+- [x] R03-R01-D01 a D08 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Conferir matrizes de contratos/ACL reais do CRM por responsáveis, **sem modificar o repositório CRM**.
 - [ ] Definir contratos e capacidades técnicas específicas de AIA para o piloto, sem criar APIs.
 - [ ] Comparar tecnologias de persistência, filas, IAM, segredos e provedores após requisitos e custos.
@@ -185,6 +185,6 @@ A sequência exata depende do estágio dos projetos e de validações de respons
 - [ ] Manter todos os gates **CORE/SEG/AUT** e demais decisões próprias do CRM abertos.
 - [ ] Não implementar código, SQL, ALLOW, APIs, credenciais, contratações, infraestrutura, testes reais, mudanças em outros repositórios ou deploy.
 
-**Próximo bloco documental candidato:** `AIA-R04/S01 — Contratos Técnicos Mínimos do MVP CRM: Operações, Campos, Erros e Confirmações` **OU** `AIA-R03/R02 — Comparativo Técnico e Matriz de Custo de Stack`. A seleção desta sequência precisa ser registrada sem confundir planejamento com homologação. 
+**Próximo bloco documental selecionado para proposta:** `AIA-R04/S01 — Contratos Técnicos Mínimos do MVP CRM: Operações, Campos, Erros e Confirmações`. O comparativo de stack `AIA-R03/R02` permanece pendente; a sequência documental não constitui homologação nem autorização de programação. 
 
 **Preservação:** todos os repositórios e PRs de CRM, Portal, Sites, Performance AI e Universidade permanecem intocados, assim como VPS, Cloudflare, n8n, contas, credenciais e servidores.
