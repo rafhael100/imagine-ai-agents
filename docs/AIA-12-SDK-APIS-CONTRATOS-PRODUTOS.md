@@ -1,6 +1,6 @@
 # AIA-12 — SDK, APIs, Eventos e Contratos com os Produtos Imagine | Proposta funcional v0.1
 
-> **Situação:** proposta exclusivamente documental. **AIA12-D01 a D10 ABERTAS** para avaliação do responsável.  
+> **Situação:** diretrizes **AIA12-D01 a D10 APROVADAS FUNCIONALMENTE em 2026-11-06**; critérios técnicos, contratos e implementação permanecem abertos.  
 > **Data:** 2026-11-06. **Produto:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-11 aprovados como diretrizes funcionais; arquitetura técnica, autenticação, homologação, custos, implementação e deploy permanecem bloqueados.
 
@@ -179,7 +179,7 @@ Antes de qualquer implementação/rollout real:
 
 Schemas, bancos, frameworks e tecnologias seguem abertos.
 
-## 14. Matriz AIA12-D01 a D10 — propostas de decisão
+## 14. Diretrizes AIA12-D01 a D10 — aprovadas funcionalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -194,11 +194,11 @@ Schemas, bancos, frameworks e tecnologias seguem abertos.
 | AIA12-D09 | Custos/privacidade | Telemetria técnica segregada; créditos/preços sob domínio de cada produto; payload mínimo | Cobrança e dados indiscriminados numa conta global |
 | AIA12-D10 | MVP | Contratos mínimos com CRM: execução, resultado/estado, ferramentas limitadas, aprovação e uso técnico | Integrar todos os produtos e fluxos na primeira entrega |
 
-**AIA12-D01 a D10: ABERTAS — aguardam aprovação funcional expressa do responsável.** Nenhuma linguagem, endpoint, padrão de token, banco, modelo, provedor, preço ou infraestrutura está aprovada.
+**AIA12-D01 a D10: APROVADAS FUNCIONALMENTE em 2026-11-06 pelo responsável.** Nenhuma linguagem, endpoint, padrão de token, banco, modelo, provedor, preço ou infraestrutura está aprovada. Esta ratificação não autoriza código, APIs reais, integrações, testes funcionais nem deploy.
 
 ## 15. Critérios documentais de conclusão e próximos gates
 
-- [ ] AIA12-D01 a D10 aprovadas ou revisadas.
+- [x] AIA12-D01 a D10 aprovadas funcionalmente pelo responsável em 2026-11-06.
 - [ ] Definir e ratificar matriz de responsabilidades por produto/tenant/usuário.
 - [ ] Definir identidade/autorização de serviços, revogação, mapeamentos e segregação.
 - [ ] Detalhar schemas de contrato, erros, eventos, idempotência, ordem e reconciliação.
