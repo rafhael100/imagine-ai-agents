@@ -1,6 +1,6 @@
 # AIA-07 — Execução, Filas e Orquestração de Agentes | Proposta funcional v0.1
 
-> **Situação:** proposta documental, **AIA07-D01 a D10 ABERTAS** para avaliação.  
+> **Situação:** diretrizes **AIA07-D01 a D10 APROVADAS FUNCIONALMENTE em 2026-11-06**; especificação técnica, programação e implantação continuam bloqueadas.  
 > **Data:** 2026-11-06. **Projeto:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-06 com diretrizes funcionais aprovadas; todos os gates de arquitetura técnica, segurança detalhada, fornecedores, custos e desenvolvimento seguem abertos.
 
@@ -142,7 +142,7 @@ Agentes especialistas podem usar o mesmo modelo de IA com instruções diferente
 
 Os nomes são conceituais e não determinam infraestrutura, tabela ou implementação.
 
-## 12. Propostas de decisão AIA07-D01 a D10 (ABERTAS)
+## 12. Diretrizes AIA07-D01 a D10 (aprovadas funcionalmente)
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 |---|---|---|---|
@@ -157,7 +157,7 @@ Os nomes são conceituais e não determinam infraestrutura, tabela ou implementa
 | AIA07-D09 | Integração n8n | n8n restrito a fluxos internos Imagine e com licenciamento validado | n8n como motor de automações livre para clientes |
 | AIA07-D10 | MVP | Agente único CRM, fila de tarefas, checkpoints, consulta e criação controlada de tarefas | Multiagentes e integrações simultâneas desde o início |
 
-**Todas AIA07-D01 a D10 permanecem ABERTAS**, sem autorização de código, ferramentas, fornecedores, infraestrutura, licenciamento, testes reais ou deploy.
+**AIA07-D01 a D10 APROVADAS FUNCIONALMENTE em 2026-11-06 pelo responsável.** Não há autorização de código, ferramentas, fornecedores, infraestrutura, licenciamento, testes reais ou deploy.
 
 ## 13. Exemplos e casos de teste documentais
 
@@ -174,7 +174,7 @@ Os nomes são conceituais e não determinam infraestrutura, tabela ou implementa
 
 ## 14. Critérios documentais de aprovação
 
-- [ ] AIA07-D01 a D10 aprovadas ou corrigidas.
+- [x] AIA07-D01 a D10 aprovadas funcionalmente pelo responsável em 2026-11-06.
 - [ ] Estados, transições e responsáveis revisados.
 - [ ] Fronteiras entre CRM automações, Imagine AI Agents e n8n homologadas.
 - [ ] Contratos de tarefas/eventos com AIA-12 definidos.
