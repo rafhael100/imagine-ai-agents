@@ -1,6 +1,6 @@
 # AIA-R03/S05 — Implantação, Homologação, Versionamento e Rollback | Proposta documental v0.1
 
-> **Estado:** proposta exclusivamente documental; **R03-S05-D01 a D10 ABERTAS** para decisão do responsável.  
+> **Estado:** diretrizes **R03-S05-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente preliminares. R01-G01 a G11 e CORE/SEG/AUT do CRM permanecem abertos.  
 > **Data de referência:** 2026-11-06. **Repositório:** `rafhael100/imagine-ai-agents`.  
 > **Precedência:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01, AIA-R02/S01–S05, AIA-R02/R01–R06 e AIA-R03/S01–S04 ratificados exclusivamente como diretrizes **documentais preliminares**.  
 > **Bloqueios:** R01-G01 a G11 **TODOS ABERTOS**; gates CORE/SEG/AUT e demais bloqueios do CRM inalterados. Não estão autorizados código, ALLOW, SQL, testes reais, credenciais, seleção de fornecedor, contratações, VPS, Cloudflare, n8n, alteração de outros repositórios, release real ou deploy.
@@ -162,7 +162,7 @@ Números de alerta/limiares, páginas, tecnologias, SLA/RTO/RPO e gatilhos de ro
 
 Estes são **casos de planejamento**; não foram realizados testes, deploys, rollback nem incidentes simulados reais.
 
-## 11. Matriz R03-S05-D01 a D10 — propostas para decisão
+## 11. Diretrizes R03-S05-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -177,11 +177,11 @@ Estes são **casos de planejamento**; não foram realizados testes, deploys, rol
 | R03-S05-D09 | Custos e responsáveis | Orçamento, licenças, fornecedores, suporte, alçadas e controle de mudanças aprovados antes de gastos | Contratar/consumir APIs sem aprovação |
 | R03-S05-D10 | Próxima fase | Consolidar a arquitetura em R03/R01 documentalmente, sem código, testes funcionais, credenciais ou deploy | Considerar R03/S05 uma ordem para implementar |
 
-**R03-S05-D01 a D10: ABERTAS para avaliação documental preliminar.** A escolha de critérios não fecha gates, homologa stack, define preço ou autoriza operação real.
+**R03-S05-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Ratificação estritamente documental preliminar. Os critérios não fecham gates R01-G01 a G11 ou CORE/SEG/AUT, não homologam stack ou preços e não autorizam código, ALLOW, SQL, testes reais, credenciais, implantação ou operação.
 
 ## 12. Pendências, governança e próximo recorte
 
-- [ ] Ratificar ou corrigir R03-S05-D01 a D10.
+- [x] R03-S05-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Definir responsáveis por aprovação, QA, segurança, operação, privacidade, custos, integração CRM e go/no-go sob decisão separada.
 - [ ] Confrontar contratos AIA/CRM, matriz oficial de ACL, alçadas e critérios de efeitos, mantendo gates CORE/SEG/AUT abertos.
 - [ ] Definir versionamento real de APIs/eventos/agentes/modelos e procedimentos de compatibilidade quando a tecnologia for selecionada.
