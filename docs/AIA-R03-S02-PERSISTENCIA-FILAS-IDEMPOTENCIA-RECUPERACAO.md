@@ -1,6 +1,6 @@
 # AIA-R03/S02 — Persistência, Filas, Idempotência e Recuperação | Proposta documental v0.1
 
-> **Estado:** proposta documental de arquitetura; **R03-S02-D01 a D10 ABERTAS** para avaliação do responsável.  
+> **Estado:** diretrizes **R03-S02-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente preliminares; R01-G01 a G11 e CORE/SEG/AUT do CRM permanecem abertos.  
 > **Data de referência:** 2026-11-06. **Repositório:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01, AIA-R02/S01–S05, AIA-R02/R01–R06 e AIA-R03/S01 ratificados apenas como **diretrizes documentais preliminares**.  
 > **Gates:** R01-G01 a G11 TODOS ABERTOS, sobretudo G03/G05/G06/G07/G08/G10/G11; CORE/SEG/AUT e demais bloqueios próprios do CRM permanecem abertos.  
@@ -184,7 +184,7 @@ A análise futura de alternativas deverá comparar cada candidato por:
 
 Não recomendar Redis, PostgreSQL, RabbitMQ, Kafka, SQS, Docker, Leaseweb ou outro produto como **escolha ratificada** neste momento. A seleção exige matriz comparativa e aprovação técnica/comercial específicas.
 
-## 13. Matriz R03-S02-D01 a D10 — decisões propostas
+## 13. Diretrizes R03-S02-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -199,11 +199,11 @@ Não recomendar Redis, PostgreSQL, RabbitMQ, Kafka, SQS, Docker, Leaseweb ou out
 | R03-S02-D09 | Observabilidade/custos | Telemetria mínima por empresa/execução, alertas, custos técnicos e créditos comerciais separados | Logs irrestritos e cobrança repetida de retries |
 | R03-S02-D10 | Seleção e fase | Comparar tecnologias/fornecedores em documentação posterior, preservando gates, sem código ou instalação | Aprovar banco/fila/VPS e iniciar implementação agora |
 
-**R03-S02-D01 a D10: ABERTAS** para aprovação **documental preliminar** do responsável. Não escolher banco, broker, queue, banco de cache, schema, provedor, servidor, arquitetura definitiva, preço ou TTL; não fechar gates.
+**R03-S02-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Ratificação exclusivamente documental preliminar, sem escolher banco, broker, queue, cache, schema, provedor, servidor, arquitetura física, preço ou TTL, sem fechar gates e sem autorizar código, SQL, ALLOW, testes reais ou deploy.
 
 ## 14. Dependências e próximo recorte
 
-- [ ] Revisar/ratificar R03-S02-D01 a D10, sem homologação técnica.
+- [x] R03-S02-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06, sem homologação técnica.
 - [ ] Confirmar as necessidades de execução/idempotência do CRM, preservando CORE/SEG/AUT e R01-G01/G02/G03/G08.
 - [ ] Formalizar contrato lógico de dados/estados, consumo, retenção e controle de concorrência com AIA-04/07/08/10/11/12.
 - [ ] Definir matriz futura de custos, capacidade, RTO/RPO e contingência sem compras ou provisionamento.
