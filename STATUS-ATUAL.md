@@ -1,7 +1,7 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-06  
-**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 será planejado em branch independente.  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 proposto em branch independente, com decisões D01–D10 abertas para revisão.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
@@ -19,6 +19,8 @@
 - Serviços, dados e autenticações de produtos devem permanecer segregados; integração por contratos e APIs.
 - Decisões pendentes em outros projetos não são consideradas automaticamente aprovadas aqui.
 
+- AIA-02: proposta v0.1 em `docs/AIA-02-INSTRUCOES-PERSONALIDADE-REGRAS.md` na branch `docs/aia-02-instrucoes-regras-2026-11-06`; decisões D01–D10 **pendentes**.
+
 ## Propostas complementares em avaliação
 
 - Serviço compartilhado de agentes, com administração interna central e configuração limitada nos produtos.
@@ -31,7 +33,7 @@
 - [x] Criar e confirmar repositório privado no GitHub.
 - [x] Aprovar funcionalmente AIA01-D01 a D08 (2026-11-06).
 - [ ] Definir/validar os critérios técnicos detalhados de AIA-01 e integrações antes da implementação.
-- [ ] Revisar e aprovar AIA-02 (instruções, personalidade e regras dos agentes).
+- [ ] Revisar e decidir AIA02-D01 a D10 (instruções, personalidade, regras e testes).
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
 - [ ] Definir provedores, modelos, abstração, contingência e custos.
