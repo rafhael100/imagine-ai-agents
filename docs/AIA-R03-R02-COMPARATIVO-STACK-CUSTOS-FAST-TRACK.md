@@ -1,6 +1,6 @@
 # AIA-R03/R02 — Comparativo de Stack, Custos e Critérios para Fast-Track Técnico Isolado | Proposta documental v0.1
 
-> **Situação:** proposta **DOCUMENTAL PRELIMINAR**, decisões **R03-R02-D01 a D10 ABERTAS** para aprovação.  
+> **Situação:** diretrizes **R03-R02-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente preliminares. A autorização de código AIA-FT01 permanece PENDENTE. Os gates R01-G01 a G11 e CORE/SEG/AUT do CRM permanecem abertos.  
 > **Data de referência:** 2026-11-06. **Repositório:** `rafhael100/imagine-ai-agents`.  
 > **Precedência:** AIA-01–AIA-12 aprovados funcionalmente; AIA-R01, AIA-R02, AIA-R03/S01–S05, R03/R01 e AIA-R04/S01–S02 aprovados **somente documentalmente**.  
 > **Gates:** R01-G01–G11 **TODOS ABERTOS**; CORE/SEG/AUT e demais gates próprios do CRM permanecem **abertos**.  
@@ -160,7 +160,7 @@ O desenvolvimento mockado, se vier a ser aprovado, **não elimina ou homologa ne
 | PR documental interpretado como release | Registro de status por decisão, proteção de main e go/no-go separado |
 | Testes unitários de mocks alegados como segurança do CRM | Evidência válida só para domínio testado; gates reais continuam abertos |
 
-## 11. Matriz R03-R02-D01 a D10 — propostas para decisão
+## 11. Diretrizes R03-R02-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -175,11 +175,11 @@ O desenvolvimento mockado, se vier a ser aprovado, **não elimina ou homologa ne
 | **R03-R02-D09** | Licença/segurança | n8n e provedores sujeitos a termos reais; evitar segredos, dados reais e APIs pagas no primeiro lote | Assumir n8n livre para qualquer SaaS e usar chaves reais |
 | **R03-R02-D10** | Próxima decisão | Criar **proposta formal separada de autorização do fast-track**, sem programar até aceite expresso; manter G01–G11 e CORE/SEG/AUT abertos | Interpretar este PR como autorização de código/SQL/deploy |
 
-**R03-R02-D01 a D10: ABERTAS** para aprovação **documental preliminar** do responsável. Esta decisão não escolhe stack final, não autoriza fast-track, não fecha gates, não homologa licença nem compromete despesas.
+**R03-R02-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Ratificação estritamente documental preliminar: não escolhe stack final, não autoriza AIA-FT01 ou implementação, não fecha gates, não homologa licença e não compromete despesas, SQL/ALLOW, APIs reais, testes ou deploy.
 
 ## 12. Dependências e passos seguintes
 
-- [ ] Revisar/aprovar R03-R02-D01 a D10 como diretrizes documentais preliminares.
+- [x] R03-R02-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06; AIA-FT01 aguarda autorização expressa separada.
 - [ ] Validar comparativo real de SDKs/versões de Laravel, Node/TypeScript, Python, PostgreSQL, filas e respectivos termos antes de escolha.
 - [ ] Definir escopo, branch, dono, arquivos e permissões para uma **proposta futura formal de fast-track isolado**.
 - [ ] Resolver questões de API/ACL final do CRM e contrato de efeitos apenas quando os responsáveis homologarem bilateralmente.
