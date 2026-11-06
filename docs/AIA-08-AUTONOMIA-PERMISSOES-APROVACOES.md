@@ -1,6 +1,6 @@
 # AIA-08 — Autonomia, Permissões e Central de Aprovações | Proposta funcional v0.1
 
-> **Status:** proposta documental para revisão; **AIA08-D01 a D10 ABERTAS**.  
+> **Status:** diretrizes **AIA08-D01 a D10 APROVADAS FUNCIONALMENTE em 2026-11-06**; requisitos técnicos, programação e implantação permanecem bloqueados.  
 > **Data de referência:** 2026-11-06.  
 > **Precedência:** AIA-01 a AIA-07 com diretrizes funcionais aprovadas; os gates de arquitetura técnica, contratos de produto, custos, segurança detalhada e implementação permanecem abertos.
 
@@ -179,7 +179,7 @@ Telas:
 
 Nenhum schema, banco, endpoint, serviço ou linguagem de programação é aprovado por esta lista.
 
-## 13. Matriz AIA08-D01 a D10 — propostas para aprovação
+## 13. Diretrizes AIA08-D01 a D10 — aprovadas funcionalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -194,13 +194,13 @@ Nenhum schema, banco, endpoint, serviço ou linguagem de programação é aprova
 | AIA08-D09 | Auditoria e contingência | Evidência separada de proposta, decisão, execução, confirmação e revogação; falha segura | Tratar aprovação como execução e continuar em falhas |
 | AIA08-D10 | MVP | Leitura/rascunho/criação de tarefa controlada no CRM; aprovação humana para ampliação sensível | Autonomia irrestrita de agentes já no MVP |
 
-**AIA08-D01 a D10 permanecem ABERTAS.** Nenhuma aprovação funcional presumida.
+**AIA08-D01 a D10 APROVADAS FUNCIONALMENTE em 2026-11-06 pelo responsável.** Aprovação exclusivamente documental e funcional; não autoriza concessões reais de privilégio, código, testes, credenciais, despesas ou deploy.
 
 ## 14. Casos de teste documentais e critérios de conclusão
 
 Cenários: lead de outro tenant; agente tenta aumentar próprio escopo; aprovação do orçamento expira; aprovação de campanha alterada após decisão; duas aprovações simultâneas; usuário perde permissão; recusa seguida de retry; autorização por texto malicioso de documento; tenant troca na fila; timeout após execução confirmada; limite de orçamento ultrapassado por chamadas repetidas; desligamento emergencial de ferramenta; produto com login independente; operador tenta aprovar própria solicitação acima de sua alçada.
 
-- [ ] Decisões AIA08-D01 a D10 avaliadas/aprovadas ou ajustadas pelo responsável.
+- [x] AIA08-D01 a D10 aprovadas funcionalmente pelo responsável em 2026-11-06.
 - [ ] Papéis, alçadas, dupla aprovação e prevenção de conflitos de interesse detalhados por produto.
 - [ ] Ciclo de vida da aprovação conciliado com AIA-07 e API do executor.
 - [ ] Matriz de riscos e permissões testável com AIA-04, AIA-09 e AIA-12.
