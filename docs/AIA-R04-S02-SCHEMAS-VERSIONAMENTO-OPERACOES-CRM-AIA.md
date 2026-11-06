@@ -1,6 +1,6 @@
 # AIA-R04/S02 — Schemas, Versionamento e Validações dos Contratos CRM/AIA | Proposta documental v0.1
 
-> **Situação:** proposta de especificação **documental e não executável**; **R04-S02-D01 a D10 ABERTAS** para avaliação do responsável.  
+> **Situação:** diretrizes **R04-S02-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente preliminares e não executáveis. Os gates R01-G01 a G11 e CORE/SEG/AUT do CRM permanecem abertos.  
 > **Referência:** 2026-11-06. **Repositório:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-12 funcionais aprovados; AIA-R01, AIA-R02, AIA-R03 e AIA-R04/S01 ratificados **apenas como diretrizes documentais preliminares**.  
 > **Gates e restrições:** R01-G01 a G11 **TODOS ABERTOS**; CORE/SEG/AUT e demais gates do CRM **ABERTOS**. Nenhum schema, endpoint, ACL, contrato real, provedor, stack ou payload foi homologado. **Sem código, ALLOW, SQL, criação de API, credenciais, dados reais, execução de testes, instalação, contratações ou deploy.**
@@ -188,7 +188,7 @@ A possível programação inicial de um núcleo **isolado e sem integração rea
 
 **Este documento não constitui a autorização.** Uma proposta de fast-track pode ser formulada depois do comparativo de stack inicial e dos critérios acima, com escopo negativo explícito.
 
-## 12. Matriz R04-S02-D01 a D10 — propostas para decisão
+## 12. Diretrizes R04-S02-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -203,11 +203,11 @@ A possível programação inicial de um núcleo **isolado e sem integração rea
 | R04-S02-D09 | Privacidade/auditoria | Dados mínimos, rastreabilidade referencial, retenção por finalidade, proteção de logs | Persistência indiscriminada de prompts e credenciais |
 | R04-S02-D10 | Próxima autorização | Avançar para **matriz de stack/custo e recorte de fast-track isolado apenas documental**, pedindo autorização específica depois | Começar código, integrar CRM e instalar infraestrutura automaticamente |
 
-**R04-S02-D01 a D10: ABERTAS**. Recomenda-se ratificação **documental preliminar**, sem códigos, APIs reais, SQL/ALLOW, schemas concretos, contas, testes, compras, deploy ou fechamento de gates.
+**R04-S02-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Ratificação exclusivamente documental preliminar: sem schemas implementados, APIs reais, código, SQL, ALLOW, testes reais, credenciais, infraestrutura, compras, deploy ou fechamento de R01-G01 a G11 ou CORE/SEG/AUT do CRM.
 
 ## 13. Dependências e sequência priorizada
 
-- [ ] Revisar/aprovar R04-S02-D01 a D10 documentalmente.
+- [x] R04-S02-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Conciliar modelos de campos, estados e negativas com documentação oficial e responsáveis do CRM.
 - [ ] Aprovar documento de comparação da stack mínima e custos `AIA-R03/R02`, sem escolher fornecedor por inferência.
 - [ ] Preparar proposta separada para autorização de desenvolvimento de escopo isolado, com branch, limite, revisão e gates explícitos.
