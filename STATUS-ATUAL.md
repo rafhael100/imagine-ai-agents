@@ -1,7 +1,7 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-06  
-**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 aprovado funcionalmente (D01–D10); AIA-10 aprovado funcionalmente (D01–D10); AIA-11 aprovado funcionalmente (D01–D10); AIA-12 aprovado funcionalmente (D01–D10); os doze módulos possuem diretrizes funcionais aprovadas. A revisão transversal AIA-R01 está aprovada documentalmente (R01-D01–D08); os 11 gates técnicos continuam abertos. R02/S01 aprovado documentalmente (D01–D10); R02/S02 aprovado documentalmente (D01–D10); R02/S03 aprovado documentalmente (D01–D10); R02/S04 aprovado documentalmente (D01–D10); R02/S05 aprovado documentalmente (D01–D10); os cinco recortes S01–S05 foram ratificados documentalmente. AIA-R02/R01 aprovado documentalmente (D01–D08); R02/R02 aprovado documentalmente (D01–D10); R02/R03 aprovado documentalmente (D01–D10); R02/R04 está em proposta documental v0.1, com D01–D10 abertas para avaliação; todos os gates seguem abertos. Todos R01-G01 a G11 permanecem abertos. Implementação permanece bloqueada.  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 aprovado funcionalmente (D01–D10); AIA-10 aprovado funcionalmente (D01–D10); AIA-11 aprovado funcionalmente (D01–D10); AIA-12 aprovado funcionalmente (D01–D10); os doze módulos possuem diretrizes funcionais aprovadas. A revisão transversal AIA-R01 está aprovada documentalmente (R01-D01–D08); os 11 gates técnicos continuam abertos. R02/S01 aprovado documentalmente (D01–D10); R02/S02 aprovado documentalmente (D01–D10); R02/S03 aprovado documentalmente (D01–D10); R02/S04 aprovado documentalmente (D01–D10); R02/S05 aprovado documentalmente (D01–D10); os cinco recortes S01–S05 foram ratificados documentalmente. AIA-R02/R01 aprovado documentalmente (D01–D08); R02/R02 aprovado documentalmente (D01–D10); R02/R03 aprovado documentalmente (D01–D10); R02/R04 aprovado documentalmente (D01–D10); R02/R05 será proposto separadamente. Todos R01-G01 a G11 permanecem abertos. Implementação permanece bloqueada.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
@@ -59,7 +59,7 @@
 
 - AIA-R02/R03: diretrizes R02-R03-D01 a D10 **aprovadas documentalmente em 2026-11-06**; documento `docs/AIA-R02-R03-MAQUINA-ESTADOS-ALCADAS-EFEITOS.md`. Gates R01-G01 a G11 e CORE/SEG/AUT do CRM seguem abertos; sem SQL, ALLOW, APIs reais, testes ou código.
 
-- AIA-R02/R04: proposta `docs/AIA-R02-R04-DADOS-AUDITORIA-RETENCAO-PRIVACIDADE.md` na branch `docs/aia-r02-r04-dados-auditoria-retencao-2026-11-06`; R02-R04-D01 a D10 abertas, sem novas políticas legais/prazos concretos e sem acesso a dados reais. R01-G01 a G11 e CORE/SEG/AUT do CRM preservados; sem SQL, ALLOW ou código.
+- AIA-R02/R04: diretrizes R02-R04-D01 a D10 **aprovadas documentalmente em 2026-11-06**, documento `docs/AIA-R02-R04-DADOS-AUDITORIA-RETENCAO-PRIVACIDADE.md`. Nenhuma política legal concreta, prazo, acesso a dados reais, SQL, ALLOW ou código aprovado; R01-G01 a G11 e CORE/SEG/AUT do CRM preservados.
 
 ## Propostas complementares em avaliação
 
@@ -114,7 +114,9 @@
 - [ ] Conciliar contratos com papéis/ACL oficiais do CRM e homologar gates em decisões separadas.
 - [x] Aprovar documentalmente R02-R03-D01 a D10 (2026-11-06).
 - [ ] Homologar regras técnicas de estados, alçadas, efeitos e idempotência por produto, sem fechar automaticamente R01-G03/G04/G06/G07/G08.
-- [ ] Revisar R02-R04-D01 a D10 — dados, evidências, retenção, privacidade, derivados e incidentes nos fluxos CRM/AIA (ainda não aprovado).
+- [x] Aprovar documentalmente R02-R04-D01 a D10 (2026-11-06).
+- [ ] Detalhar responsáveis por fluxos, bases legais, prazos e evidências materiais para homologação futura; R01-G05 permanece aberto.
+- [ ] Revisar R02/R05 — Homologação de Segurança, Cenários Sintéticos e Evidências de Aceite (ainda não aprovado).
 - [ ] Manter R01-G01 a G11 abertos e sujeitos à homologação específica.
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
