@@ -1,6 +1,6 @@
 # AIA-R02/R05 — Homologação de Segurança, Casos Sintéticos e Evidências de Aceite | Proposta documental v0.1
 
-> **Situação:** proposta de critérios documentais; decisões **R02-R05-D01 a D10 ABERTAS** para avaliação do responsável.
+> **Situação:** diretrizes **R02-R05-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente preliminares; testes não executados e gates R01-G01 a G11 e CORE/SEG/AUT do CRM abertos.
 > **Data de referência:** 2026-11-06. **Projeto:** Imagine AI Agents.
 > **Precedência:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01, R02/S01–S05 e R02/R01–R04 ratificados como diretrizes **exclusivamente documentais preliminares**.
 > **Bloqueios:** R01-G01 a G11 seguem TODOS ABERTOS, inclusive G07 (laboratório/aceite). CORE/SEG/AUT e demais gates próprios do CRM seguem abertos. Este documento **NÃO** executa testes, não homologa arquitetura, não libera código, APIs, ALLOW, SQL, credenciais, dados reais, despesas, VPS ou deploy.
@@ -169,7 +169,7 @@ Cada falha futura deve apontar: ID do caso, contrato/versão, impacto/risco, evi
 
 Neste documento, **nenhum caso ultrapassou a condição de proposto**.
 
-## 11. Matriz de decisões R02-R05-D01 a D10 — propostas
+## 11. Diretrizes R02-R05-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -184,11 +184,11 @@ Neste documento, **nenhum caso ultrapassou a condição de proposto**.
 | R02-R05-D09 | Risco residual/incidentes | Registrar, corrigir e retestar desvios; não dispensar violações críticas | Aceitar falhas silenciosamente para acelerar o MVP |
 | R02-R05-D10 | Sequência CRM | Homologar primeiro critérios CRM→AIA→CRM e só depois integrar/implantar mediante autorizações separadas | Abrir todos os produtos e executar testes reais imediatamente |
 
-**R02-R05-D01 a D10: ABERTAS**, aguardando decisão **documental preliminar** do responsável. Nada neste texto executa ou autoriza testes, fecha gate, escolhe tecnologia ou permite programação.
+**R02-R05-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** São somente critérios documentais preliminares: não houve teste, evidência observada, homologação técnica, fechamento de gates, escolha de tecnologia nem autorização de programação ou deploy.
 
 ## 12. Pendências e próximos passos
 
-- [ ] R02-R05-D01 a D10 aprovadas ou alteradas documentalmente.
+- [x] R02-R05-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Consolidar matriz de critérios e evidências por gate/produto, sob revisão técnica.
 - [ ] Confirmar os papéis e ACL reais do CRM, critérios de alçada e operações permitidas, sem modificar seus gates.
 - [ ] Detalhar política jurídica/privacidade/terceiros e retenção de evidências por fluxo.
