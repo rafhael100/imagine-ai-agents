@@ -1,6 +1,6 @@
 # AIA-04 — Ferramentas, Integrações e Execução Autorizada | Proposta funcional v0.1
 
-> **Situação:** planejamento documental; AIA04-D01 a D10 ABERTAS para aprovação.  
+> **Situação:** diretrizes AIA04-D01 a D10 APROVADAS FUNCIONALMENTE em 2026-11-06; critérios técnicos e implementação continuam bloqueados.  
 > **Data:** 2026-11-06.  
 > **Escopo:** Imagine AI Agents, serviço compartilhado sem acesso irrestrito a bases ou infraestrutura dos produtos.  
 > **Precedência:** AIA-01 D01–D08, AIA-02 D01–D10 e AIA-03 D01–D10 aprovadas funcionalmente; gates técnicos e implementação continuam bloqueados.
@@ -162,7 +162,7 @@ Isto não é uma API, código executável nem uma definição autorizada de esco
 | AIA-11 | Políticas de retenção, isolamento e auditoria |
 | AIA-12 | APIs/eventos, esquemas, compatibilidade e identidade técnica |
 
-## 12. Decisões AIA04-D01 a D10 — propostas para aprovação
+## 12. Diretrizes AIA04-D01 a D10 — aprovadas funcionalmente
 
 | ID | Tema | Opção A — Recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -177,13 +177,13 @@ Isto não é uma API, código executável nem uma definição autorizada de esco
 | AIA04-D09 | Mudanças | Versionamento, testes contratuais, auditoria, suspensão e rollback | Atualizar ferramenta em produção sem validação |
 | AIA04-D10 | MVP | Ferramentas CRM somente leitura e criação controlada de tarefa no piloto | Todas as integrações simultaneamente |
 
-**AIA04-D01 a D10: ABERTAS — aguardam aprovação funcional do responsável.** Esta proposta não libera stack, endpoints, credenciais, acesso real nem programação.
+**AIA04-D01 a D10: APROVADAS FUNCIONALMENTE em 2026-11-06 pelo responsável.** Esta aprovação não libera stack, endpoints, credenciais, acesso real, programação, integrações ou deploy.
 
 ## 13. Casos de teste documentais e critérios de aceite
 
 Cenários: lead de outra empresa, instância bloqueada por plano, escopo ausente, ferramenta descontinuada, schema inválido, conteúdo malicioso em resposta de ferramenta, duplicidade de evento, timeout após execução real, aprovação expirada, indisponibilidade de API, mudança de versão e consumo de créditos excedido.
 
-- [ ] AIA04-D01 a D10 avaliadas e aprovadas ou corrigidas.
+- [x] AIA04-D01 a D10 aprovadas funcionalmente em 2026-11-06.
 - [ ] Matriz de riscos e alçadas conciliada com AIA-08 e regras de cada produto.
 - [ ] Contratos de entrada/saída e autorização definidos com AIA-12.
 - [ ] Políticas de segredos, autorização, tenants e retenção alinhadas a AIA-11.
