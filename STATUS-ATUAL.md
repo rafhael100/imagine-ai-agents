@@ -1,7 +1,7 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-06  
-**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 seguirá em proposta separada. Implementação permanece bloqueada.  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 será planejado separadamente. Implementação permanece bloqueada.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
@@ -29,6 +29,8 @@
 
 - AIA-06: diretrizes AIA06-D01 a D10 **aprovadas funcionalmente em 2026-11-06**; documento `docs/AIA-06-CONTEXTO-MEMORIA.md`. Sem memória real, código, custos ou integração.
 
+- AIA-07: diretrizes AIA07-D01 a D10 **aprovadas funcionalmente em 2026-11-06**; documento `docs/AIA-07-EXECUCAO-ORQUESTRACAO.md`. Sem programação, execução real ou infraestrutura.
+
 ## Propostas complementares em avaliação
 
 - Serviço compartilhado de agentes, com administração interna central e configuração limitada nos produtos.
@@ -51,7 +53,9 @@
 - [ ] Detalhar aspectos técnicos de AIA-05, retenção, ACL, indexação e homologação de dados.
 - [x] Aprovar funcionalmente AIA06-D01 a D10 (2026-11-06).
 - [ ] Detalhar aspectos técnicos AIA-06, retenção, consentimento/base legal, fluxos de revogação e recuperação.
-- [ ] Revisar AIA-07 — Execução e Orquestração dos Agentes (ainda não aprovado).
+- [x] Aprovar funcionalmente AIA07-D01 a D10 (2026-11-06).
+- [ ] Detalhar critérios técnicos, recuperação, filas, quotas e idempotência de AIA-07.
+- [ ] Revisar AIA-08 — Autonomia, Permissões e Aprovações (ainda não aprovado).
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
 - [ ] Definir provedores, modelos, abstração, contingência e custos.
