@@ -1,6 +1,6 @@
 # AIA-R03/S04 — Modelos, Provedores, Custos, Licenças e Contingência | Proposta documental v0.1
 
-> **Estado:** proposta documental preliminar; **R03-S04-D01 a D10 ABERTAS** para decisão do responsável.  
+> **Estado:** diretrizes **R03-S04-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente preliminares; R01-G01 a G11 e CORE/SEG/AUT do CRM permanecem abertos.  
 > **Referência:** 2026-11-06. **Repositório:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01, AIA-R02/S01–S05, AIA-R02/R01–R06 e AIA-R03/S01–S03 aprovados **somente documentalmente**.  
 > **Gates:** R01-G01 a G11 TODOS ABERTOS, em particular G05 (dados), G06 (consumo/créditos), G07 (laboratório), G09 (licenças), G10 (arquitetura/operação) e G11 (MVP/orçamento). CORE/SEG/AUT e demais gates do CRM também abertos.  
@@ -159,7 +159,7 @@ Leaseweb, VPS Ubuntu/Docker, Cloudflare e outros serviços já cogitados no ecos
 
 Casos são **propostas de teste sintético** para AIA-09 e R02/R05. Não há execução, evidência de sucesso, homologação ou compra.
 
-## 11. Matriz de decisões R03-S04-D01 a D10 — propostas
+## 11. Diretrizes R03-S04-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -174,11 +174,11 @@ Casos são **propostas de teste sintético** para AIA-09 e R02/R05. Não há exe
 | R03-S04-D09 | Orçamento/continuidade | Simular cenários e comparar custo, segurança, qualidade, RTO/RPO e alternativas antes de contratar | Provisionar e gastar sem estimativas/aceite |
 | R03-S04-D10 | Fase | Ratificar somente critérios documentais e avançar R03/S05, deixando gates e implementação bloqueados | Aprovar provedores, compras, credenciais e deploy agora |
 
-**R03-S04-D01 a D10: ABERTAS** para aprovação **documental preliminar** do responsável. A aprovação futura deste recorte não homologará modelo, região, licença, preço, contrato, quota numérica ou infraestrutura.
+**R03-S04-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Ratificação exclusivamente documental preliminar: não homologa modelo, região, licença, preço, contrato, cota numérica, infraestrutura ou fornecedores; não autoriza contas, APIs pagas, programação, SQL, ALLOW, testes funcionais nem deploy.
 
 ## 12. Dependências, lacunas e próximos passos
 
-- [ ] R03-S04-D01 a D10 revisadas/ratificadas ou ajustadas pelo responsável.
+- [x] R03-S04-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Confirmar requisitos de saída/qualidade de resumos e classificação com CRM, sem programar ou alterar gates.
 - [ ] Inventariar alternativas de provedor, modelo, preços efetivos e termos contratuais atuais sob avaliação separada.
 - [ ] Definir categorias de dados, retenção, bases jurídicas, localização, subprocessadores e planos de incidente.
