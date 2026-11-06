@@ -1,7 +1,7 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-06  
-**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 aprovado funcionalmente (D01–D10); AIA-10 em proposta documental v0.1, D01–D10 aguardam aprovação. Implementação permanece bloqueada.  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 aprovado funcionalmente (D01–D10); AIA-10 aprovado funcionalmente (D01–D10); AIA-11 seguirá em proposta independente. Implementação permanece bloqueada.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
@@ -35,7 +35,7 @@
 
 - AIA-09: diretrizes AIA09-D01 a D10 **aprovadas funcionalmente em 2026-11-06**; documento `docs/AIA-09-LABORATORIO-TESTES-AVALIACOES.md`. Sem testes reais, código, contratação ou despesas.
 
-- AIA-10: proposta `docs/AIA-10-MONITORAMENTO-CUSTOS-OBSERVABILIDADE.md` na branch `docs/aia-10-monitoramento-custos-2026-11-06`; D01–D10 abertas, sem coleta de telemetria real, código, despesas ou integração.
+- AIA-10: diretrizes AIA10-D01 a D10 **aprovadas funcionalmente em 2026-11-06**; documento `docs/AIA-10-MONITORAMENTO-CUSTOS-OBSERVABILIDADE.md`. Sem coleta de telemetria real, código, despesas ou integração.
 
 ## Propostas complementares em avaliação
 
@@ -65,7 +65,9 @@
 - [ ] Detalhar aspectos técnicos de AIA-08, matriz de alçadas, eventos de aprovação, autorização e segurança.
 - [x] Aprovar funcionalmente AIA09-D01 a D10 (2026-11-06).
 - [ ] Detalhar critérios técnicos de avaliação, datasets sintéticos, métricas, gates e evidências de AIA-09.
-- [ ] Revisar e decidir AIA10-D01 a D10 — Monitoramento, custos, limites, alertas e incidentes.
+- [x] Aprovar funcionalmente AIA10-D01 a D10 (2026-11-06).
+- [ ] Detalhar AIA-10: eventos, correlação, custos, limites, alertas, privacidade e conciliação.
+- [ ] Revisar AIA-11 — Governança, Segurança e Auditoria (ainda não aprovado).
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
 - [ ] Definir provedores, modelos, abstração, contingência e custos.
