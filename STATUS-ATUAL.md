@@ -1,7 +1,7 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-06  
-**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 aprovado funcionalmente (D01–D10); AIA-10 aprovado funcionalmente (D01–D10); AIA-11 aprovado funcionalmente (D01–D10); AIA-12 aprovado funcionalmente (D01–D10); os doze módulos possuem diretrizes funcionais aprovadas. A revisão transversal AIA-R01 está aprovada documentalmente (R01-D01–D08); os 11 gates técnicos continuam abertos. R02/S01 aprovado documentalmente (D01–D10); R02/S02 aprovado documentalmente (D01–D10); R02/S03 aprovado documentalmente (D01–D10); R02/S04 aprovado documentalmente (D01–D10); R02/S05 aprovado documentalmente (D01–D10); os cinco recortes S01–S05 foram ratificados documentalmente. AIA-R02/R01 aprovado documentalmente (D01–D08); R02/R02 aprovado documentalmente (D01–D10); R02/R03 aprovado documentalmente (D01–D10); R02/R04 aprovado documentalmente (D01–D10); R02/R05 aprovado documentalmente (D01–D10); todos os critérios de testes permanecem não executados. R02/R06 está em proposta documental v0.1, R02-R06-D01 a D08 abertas; R01-G01 a G11 permanecem abertos. Todos R01-G01 a G11 permanecem abertos. Implementação permanece bloqueada.  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 aprovado funcionalmente (D01–D10); AIA-10 aprovado funcionalmente (D01–D10); AIA-11 aprovado funcionalmente (D01–D10); AIA-12 aprovado funcionalmente (D01–D10); os doze módulos possuem diretrizes funcionais aprovadas. A revisão transversal AIA-R01 está aprovada documentalmente (R01-D01–D08); os 11 gates técnicos continuam abertos. R02/S01 aprovado documentalmente (D01–D10); R02/S02 aprovado documentalmente (D01–D10); R02/S03 aprovado documentalmente (D01–D10); R02/S04 aprovado documentalmente (D01–D10); R02/S05 aprovado documentalmente (D01–D10); os cinco recortes S01–S05 foram ratificados documentalmente. AIA-R02/R01 aprovado documentalmente (D01–D08); R02/R02 aprovado documentalmente (D01–D10); R02/R03 aprovado documentalmente (D01–D10); R02/R04 aprovado documentalmente (D01–D10); R02/R05 aprovado documentalmente (D01–D10); todos os critérios de testes permanecem não executados. R02/R06 aprovado documentalmente (D01–D08), concluindo a síntese documental de segurança do R02; o planejamento AIA-R03/S01 será proposto separadamente. Todos R01-G01 a G11 permanecem abertos. Implementação permanece bloqueada.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
@@ -63,7 +63,7 @@
 
 - AIA-R02/R05: diretrizes R02-R05-D01 a D10 **aprovadas documentalmente em 2026-11-06**, documento `docs/AIA-R02-R05-HOMOLOGACAO-SEGURANCA-EVIDENCIAS.md`. Casos sintéticos **não executados**, sem evidência de testes nem homologação de gates. R01-G01 a G11 e CORE/SEG/AUT do CRM preservados; sem código, SQL ou ALLOW.
 
-- AIA-R02/R06: proposta de síntese `docs/AIA-R02-R06-SINTESE-SEGURANCA-MATRIZ-EVIDENCIAS.md` na branch `docs/aia-r02-r06-sintese-evidencias-2026-11-06`; decisões R02-R06-D01 a D08 abertas e matriz de evidências G01–G11 **sem testes executados nem homologação**. CORE/SEG/AUT do CRM preservados, sem SQL, ALLOW, código, credenciais ou deploy.
+- AIA-R02/R06: diretrizes R02-R06-D01 a D08 **aprovadas documentalmente em 2026-11-06**, documento `docs/AIA-R02-R06-SINTESE-SEGURANCA-MATRIZ-EVIDENCIAS.md`. Evidências G01–G11 pendentes, **sem testes executados nem homologação**. CORE/SEG/AUT do CRM preservados, sem SQL, ALLOW, código, credenciais ou deploy.
 
 ## Propostas complementares em avaliação
 
@@ -122,7 +122,9 @@
 - [ ] Detalhar responsáveis por fluxos, bases legais, prazos e evidências materiais para homologação futura; R01-G05 permanece aberto.
 - [x] Aprovar documentalmente R02-R05-D01 a D10 (2026-11-06), **sem executar testes**.
 - [ ] Validar tecnicamente critérios de homologação, responsáveis e evidências antes de qualquer execução autorizada; R01-G07 continua aberto.
-- [ ] Revisar R02-R06-D01 a D08 — síntese documental de segurança e evidências dos 11 gates (ainda não aprovado; testes não executados).
+- [x] Aprovar documentalmente R02-R06-D01 a D08 (2026-11-06), sem homologar gates nem executar testes.
+- [ ] Reunir evidências futuras para R01-G01 a G11 individualmente, sob autorização explícita e com responsáveis.
+- [ ] Revisar AIA-R03/S01 — Topologia, Fronteiras de Serviços e Ambientes (ainda não aprovado; somente arquitetura documental).
 - [ ] Manter R01-G01 a G11 abertos e sujeitos à homologação específica.
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
