@@ -1,14 +1,14 @@
 # STATUS-ATUAL — Imagine AI Agents
 
-**Data de referência:** 2026-11-05  
-**Fase:** fundação documental inicial; AIA-01 em proposta para revisão em branch separada (sem implementação).  
+**Data de referência:** 2026-11-06  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 será planejado em branch independente.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
 
 - Repositório privado criado e acesso administrativo/escrita verificado.
 - Documentação inicial publicada; nenhuma implementação autorizada.
-- Proposta AIA-01 v0.1 escrita em `docs/AIA-01-CATALOGO-AGENTES.md` na branch `docs/aia-01-catalogo-2026-11-05`, com D01–D08 abertas e aguardando aprovação.
+- AIA-01: diretrizes AIA01-D01 a D08 **aprovadas funcionalmente em 2026-11-06**; especificação em `docs/AIA-01-CATALOGO-AGENTES.md`. A implantação segue bloqueada.
 - Nenhum deploy ou provisionamento de infraestrutura executado por este projeto.
 - Nenhuma alteração autorizada nos repositórios CRM, Portal, Performance AI ou Universidade.
 
@@ -19,7 +19,7 @@
 - Serviços, dados e autenticações de produtos devem permanecer segregados; integração por contratos e APIs.
 - Decisões pendentes em outros projetos não são consideradas automaticamente aprovadas aqui.
 
-## Propostas para avaliação
+## Propostas complementares em avaliação
 
 - Serviço compartilhado de agentes, com administração interna central e configuração limitada nos produtos.
 - Catálogo de agentes, modelos, ferramentas, políticas, conhecimentos, memórias, execuções, testes e custos.
@@ -29,7 +29,9 @@
 ## Gates abertos
 
 - [x] Criar e confirmar repositório privado no GitHub.
-- [ ] Revisar AIA-01 v0.1, decidir D01–D08 e autorizar (ou não) merge documental.
+- [x] Aprovar funcionalmente AIA01-D01 a D08 (2026-11-06).
+- [ ] Definir/validar os critérios técnicos detalhados de AIA-01 e integrações antes da implementação.
+- [ ] Revisar e aprovar AIA-02 (instruções, personalidade e regras dos agentes).
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
 - [ ] Definir provedores, modelos, abstração, contingência e custos.
