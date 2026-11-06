@@ -1,6 +1,6 @@
 # AIA-R03/S01 — Topologia, Fronteiras de Serviços e Ambientes | Proposta documental v0.1
 
-> **Situação:** proposta de arquitetura documental; decisões **R03-S01-D01 a D10 ABERTAS** para avaliação do responsável.  
+> **Situação:** diretrizes **R03-S01-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente como orientação preliminar; R01-G01 a G11 e CORE/SEG/AUT do CRM permanecem abertos.  
 > **Referência:** 2026-11-06. **Repositório:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-12 com diretrizes funcionais aprovadas; AIA-R01 e AIA-R02/S01–S05 e R02/R01–R06 aprovados **somente documentalmente**.  
 > **Gates:** todos os **R01-G01 a G11 ABERTOS**, especialmente G01/G02/G05/G08/G09/G10/G11; CORE/SEG/AUT e demais gates próprios do CRM abertos.  
@@ -161,7 +161,7 @@ Os cenários são requisitos de avaliação, **não** testes executados. Não de
 | G10 arquitetura/operação | Topologia física, segurança, custo e contingência ainda pendentes | ABERTO |
 | G11 MVP/orçamento | Recorte piloto e aprovação futura por etapa | ABERTO |
 
-## 11. Matriz R03-S01-D01 a D10 — propostas para decisão
+## 11. Diretrizes R03-S01-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -176,7 +176,7 @@ Os cenários são requisitos de avaliação, **não** testes executados. Não de
 | R03-S01-D09 | Continuidade/observabilidade | Planejar degradação por produto, monitoramento mínimo, backups, incidentes e custos antes da seleção técnica | Compartilhar falhas e dados sem limites |
 | R03-S01-D10 | Próximos detalhamentos | Prosseguir em R03/S02–S05 documentalmente, manter todos os gates e implantação bloqueados | Autorizar código e deploy por aprovação deste recorte |
 
-**R03-S01-D01 a D10: ABERTAS** para aprovação **documental preliminar** do responsável. Não há escolha de stack, fornecedor, região, protocolo, contrato, data de implantação ou orçamento. Esta proposta não fecha R01-G01 a G11 nem CORE/SEG/AUT do CRM.
+**R03-S01-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Ratificação **exclusivamente documental preliminar**: não define stack, fornecedor, região, protocolo, contrato, data de implantação ou orçamento, não fecha R01-G01 a G11 nem CORE/SEG/AUT do CRM, e não autoriza código, compras, testes funcionais, credenciais, VPS, Cloudflare, n8n ou deploy.
 
 ## 12. Próximos recortes propostos
 
@@ -190,7 +190,7 @@ Os nomes e etapas acima são **propostas**, não autorizações. A conclusão fu
 
 ## 13. Restrições e checklist
 
-- [ ] Avaliar R03-S01-D01 a D10 e corrigir alternativas.
+- [x] R03-S01-D01 a D10 aprovadas documentalmente pelo responsável em 2026-11-06.
 - [ ] Validar limites de responsabilidade e permissão com a documentação oficial dos produtos.
 - [ ] Estabelecer critérios de comparação entre topologias, custo, risco, escalabilidade e isolamento sem escolher fornecedor.
 - [ ] Preparar mapa de dados, identidade, segredos, filas, backups e custos, com responsáveis e evidências.
@@ -199,4 +199,4 @@ Os nomes e etapas acima são **propostas**, não autorizações. A conclusão fu
 - [ ] Preservar `main`/PRs de CRM, Portal, Performance AI e Universidade; infraestrutura e contratos não autorizados.
 - [ ] Não criar código, testes reais, ALLOW, SQL, credenciais, contas, VPS/Cloudflare/n8n, contratos pagos ou deploy.
 
-**Próximo passo recomendado:** aprovação documental preliminar do R03/S01 e, se ratificada, abertura separada do detalhamento R03/S02. 
+**Próximo passo recomendado:** com R03/S01 ratificado documentalmente, abrir em branch separada o detalhamento R03/S02, preservando todos os gates e bloqueios. 
