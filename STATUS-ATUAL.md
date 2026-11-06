@@ -1,7 +1,7 @@
 # STATUS-ATUAL — Imagine AI Agents
 
 **Data de referência:** 2026-11-06  
-**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 em proposta documental v0.1, com D01–D10 pendentes de avaliação. Implementação permanece bloqueada.  
+**Fase:** AIA-01 aprovado funcionalmente (D01–D08); detalhamento técnico e implementação ainda bloqueados. AIA-02 aprovado funcionalmente (D01–D10); AIA-03 aprovado funcionalmente (D01–D10); AIA-04 aprovado funcionalmente (D01–D10); AIA-05 aprovado funcionalmente (D01–D10); AIA-06 aprovado funcionalmente (D01–D10). AIA-07 aprovado funcionalmente (D01–D10); AIA-08 aprovado funcionalmente (D01–D10); AIA-09 seguirá em proposta independente. Implementação permanece bloqueada.  
 **GitHub:** `rafhael100/imagine-ai-agents`, branch padrão `main`.
 
 ## Estado confirmado
@@ -31,7 +31,7 @@
 
 - AIA-07: diretrizes AIA07-D01 a D10 **aprovadas funcionalmente em 2026-11-06**; documento `docs/AIA-07-EXECUCAO-ORQUESTRACAO.md`. Sem programação, execução real ou infraestrutura.
 
-- AIA-08: proposta `docs/AIA-08-AUTONOMIA-PERMISSOES-APROVACOES.md` na branch `docs/aia-08-autonomia-aprovacoes-2026-11-06`; decisões D01–D10 abertas, sem concessão real de permissões, programação, custos ou execução.
+- AIA-08: diretrizes AIA08-D01 a D10 **aprovadas funcionalmente em 2026-11-06**; documento `docs/AIA-08-AUTONOMIA-PERMISSOES-APROVACOES.md`. Sem concessão real de privilégios, código, custos ou execução.
 
 ## Propostas complementares em avaliação
 
@@ -57,7 +57,9 @@
 - [ ] Detalhar aspectos técnicos AIA-06, retenção, consentimento/base legal, fluxos de revogação e recuperação.
 - [x] Aprovar funcionalmente AIA07-D01 a D10 (2026-11-06).
 - [ ] Detalhar critérios técnicos, recuperação, filas, quotas e idempotência de AIA-07.
-- [ ] Revisar AIA08-D01 a D10 — Autonomia, permissões, alçadas, execução aprovada e segurança.
+- [x] Aprovar funcionalmente AIA08-D01 a D10 (2026-11-06).
+- [ ] Detalhar aspectos técnicos de AIA-08, matriz de alçadas, eventos de aprovação, autorização e segurança.
+- [ ] Revisar AIA-09 — Laboratório e Avaliação dos Agentes (ainda não aprovado).
 - [ ] Aprovar escopo e fronteiras de responsabilidade entre produtos.
 - [ ] Aprovar contratos de autenticação, autorização e isolamento.
 - [ ] Definir provedores, modelos, abstração, contingência e custos.
