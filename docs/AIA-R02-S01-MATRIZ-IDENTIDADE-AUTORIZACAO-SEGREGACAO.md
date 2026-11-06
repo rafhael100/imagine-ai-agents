@@ -1,6 +1,6 @@
 # AIA-R02/S01 — Matriz de Identidade, Autorização, Segregação e Fluxos entre Produtos | Proposta v0.1
 
-> **Situação:** proposta de detalhamento documental; decisões **R02-S01-D01 a D10 ABERTAS** para avaliação do responsável.
+> **Situação:** diretrizes **R02-S01-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável. Este recorte permanece preliminar e todos os gates R01-G01 a G11 seguem abertos.
 > **Data de referência:** 2026-11-06.
 > **Precedência:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01-D01 a D08 aprovadas **somente documentalmente**. Gates **R01-G01 a G11 permanecem abertos**, inclusive G01/G02 abordados nesta proposta.
 > **Escopo:** definir contratos e critérios, não configurar serviços, implementar API, autenticação, credencial, código ou testes reais.
@@ -153,7 +153,7 @@ Estes são **critérios documentais**, não testes executados. Os resultados rea
 
 **Nenhum desses gates pode ser considerado fechado com a simples aprovação de R02/S01**. O fechamento depende de contratos técnicos completos, critérios de homologação e decisão separada; testes reais exigirão autorização adicional.
 
-## 11. Matriz de decisões R02-S01-D01 a D10 — propostas
+## 11. Diretrizes documentais R02-S01-D01 a D10 — aprovadas
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -168,11 +168,11 @@ Estes são **critérios documentais**, não testes executados. Os resultados rea
 | R02-S01-D09 | Integração entre produtos | Integração explícita e contratual por produto; não presumir SSO nem compartilhamento | Compartilhar identidades e dados automaticamente |
 | R02-S01-D10 | Primeiro recorte | Matriz e contratos CRM→AIA→CRM com leitura e tarefa controlada, sem acesso a dados reais neste estágio | Liberar simultaneamente todos os produtos |
 
-**R02-S01-D01 a D10 ABERTAS para decisão do responsável.** Aprovação desta matriz será exclusivamente **documental preliminar**; sem escolha de protocolos, emissão de chaves, testes de autenticação, programação ou fechamento de gates.
+**R02-S01-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Aprovação exclusivamente **documental preliminar**; não implica escolha de protocolos, emissão de chaves, testes de autenticação, programação ou fechamento de gates.
 
 ## 12. Próximos detalhamentos documentais sugeridos
 
-Após ratificação de R02/S01:
+Após ratificação documental de R02/S01 (concluída):
 - **R02/S02 — Contratos de Autenticação e Claims:** esquema lógico de identidade de produto/serviço/usuário, audience, issuer, expiração, revogação e mapeamento.
 - **R02/S03 — Matriz de Permissões e Escopos CRM:** leads, resumo, classificação, tarefas e eventos, com cenários de autorização.
 - **R02/S04 — Contratos de Segregação, Retenção e Conformidade:** políticas de dados/derivados, privacidade, minimização, incidentes e fluxos cross-product.
