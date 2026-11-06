@@ -1,6 +1,6 @@
 # AIA-R02/S02 — Contratos de Autenticação, Claims, Validade e Revogação | Proposta documental v0.1
 
-> **Estado:** diretrizes **R02-S02-D01 a D10 ABERTAS** para avaliação do responsável.  
+> **Estado:** diretrizes **R02-S02-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06** pelo responsável, exclusivamente como orientações preliminares. Todos os gates R01-G01 a G11 permanecem abertos.  
 > **Data:** 2026-11-06. **Projeto:** Imagine AI Agents.  
 > **Precedência:** AIA-01 a AIA-12 aprovados funcionalmente; AIA-R01-D01 a D08 e R02-S01-D01 a D10 ratificados somente documentalmente.  
 > **Gates:** R01-G01 a G11 permanecem **TODOS ABERTOS**, inclusive G01/G02. Não programar, emitir credenciais, executar testes reais nem implantar.
@@ -149,7 +149,7 @@ Logs mínimos: produto emissor, ambiente, identidade técnica pseudonimizada/ref
 9. Alinhar R02/S03 (escopos CRM), R02/S04 (dados) e R02/S05 (execução/idempotência).
 10. Somente depois: gate de arquitetura/tecnologia, orçamento e autorização explícita para implementação isolada.
 
-## 11. Matriz R02-S02-D01 a D10 — propostas para decisão
+## 11. Diretrizes R02-S02-D01 a D10 — aprovadas documentalmente
 
 | ID | Tema | Alternativa A — recomendada | Alternativa B |
 | --- | --- | --- | --- |
@@ -164,7 +164,7 @@ Logs mínimos: produto emissor, ambiente, identidade técnica pseudonimizada/ref
 | R02-S02-D09 | Erros e auditoria | Negação por padrão, códigos seguros, trilha mínima e resposta conservadora | Fallback permissivo e exposição de informação interna |
 | R02-S02-D10 | Primeiro contrato | Detalhar CRM→AIA→CRM, sem escolher protocolo nem criar credenciais agora | Implantar SSO/integração de todos os produtos simultaneamente |
 
-**R02-S02-D01 a D10 ABERTAS** — aguardam aprovação **documental preliminar** do responsável. Nenhum protocolo, algoritmo, ferramenta de identidade, chave, versão técnica ou arquitetura foram escolhidos.
+**R02-S02-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-06 pelo responsável.** Aprovação **preliminar**, sem fechar os gates. Nenhum protocolo, algoritmo, ferramenta de identidade, chave, versão técnica ou arquitetura foram escolhidos; não há autorização de programação, testes reais, integração, custos ou deploy.
 
 ## 12. Requisitos para eventual fechamento de R01-G01/G02
 
