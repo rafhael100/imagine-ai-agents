@@ -239,3 +239,31 @@ Autorização expressa do responsável nesta conversa e ordem F1-01 ratificada.
   acesso CRM/VPS/Cloudflare/n8n/APIs reais de produto. GitHub restrito ao
   versionamento e registro no PR autorizado.
 - R01-G01 a G11 TODOS ABERTOS; CORE/SEG/AUT CRM permanecem abertos.
+
+## Validação independente dos mocks PHP — 2026-11-07
+
+Esta atualização **prevalece sobre o impedimento histórico de PHP no Codex**:
+o runtime segue ausente no ambiente Codex, mas a validação foi executada
+independentemente em ambiente isolado de análise, sem GitHub Actions.
+
+- Executor da validação: ChatGPT, **PHP CLI 8.4.24**, em ambiente isolado local,
+  sem acesso autenticado à conta GitHub e sem instalação de dependências.
+- Integridade: os 16 arquivos PHP (`src/` e `tests/Unit/run.php`) foram
+  reproduzidos a partir do conteúdo autenticado do GitHub e **cada arquivo
+  teve SHA-1 Git blob idêntico ao informado pelo conector**. Portanto a
+  validação corresponde aos bytes existentes no PR #71 no momento da leitura.
+- Lint: `find src tests/Unit -type f -name '*.php' -print0 | xargs -0 -n1 php -l`
+  → **16/16 sem erros de sintaxe**, código de saída 0.
+- Testes: `php tests/Unit/run.php` → **10 PASS, 0 FAIL**,
+  saída `10 cases, 0 failures`, código de saída 0.
+- Limitações: apenas testes locais sintéticos sobre os mocks. Não comprovam
+  autenticação/ACL real, segurança de produção, concorrência, durabilidade
+  transacional, CRM real, LGPD em produção ou desempenho.
+- Custo: **zero execuções de GitHub Actions para esta validação**.
+  O workflow proposto inicialmente foi removido da branch filha sem execução,
+  evitando introduzir gatilho de consumo de minutos. Nenhuma configuração
+  de cobrança da conta foi alterada.
+- Preservação: `main`, branch base e repositórios de outros produtos
+  inalterados; PR #71 permanece **DRAFT/SEM MERGE** até decisão específica.
+  R01-G01 a G11 e CORE/SEG/AUT CRM continuam **ABERTOS**;
+  F1-02, integrações, infraestrutura e deploy não autorizados.
