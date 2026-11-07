@@ -267,3 +267,13 @@ independentemente em ambiente isolado de análise, sem GitHub Actions.
   inalterados; PR #71 permanece **DRAFT/SEM MERGE** até decisão específica.
   R01-G01 a G11 e CORE/SEG/AUT CRM continuam **ABERTOS**;
   F1-02, integrações, infraestrutura e deploy não autorizados.
+
+## Encerramento controlado FT01-F1-01 — 2026-11-07
+
+- Aprovação expressa do responsável para merge **somente no ramo de desenvolvimento** registrada nesta conversa.
+- PR [#71](https://github.com/rafhael100/imagine-ai-agents/pull/71) **MERGED**, método squash, commit `d419d481af9fbaea0e1baa60094ddcc799fb72b4`, destino `dev/ft01-aia-core-mocks-2026-11-06`.
+- Código aceito **somente como primeiro lote mockado**, não como produto homologado: 16 arquivos PHP validados em ambiente local isolado com PHP 8.4.24, lint 16/16, 10 testes unitários sintéticos PASS e zero falhas, conforme registro e comentário do PR. Não representa autenticação, integração CRM nem segurança de produção.
+- Nenhuma execução GitHub Actions; workflow temporário removido antes do merge.
+- `main` preservada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`. Não há merge para `main`, deploy, código F1-02, SQL, ALLOW, integração real, dados pessoais, credenciais, n8n, Cloudflare ou VPS.
+- **Próxima etapa: somente proposta e análise documental de FT01-F1-02**. Desenvolvimento F1-02 requer nova autorização expressa, branch filha exclusiva e review separado.
+- Gates R01-G01 a G11 **TODOS ABERTOS**; CORE/SEG/AUT CRM e demais bloqueios técnicos **ABERTOS**.
