@@ -174,3 +174,96 @@
 - [ ] Autorizar implementação em branch separada.
 
 **Bloqueio:** sem programação, deploy, migração, mudanças em outros repositórios ou consumo pago de APIs sem autorização.
+
+## Execução restrita FT01-F1-01 — 2026-11-06
+
+Registro atual deste lote prevalece sobre descrições históricas de ausência de
+código/testes autorizados acima. Executor: Codex, ambiente gerenciado `/workspace`.
+Autorização expressa do responsável nesta conversa e ordem F1-01 ratificada.
+
+- Repositório: `rafhael100/imagine-ai-agents`.
+- Base existente: `dev/ft01-aia-core-mocks-2026-11-06`.
+- Filha existente: `dev/ft01-f1-01-domain-mocks-2026-11-06`.
+- SHA inicial comum de main/base/filha: `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`.
+- Preflight: `gh auth status` autenticado como `rafhael100`, permissão ADMIN,
+  `git ls-remote` confirmou as três refs; `git push --dry-run` retornou
+  `Everything up-to-date`. Checkout local rastreia a filha existente; nenhuma
+  branch remota foi recriada, sobrescrita ou forçada.
+- Leitura: AGENTS, README, STATUS, PR #70, AIA-FT01 (proposta e ordem),
+  R03/R02, R04/S01–S02 e R02/R03. Árvore inicialmente limpa, apenas documental.
+- Entrega: oito modelos puros e erro local em `src/Domain`; três interfaces em
+  `src/Contracts`; três mocks em `src/Mocks`; runner com dez casos em
+  `tests/Unit/run.php`; README e este registro. AGENTS e demais documentos intactos.
+- PHP: `php -v` retornou `php: command not found` (127). **Zero testes unitários
+  executados e zero lint PHP executado.** Dez casos escritos, todos não executados.
+  Nenhuma versão de runtime verificada e nenhuma instalação realizada, conforme
+  seção 1 da ordem executiva. Compatibilidade sintática/alvo PHP 8.1+ pendente.
+- Verificação disponível: revisão estática do diff e `git diff --check`;
+  não equivale a validação de execução PHP ou segurança do produto.
+- Limites: fixtures fixas, igualdade material por bytes, relógio explícito,
+  idempotência volátil sem concorrência, prova de efeito somente sintética;
+  contexto não autenticado e políticas locais não substituem ACL CRM.
+- Pendências: revisão do draft filha → base e execução futura de lint/testes
+  em PHP previamente disponível e autorizado. Commits e URL do draft serão
+  informados no relatório final/GitHub, sem merge.
+- R01-G01 a G11 TODOS ABERTOS; CORE/SEG/AUT CRM preservados. Sem APIs reais,
+  dados pessoais, credenciais de serviços de produto, Composer, SQL, ALLOW,
+  instalação, serviços pagos, VPS/Cloudflare/n8n, deploy ou início F1-02.
+  GitHub usado exclusivamente no versionamento autorizado. Main, base e demais
+  repositórios não recebem alterações deste lote.
+
+## Revalidação solicitada do PR #71 — 2026-11-06
+
+- Executor: Codex, ambiente gerenciado `/workspace`; exclusivamente na filha
+  `dev/ft01-f1-01-domain-mocks-2026-11-06`, árvore inicialmente limpa.
+- Código sob validação: `b55a42b612ad4937e496327401502a2ae3011ac9`.
+  PR #71 confirmado OPEN/DRAFT, filha e base corretas.
+- `command -v php php8.1 php8.2 php8.3 php8.4 php8.5`: nenhum executável
+  encontrado (saída vazia).
+- Verificação dos padrões `/usr/bin/php*`, `/usr/local/bin/php*`,
+  `/opt/php*/bin/php`, `/opt/php/*/bin/php`: nenhum runtime encontrado.
+- Busca adicional por arquivos `php` ou `php8.[1-9]` em `/usr/bin`,
+  `/usr/local/bin`, `/opt` e `/workspace`: nenhum resultado.
+- `php -v`: **FAIL na disponibilidade do runtime**, código de saída **127**,
+  `/bin/bash: line 1: php: command not found`. Versão PHP não verificável.
+- Lint PHP: **NÃO EXECUTADO**; dez casos de `tests/Unit/run.php`:
+  **TODOS NÃO EXECUTADOS**. Nenhum resultado PASS/FAIL de código é atribuído.
+  Não foi possível determinar necessidade de correções pela execução.
+- Nenhuma instalação, dependência, container ou ambiente alternativo utilizado.
+  Nenhuma alteração de código. Apenas este registro documental na filha.
+- `git diff --check`: PASS para a atualização documental.
+- Pendência: executar sintaxe de todos os arquivos PHP em `src/` e `tests/`
+  e `php tests/Unit/run.php` quando houver PHP 8.1+ previamente instalado
+  no ambiente autorizado. PR permanece rascunho, validação de runtime bloqueada.
+- Sem merge, F1-02, deploy, alteração de main/base ou outros repositórios,
+  acesso CRM/VPS/Cloudflare/n8n/APIs reais de produto. GitHub restrito ao
+  versionamento e registro no PR autorizado.
+- R01-G01 a G11 TODOS ABERTOS; CORE/SEG/AUT CRM permanecem abertos.
+
+## Validação independente dos mocks PHP — 2026-11-07
+
+Esta atualização **prevalece sobre o impedimento histórico de PHP no Codex**:
+o runtime segue ausente no ambiente Codex, mas a validação foi executada
+independentemente em ambiente isolado de análise, sem GitHub Actions.
+
+- Executor da validação: ChatGPT, **PHP CLI 8.4.24**, em ambiente isolado local,
+  sem acesso autenticado à conta GitHub e sem instalação de dependências.
+- Integridade: os 16 arquivos PHP (`src/` e `tests/Unit/run.php`) foram
+  reproduzidos a partir do conteúdo autenticado do GitHub e **cada arquivo
+  teve SHA-1 Git blob idêntico ao informado pelo conector**. Portanto a
+  validação corresponde aos bytes existentes no PR #71 no momento da leitura.
+- Lint: `find src tests/Unit -type f -name '*.php' -print0 | xargs -0 -n1 php -l`
+  → **16/16 sem erros de sintaxe**, código de saída 0.
+- Testes: `php tests/Unit/run.php` → **10 PASS, 0 FAIL**,
+  saída `10 cases, 0 failures`, código de saída 0.
+- Limitações: apenas testes locais sintéticos sobre os mocks. Não comprovam
+  autenticação/ACL real, segurança de produção, concorrência, durabilidade
+  transacional, CRM real, LGPD em produção ou desempenho.
+- Custo: **zero execuções de GitHub Actions para esta validação**.
+  O workflow proposto inicialmente foi removido da branch filha sem execução,
+  evitando introduzir gatilho de consumo de minutos. Nenhuma configuração
+  de cobrança da conta foi alterada.
+- Preservação: `main`, branch base e repositórios de outros produtos
+  inalterados; PR #71 permanece **DRAFT/SEM MERGE** até decisão específica.
+  R01-G01 a G11 e CORE/SEG/AUT CRM continuam **ABERTOS**;
+  F1-02, integrações, infraestrutura e deploy não autorizados.
