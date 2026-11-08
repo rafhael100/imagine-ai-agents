@@ -49,6 +49,7 @@ final class ReadOnlyTraceReview
         $effectStates = [];
         $terminal = null;
         $seenSubmit = false;
+        $lastEffect = null;
         foreach ($events as $index => $event) {
             if (!is_array($event)) return self::unknown('TRACE_INVALID');
             $keys = array_keys($event);
@@ -67,12 +68,12 @@ final class ReadOnlyTraceReview
             if ($intentRef !== null && $event['intent'] !== null && ($event['intent'] !== $intentRef || $event['step'] !== $stepRef)) {
                 return self::unknown('INTENT_CONFLICT');
             }
-            if (isset($event['clock'])) {
+            if (array_key_exists('clock', $event)) {
                 if (!is_int($event['clock']) || $event['clock'] < 0
                     || ($previousClock !== null && $event['clock'] < $previousClock)) return self::unknown('CLOCK_CONFLICT');
                 $previousClock = $event['clock'];
             }
-            if (isset($event['intent_signature'])) {
+            if (array_key_exists('intent_signature', $event)) {
                 if (!is_string($event['intent_signature']) || $signatureRef === null
                     || $event['intent_signature'] !== $signatureRef || $event['intent'] !== $intentRef) {
                     return self::unknown('INTENT_CONFLICT');
@@ -86,10 +87,17 @@ final class ReadOnlyTraceReview
             if ($terminal !== null && $runState !== $terminal) return self::unknown('STATE_CONFLICT');
             if (in_array($runState, ['CONCLUIDA', 'FALHOU', 'CANCELADA'], true)) $terminal = $runState;
             $code = substr($event['code'], 10);
-            if ($terminal !== null && $code === 'SUBMITTED' && $index > 0) return self::unknown('STATE_CONFLICT');
-            if ($code === 'SUBMITTED') $seenSubmit = true;
+            if ($index === 0 && ($code !== 'STARTED' || $runState !== 'EXECUTANDO')) return self::unknown('TRACE_INVALID');
+            if ($index > 0 && $code === 'STARTED') return self::unknown('TRACE_INVALID');
+            if ($code === 'SUBMITTED') {
+                if ($terminal !== null || $runState !== 'EXECUTANDO' || $seenSubmit) return self::unknown('STATE_CONFLICT');
+                $seenSubmit = true;
+            }
             if (in_array($code, ['CONFIRMADO', 'NEGADO', 'PENDENTE', 'INDETERMINADO'], true)) {
                 if (!$seenSubmit || $event['intent'] === null) return self::unknown('TRACE_INVALID');
+                if ($lastEffect !== null && in_array($lastEffect, ['CONFIRMADO', 'NEGADO'], true)
+                    && $code !== $lastEffect) return self::unknown('EFFECT_CONFLICT');
+                $lastEffect = $code;
                 $sawEffect = true;
                 $effectStates[$code] = true;
             }
@@ -97,7 +105,7 @@ final class ReadOnlyTraceReview
         if (isset($effectStates['CONFIRMADO'], $effectStates['NEGADO'])) return self::unknown('EFFECT_CONFLICT');
         if (!$sawEffect || $proof === null) return self::unknown('PROOF_UNAVAILABLE');
         // Confirmations/denials are never derived from a log, only from compatible fake evidence.
-        if (!isset($effectStates[$proof->state])) return self::unknown('PROOF_CONFLICT');
+        if ($lastEffect !== $proof->state) return self::unknown('PROOF_CONFLICT');
         if ($proof->state === 'CONFIRMADO' && (!$proof->isConfirmed() || $proof->source !== 'SYNTHETIC_MOCK_CRM')) {
             return self::unknown('PROOF_UNAVAILABLE');
         }

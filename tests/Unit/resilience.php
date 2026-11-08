@@ -48,6 +48,20 @@ return [
         $events = $c->events();
         array_splice($events, 2, 0, [$events[1]]);
         check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['state'] === 'INDETERMINADO');
+        // Same sequence, conflicting content must also fail without replacing the original.
+        $events = $c->events();
+        $conflict = $events[count($events) - 1];
+        $conflict['code'] = 'SYNTHETIC_NEGADO';
+        $events[] = $conflict;
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['state'] === 'INDETERMINADO');
+        // Even renumbered later uncertainty cannot inherit an earlier confirmation.
+        $events = $c->events();
+        $later = $events[count($events) - 1];
+        $later['sequence'] = count($events) + 1;
+        $later['code'] = 'SYNTHETIC_INDETERMINADO';
+        $events[] = $later;
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'EFFECT_CONFLICT');
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $effect)['state'] === 'CONFIRMADO');
     },
     'U03-05 out-of-order and regressive injected clocks fail closed' => function (): void {
         [$ctx, , $c, , $intent, $approval] = resilienceFixture();
@@ -56,6 +70,9 @@ return [
         foreach ($events as $i => &$event) $event['clock'] = $i === count($events)-1 ? 0 : $i + 1;
         unset($event);
         check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'CLOCK_CONFLICT');
+        $nullClock = $c->events();
+        $nullClock[0]['clock'] = null;
+        check(ReadOnlyTraceReview::inspect($nullClock, $ctx, $intent, $effect)['reason'] === 'CLOCK_CONFLICT');
         $outOfOrder = $c->events();
         [$outOfOrder[0], $outOfOrder[1]] = [$outOfOrder[1], $outOfOrder[0]];
         check(ReadOnlyTraceReview::inspect($outOfOrder, $ctx, $intent, $effect)['state'] === 'INDETERMINADO');
@@ -119,6 +136,9 @@ return [
         check(!str_contains(json_encode($events, JSON_THROW_ON_ERROR), 'payload_marker'));
         $review = ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect);
         check($review['state'] === 'CONFIRMADO');
+        $nullSignature = $events;
+        $nullSignature[count($nullSignature) - 1]['intent_signature'] = null;
+        check(ReadOnlyTraceReview::inspect($nullSignature, $ctx, $intent, $effect)['reason'] === 'INTENT_CONFLICT');
         $events[0]['prompt'] = 'SYNTHETIC_prompt_payload_marker';
         $invalid = ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect);
         check($invalid['state'] === 'INDETERMINADO'

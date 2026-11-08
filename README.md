@@ -133,3 +133,13 @@ Escopo executado com autorização específica do responsável **somente** na br
 - Em ambiente autorizado que tenha PHP 8.1+ **já disponível**, executar `find src tests/Unit -type f -name '*.php' -print0 | xargs -0 -n1 php -l` e `php tests/Unit/run.php`, registrar os códigos de saída, versão e os 34 resultados efetivos. Não instalar PHP/Composer por iniciativa própria nem habilitar GitHub Actions.
 
 **Limitações:** estado e provas apenas fictícios e voláteis; nenhum journal durável, autenticação/ACL real, integração CRM/IA, garantias de concorrência, idempotência entre processos, conformidade operacional ou recuperação após queda de produção. Não armazenar dados pessoais nesses testes. Os gates R01-G01–G11 e CORE/SEG/AUT CRM permanecem abertos.
+
+Revisão Codex F1-03 em 2026-11-08: o trabalho já existente na filha e no PR #80
+foi preservado. A leitura do trace agora exige início explícito, rejeita nova
+submissão na mesma sequência e regressão de efeito terminal, compara a prova
+com o último efeito observado e rejeita relógio/assinatura opcionais nulos.
+Os casos U03-04/U03-05/U03-12 incluem essas entradas adversariais, mantendo os 12
+casos F1-03 e as 22 regressões anteriores. Neste ambiente, `php -v` retorna 127
+(`php: command not found`): lint e os **34 casos NÃO EXECUTADOS pelo Codex**.
+A evidência auxiliar histórica acima não valida estas correções nem a suíte
+completa no SHA atual. Aceite permanece pendente de execução posterior.

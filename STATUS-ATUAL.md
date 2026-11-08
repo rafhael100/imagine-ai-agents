@@ -412,3 +412,37 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - `src/Contracts/`, `src/Domain/`, `src/MockOrchestration/`, `AGENTS.md`, CRM, Portal e infraestrutura não alterados neste lote; não existe persistência, fila, CRM real, IA real, ACL real ou recuperação durável.
 - **PR de código obrigatório em DRAFT, sem merge; F1-04 não autorizado.** R01-G01–G11 e CORE/SEG/AUT CRM permanecem ABERTOS. Nenhum deploy, gasto ou CI.
 - Próximo ato: executar `php -l` em todos os arquivos e `php tests/Unit/run.php` no checkout completo em ambiente já equipado com PHP 8.1+, documentar resultados e submeter para revisão humana antes de qualquer solicitação de merge.
+
+## Revisão/continuação Codex F1-03 — 2026-11-08
+
+- Executor: Codex, ambiente gerenciado `/workspace`; autorização explícita do
+  responsável nesta conversa. GitHub autenticado como rafhael100, árvore limpa.
+- Main observada: `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`;
+  base: `61bcb9e665b5b6a0a88dabc9299b2083d0342458`;
+  filha existente: `a9a1d0d88e170bddc36072caec506575020dea7e`.
+- A filha já continha sete commits F1-03 e o PR #80 OPEN/DRAFT, com base correta.
+  Foi vinculada ao checkout sem recriar ou sobrescrever a ref remota. Não foi
+  duplicado o PR nem descartada a implementação existente.
+- Lidos AGENTS, README, STATUS, contratos anteriores e ordens/proposta F1-03.
+  As alterações documentais prévias em `docs/` foram preservadas e não são
+  alterações realizadas pelo Codex nesta continuação.
+- Revisão estática encontrou aceitação de prova antiga apesar de regressão
+  posterior do efeito. Corrigido `ReadOnlyTraceReview`: exige STARTED inicial,
+  rejeita novo submit e regressão de terminal, compara último efeito com a prova,
+  verifica campos opcionais presentes mesmo quando nulos. Ampliados cenários
+  dentro de U03-04/U03-05/U03-12, sem novos IDs além dos 12 autorizados.
+- `command -v php php8.1 php8.2 php8.3 php8.4 php8.5`: nenhum executável;
+  `php -v`: saída **127**, `php: command not found`. Sem versão verificável.
+- **Lint e os 34 testes NÃO EXECUTADOS neste ambiente**. Evidência auxiliar
+  histórica de PHP 8.4.24 não comprova o SHA corrigido ou a suíte integral.
+  Nenhuma instalação, dependência, Actions, container ou serviço pago utilizado.
+- Verificação estática: `git diff --check`, inventário de 12 novos casos e
+  comparação das 22 regressões com a base; sem alegar validação PHP.
+- Arquivos desta continuação: `src/MockResilience/ReadOnlyTraceReview.php`,
+  `tests/Unit/resilience.php`, README e STATUS. Contratos, coordenador,
+  AGENTS, Domain e documentação ratificada intactos nesta revisão.
+- PR #80 permanece draft, sem merge. Pendência: lint e runner completos em PHP
+  8.1+ previamente disponível e revisão humana antes de autorização de merge.
+- Main/base, outros repositórios e infraestrutura preservados. R01-G01 a G11
+  e CORE/SEG/AUT ABERTOS. Sem dados privados, credenciais de produto, SQL/ALLOW,
+  APIs reais, deploy ou F1-04. GitHub somente para versionamento autorizado.
