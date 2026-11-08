@@ -535,3 +535,13 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - F1-05: **12 testes novos U05-01..U05-12 NÃO EXECUTADOS e 46 anteriores como regressão**, meta futura 58, sem código ou branch de implementação autorizados.
 - **Preservar main**, R01-G01 a G11 **TODOS ABERTOS**, CORE/SEG/AUT CRM **ABERTOS**, demais projetos e VPS/Cloudflare/n8n intactos. Sem SQL/ALLOW, APIs/CRM reais, credenciais, dados privados, Github Actions, instalação PHP/Composer, custos, deploy ou F1-06.
 - Próximo ato: revisão da ordem executiva e **autorização expressa independente para F1-05 código/testes**, separada de qualquer autorização para merge de código futura.
+
+## F1-05 — Autorização executiva expressa e restrita (2026-11-08)
+
+- O responsável respondeu **“sim”** à pergunta explícita sobre autorizar o AIA-FT01-F1-05 **somente para desenvolvimento PHP mockado e testes unitários sintéticos, sem merge, despesas, integrações reais ou mudanças na infraestrutura**. Trata-se de decisão EXECUTIVA distinta da aprovação documental F105-D01 a D10 do PR #85.
+- A ordem formal de execução permitida está em `docs/AIA-FT01-F1-05-ORDEM-EXECUTIVA-PROPOSTA.md` (título atualizado para autorização ratificada). O PR da autorização permanece **estritamente documental**; sua integração NÃO é merge de código F1-05.
+- Autoriza após preflight autenticado criar/verificar `dev/ft01-f1-05-usage-quotas-mocks-2026-11-08`, filha da `dev/ft01-aia-core-mocks-2026-11-06`. **Não substituir refs ou criar branch alternativa sem conciliação.**
+- Escopo de implementação exclusivamente sintético: política de cotas técnicas por contexto, eventos Usage deduplicados, evidências estimadas/observadas/conciliadas sem custos comerciais reais, alertas sem envio, fail-closed, rastro mínimo; arquivos `src/MockUsage/`, `tests/Unit/`, `README.md`, `STATUS-ATUAL.md`.
+- 12 casos U05-01–U05-12 autorizados e regressão de 46 casos existentes; **58 é meta futura, NÃO resultado executado**. Testar só se PHP 8.1+ já existir; na ausência, registrar **NÃO EXECUTADOS** sem instalar PHP/Composer ou usar GitHub Actions.
+- Entrega de código F1-05 deve ocorrer em **PR DRAFT da branch filha → branch dev, SEM MERGE**. Merge de código exige revisão e **autorização expressa independente**, não abrangida pelo “sim” atual.
+- `main` continua preservada, R01-G01 a G11 **TODOS ABERTOS**, CORE/SEG/AUT CRM **ABERTOS**. **Não** SQL/ALLOW, banco real, CRM/Portal, LLM/APIs reais, dados privados, credenciais, compras/gastos, infraestrutura VPS/Cloudflare/n8n, deploy ou F1-06. Registros anteriores de “minuta não aprovada” são anteriores a esta autorização.
