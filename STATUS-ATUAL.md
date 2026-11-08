@@ -526,3 +526,12 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - O [PR #85](https://github.com/rafhael100/imagine-ai-agents/pull/85) permanece **DOCUMENTAL, DRAFT e SEM MERGE**, até autorização específica. A minuta executiva a preparar é **proposta separada não aprovada**.
 - **NÃO AUTORIZADOS:** programação F1-05, Codex, branch de código, novos testes, alterações `main`/CRM/Portal/outros projetos, APIs reais, SQL/ALLOW, dados privados, credenciais, GitHub Actions, despesas, VPS/Cloudflare/n8n, deploy, F1-06 ou fechamento de gates.
 - **R01-G01 a G11 e CORE/SEG/AUT CRM TODOS ABERTOS.** Próxima decisão independente: revisar e autorizar, ou não, a **ordem executiva F1-05**; merge de código exigirá autorização ainda posterior.
+
+## F1-05 — PR #85 integrado, minuta executiva limpa em revisão (2026-11-08)
+
+- O responsável aprovou a incorporação **documental** do PR #85 e a preparação da minuta executiva F1-05. O PR #85 já foi **MERGED exclusivamente na branch dev**, squash `93ca068dbbb6e4962a532a5f98994b55fd097621`, com F105-D01 a D10 alternativas A ratificadas apenas documentalmente. Anotações anteriores de #85 como draft/sem merge são históricas.
+- Minuta de autorização executiva **NÃO APROVADA**: `docs/AIA-FT01-F1-05-ORDEM-EXECUTIVA-PROPOSTA.md`, no ramo documental limpo `docs/ft01-f1-05-ordem-executiva-revisao-2026-11-08` criado diretamente da branch dev após #85. Esta minuta não pode ser interpretada como ordem ao Codex.
+- A minuta anterior #86 provinha de branch documental pré-squash e exibia o mesmo arquivo F1-05 de #85 como alteração adicional por ancestralidade. A presente revisão preserva o conteúdo da ordem sem duplicar o arquivo já integrado. **Não fazer merge sem decisão específica.**
+- F1-05: **12 testes novos U05-01..U05-12 NÃO EXECUTADOS e 46 anteriores como regressão**, meta futura 58, sem código ou branch de implementação autorizados.
+- **Preservar main**, R01-G01 a G11 **TODOS ABERTOS**, CORE/SEG/AUT CRM **ABERTOS**, demais projetos e VPS/Cloudflare/n8n intactos. Sem SQL/ALLOW, APIs/CRM reais, credenciais, dados privados, Github Actions, instalação PHP/Composer, custos, deploy ou F1-06.
+- Próximo ato: revisão da ordem executiva e **autorização expressa independente para F1-05 código/testes**, separada de qualquer autorização para merge de código futura.
