@@ -214,3 +214,19 @@ php examples/knowledge_context_demo.php
 O exemplo materializa uma única passagem fictícia (`READY` / `UNTRUSTED_DATA`), simula revogação antes da entrega (`DENIED`) e tenta reutilizar o grant de outra empresa (`DENIED`). A saída não contém dados de clientes nem autoriza ferramentas.
 
 **Validação reproduzida:** PHP 8.4.24 já presente; `php -l` do exemplo PASS; execução exit 0. Hash Git blob do exemplo `0d9fe667bb3e09e34228618b6b9234b19d1ef9fc`, idêntico ao arquivo publicado. Um pacote portátil offline de demonstração foi criado no ambiente de revisão (não implantado). Os **82 testes oficiais da branch F1-07 não foram executados**, nem os **85 futuros combinados** com a correção #92. PR de código continua DRAFT sem merge.
+
+### Validador offline de regressão (sem rede e sem Actions)
+
+O script `tools/validate_ft01_offline.sh` exige um **checkout Git completo** com PHP 8.1+ já instalado e verifica o SHA, integridade mínima de diretórios, lint de todos os PHP e execução real do runner oficial. Retorna **exit 2 / BLOCKED** se o checkout está incompleto e **exit 1 / FAIL** se lint/testes falham; só devolve `VALIDATION_PASS` em caso de regressão efetiva sem falhas.
+
+```sh
+# Após checkout completo do PR #95 (F1-07 sem #92):
+bash tools/validate_ft01_offline.sh
+
+# Após conciliar também o PR #92 (3 casos F1-06 a mais):
+EXPECTED_CASES=85 bash tools/validate_ft01_offline.sh
+```
+
+A base atual do PR #95 exige **43 arquivos PHP** (incluindo o exemplo) e **82 testes**. Com F1-06 corretivo, permanece 43 PHP e passam a ser exigidos 85 testes. Para fixar uma revisão específica, defina `EXPECTED_SHA` com o SHA completo previamente verificado no GitHub. O validador não instala dependências, não chama rede e não cria CI.
+
+**Evidência desta revisão:** o script exato foi conferido por hash Git blob SHA-1 `2359d514cf2983b2101d87b08393388df04a1970`. Na cópia PARCIAL do sandbox, retornou corretamente `BLOCKED` / exit 2, sem falsificar validação completa. **82/82 e 85/85 não executados**. Os PRs #92 e #95 seguem DRAFT sem merge.
