@@ -1,6 +1,6 @@
 # AIA-FT01/F1-06 — Minuta de ordem executiva restrita | Proposta v0.1
 
-> **SITUAÇÃO: MINUTA EM AVALIAÇÃO. EXECUÇÃO F1-06 NÃO AUTORIZADA.**
+> **SITUAÇÃO: MINUTA DOCUMENTAL EM AVALIAÇÃO — NÃO É ORDEM EXECUTIVA NEM AUTORIZAÇÃO DE MERGE.** O PR de código #91 já existe em DRAFT e declara autorização executiva anterior, código e testes sintéticos; essa declaração exige conferência independente antes de qualquer decisão sobre integração.
 >
 > **Data:** 2026-11-08. Repo `rafhael100/imagine-ai-agents`. Branch somente documental `docs/ft01-f1-06-ordem-executiva-proposta-2026-11-08`, criada separadamente da branch de planejamento; base `dev/ft01-aia-core-mocks-2026-11-06`.
 >
@@ -19,19 +19,19 @@
 
 O laboratório **não** publica agentes reais, não gera UI, não estabelece permissões CRM, não assina snapshots, não faz deploy e não integra provedor de IA.
 
-## 2. Branch de código futura — NÃO criada e NÃO autorizada
+## 2. Branch de código candidata — estado atualizado e sem autorização por esta minuta
 
 | Critério | Proposta para decisão posterior |
 | --- | --- |
 | Repositório | `rafhael100/imagine-ai-agents` |
 | Branch base futura | `dev/ft01-aia-core-mocks-2026-11-06`, **já com o merge documental do PR #89**; validar novamente SHA atual antes de qualquer execução futura |
-| Nova branch de código CANDIDATA | `dev/ft01-f1-06-agent-release-mocks-2026-11-08` — **NÃO CRIADA** |
+| Branch de código existente | `dev/ft01-f1-06-agent-release-mocks-2026-11-08` — **EXISTE**, vinculada ao PR #91 **DRAFT / SEM MERGE**, conforme consulta em 2026-11-08; não foi criada por esta minuta |
 | Origem | SHA atual autenticado da branch dev após verificação de histórico, `AGENTS.md` e árvore limpa |
 | PR de código futuro | **DRAFT**, filha → branch dev, **SEM MERGE** |
 | Merge de código | Dependerá de autorização distinta, após revisão de commits e testes |
 | `main` e demais projetos | Não tocar |
 
-Se branch homônima já existir, interromper para inspeção; não usar force-push, sobrescrita nem atualização de referências sem análise e decisão. A autorização desta minuta, se eventualmente ocorrer como aceitação **documental**, não substitui uma ordem executiva explícita.
+A branch homônima já existe e foi identificada no PR #91. Sua existência exige conferência do histórico e da autorização declarada antes de qualquer ação; não usar force-push, sobrescrita ou atualização de referências por esta minuta. A autorização desta minuta, se eventualmente ocorrer como aceitação **documental**, não substitui uma ordem executiva explícita.
 
 ## 3. Preflight obrigatório a eventual executor
 
@@ -83,7 +83,7 @@ Não criar endpoints HTTP, `.env`, Dockerfile, migrations, banco, filas, mecanis
 | U06-11 | Suspensão e rollback respeitam elegibilidade e revogações atuais |
 | U06-12 | Injeção adversarial e token sintético não aparecem no trace nem elevam privilégios |
 
-**Estado atual:** U06-01 a U06-12 NÃO IMPLEMENTADOS E NÃO EXECUTADOS. O histórico de **58 testes anteriores** é evidência do laboratório até F1-05, não substitui regressão de um novo commit. `70/70` é **meta futura**, não resultado.
+**Estado do texto original:** U06-01 a U06-12 eram candidatos ainda não executados quando esta minuta foi redigida. **Atualização (2026-11-08):** o PR #91 informa que os 12 casos foram implementados, que o lint de 35 arquivos PHP passou e que a suíte totalizou **70/70 PASS** em execução anterior. Essas são **alegações registradas no PR #91, não resultados reexecutados nesta revisão da minuta**. Os 58 testes F1-01..F1-05 continuam a regressão de referência, sem inferir homologação operacional.
 
 Com autorização executiva distinta e PHP 8.1+ existente no ambiente:
 ```sh
@@ -112,13 +112,15 @@ Este texto é **proposta para futura decisão independente**, não ordem concedi
 
 ## 9. Estado e próximas decisões
 
+> **Fato posterior à redação original (2026-11-08):** [PR #91](https://github.com/rafhael100/imagine-ai-agents/pull/91) aberto em rascunho, sem merge, contendo branch de código F1-06 e relato de 35/35 lint e 70/70 testes PASS. A autorização executiva específica é *alegada no PR #91* e deve ser verificada no registro original antes de qualquer decisão de merge. Menções anteriores neste documento à branch "não criada" ou a testes "não executados" descrevem o estado da minuta original e **não devem ser usadas como estado atual**. O PR #90 é apenas documental e permanece sem merge.
+
 > **Atualização de preflight documental (2026-11-08):** o PR #89 já consta como MERGED, exclusivamente na dev (`2453b3cd3a0283136c35b64dd03f559a0d4ca053`). O PR #90 continua DRAFT, sem merge. A branch documental do PR #90 foi criada antes da integração do #89; não realizar rebase, force-push ou alteração da base sem revisão adicional. A minuta atualiza apenas fatos documentais: **nenhuma execução ou autorização de código F1-06 foi concedida**.
 
 - [x] F106-D01 a D10, alternativas A, ratificadas **documentalmente** pelo responsável em 2026-11-08, registradas no PR #89.
 - [x] **Merge exclusivamente documental do PR #89** realizado na dev em 2026-11-08, commit `2453b3cd3a0283136c35b64dd03f559a0d4ca053`; isso não concede autorização de código F1-06.
-- [ ] Revisão e autorização **executiva explícita** da F1-06 em novo ato.
-- [ ] Somente depois: branch de código, desenvolvimento, validação sintética, PR draft sem merge.
+- [ ] **Conferir documentalmente** a autorização executiva expressa mencionada pelo PR #91, sem presumir que a presente minuta tenha concedido autorização.
+- [x] Branch de código e PR #91 já existentes, em **DRAFT / SEM MERGE**; o PR #91 declara desenvolvimento e validação sintética anterior, **ainda sujeitos à revisão independente**.
 - [ ] Merge de código e qualquer deploy sempre exigem aprovações **adicionais e específicas**.
 - [ ] R01-G01–G11 e CORE/SEG/AUT CRM todos abertos, `main` intocada, F1-07 não autorizado.
 
-**Conclusão:** F1-06 aprovada documentalmente; **nenhuma programação F1-06, novo teste, merge ou implantação autorizada neste ato**.
+**Conclusão atualizada:** as diretrizes F1-06 foram aprovadas documentalmente no PR #89. O PR #91 contém código e evidências declaradas, mas permanece **DRAFT / SEM MERGE**. **Este PR #90 não autoriza programação, merge ou implantação**, nem confirma por si só as autorizações narradas no PR #91. A `main` e os gates R01-G01–G11 e CORE/SEG/AUT CRM permanecem preservados.
