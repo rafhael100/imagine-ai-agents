@@ -156,3 +156,18 @@ completa no SHA atual. Aceite permanece pendente de execução posterior.
 **Evidência independente do código publicado:** PHP CLI 8.4.24; **26/26 arquivos PHP lint PASS**; **46/46 testes sintéticos PASS, zero falhas**; **exit code 0**. Os hashes Git blob SHA-1 de todos os 26 arquivos PHP locais testados coincidem com os blobs correspondentes da branch GitHub. Uma fixture de teste U04-08 foi ajustada para distinguir concessão ainda vigente de aprovação expirada; todas as regras de autorização foram mantidas.
 
 **Não é produção:** grants sintéticos **não são identidade/ACL**, resultados fake não são confirmações reais do CRM, ausência de persistência, filas, concorrência, APIs, modelo LLM, dados reais e validação bilateral. Gates R01-G01–G11 e CORE/SEG/AUT CRM continuam **ABERTOS**; `main`, infra e demais projetos intocados. Merge e F1-05 **não autorizados**.
+
+## FT01-F1-05 — laboratório de consumo técnico e cotas fictícias (2026-11-08)
+
+**Autorização executiva distinta e expressa:** o responsável respondeu `sim` à pergunta específica sobre executar programação e testes sintéticos F1-05, após ratificação documental de F105-D01 a D10 e incorporação do PR #85. A autorização **não permite merge de código, deploy, integração real, F1-06 ou alteração de `main`**.
+
+- `src/MockUsage/MockUsagePolicy.php`: política técnica *fictícia*, em memória, vinculada a produto, empresa, principal, finalidade, recurso, operação `mock.*`, versão do contexto e intervalo lógico de validade; revogação e cota máxima.
+- `src/MockUsage/MockUsageLedger.php`: registro volátil de tentativas/estados ESTIMADO/OBSERVADO/AJUSTADO, deduplicação e conflito material, consumo conservador por tentativa sem somar estimativa e observação, quota `SYNTHETIC_WITHIN_QUOTA` **não autoriza ferramentas**, conciliação incerta, e alertas locais deduplicados.
+- `src/MockUsage/MockUsageProof.php`: prova de uso fictícia, isolada, proveniente apenas de `SYNTHETIC_MOCK_PROVIDER`; **não constitui comprovante de despesa, transação ou efeito do CRM**.
+- `tests/Unit/usage_quota.php`: 12 casos novos U05-01 a U05-12. `tests/Unit/run.php` apenas inclui esta suíte após as 46 regressões F1-01 a F1-04, sem alterar os testes anteriores.
+
+**Execução real independente (código exato verificado):** PHP CLI **8.4.24**, sandbox local; `find src tests/Unit -type f -name '*.php' -print0 | xargs -0 -n1 php -l` → **30/30 PASS**, exit 0; `php tests/Unit/run.php` → **58/58 PASS, zero falhas**, exit 0. Conteúdo dos **30/30 arquivos PHP** publicados na branch F1-05 conferido por **Git blob SHA-1** contra os arquivos locais testados, sem divergências.
+
+**Limitações:** somente **processo único, memória volátil e dados inventados**. Sem reserva de quota atômica, durabilidade, validação real de identidade ou permissão, custos efetivos, preço, cobrança, saldo de créditos, provedor, faturamento, conciliação financeira, LGPD operacional, alertas externos ou CRM real. Não há qualquer fonte de verdade além das fixtures do laboratório.
+
+**Segurança/governança:** `src/Contracts/`, domínio anterior, coordenador F1-02, resiliência F1-03, despacho F1-04, `AGENTS.md` e documentos ratificados permanecem intactos. Código somente na branch filha, PR futuro **draft e sem merge**, `main` e infraestrutura intocadas, R01-G01–G11 e CORE/SEG/AUT CRM **ABERTOS**, F1-06 não autorizado.
