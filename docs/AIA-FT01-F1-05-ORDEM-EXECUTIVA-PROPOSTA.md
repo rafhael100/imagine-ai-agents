@@ -2,9 +2,9 @@
 
 > **ESTADO: MINUTA NÃO APROVADA. PROGRAMAÇÃO E TESTES F1-05 CONTINUAM BLOQUEADOS.**
 >
-> Data: 2026-11-08. Repo: `rafhael100/imagine-ai-agents`. Branch **somente documental**: `docs/ft01-f1-05-autorizacao-executiva-proposta-2026-11-08`. Destino deste PR documental: `docs/ft01-f1-05-consumo-cotas-observabilidade-mock-2026-11-08` (branch do PR #85), sem afetar a base dev ou a main.
+> Data: 2026-11-08. Repo: `rafhael100/imagine-ai-agents`. Branch **somente documental**: `docs/ft01-f1-05-autorizacao-executiva-proposta-2026-11-08`. Destino deste PR documental: `dev/ft01-aia-core-mocks-2026-11-06` (**somente a documentação**); a `main` continua preservada.
 >
-> **Precedência:** o responsável ratificou **exclusivamente como diretrizes documentais** as alternativas A de F105-D01 a D10 no PR #85. Esta ratificação ou esta minuta **NÃO autorizam** criar branch de implementação, chamar Codex, escrever PHP, executar novos testes, fazer merge de código, implantar ou contratar serviços. PR #85 continua pendente de merge documental específico.
+> **Precedência:** o responsável ratificou **exclusivamente como diretrizes documentais** as alternativas A de F105-D01 a D10 no PR #85. Esta ratificação ou esta minuta **NÃO autorizam** criar branch de implementação, chamar Codex, escrever PHP, executar novos testes, fazer merge de código, implantar ou contratar serviços. **O PR #85 já foi integrado documentalmente à branch dev em 2026-11-08, commit `93ca068dbbb6e4962a532a5f98994b55fd097621`, após autorização expressa.**
 >
 > **Bloqueios:** `main`, CRM, Portal, Performance AI, Universidade, Sites e demais projetos preservados; R01-G01 a G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**; F1-06 também bloqueado. Sem SQL, ALLOW, dados reais, APIs de fornecedores, LLM, autenticação/ACL real, credenciais, custos, Docker, Composer, GitHub Actions, VPS/Cloudflare/n8n ou deploy.
 
@@ -26,7 +26,7 @@ Nenhum número de quota da fixture corresponde a plano ou preço Imagine. Nenhum
 | Item | Regra |
 | --- | --- |
 | Repositório | `rafhael100/imagine-ai-agents` |
-| Branch de referência para código | `dev/ft01-aia-core-mocks-2026-11-06`, **somente após PR #85 ficar documentalmente integrado quando autorizado** |
+| Branch de referência para código | `dev/ft01-aia-core-mocks-2026-11-06`, **PR #85 já integrado documentalmente no commit `93ca068dbbb6e4962a532a5f98994b55fd097621`** |
 | Branch candidata não criada | `dev/ft01-f1-05-usage-quotas-mocks-2026-11-08` |
 | Ponto inicial | SHA atual da branch base aferido via GitHub no momento da futura autorização |
 | Destino eventual do PR de código | **Draft filha → dev; sem merge** |
@@ -37,7 +37,7 @@ Se houver branch homônima ou commits não previstos, inspecionar sem sobrescrev
 
 ## 3. Verificações obrigatórias antes de eventual execução
 
-1. Confirmar autenticação GitHub, remote, branch ativa, árvore limpa, SHAs de dev e main, autoria do PR #85 e o seu status. Não realizar merge do PR #85 sem autorização específica.
+1. Confirmar autenticação GitHub, remote, branch ativa, árvore limpa e SHAs de dev e main; verificar que o PR #85 já está **MERGED apenas na dev**, sem tentar mesclá-lo de novo.
 2. Ler `AGENTS.md`, `README.md`, `STATUS-ATUAL.md`, `Domain/Usage.php`, `Domain/Attempt.php`, `Domain/TenantContext.php`, contratos e testes F1-01..F1-04, AIA-10, R03/S04, R04/S01–S02 e a proposta documental F1-05.
 3. Validar que o catálogo de ferramentas F1-04 e o coordenador F1-02 não serão alterados nem terão sua autoridade substituída; não confundir limites técnicos de uso com créditos CRM.
 4. Verificar PHP CLI 8.1+ **já disponível**. Se ausente, registrar lint/testes **NÃO EXECUTADOS**, sem instalar PHP, Composer, ferramentas ou acionar CI.
@@ -112,3 +112,10 @@ Registrar SHA de checkout, versão, hashes de blobs e códigos de saída reais; 
 O texto é apenas minuta; **não houve autorização executiva nesta conversa**.
 
 **Próximo ato:** o responsável deve revisar a minuta e decidir em ato independente sobre executar ou não o lote. Antes disso, F1-05 permanece **documental ratificada, execução bloqueada**.
+
+## 9. Atualização de estado e destino documental — 2026-11-08
+
+- PR #85 **MERGED**, com ratificação exclusivamente documental de F105-D01 a D10 (alternativas A), na branch `dev/ft01-aia-core-mocks-2026-11-06`; merge `93ca068dbbb6e4962a532a5f98994b55fd097621`.
+- PR #86 **continua DOCUMENTAL/DRAFT e SEM MERGE**. Seu destino foi atualizado para a branch dev após o encerramento do PR #85. O histórico desta branch é filho da branch documental #85, que foi incorporada via squash; a comparação pode mostrar o documento F1-05 do #85 como arquivo adicional por ancestralidade, embora seu blob seja idêntico. Antes de qualquer merge deste PR #86, reconciliar a diferença de histórico e verificar o diff efetivo. **Não fazer merge automaticamente.**
+- **F1-05 AINDA NÃO AUTORIZADO PARA CÓDIGO/TESTES:** nenhuma branch de código, Codex, runtime, CI, integrações, despesas ou implantação autorizados por esta minuta.
+- R01-G01–G11 e CORE/SEG/AUT CRM **ABERTOS**. `main`, demais repositórios, VPS/Cloudflare/n8n inalterados; F1-06 bloqueado.
