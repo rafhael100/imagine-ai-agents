@@ -460,10 +460,19 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 ## F1-04 — proposta documental de catálogo de ferramentas simuladas (2026-11-08)
 
 - O responsável **AUTORIZOU APENAS PREPARAR DOCUMENTAÇÃO F1-04** ao responder "sim" ao planejamento sugerido. Não autorizou programação, testes F1-04, branch de código ou merge.
-- **PROPOSTA DOCUMENTAL AINDA NÃO RATIFICADA:** `docs/AIA-FT01-F1-04-CATALOGO-CAPACIDADES-DESPACHO-MOCK-PROPOSTA.md`, branch documental `docs/ft01-f1-04-catalogo-capacidades-ferramentas-mock-2026-11-08`, base `dev/ft01-aia-core-mocks-2026-11-06`; relacionada à issue #81.
-- **F104-D01 a D10 TODAS ABERTAS:** catálogo local de tools e capabilities fictícias, versionamento/esquema, separação de sugestão e autorização, decisões de leitura e mutação fake, segregação por tenant, fail-closed, idempotência e trace mínimo.
+- **PROPOSTA DOCUMENTAL RATIFICADA em 2026-11-08, alternativas A F104-D01 a D10:** `docs/AIA-FT01-F1-04-CATALOGO-CAPACIDADES-DESPACHO-MOCK-PROPOSTA.md`, branch documental `docs/ft01-f1-04-catalogo-capacidades-ferramentas-mock-2026-11-08`, base `dev/ft01-aia-core-mocks-2026-11-06`; relacionada à issue #81.
+- **F104-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-08:** catálogo local de tools e capabilities fictícias, versionamento/esquema, separação de sugestão e autorização, decisões de leitura e mutação fake, segregação por tenant, fail-closed, idempotência e trace mínimo.
 - **12 testes U04-01..U04-12 PROPOSTOS, NÃO EXECUTADOS**, mais regressão obrigatória dos 34 F1-01/02/03 já verificados anteriormente no laboratório. Meta futura: **46 cenários**, sem alegar que tenham sido executados nesta etapa.
 - O merge anterior do PR #80 foi confirmado somente na branch de desenvolvimento em `b5931b6f94331b6bcc9ab26020ded9a4c5707eeb`; `main` observada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`, sem novos commits neste planejamento.
 - **F1-04 NÃO AUTORIZADO PARA CÓDIGO, TESTES OU MERGE:** não criar `dev/ft01-f1-04-tool-catalog-mocks-2026-11-08`, não chamar Codex, instalar PHP/Composer, configurar GitHub Actions, acessar APIs/CRM real, SQL/ALLOW, dados privados, credenciais ou VPS/Cloudflare/n8n, incorrer despesas ou realizar deploy. F1-05 também NÃO autorizado.
 - R01-G01 a G11 **TODOS ABERTOS**; CORE/SEG/AUT CRM **ABERTOS**. `main` e todos os demais repositórios/serviços preservados.
-- **Próximo ato:** submeter alternativas A F104-D01 a D10 para ratificação **somente documental**, depois propor autorização executiva em ato independente.
+- **Próximo ato:** preparar proposta de autorização executiva F1-04 **em ato independente**, para avaliação expressa antes de qualquer Codex ou criação de branch de código.
+
+## Ratificação documental F104-D01 a D10 — 2026-11-08
+
+- O responsável respondeu **“sim”** ao pedido específico de aprovar documentalmente as alternativas A de F104-D01 a D10, sem autorização de programação.
+- Escopo ratificado: catálogo/capabilities fictícios, validação fail-closed de parâmetros e versões, escopo/tenants, separação leitura-sugestão-mutações fake, supervisão de aprovações, idempotência e rastro mínimo sintético.
+- Os **12 cenários U04-01 a U04-12 continuam propostos, não implementados nem executados**; os 34 cenários históricos F1-01/02/03 são regressão futura. **46/46 é meta, não resultado.**
+- **F1-04 NÃO ESTÁ AUTORIZADO PARA CÓDIGO/TESTES.** PR #82 é apenas documental; sem branch de código, merge de código, CI/Actions, instalação, SQL/ALLOW, API real, gastos, VPS/Cloudflare/n8n, dados privados ou deploy.
+- `main` e outros projetos preservados, R01-G01 a G11 **TODOS ABERTOS**, CORE/SEG/AUT CRM **ABERTOS**. F1-05 bloqueado.
+- Próximo passo: apresentar **minuta executiva F1-04 separada** para eventual autorização específica do responsável.
