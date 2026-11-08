@@ -287,3 +287,18 @@ independentemente em ambiente isolado de análise, sem GitHub Actions.
 - **F1-01 encerrado apenas na branch dev**; `main`, CRM, Portal e demais produtos intactos.
 - R01-G01 a G11 **TODOS ABERTOS** e CORE/SEG/AUT CRM **TODOS ABERTOS**.
 - Próximo passo: preparar autorização executiva **separada** para avaliação do responsável, antes de Codex ou testes F1-02.
+
+## F1-02 — Ratificação documental e proposta executiva — 2026-11-08
+
+- PR [#73](https://github.com/rafhael100/imagine-ai-agents/pull/73) **MERGED apenas em** `dev/ft01-aia-core-mocks-2026-11-06`, commit `77fb9abeec46f35e82f2c4151b95620cc200c2ea`, com aprovação **documental** das alternativas A FT01-F102-D01 a D10. Nenhum código F1-02 foi criado.
+- **ORDEM EXECUTIVA AUTORIZADA EM 2026-11-08, somente no escopo PHP mockado F1-02**: `docs/AIA-FT01-F1-02-ORDEM-EXECUTIVA-PROPOSTA.md` na branch documental `docs/ft01-f1-02-autorizacao-executiva-proposta-2026-11-08`. O texto estabelece os limites de futuro código PHP puro, branch exclusiva, 12 testes novos + regressão dos 10 testes F1-01, sem instalar dependências.
+- O responsável **AUTORIZOU EXPRESSAMENTE a execução F1-02** em 2026-11-08, respondendo “ok aprovado” à solicitação explícita de código PHP mockado e testes unitários sintéticos sem merge, custos ou infraestrutura. A execução ainda depende de preflight, commits e evidências; o aceite não autoriza merge de código, F1-03 ou deploy.
+- `main`, CRM, Portal, demais repositórios e VPS/Cloudflare/n8n não foram alterados nesta fase documental. Não há autorização de SQL/ALLOW, APIs reais, dados privados, credenciais, GitHub Actions, despesas, merge de código ou deploy.
+- **R01-G01 a G11 TODOS ABERTOS**, **CORE/SEG/AUT CRM ABERTOS**. F1-03 não autorizado.
+
+## Autorização executiva F1-02 — 2026-11-08
+
+- O responsável autorizou **AIA-FT01-F1-02** para programação PHP puro mockado, coordenação supervisionada local e testes unitários sintéticos, exclusivamente na futura branch filha `dev/ft01-f1-02-supervised-mocks-2026-11-07`, base `dev/ft01-aia-core-mocks-2026-11-06`, somente após preflight Git e preservação da base.
+- **PR #75:** autorização documental e ordem técnica; não confundir com PR de código ou evidências de execução. Devem ser entregues 12 novos testes mais regressão dos 10 originais, quando runtime PHP autorizado estiver disponível, sem instalar dependências.
+- **Nenhuma autorização:** alteração de `main`, merge de código, F1-03, SQL/ALLOW, `src/Contracts/`, APIs CRM/IA reais, VPS/Cloudflare/n8n, GitHub Actions, credenciais, dados pessoais, gastos ou deploy.
+- R01-G01 a G11 **TODOS ABERTOS** e CORE/SEG/AUT CRM **ABERTOS**.
