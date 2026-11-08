@@ -535,3 +535,12 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - **12 novos casos U05-01–U05-12 continuam NÃO IMPLEMENTADOS/NÃO EXECUTADOS**; 46 anteriores serão regressão futura. Meta 58, nenhum novo PASS presumido.
 - Sem merge desta minuta; `main`, CRM, Portal e demais projetos preservados, zero infraestrutura/API real/custos/deploy. Gates R01-G01 a G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**; F1-06 bloqueado.
 - Próximo ato: revisão desta proposta e solicitação de **autorização executiva F1-05 expressa e independente**, antes de qualquer Codex, código, testes ou PR de implementação.
+
+## F1-05 — PR #85 integrado; minuta executiva #86 pendente (2026-11-08)
+
+- O responsável disse **“sim”** à recomendação específica de concluir a integração **exclusivamente documental** do PR #85 e preparar a minuta executiva F1-05, sem iniciar código.
+- **PR #85 MERGED na branch dev:** commit `93ca068dbbb6e4962a532a5f98994b55fd097621`; F105-D01 a D10 alternativas A ratificadas documentalmente. Referências históricas a #85 como draft/sem merge são anteriores à incorporação.
+- **PR #86:** `docs/ft01-f1-05-autorizacao-executiva-proposta-2026-11-08` → `dev/ft01-aia-core-mocks-2026-11-06`, DOCUMENTAL, **DRAFT/SEM MERGE**; contém a minuta executiva ainda **NÃO AUTORIZADA**. Seu ramo nasceu do ramo documental #85, que foi integrado via squash. A comparação pode exibir mudanças duplicadas de #85 por divergência de ancestralidade; **reconciliar/validar o diff antes de qualquer merge do #86**, jamais mesclar automaticamente.
+- **F1-05 NÃO AUTORIZADO PARA CÓDIGO/TESTES:** 12 novos cenários U05-01..U05-12 e 46 regressões são **58 testes FUTUROS**, não executados como lote. Nenhuma branch de implementação, Codex, instalações, CI/GitHub Actions, SQL/ALLOW, APIs/CRM reais, credenciais, dados privados, gastos, VPS/Cloudflare/n8n ou deploy liberados.
+- `main` observada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`, inalterada. R01-G01 a G11 **TODOS ABERTOS**, CORE/SEG/AUT CRM **ABERTOS**; F1-06 bloqueado.
+- **Próxima decisão do responsável:** revisar a minuta executiva e conceder ou negar **autorização expressa independente** para o código F1-05; eventual merge de código exigirá ainda outra decisão específica.
