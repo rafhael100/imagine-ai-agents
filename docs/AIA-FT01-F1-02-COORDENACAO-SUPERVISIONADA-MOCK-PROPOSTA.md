@@ -1,6 +1,6 @@
 # AIA-FT01/F1-02 — Proposta de Coordenação Supervisionada e Recuperação Simulada | v0.1
 
-> **ESTADO: PROPOSTA DOCUMENTAL. FT01-F102-D01 a D10 ABERTAS. F1-02 NÃO AUTORIZADO PARA PROGRAMAÇÃO.**
+> **ESTADO: FT01-F102-D01 a D10 APROVADAS DOCUMENTALMENTE em 2026-11-08**, alternativas A, como diretrizes preliminares. **F1-02 NÃO AUTORIZADO PARA PROGRAMAÇÃO**; F1-01 não autoriza F1-02. R01-G01 a G11 e CORE/SEG/AUT CRM continuam ABERTOS.
 >
 > **Data:** 2026-11-07. **Repo:** `rafhael100/imagine-ai-agents`. **Base documental:** `dev/ft01-aia-core-mocks-2026-11-06`, após PR #71. **Branch desta proposta:** `docs/ft01-f1-02-proposta-orquestracao-mock-2026-11-07`.
 >
@@ -95,7 +95,7 @@ A execução futura exigirá:
 
 **Não equivale a homologação de sistema nem liberação do F1-03.** A governança F1-02 exige autorização para criar código e, posteriormente, autorização independente de merge.
 
-## 7. Decisões FT01-F102-D01 a D10 para avaliação documental
+## 7. Decisões FT01-F102-D01 a D10 ratificadas documentalmente
 
 | Decisão | Alternativa A — recomendada | Alternativa B — não recomendada |
 | --- | --- | --- |
@@ -110,15 +110,15 @@ A execução futura exigirá:
 | **D09** — Git/revisão | Novo branch filho de dev, PR draft, `main` e gates intactos | Fazer merge automático em `main` ou iniciar F1-03 |
 | **D10** — governança | Ratificar este **plano documental somente**; pedir autorização executiva própria antes do Codex | Interpretar aprovação desta proposta como permissão para programar |
 
-**FT01-F102-D01 a D10: ABERTAS.** Aprovar as alternativas A como diretrizes documentais **NÃO AUTORIZA** criar branch de código, codificar, testar, usar Actions ou mesclar PR.
+**FT01-F102-D01 a D10: APROVADAS DOCUMENTALMENTE em 2026-11-08**, alternativas A, sem autorização executiva F1-02. A aprovação **NÃO AUTORIZA** criar branch de código, codificar, testar, usar Actions ou mesclar PR, e não fecha gates.
 
 ## 8. Próximas decisões separadas
 
-- [ ] Ratificação **documental** FT01-F102-D01 a D10 pelo responsável.
+- [x] Ratificação **documental** FT01-F102-D01 a D10 (alternativas A) pelo responsável em 2026-11-08.
 - [ ] Preparar, submeter e obter **autorização executiva expressa** de F1-02 com branch, arquivos, restrições e testes sintéticos.
 - [ ] Somente depois: orientar Codex a executar F1-02 e abrir PR draft, sem merge.
 - [ ] Validar o diff e evidências antes de pedir aprovação independente para merge em branch dev.
 - [ ] Manter `main`, R01-G01 a G11 e CORE/SEG/AUT **abertos e inalterados**.
 - [ ] Não instalar dependências, usar serviços externos/cobráveis, dados pessoais, SQL, ALLOW, APIs reais ou infraestrutura.
 
-**Próxima ação imediata autorizada nesta conversa:** apresentar este plano e as dez decisões ao responsável para ratificação **documental**, sem programação.
+**Próxima ação documental:** preparar e submeter proposta separada de **autorização executiva F1-02** para avaliação do responsável. A ratificação documental já ocorreu, mas **não autoriza o Codex a programar**.
