@@ -26,14 +26,14 @@ final class MockPromotionGate
         MockAgentVersionSnapshot::syntheticRef($datasetVersion);
         MockAgentVersionSnapshot::syntheticRef($ruleVersion);
         if (!in_array($maxRisk, ['LOW', 'MEDIUM', 'HIGH'], true)
-            || !array_is_list($allowedTools) || count($allowedTools) > 8
-            || count(array_unique($allowedTools)) !== count($allowedTools)) {
+            || !array_is_list($allowedTools) || count($allowedTools) > 8) {
             MockError::fail('CATALOG_SCHEMA_DENIED');
         }
         foreach ($allowedTools as $tool) {
             if (!is_string($tool)) MockError::fail('CATALOG_SCHEMA_DENIED');
             MockAgentVersionSnapshot::syntheticRef($tool);
         }
+        if (count(array_unique($allowedTools)) !== count($allowedTools)) MockError::fail('CATALOG_SCHEMA_DENIED');
         $this->allowedTools = $allowedTools;
     }
 
