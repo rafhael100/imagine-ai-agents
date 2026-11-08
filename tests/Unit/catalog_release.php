@@ -94,6 +94,10 @@ return [
         ] as $patch) {
             denied('CATALOG_SCHEMA_DENIED', fn () => f106Snapshot($ctx, 'SYNTHETIC_SNAPSHOT_BAD', 'SYNTHETIC_BAD', $patch));
         }
+        $catalog = new MockAgentTemplateCatalog();
+        denied('CATALOG_SCHEMA_DENIED', fn () => $catalog->addTemplate('SYNTHETIC_BAD', $ctx, [['SYNTHETIC_TOOL_READ']]));
+        denied('CATALOG_SCHEMA_DENIED', fn () => new MockPromotionGate($catalog, $ctx, [['SYNTHETIC_TOOL_READ']],
+            'SYNTHETIC_DATASET_V1', 'SYNTHETIC_RULE_V1'));
     },
     'U06-05 missing revoked expired or failed review blocks publication' => function (): void {
         [$ctx, , $snapshot, $review, $gate] = f106Fixture();
