@@ -456,3 +456,14 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - **Aceite limitado ao laboratório sintético:** não comprova autenticação ou ACL reais, integrações CRM/IA, estado durável, concorrência, recuperação, privacidade operacional, segurança de produção ou compatibilidade em outras versões PHP.
 - **PR #80 permanece DRAFT e SEM MERGE**. Main, base dev, outros repositórios, VPS/Cloudflare/n8n preservados; F1-04, SQL/ALLOW, execução real e deploy não autorizados. **R01-G01 a G11 e CORE/SEG/AUT CRM ABERTOS.**
 - **Próxima decisão:** submeter o PR #80 à revisão do responsável e solicitar autorização específica para eventual merge **exclusivamente na branch `dev/ft01-aia-core-mocks-2026-11-06`**, rechecando SHAs e ausência de conflitos imediatamente antes de qualquer merge.
+
+## F1-04 — proposta documental de catálogo de ferramentas simuladas (2026-11-08)
+
+- O responsável **AUTORIZOU APENAS PREPARAR DOCUMENTAÇÃO F1-04** ao responder "sim" ao planejamento sugerido. Não autorizou programação, testes F1-04, branch de código ou merge.
+- **PROPOSTA DOCUMENTAL AINDA NÃO RATIFICADA:** `docs/AIA-FT01-F1-04-CATALOGO-CAPACIDADES-DESPACHO-MOCK-PROPOSTA.md`, branch documental `docs/ft01-f1-04-catalogo-capacidades-ferramentas-mock-2026-11-08`, base `dev/ft01-aia-core-mocks-2026-11-06`; relacionada à issue #81.
+- **F104-D01 a D10 TODAS ABERTAS:** catálogo local de tools e capabilities fictícias, versionamento/esquema, separação de sugestão e autorização, decisões de leitura e mutação fake, segregação por tenant, fail-closed, idempotência e trace mínimo.
+- **12 testes U04-01..U04-12 PROPOSTOS, NÃO EXECUTADOS**, mais regressão obrigatória dos 34 F1-01/02/03 já verificados anteriormente no laboratório. Meta futura: **46 cenários**, sem alegar que tenham sido executados nesta etapa.
+- O merge anterior do PR #80 foi confirmado somente na branch de desenvolvimento em `b5931b6f94331b6bcc9ab26020ded9a4c5707eeb`; `main` observada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`, sem novos commits neste planejamento.
+- **F1-04 NÃO AUTORIZADO PARA CÓDIGO, TESTES OU MERGE:** não criar `dev/ft01-f1-04-tool-catalog-mocks-2026-11-08`, não chamar Codex, instalar PHP/Composer, configurar GitHub Actions, acessar APIs/CRM real, SQL/ALLOW, dados privados, credenciais ou VPS/Cloudflare/n8n, incorrer despesas ou realizar deploy. F1-05 também NÃO autorizado.
+- R01-G01 a G11 **TODOS ABERTOS**; CORE/SEG/AUT CRM **ABERTOS**. `main` e todos os demais repositórios/serviços preservados.
+- **Próximo ato:** submeter alternativas A F104-D01 a D10 para ratificação **somente documental**, depois propor autorização executiva em ato independente.
