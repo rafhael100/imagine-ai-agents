@@ -1,6 +1,6 @@
 # AIA-FT01/F1-04 — Catálogo de capacidades e despacho seguro de ferramentas simuladas | Proposta documental v0.1
 
-> **SITUAÇÃO: F104-D01 a D10 ABERTAS PARA AVALIAÇÃO.** O responsável autorizou apenas preparar o planejamento documental F1-04 em 2026-11-08. **NÃO autorizou branch de código, programação, testes adicionais, merge, implantação ou integrações reais.**
+> **SITUAÇÃO: F104-D01 a D10 (alternativas A) RATIFICADAS DOCUMENTALMENTE em 2026-11-08.** O responsável respondeu **“sim”** à pergunta específica de ratificação das dez decisões documentais. Esta aprovação **NÃO AUTORIZA** branch de código, programação, execução dos testes F1-04, merge de código, implantação ou integrações reais; todos os gates permanecem ABERTOS.
 >
 > Repositório: `rafhael100/imagine-ai-agents`. Branch **documental**: `docs/ft01-f1-04-catalogo-capacidades-ferramentas-mock-2026-11-08`. Base: `dev/ft01-aia-core-mocks-2026-11-06`.
 >
@@ -101,7 +101,7 @@ A proposta é **12 novos casos sintéticos + 34 regressões F1-01/F1-02/F1-03**,
 - Código futuro deverá ficar em **PR draft filha → branch dev**, sem merge automático. Revisão de escopo, testes reais e autorização de merge **separada**, ainda exclusivamente na dev.
 - Sem F1-05, integração real, `main`, deploy, banco, filas ou alterações em outros repositórios.
 
-## 8. Decisões F104-D01 a D10 — ABERTAS
+## 8. Decisões F104-D01 a D10 — RATIFICADAS DOCUMENTALMENTE
 
 | Decisão | Alternativa A — RECOMENDADA para ratificação documental | Alternativa B — NÃO recomendada |
 | --- | --- | --- |
@@ -116,14 +116,14 @@ A proposta é **12 novos casos sintéticos + 34 regressões F1-01/F1-02/F1-03**,
 | **F104-D09 — custo/arquitetura** | PHP puro in-memory, zero infra/Actions/dependências, branch e `main` separados | Introduzir serviços pagos, API real, deploy |
 | **F104-D10 — governança** | Ratificação APENAS documental; autorização executiva e merge de código em atos próprios | Aprovação genérica implica execução automática |
 
-**F104-D01 a D10: TODAS ABERTAS.** A aceitação das alternativas A, quando ocorrer, **não** permitirá criar branch de código, executar Codex, testes, instalar runtime, dar merge ou alterar gates.
+**F104-D01 a D10: alternativas A RATIFICADAS DOCUMENTALMENTE em 2026-11-08.** As alternativas B não foram adotadas. Esta ratificação **não permite** criar branch de código, executar Codex ou novos testes, instalar runtime, fazer merge de código, alterar gates ou iniciar F1-05.
 
 ## 9. Critérios para aceite documental e próximos atos
 
-- [ ] O responsável revisar e, se concordar, **ratificar somente documentalmente** alternativas A F104-D01 a D10.
+- [x] O responsável **ratificou somente documentalmente** as alternativas A F104-D01 a D10 em 2026-11-08.
 - [ ] Depois, preparar **minuta executiva separada** com branch, SHA, arquivos, exclusões e 46 testes para avaliação.
 - [ ] Somente autorização expressa de execução poderá liberar futura branch de código e Codex.
 - [ ] Registrar testes efetivamente rodados, diferenças e regressões antes de solicitar merge específico somente na branch dev.
 - [ ] Preservar `main`, infraestrutura, demais repositórios e F1-05 bloqueados; R01-G01 a G11 e CORE/SEG/AUT **ABERTOS**.
 
-**Estado do lote nesta data:** **somente proposta documental preparada; F1-04 NÃO AUTORIZADO PARA PROGRAMAÇÃO.**
+**Estado do lote nesta data:** F104-D01 a D10 **APROVADAS DOCUMENTALMENTE**; **F1-04 NÃO AUTORIZADO PARA PROGRAMAÇÃO, TESTES OU MERGE DE CÓDIGO.** Próximo ato: propor e submeter ordem executiva em decisão separada.
