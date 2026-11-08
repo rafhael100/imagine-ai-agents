@@ -526,3 +526,12 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - O [PR #85](https://github.com/rafhael100/imagine-ai-agents/pull/85) permanece **DOCUMENTAL, DRAFT e SEM MERGE**, até autorização específica. A minuta executiva a preparar é **proposta separada não aprovada**.
 - **NÃO AUTORIZADOS:** programação F1-05, Codex, branch de código, novos testes, alterações `main`/CRM/Portal/outros projetos, APIs reais, SQL/ALLOW, dados privados, credenciais, GitHub Actions, despesas, VPS/Cloudflare/n8n, deploy, F1-06 ou fechamento de gates.
 - **R01-G01 a G11 e CORE/SEG/AUT CRM TODOS ABERTOS.** Próxima decisão independente: revisar e autorizar, ou não, a **ordem executiva F1-05**; merge de código exigirá autorização ainda posterior.
+
+## F1-05 — minuta executiva futura, NÃO autorizada (2026-11-08)
+
+- As alternativas A de F105-D01 a D10 foram **ratificadas somente DOCUMENTALMENTE** na branch do PR #85, sem programação ou merge automático.
+- **Minuta separada em avaliação:** `docs/AIA-FT01-F1-05-ORDEM-EXECUTIVA-PROPOSTA.md`, branch `docs/ft01-f1-05-autorizacao-executiva-proposta-2026-11-08`, derivada da branch documental do PR #85. Este trabalho contém **somente documentos** e não autoriza executar a minuta.
+- **Futura branch de código ainda NÃO criada/autorizada:** `dev/ft01-f1-05-usage-quotas-mocks-2026-11-08`, dependente de decisão própria do responsável e confirmação da incorporação documental do PR #85 na base.
+- **12 novos casos U05-01–U05-12 continuam NÃO IMPLEMENTADOS/NÃO EXECUTADOS**; 46 anteriores serão regressão futura. Meta 58, nenhum novo PASS presumido.
+- Sem merge desta minuta; `main`, CRM, Portal e demais projetos preservados, zero infraestrutura/API real/custos/deploy. Gates R01-G01 a G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**; F1-06 bloqueado.
+- Próximo ato: revisão desta proposta e solicitação de **autorização executiva F1-05 expressa e independente**, antes de qualquer Codex, código, testes ou PR de implementação.
