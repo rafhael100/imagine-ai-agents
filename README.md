@@ -202,3 +202,15 @@ completa no SHA atual. Aceite permanece pendente de execução posterior.
 **Evidência executada nesta revisão:** PHP CLI 8.4.24 já disponível, sem instalação nem fornecedor. Lint **6/6 PASS** nas seis classes novas localmente reconstruídas; hashes Git blob SHA-1 **6/6 coincidentes** com os arquivos publicados na branch. Runner auxiliar local exercitando U07-01..U07-12 e isolamento adicional de referência igual entre tenants: **13/13 PASS, 0 falhas**. Essa reprodução **não equivale** à execução do arquivo oficial `tests/Unit/knowledge_context.php` no checkout completo, nem à regressão oficial `php tests/Unit/run.php`; **82/82 NÃO foi executado/comprovado**. O checkout integral segue inacessível por DNS no sandbox; não houve Actions, Composer ou custos.
 
 **Restrições:** laboratório de processo único e memória volátil; nenhum RAG, LLM, OCR, embedding, crawler, banco/SQL, autenticação/ACL real, documentos de cliente, APIs CRM, importação, persistência, retenção legal, cobrança, infraestrutura, publicação ou efeito externo. `main`, contratos/implementações F1-01..F1-06 e outros produtos preservados. PR de código DRAFT sem merge automático; R01-G01–G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**.
+
+### Demonstração offline executável F1-07 (2026-11-08)
+
+O arquivo `examples/knowledge_context_demo.php` é um exemplo sem infraestrutura, Composer, banco, API ou LLM. Execute no checkout da branch com PHP 8.1+ já instalado:
+
+```sh
+php examples/knowledge_context_demo.php
+```
+
+O exemplo materializa uma única passagem fictícia (`READY` / `UNTRUSTED_DATA`), simula revogação antes da entrega (`DENIED`) e tenta reutilizar o grant de outra empresa (`DENIED`). A saída não contém dados de clientes nem autoriza ferramentas.
+
+**Validação reproduzida:** PHP 8.4.24 já presente; `php -l` do exemplo PASS; execução exit 0. Hash Git blob do exemplo `0d9fe667bb3e09e34228618b6b9234b19d1ef9fc`, idêntico ao arquivo publicado. Um pacote portátil offline de demonstração foi criado no ambiente de revisão (não implantado). Os **82 testes oficiais da branch F1-07 não foram executados**, nem os **85 futuros combinados** com a correção #92. PR de código continua DRAFT sem merge.
