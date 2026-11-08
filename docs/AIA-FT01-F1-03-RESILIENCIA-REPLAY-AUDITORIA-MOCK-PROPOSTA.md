@@ -1,10 +1,10 @@
 # AIA-FT01/F1-03 — Proposta documental de resiliência, replay seguro e auditoria sintética | v0.1
 
-> **ESTADO: PROPOSTA DOCUMENTAL — F103-D01 a D10 ABERTAS. F1-03 NÃO AUTORIZADO PARA CÓDIGO, TESTES OU MERGE.**
+> **ESTADO: F103-D01 a D10, alternativas A, RATIFICADAS EXCLUSIVAMENTE COMO DIRETRIZES DOCUMENTAIS em 2026-11-08. F1-03 NÃO AUTORIZADO PARA CÓDIGO, TESTES, MERGE OU DEPLOY.**
 >
 > Data: 2026-11-08. Repositório: rafhael100/imagine-ai-agents. Branch documental: docs/ft01-f1-03-proposta-resiliencia-auditoria-mock-2026-11-08. Base: dev/ft01-aia-core-mocks-2026-11-06.
 >
-> **Restrições vinculantes:** main inalterada; gates R01-G01 a G11 e CORE/SEG/AUT CRM ABERTOS; sem banco, SQL, ALLOW, filas, rede, APIs reais, autenticação/ACL em produção, dados pessoais, modelos de IA pagos, instalação de PHP/Composer, GitHub Actions, VPS/Cloudflare/n8n, despesas ou deploy. Esta aprovação para preparar DOCUMENTAÇÃO não é autorização para executar Codex.
+> **Restrições vinculantes:** main inalterada; gates R01-G01 a G11 e CORE/SEG/AUT CRM ABERTOS; sem banco, SQL, ALLOW, filas, rede, APIs reais, autenticação/ACL em produção, dados pessoais, modelos de IA pagos, instalação de PHP/Composer, GitHub Actions, VPS/Cloudflare/n8n, despesas ou deploy. A ratificação DOCUMENTAL das dez diretrizes não autoriza executar Codex, escrever código funcional, rodar testes F1-03 ou realizar merge.
 
 ## 1. Contexto confirmado e posição na arquitetura
 
@@ -83,7 +83,7 @@ Os casos acima são **critérios propostos, não resultados obtidos**. Os 22 tes
 - PR futuro de código deve ser **draft**, com destino SOMENTE branch-base, sem merge automático. Merge exige nova aprovação independente após revisão e validação.
 - Nenhuma alteração permitida em main, src/Contracts/, CRM/Portal ou infraestrutura e nenhuma programação de F1-04.
 
-## 7. Decisões FT01-F103-D01 a D10 — ABERTAS para ratificação documental
+## 7. Decisões FT01-F103-D01 a D10 — alternativas A RATIFICADAS documentalmente
 
 | Decisão | Alternativa A recomendada | Alternativa B não recomendada |
 | --- | --- | --- |
@@ -98,15 +98,15 @@ Os casos acima são **critérios propostos, não resultados obtidos**. Os 22 tes
 | **F103-D09 — Git/gates** | PR draft filha → dev, main e gates preservados | Merge em main, F1-04 ou fechamento tácito |
 | **F103-D10 — governança** | Aprovar somente esta documentação e pedir autorização executiva própria | Interpretar aprovação documental como ordem ao Codex |
 
-**ESTADO: F103-D01 a D10 TODAS ABERTAS.** Ratificar as alternativas A não autoriza código, teste, instalação, APIs, gastos, merge nem F1-04.
+**ESTADO EM 2026-11-08: F103-D01 a D10, alternativas A, RATIFICADAS DOCUMENTALMENTE pelo responsável.** As alternativas B não foram adotadas. Esta ratificação não autoriza código, teste, instalação, APIs reais, gastos, merge, deploy ou F1-04, nem encerra qualquer gate R01/CORE/SEG/AUT.
 
 ## 8. Critérios de aceite DOCUMENTAL para este PR
 
-- [ ] Responsável revisar e ratificar F103-D01 a D10 como diretrizes documentais.
-- [ ] Confirmar que F1-03 permanece limitado a simulações sintéticas sem efeitos reais.
+- [x] Responsável revisou e ratificou F103-D01 a D10, alternativas A, **somente como diretrizes documentais** em 2026-11-08.
+- [x] Escopo documental ratificado limita F1-03 a simulações sintéticas sem efeitos reais.
 - [ ] Aprovar separadamente, se desejado, uma ordem executiva futura que cite branch filha, arquivos permitidos e execução de 34 testes locais sintéticos.
 - [ ] Somente após autorização executiva: Codex trabalha em branch isolada, PR draft e testes sob limites.
 - [ ] Revisar resultados reais antes de considerar merge em dev; não estender ao F1-04.
 - [ ] Preservar main, R01-G01 a G11 e CORE/SEG/AUT CRM ABERTOS, zero alterações de infra e zero despesas.
 
-**Próximo passo:** apresentar esta proposta para revisão do responsável. Este arquivo NÃO é uma autorização executiva.
+**Próximo passo:** preparar proposta de ordem executiva **separada** para futura avaliação do responsável, sem escrever PHP, criar branch de código, executar testes ou fazer merge por iniciativa própria. Este arquivo NÃO é uma autorização executiva.
