@@ -55,12 +55,26 @@ try {
 }
 if (!$denied) throw new RuntimeException('Revocation was not enforced');
 
+// A different tenant may not reuse this source or its original grant.
+$otherTenant = new TenantContext(
+    'SYNTHETIC_CRM', 'SYNTHETIC_OTHER', 'SYNTHETIC_OPERATOR',
+    'SYNTHETIC_ASSIST', 'SYNTHETIC_CASE_001',
+);
+$crossTenantDenied = false;
+try {
+    $retriever->select($grant, $otherTenant, [$source->ref], 23);
+} catch (MockError $error) {
+    $crossTenantDenied = $error->getMessage() === 'KNOWLEDGE_DENIED';
+}
+if (!$crossTenantDenied) throw new RuntimeException('Cross-tenant isolation failed');
+
 echo json_encode([
     'mode' => 'SYNTHETIC_OFFLINE',
     'delivery' => $result['status'],
     'trust' => $result['trust'],
     'passage_count' => count($result['passages']),
     'pending_after_revocation' => 'DENIED',
+    'cross_tenant_access' => 'DENIED',
     'trace_codes' => array_column($trace->events(), 'code'),
     'external_calls' => 0,
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR), "\n";
