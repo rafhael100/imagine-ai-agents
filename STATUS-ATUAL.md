@@ -302,3 +302,41 @@ independentemente em ambiente isolado de análise, sem GitHub Actions.
 - **PR #75:** autorização documental e ordem técnica; não confundir com PR de código ou evidências de execução. Devem ser entregues 12 novos testes mais regressão dos 10 originais, quando runtime PHP autorizado estiver disponível, sem instalar dependências.
 - **Nenhuma autorização:** alteração de `main`, merge de código, F1-03, SQL/ALLOW, `src/Contracts/`, APIs CRM/IA reais, VPS/Cloudflare/n8n, GitHub Actions, credenciais, dados pessoais, gastos ou deploy.
 - R01-G01 a G11 **TODOS ABERTOS** e CORE/SEG/AUT CRM **ABERTOS**.
+
+## Execução FT01-F1-02 — 2026-11-08
+
+- Executor: Codex, ambiente gerenciado `/workspace`. Autorização expressa do
+  responsável nesta conversa e ordem executiva ratificada no PR #75.
+- `gh auth status`: autenticado como rafhael100. Remoto confirmado:
+  `https://github.com/rafhael100/imagine-ai-agents.git`.
+- Base e filha remotas existentes no início: ambas
+  `4c705744711a7153174dda012b91af2cae77102b`. Main observada:
+  `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`.
+- Filha exclusiva: `dev/ft01-f1-02-supervised-mocks-2026-11-07`, checkout local
+  rastreando a ref existente; sem recriar/sobrescrever branch remota. Árvore
+  inicialmente limpa, F1-01 presente e nenhum workflow `.github` na árvore.
+- Lidos AGENTS, README, STATUS, AIA-FT01, R03/R02, R04/S01–S02, proposta de
+  coordenação F1-02 e ordem executiva. As restrições históricas documentais cedem
+  apenas ao escopo expressamente autorizado; gates mantidos.
+- Plano/arquivos: novo `src/MockOrchestration/SupervisedCoordinator.php`, novo
+  `src/Mocks/MockSupervisedGateway.php`, novos 12 casos em
+  `tests/Unit/supervised.php`, inclusão no runner existente, README e este STATUS.
+  Nenhum arquivo de Domain ou Contracts alterado; dez casos F1-01 preservados.
+- Implementado: composição determinística, aprovação exata/revogação/expiração
+  pelo modelo existente, reserva de envio, conflito de chave, consulta após
+  timeout sem novo submit, quatro resultados fake, transições/cancelamento e
+  rastros referenciais sem conteúdo material. Riscos/limitações no README.
+- Runtime: `command -v php php8.1 php8.2 php8.3 php8.4` não encontrou executável;
+  `php -v` retornou **127**, `php: command not found`. Versão não verificável.
+- **Lint PHP NÃO EXECUTADO. Dez regressões F1-01 e 12 casos novos F1-02 TODOS
+  NÃO EXECUTADOS (22 pendentes)**. Nenhum resultado PASS/FAIL de runtime atribuído.
+  Não houve instalação, Composer, container, CI ou GitHub Actions.
+- Verificações estáticas: `git diff --check` e comparação dos dez casos originais
+  com o SHA de origem; não equivalem a execução de PHP ou homologação de segurança.
+- Pendências: revisão do draft filha → base e validação isolada posterior com
+  PHP 8.1+ previamente disponível. Aceite de código depende dessa validação;
+  commits e PR serão identificados no relatório final e na descrição do PR.
+- Main/base e outros repositórios preservados. Nenhum acesso CRM/IA reais,
+  credenciais de produto, dados pessoais, SQL/ALLOW, infraestrutura, serviço pago,
+  deploy ou F1-03. GitHub utilizado somente no versionamento autorizado.
+- R01-G01 a G11 TODOS ABERTOS; CORE/SEG/AUT CRM ABERTOS.
