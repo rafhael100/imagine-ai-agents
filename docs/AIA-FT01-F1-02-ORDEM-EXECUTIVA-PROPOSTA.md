@@ -1,6 +1,6 @@
-# AIA-FT01/F1-02 — Proposta de Autorização Executiva Restrita e Ordem ao Codex | v0.1
+# AIA-FT01/F1-02 — Autorização Executiva Restrita e Ordem ao Codex | v0.1 ratificada
 
-> **ESTADO: ORDEM PROPOSTA; EXECUÇÃO F1-02 NÃO AUTORIZADA.** A aprovação documental do PR #73 e o registro deste documento **não permitem criar branch de código, executar Codex ou rodar novos testes**. Requer autorização executiva expressa e separada do responsável.
+> **ESTADO: F1-02 EXPRESSAMENTE AUTORIZADO PELO RESPONSÁVEL EM 2026-11-08**, em resposta afirmativa à pergunta específica de autorização do segundo lote. Autoriza somente PHP puro mockado, testes unitários sintéticos e branch filha isolada, após preflight Git; não autoriza merge, infraestrutura, despesas, integração real ou F1-03. A autorização NÃO comprova que o código tenha sido executado.
 >
 > **Referência:** 2026-11-08. **Repositório:** `rafhael100/imagine-ai-agents`. **Branch documental:** `docs/ft01-f1-02-autorizacao-executiva-proposta-2026-11-08`, base `dev/ft01-aia-core-mocks-2026-11-06`.
 >
@@ -8,9 +8,9 @@
 >
 > **Gates e preservações obrigatórias:** R01-G01 a G11 **TODOS ABERTOS**, CORE/SEG/AUT CRM **ABERTOS**, sem SQL/ALLOW, credenciais, banco/filas, APIs reais, dados pessoais, integrações, instalações de PHP/Composer/Laravel, GitHub Actions, despesas, VPS/Cloudflare/n8n, alteração de `main`, merge de código ou deploy.
 
-## 1. Objetivo e recorte técnico da autorização FUTURA
+## 1. Objetivo e recorte técnico da autorização concedida
 
-Implementar, **somente após autorização executiva expressa**, o segundo lote de **coordenação supervisionada local** sobre as estruturas PHP puras do F1-01, com contratos mockados, sem conexões reais e sem poderes de escrita externa.
+Implementar, **sob a autorização executiva expressa de 2026-11-08**, o segundo lote de **coordenação supervisionada local** sobre as estruturas PHP puras do F1-01, com contratos mockados, sem conexões reais e sem poderes de escrita externa.
 
 O resultado esperado é uma camada sintética que:
 - coordena `Run → Step → Intent → Approval → Effect` com estados e falhas explícitas;
@@ -22,7 +22,7 @@ O resultado esperado é uma camada sintética que:
 
 F1-02 é **recorte de laboratório** e não produto pronto. Não adicionar motor próprio de automações CRM, cobrança, agentes IA remotos, persistência, filas ou infraestrutura.
 
-## 2. Branch exclusiva prevista — ainda NÃO criada
+## 2. Branch exclusiva de código autorizada — criar após preflight
 
 | Elemento | Valor proposto |
 | --- | --- |
@@ -32,9 +32,9 @@ F1-02 é **recorte de laboratório** e não produto pronto. Não adicionar motor
 | Origem | SHA vigente da branch base, validada por Git autenticado antes da criação |
 | Destino do PR de código | **Branch filha → branch base**, em modo **draft** |
 | `main` | Não criar commits nem fazer merge |
-| Autorização atual | **Somente elaborar esta proposta documental** |
+| Autorização atual | **F1-02 expressamente autorizado em 2026-11-08; sem merge, deploy ou F1-03** |
 
-A branch filha da F1-02 só poderá ser criada **depois** de receber a autorização executiva expressa. Caso exista, apontar a SHA e parar para conciliar; não sobrescrever, forçar ou recuperar por atalhos.
+A criação da branch filha de F1-02 foi autorizada expressamente em 2026-11-08, condicionada ao preflight. Caso exista, apontar a SHA e parar para conciliar; não sobrescrever, forçar ou recuperar por atalhos.
 
 ## 3. Preflight obrigatório ao executor futuro
 
@@ -45,7 +45,7 @@ A branch filha da F1-02 só poderá ser criada **depois** de receber a autoriza�
 5. Confirmar se `php` 8.1+ **já está disponível**, mas sua ausência **não autoriza instalação**. Se faltar, documentar impossibilidade de executar testes; código não poderá ser aceito sem validação posterior.
 6. Registrar SHA de origem, ambiente e arquivos candidatos antes do primeiro commit.
 
-## 4. Superfícies permitidas somente após autorização executiva
+## 4. Superfícies permitidas pela autorização executiva
 
 | Superfície | Uso permitido | Exclusões |
 | --- | --- | --- |
@@ -107,20 +107,20 @@ Manter **10 testes originais F1-01** passando sem adulterações oportunistas. M
 - [ ] Manter gates R01-G01 a G11 e CORE/SEG/AUT CRM **abertos**.
 - [ ] Não iniciar F1-03 ou integração real; solicitar autorização de merge separada.
 
-## 8. Texto sugerido para AUTORIZAÇÃO EXECUTIVA — ainda NÃO concedida
+## 8. Autorização executiva expressa concedida
 
-O responsável poderá aprovar em mensagem separada, de forma inequívoca:
+O responsável respondeu **“ok aprovado”** à solicitação inequívoca: **“Você autoriza expressamente o AIA-FT01-F1-02, incluindo código PHP mockado e testes unitários sintéticos, sem merge, custos ou alterações na infraestrutura?”** Portanto, o escopo executivo foi concedido em 2026-11-08 com o seguinte texto operacional:
 
 > **Autorizo expressamente a execução do AIA-FT01-F1-02**, exclusivamente no repositório `rafhael100/imagine-ai-agents`, criando a branch `dev/ft01-f1-02-supervised-mocks-2026-11-07` a partir da `dev/ft01-aia-core-mocks-2026-11-06`, após preflight Git autenticado. Autorizo somente código PHP puro de coordenação supervisionada local, políticas e efeitos mockados em `src/MockOrchestration/`, `src/Domain/`, `src/Mocks/`, até 12 testes unitários novos em `tests/Unit/`, preservando e reexecutando os 10 testes de F1-01 onde PHP 8.1+ já estiver disponível, além de documentação em `README.md` e `STATUS-ATUAL.md`. Se PHP faltar, relatar testes não executados, sem instalar nada. Não autorizo dependências instaladas, mudanças em `src/Contracts/`, SQL, ALLOW, API/CRM/IA reais, dados privados, credenciais, Github Actions, despesas, VPS/Cloudflare/n8n, alteração da `main`, merge ou deploy. Abrir PR draft filha → branch base, apresentar diff, commits e resultados reais e preservar R01-G01 a G11 e CORE/SEG/AUT CRM abertos. Não iniciar F1-03. Se preflight falhar, parar.
 
-**A autorização acima é um modelo de decisão, não o estado atual.** Aprovar/mergear a proposta documental que contém este texto não é autorização para o Codex programar. Só uma mensagem adicional do responsável que **explicitamente autorize executar F1-02** desbloqueará esse lote.
+**Estado ratificado:** autorização executiva F1-02 concedida em 2026-11-08, restrita ao lote descrito. A codificação efetiva deverá ocorrer no executor autorizado após preflight e ser comprovada por commit, PR e saídas reais; o aceite não autoriza merge do PR de código, deployment nem F1-03. O PR #75 é documental; o código F1-02 permanecerá em PR separado.
 
 ## 9. Próximos passos
 
-1. Revisar e, se desejado, aprovar a **proposta executiva F1-02 como documentação**.
-2. Emitir, em decisão própria, autorização expressa nos termos da seção 8.
-3. Executar Codex apenas depois disso; validar PR separado, sem merge.
-4. Pedir nova autorização para eventual merge **somente na branch dev**.
-5. Preservar `main`, gates e infra para todas as etapas.
+1. [x] Autorizar expressamente F1-02 em 2026-11-08, somente para o lote mockado e testes locais sintéticos.
+2. [ ] Executar preflight Git e conferir o SHA de origem antes de trabalhar na branch filha autorizada.
+3. [ ] Codificar e validar apenas no ramo filho; abrir PR de código **draft** para a branch de desenvolvimento, sem merge.
+4. [ ] Revisar evidências e pedir nova autorização para eventual merge **somente na branch dev**.
+5. [ ] Preservar `main`, gates, infra, zero custos e proibição de F1-03.
 
-**Estado vinculante atual:** F1-01 concluído na branch dev; F1-02 **APROVADO DOCUMENTALMENTE, NÃO AUTORIZADO PARA PROGRAMAÇÃO**; todos os gates permanecem abertos.
+**Estado vinculante atual:** F1-01 concluído na branch dev; F1-02 **AUTORIZADO EXPRESSAMENTE em 2026-11-08 para PHP puro mockado e testes sintéticos, não executado até prova em GitHub**. Merge do código, F1-03 e integração real NÃO AUTORIZADOS. Todos os gates permanecem ABERTOS.
