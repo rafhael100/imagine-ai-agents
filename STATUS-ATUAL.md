@@ -446,3 +446,13 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - Main/base, outros repositórios e infraestrutura preservados. R01-G01 a G11
   e CORE/SEG/AUT ABERTOS. Sem dados privados, credenciais de produto, SQL/ALLOW,
   APIs reais, deploy ou F1-04. GitHub somente para versionamento autorizado.
+
+## Validação independente integral do PR #80 — 2026-11-08
+
+- **Commit de código testado:** `f5d675ec08ffa8d8db40777fa836c28d89f89de2`, após a revisão corretiva do Codex sobre `ReadOnlyTraceReview.php` e os cenários U03-04/U03-05/U03-12. O histórico anterior indicando que o Codex não tinha PHP permanece válido para aquele executor, mas a pendência de execução da suíte completa está resolvida **em ambiente independente** para este commit.
+- **Reprodução exata verificada:** os **22/22 arquivos PHP** de `src/` e `tests/Unit/` foram reconstruídos a partir do conteúdo dos arquivos e seus hashes Git blob SHA-1 conferidos contra os objetos do GitHub (incluindo os dois arquivos revisados). Sem arquivos PHP adicionais na árvore testada ou alterações funcionais para obter PASS.
+- **Ambiente:** PHP CLI **8.4.24**, sandbox local isolado do ChatGPT; sem serviços externos, Composer, GitHub Actions, instalação de dependências, dados privados, credenciais, despesas ou VPS.
+- **Comandos efetivamente executados:** `find src tests/Unit -type f -name '*.php' -print0 | xargs -0 -n1 php -l` → **22/22 sem erros de sintaxe, exit 0**; `php tests/Unit/run.php` → **34/34 PASS, 0 FAIL, exit 0**; 10 regressões F1-01, 12 F1-02 e 12 U03-01–U03-12 com os casos reforçados.
+- **Aceite limitado ao laboratório sintético:** não comprova autenticação ou ACL reais, integrações CRM/IA, estado durável, concorrência, recuperação, privacidade operacional, segurança de produção ou compatibilidade em outras versões PHP.
+- **PR #80 permanece DRAFT e SEM MERGE**. Main, base dev, outros repositórios, VPS/Cloudflare/n8n preservados; F1-04, SQL/ALLOW, execução real e deploy não autorizados. **R01-G01 a G11 e CORE/SEG/AUT CRM ABERTOS.**
+- **Próxima decisão:** submeter o PR #80 à revisão do responsável e solicitar autorização específica para eventual merge **exclusivamente na branch `dev/ft01-aia-core-mocks-2026-11-06`**, rechecando SHAs e ausência de conflitos imediatamente antes de qualquer merge.
