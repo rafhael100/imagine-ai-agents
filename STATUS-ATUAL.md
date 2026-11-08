@@ -363,3 +363,23 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - `main` permaneceu em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; nenhuma alteração no CRM, Portal, demais repositórios ou VPS/Cloudflare/n8n. Sem GitHub Actions, novas dependências, custos, deploy, dados pessoais, SQL/ALLOW ou APIs reais.
 - **F1-03 NÃO AUTORIZADO.** Próximo passo sugerido: apresentar proposta documental F1-03 para revisão e aprovação em processo separado antes de qualquer código.
 - R01-G01 a G11 **TODOS ABERTOS**; CORE/SEG/AUT CRM e demais gates **ABERTOS**.
+
+## FT01-F1-03 — planejamento documental proposto em 2026-11-08
+
+- O responsável disse **“sim”** para **preparar o planejamento documental de F1-03**, sem autorizar executar código ou testes.
+- **PROPOSTA DOCUMENTAL, AINDA NÃO RATIFICADA:** docs/AIA-FT01-F1-03-RESILIENCIA-REPLAY-AUDITORIA-MOCK-PROPOSTA.md, na branch documental docs/ft01-f1-03-proposta-resiliencia-auditoria-mock-2026-11-08, derivada de dev/ft01-aia-core-mocks-2026-11-06.
+- **F103-D01 a D10 TODAS ABERTAS**: falhas compostas sintéticas, classificação fail-closed de estados, replay **somente de leitura**, detecção de conflito em rastros mínimos, isolamento de tenant e relógio explícito; 12 cenários F1-03 **propostos** e 22 regressões F1-01/F1-02 **existentes** (34 testes planejados, NÃO executados nesta etapa).
+- **F1-03 NÃO AUTORIZADO para execução**; nenhuma branch filha de código, PHP, teste, Actions, infraestrutura, API real, dependência, dado pessoal ou despesa autorizados. F1-04 também não autorizado.
+- **Histórico preservado:** F1-01 e F1-02 foram integrados somente na branch dev após revisão e testes unitários sintéticos; isso não concede homologação de CRM/IA reais.
+- main, CRM, Portal, Performance, Universidade e VPS/Cloudflare/n8n intocados; sem merge de código/deploy. Gates R01-G01 a G11 **TODOS ABERTOS** e CORE/SEG/AUT CRM **ABERTOS**.
+- **Próximo ato:** submeter F103-D01 a D10 para ratificação **documental**; depois, se aprovado, propor autorização executiva separada. Não usar Codex antes dela.
+
+## Ratificação documental FT01-F1-03 — 2026-11-08
+
+- O responsável respondeu **“aprovado”** à solicitação explícita de ratificação **DOCUMENTAL das alternativas A de F103-D01 a D10**, referentes ao [PR #78](https://github.com/rafhael100/imagine-ai-agents/pull/78).
+- **F103-D01 a D10 RATIFICADAS APENAS COMO DIRETRIZES DOCUMENTAIS**: simulação de falhas compostas, replay estritamente de leitura, journaling mínimo sintético, fail-closed, isolamento entre tenants e testes condicionais futuros.
+- A proposta técnica contempla **12 testes F1-03 ainda NÃO EXECUTADOS**, além de 22 regressões F1-01/F1-02 já validadas anteriormente em cenário sintético; 34 cenários são **meta futura**, nunca um resultado de execução F1-03.
+- **Nenhuma autorização executiva F1-03:** sem Codex para código, branch filha de implementação, testes F1-03, GitHub Actions, dependências, SQL/ALLOW, APIs reais, dados privados, VPS/Cloudflare/n8n, despesas, merge ou deploy.
+- PR #78 permanece **DRAFT/OPEN**, exclusivamente documental; não fazer merge por aprovação genérica. `main`, demais repositórios e infraestrutura não são objeto de mudanças nesta ratificação.
+- **R01-G01 a G11 e CORE/SEG/AUT CRM permanecem TODOS ABERTOS**, assim como homologações reais. F1-04 não autorizado.
+- Próximo passo: **preparar e submeter ordem executiva F1-03 separada para avaliação**, com escopo, arquivos, cenários, condições de interrupção e aprovação explícita exigida antes de execução.
