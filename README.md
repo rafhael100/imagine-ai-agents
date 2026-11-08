@@ -185,3 +185,17 @@ completa no SHA atual. Aceite permanece pendente de execução posterior.
 **Validação realizada sobre código idêntico à branch GitHub:** PHP CLI **8.4.24**, lint `find src tests/Unit -type f -name '*.php' -print0 | xargs -0 -n1 php -l` → **35/35 PASS, exit 0**; `php tests/Unit/run.php` → **70/70 PASS, zero falhas, exit 0**. Os **35 hashes Git blob SHA-1** dos arquivos PHP da branch foram confrontados com os 35 arquivos locais testados, sem divergências. Inclui verificação adversarial de arrays de ferramentas malformados, sem suprimir avisos.
 
 **Limites obrigatórios:** processo único e estado volátil, sem agentes/identidades/permissões reais, modelo LLM, assinatura criptográfica, publicação operacional, rede, CRM, autenticação, persistência, concorrência, custo ou rollback de infraestrutura. Catálogo fictício não altera cota, approval, ferramentas ou crédito comercial. O PR de código permanece **DRAFT e SEM MERGE**; `main` e VPS intocadas. Gates R01-G01–G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**, F1-07 bloqueado.
+
+## FT01-F1-06 — correção isolada de consistência pós-merge (2026-11-08)
+
+Após a integração de código F1-06 na **dev** pelo PR #91 (squash `02ed376c7be5258d091b26667ca00f63a0db46ab`), a auditoria identificou três sequências adversariais. A correção está **somente** na branch filha `dev/ft01-f1-06-consistency-corrections-2026-11-08`, para revisão por **PR DRAFT sem merge automático**.
+
+- `MockPromotionGate::suspend` usa a referência do último snapshot selecionado já validado, permitindo **suspender** mesmo depois de o catálogo desativar a versão. A seleção visível `current()` falha fechada se o snapshot foi desativado.
+- Uma referência de suspensão antiga não retorna `SUSPENSO` se já houver outra versão ativa: rejeita `PROMOTION_CONFLICT`. Repetição com a seleção vazia mantém a idempotência sem novo evento.
+- `revokeTool` limpa a seleção simulada quando uma ferramenta usada pela versão ativa perde elegibilidade, com **um evento local de código fechado**; revogar ferramenta não usada ou repetir revogação não duplica eventos.
+
+`tests/Unit/catalog_release.php` mantém U06-01..U06-12 e acrescenta **U06-C01, U06-C02 e U06-C03**. O runner existente os carrega automaticamente: **meta total 73** (70 anteriores + 3 novos), não resultado certificado.
+
+**Validação efetiva limitada:** PHP CLI 8.4.24 já instalado, sem instalações. Seis classes PHP relevantes foram reconstruídas localmente e comparadas por SHA Git blob aos seis arquivos exatos da branch (6/6 idênticos); `php -l` nessas seis classes **PASS** e um runner local equivalente aos três casos corretivos resultou em **3/3 PASS, 0 falhas, exit 0**. Esse runner local isolado **não equivale** à execução do checkout integral ou ao runner oficial `php tests/Unit/run.php`: os **73 testes completos NÃO foram reexecutados** nesta revisão devido à indisponibilidade DNS do GitHub para o checkout no sandbox. A evidência anterior de 70/70 permanece histórica, não foi presumida novamente.
+
+**Limites:** estado volátil e sintético, processo único, sem efeitos externos, IAM, serviços reais, persistência, concorrência, credenciais, cobrança ou infraestrutura. `main`, CRM, Portal, demais projetos e `AGENTS.md` não são alterados; R01-G01–G11 e CORE/SEG/AUT CRM seguem **ABERTOS**. **Sem merge do PR corretivo, sem deploy e sem F1-07.**
