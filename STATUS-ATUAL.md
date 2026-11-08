@@ -556,3 +556,13 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - **Integridade:** hashes **Git blob SHA-1 dos 30/30 arquivos PHP publicados coincidiram exatamente com os 30 arquivos executados localmente**. Não houve alteração de código depois desses testes; documentação posterior não afeta a versão testada.
 - **LIMITAÇÕES:** processo único, estado volátil, sem medição real de fornecedor, sem atomicidade entre workers, sem persistência, sem moeda/fatura/saldo, sem garantias de operação/segurança/privacidade em produção. Resultados sintéticos não fecham gates.
 - **Proibições mantidas:** PR de código será **DRAFT filha → dev SEM MERGE**; novos merges dependem de aprovação expressa específica. `main`, CRM, Portal, Sites, Performance AI, Universidade, VPS/Cloudflare/n8n e demais infra inalterados; sem SQL/ALLOW, credenciais, dados privados, API/LLM real, instalação PHP/Composer, GitHub Actions, gastos ou deploy. R01-G01–G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**. F1-06 **NÃO AUTORIZADO**.
+
+## F1-06 — proposta DOCUMENTAL de catálogo de versões e avaliações sintéticas (2026-11-08)
+
+- O responsável respondeu **“sim”** ao pedido de **iniciar somente a documentação F1-06**, após integração F1-05 pelo PR #88 (squash `8b128c2882c7baf7e59264b16361c9bc9f8108d7`). **Não autorizou** código, testes F1-06, criação de branch de programação, merge, integração real, infraestrutura ou deploy.
+- **PROPOSTA DOCUMENTAL AINDA NÃO RATIFICADA:** `docs/AIA-FT01-F1-06-CATALOGO-VERSOES-AVALIACAO-MOCK-PROPOSTA.md` na branch `docs/ft01-f1-06-catalogo-versoes-avaliacao-mock-2026-11-08`, a partir de `dev/ft01-aia-core-mocks-2026-11-06`.
+- **F106-D01 a D10 TODAS ABERTAS:** snapshots imutáveis de templates fictícios, versionamento de instruções/capabilities, avaliação vinculada a manifesto, gates locais fail-closed, suspensão e rollback mockado, sem grants reais ou publicação operacional.
+- **12 testes U06-01..U06-12 apenas PROPOSTOS/NÃO IMPLEMENTADOS/NÃO EXECUTADOS**; preservar os 58 testes históricos F1-01..F1-05. A meta futura **70/70 não é resultado obtido**.
+- **Branch candidata de código NÃO CRIADA:** `dev/ft01-f1-06-agent-release-mocks-2026-11-08`. PR futuro de código, caso expressamente autorizado, será draft filha → dev; merge dependerá de autorização específica posterior.
+- `main`, CRM, Portal, demais produtos, VPS/Cloudflare/n8n, bancos, SQL/ALLOW, dados reais, credenciais, GitHub Actions, PHP/Composer instalados, custos e deploy preservados. **R01-G01–G11 e CORE/SEG/AUT CRM TODOS ABERTOS**. F1-07 não autorizado.
+- **Próximo passo:** submeter F106-D01 a D10, alternativas A, para possível **ratificação SOMENTE documental**, sem confundir aprovação do plano com ordem executiva.
