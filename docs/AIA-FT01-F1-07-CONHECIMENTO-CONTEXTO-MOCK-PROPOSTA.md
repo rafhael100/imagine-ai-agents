@@ -1,10 +1,10 @@
 # AIA-FT01/F1-07 — Recuperação segura de conhecimento e contexto sintético | Proposta documental v0.1
 
-> **ESTADO: PROPOSTA DOCUMENTAL — F107-D01 a D10 TODAS ABERTAS, NÃO RATIFICADAS.**
+> **ESTADO: F107-D01 a D10, alternativas A, RATIFICADAS EXCLUSIVAMENTE DOCUMENTALMENTE em 2026-11-08.**
 >
 > Data: 2026-11-08. Repositório: `rafhael100/imagine-ai-agents`. Branch **exclusivamente documental**: `docs/ft01-f1-07-retrieval-context-mocks-2026-11-08`. Base `dev/ft01-aia-core-mocks-2026-11-06`, commit verificado `02ed376c7be5258d091b26667ca00f63a0db46ab` (F1-06 já integrada via PR #91).
 >
-> **Autorização atual:** o responsável respondeu **“autorizado”** à proposta específica de **iniciar SOMENTE a documentação F1-07**. Não autorizou branch de código, PHP, testes novos, merge documental ou de código, deploy, fornecedores, despesas, integrações reais ou fechamento de gates.
+> **Autorização atual:** o responsável respondeu primeiro **“autorizado”** à proposta específica de iniciar somente a documentação F1-07 e, após apresentação das decisões F107-D01 a D10 no PR #93, respondeu **“sim aprovado”** à pergunta de ratificação **DOCUMENTAL das dez alternativas A**. Esta aprovação **não autoriza** branch de código, PHP, testes novos, merge documental ou de código, deploy, fornecedores, despesas, integrações reais ou fechamento de gates.
 >
 > **Restrições imutáveis:** `main`, CRM/Portal/Sites/Performance/Universidade e outros repositórios, VPS/Cloudflare/n8n, CI/Actions, segredos, dados pessoais, SQL/ALLOW, APIs/LLM reais, instalação de dependências, banco, filas ou deploy permanecem fora de escopo. Gates R01-G01 a G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**. F1-08 não autorizado.
 
@@ -88,9 +88,9 @@ Após eventual autorização executiva F1-07 em ato próprio: **12 casos novos +
 
 **Regressão:** preservar integralmente os 70 testes F1-01..F1-06. Futura meta **82/82 PASS** e número de arquivos PHP de lint só poderão ser declarados **após** execução real, sem presunção. Se PHP 8.1+ estiver disponível *previamente* ao executor autorizado, considerar `php -v`, lint e `php tests/Unit/run.php`; sem instalar runtime/Composer/Actions em caso de ausência. Confrontar SHA e hashes do código exato executado.
 
-## 6. Decisões F107-D01 a D10 — TODAS ABERTAS
+## 6. Decisões F107-D01 a D10 — ALTERNATIVAS A RATIFICADAS DOCUMENTALMENTE
 
-| ID | Alternativa A RECOMENDADA para possível ratificação DOCUMENTAL | Alternativa B NÃO recomendada |
+| ID | Alternativa A RATIFICADA exclusivamente documentalmente | Alternativa B NÃO adotada |
 | --- | --- | --- |
 | **F107-D01 — objetivo** | Retrieval e envelope de contexto **somente fictícios**, in-memory e read-only | RAG real/LLM, ingestão e memória persistente já neste lote |
 | **F107-D02 — autoridade** | Produto/tenant/principal/finalidade/recurso conferidos em fixture; dono do produto conserva ACL real | Tratar documento ou `SYNTHETIC_*` como prova de acesso |
@@ -103,7 +103,7 @@ Após eventual autorização executiva F1-07 em ato próprio: **12 casos novos +
 | **F107-D09 — testes e custos** | Propor U07-01..U07-12 + 70 regressões; PHP puro sem serviços/custos | Presumir 82 PASS, instalar dependências ou usar API paga |
 | **F107-D10 — governança** | Aprovação APENAS documental; autorização executiva e merge separados; gates abertos | Supor que documentação habilita código, produção ou F1-08 |
 
-**F107-D01 a D10: TODAS ABERTAS, AINDA NÃO RATIFICADAS.** Alternativas A propostas; B não recomendadas. Ratificação documental posterior, se ocorrer, **não libera programação nem merge**.
+**F107-D01 a D10: alternativas A RATIFICADAS EXCLUSIVAMENTE DOCUMENTALMENTE em 2026-11-08** pelo responsável no PR #93; as alternativas B não foram adotadas. A ratificação **não libera programação, execução de testes F1-07, criação de branch de código, merge ou deploy**.
 
 ## 7. Escopo futuro candidato e governança
 
@@ -117,10 +117,10 @@ Após eventual autorização executiva F1-07 em ato próprio: **12 casos novos +
 
 ## 8. Critérios de aceite DOCUMENTAL e próximos atos
 
-- [ ] Responsável avaliar F107-D01 a D10 e, se concordar, ratificar **somente** alternativas A como diretrizes documentais.
-- [ ] Após ratificação, preparar minuta executiva **separada e não autoexecutável** para avaliação.
+- [x] Responsável **ratificou exclusivamente documentalmente** as dez alternativas A de F107-D01 a D10 em 2026-11-08.
+- [ ] Preparar minuta executiva **separada e não autoexecutável** para avaliação, sem executar o seu conteúdo.
 - [ ] Solicitar decisão própria sobre eventual merge documental desta proposta; nenhuma aprovação de código decorre dele.
 - [ ] Preservar 70 testes anteriores como regressão futura; U07-01..U07-12 não implementados/executados.
 - [ ] Manter R01-G01–G11 e CORE/SEG/AUT CRM **ABERTOS**, sem SQL/ALLOW, dados reais, custos, infra ou deploy.
 
-**Estado efetivo F1-07:** somente proposta documental preparada. **Sem autorização executiva, sem testes F1-07 e sem merge.**
+**Estado efetivo F1-07:** propostas F107-D01 a D10 **ratificadas exclusivamente documentalmente**. PR #93 permanece em rascunho e sem merge; **sem autorização executiva, sem testes F1-07 e sem implantação**.
