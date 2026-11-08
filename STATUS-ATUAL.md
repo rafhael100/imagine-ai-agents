@@ -476,3 +476,12 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - **F1-04 NÃO ESTÁ AUTORIZADO PARA CÓDIGO/TESTES.** PR #82 é apenas documental; sem branch de código, merge de código, CI/Actions, instalação, SQL/ALLOW, API real, gastos, VPS/Cloudflare/n8n, dados privados ou deploy.
 - `main` e outros projetos preservados, R01-G01 a G11 **TODOS ABERTOS**, CORE/SEG/AUT CRM **ABERTOS**. F1-05 bloqueado.
 - Próximo passo: apresentar **minuta executiva F1-04 separada** para eventual autorização específica do responsável.
+
+## F1-04 — Ratificação documental e minuta executiva separada — 2026-11-08
+
+- O [PR #82](https://github.com/rafhael100/imagine-ai-agents/pull/82) foi **MERGED somente na branch** `dev/ft01-aia-core-mocks-2026-11-06` (SHA `84f882bb4b9c5ed22514114491e5138cc599bb07`), com F104-D01 a D10 (alternativas A) **ratificadas exclusivamente como diretrizes documentais**. Registros históricos anteriores que descrevem o PR #82 como draft são anteriores ao merge.
+- **Nova minuta de autorização executiva AINDA NÃO APROVADA:** `docs/AIA-FT01-F1-04-ORDEM-EXECUTIVA-PROPOSTA.md` na branch **documental** `docs/ft01-f1-04-autorizacao-executiva-proposta-2026-11-08`.
+- Propõe para autorização futura e independente a branch **DE CÓDIGO NÃO CRIADA** `dev/ft01-f1-04-tool-catalog-mocks-2026-11-08`, catálogo/capabilities e despacho de ferramentas puramente fake, 12 novos testes U04-01..12 e 34 regressões, total candidato de 46 casos **NÃO EXECUTADOS neste lote**.
+- A aprovação documental F104 **não autoriza** Codex, branch de código, novos testes, merge de código, nenhuma integração CRM real, credenciais, dados privados, SQL/ALLOW, instalação PHP/Composer, GitHub Actions, despesas, VPS/Cloudflare/n8n ou deploy.
+- `main` preservada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a` na verificação. R01-G01 a G11 **TODOS ABERTOS**, CORE/SEG/AUT CRM **ABERTOS**, F1-05 não autorizado.
+- **Próximo ato:** submeter esta minuta para revisão e, somente depois de decisão executiva expressa do responsável, iniciar código F1-04 em branch filha isolada.
