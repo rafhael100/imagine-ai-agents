@@ -120,6 +120,7 @@ $tests['all outcomes retain their state and timeout never resubmits'] = function
         check($gateway->count() === 1 && $effect->state === $state);
     }
 };
+$tests = array_merge($tests, require __DIR__ . '/supervised.php');
 $failed = 0;
 foreach ($tests as $name => $test) {
     try { $test(); echo "PASS $name\n"; }

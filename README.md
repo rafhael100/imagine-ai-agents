@@ -73,3 +73,51 @@ Pendências: executar lint e os dez casos em ambiente autorizado com PHP já
 existente; revisar os contratos simulados e homologar contratos reais separadamente.
 R01-G01 a G11 e CORE/SEG/AUT CRM permanecem abertos. F1-02, merge e deploy exigem
 nova autorização.
+
+## FT01-F1-02 — coordenação supervisionada local (2026-11-08)
+
+`SupervisedCoordinator` recebe contexto, gateway fake e provedor fake por injeção
+manual. Permite iniciar run, criar etapas, sugerir, executar intenção com aprovação
+externamente fornecida, consultar efeito e transitar a run explicitamente. Não
+emite aprovação: usa o objeto F1-01, inclusive revogação e janela `[issuedAt,
+expiresAt)` com relógio passado como parâmetro. Não há relógio global ou agendamento.
+
+`execute` reserva a intenção antes do único `submit`. Repetição da mesma intenção
+consulta `status`; divergência material falha com `IDEMPOTENCY_CONFLICT`. Falha de
+envio vira `INDETERMINADO`, nunca retry automático. `afterTimeout` exige tentativa
+TIMEOUT vinculada à intenção e faz somente consulta. `reconcile` também funciona
+para run terminal, preservando a distinção entre estado da run e efeito. Novas
+operações exigem run ativa. Confirmado/negado não podem regredir; ausência de
+registro após dispatch é tratada como indeterminação. Erro na consulta propaga a
+falha sem liberar novo envio ou apagar a última evidência.
+
+`MockSupervisedGateway` compõe o fake F1-01 sem modificar contratos. Expõe contadores
+para observar submissões/consultas e permite simular perda da resposta depois do
+efeito. `recordSyntheticEvidence` é controle explícito de fixture, não API real;
+atualiza resultado pendente/indeterminado para confirmação, negativa ou continuação
+da espera. Prova CONFIRMADO continua exclusivamente `SYNTHETIC_MOCK_CRM`.
+
+Rastros são arrays em memória com sequência, referências de produto/tenant/run/
+step/intent e códigos fechados. Referências recebem hash determinístico para evitar
+copiar conteúdo arbitrário mesmo com prefixo SYNTHETIC. Não armazenam material,
+prompt, sugestão, erro bruto ou stack. Hash não é autenticação nem anonimização de
+produção. Cada coordenador serve um contexto sintético; não é ACL CRM.
+
+Os dez casos originais são preservados; `tests/Unit/supervised.php` acrescenta os
+12 casos U02-01–U02-12 da ordem executiva, carregados pelo mesmo runner. Em ambiente
+autorizado com PHP 8.1+ **previamente disponível**, executar:
+
+```sh
+find src tests/Unit -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+php tests/Unit/run.php
+```
+
+Nesta execução Codex, PHP está ausente: **lint e os 22 testes NÃO EXECUTADOS**.
+Nenhuma instalação ou GitHub Actions utilizada. A validação independente anterior
+F1-01 registrada no STATUS não comprova o código novo F1-02.
+
+Limitações: estado volátil por instância, nenhuma atomicidade, concorrência,
+recuperação durável ou prova de serviço real. Run concluída não indica efeito
+confirmado; cancelamento não apaga efeitos existentes. Novos objetos/coordenadores
+não representam recuperação de processo. Sem merge, F1-03 ou deploy. R01-G01 a G11
+e CORE/SEG/AUT CRM continuam abertos.
