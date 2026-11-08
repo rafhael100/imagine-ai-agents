@@ -281,9 +281,9 @@ independentemente em ambiente isolado de análise, sem GitHub Actions.
 ## Proposta documental FT01-F1-02 — 2026-11-07
 
 - O responsável **aprovou a preparação do próximo plano documental**, não a programação F1-02.
-- Documento **PROPOSTO E AINDA NÃO RATIFICADO**: `docs/AIA-FT01-F1-02-COORDENACAO-SUPERVISIONADA-MOCK-PROPOSTA.md` na branch documental `docs/ft01-f1-02-proposta-orquestracao-mock-2026-11-07`, baseada em `dev/ft01-aia-core-mocks-2026-11-06`.
-- Decisões **FT01-F102-D01 a D10 ABERTAS**, propondo uma camada de coordenação supervisionada apenas simulada, status e reconciliação fake, menor privilégio lógico, 12 novos casos sintéticos e preservação dos 10 casos de regressão F1-01.
+- Documento **RATIFICADO DOCUMENTALMENTE em 2026-11-08, sem autorização de execução**: `docs/AIA-FT01-F1-02-COORDENACAO-SUPERVISIONADA-MOCK-PROPOSTA.md` na branch documental `docs/ft01-f1-02-proposta-orquestracao-mock-2026-11-07`, baseada em `dev/ft01-aia-core-mocks-2026-11-06`.
+- Decisões **FT01-F102-D01 a D10 APROVADAS DOCUMENTALMENTE (alternativas A, 2026-11-08)**, propondo uma camada de coordenação supervisionada apenas simulada, status e reconciliação fake, menor privilégio lógico, 12 novos casos sintéticos e preservação dos 10 casos de regressão F1-01.
 - **F1-02 NÃO AUTORIZADO para código**, branch de execução não criada; nenhum teste novo, PHP instalado, CI/Actions, despesa, instalação, servidor, API ou merge autorizado.
 - **F1-01 encerrado apenas na branch dev**; `main`, CRM, Portal e demais produtos intactos.
 - R01-G01 a G11 **TODOS ABERTOS** e CORE/SEG/AUT CRM **TODOS ABERTOS**.
-- Próximo passo: submeter as dez diretrizes propostas ao responsável para ratificação documental, depois pedir autorização executiva **separada** para Codex.
+- Próximo passo: preparar autorização executiva **separada** para avaliação do responsável, antes de Codex ou testes F1-02.
