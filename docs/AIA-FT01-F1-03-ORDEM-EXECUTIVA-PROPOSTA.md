@@ -1,12 +1,12 @@
-# AIA-FT01/F1-03 — Proposta de autorização executiva restrita | v0.1
+# AIA-FT01/F1-03 — Autorização executiva restrita ratificada | v0.1
 
-> **ESTADO: PROPOSTA EXECUTIVA, NÃO AUTORIZADA.** O responsável aprovou **apenas as diretrizes documentais F103-D01 a D10 (alternativas A)** em 2026-11-08. Aprovação documental, criação/merge de PRs documentais, e esta minuta não autorizam Codex a programar F1-03.
+> **ESTADO: F1-03 EXPRESSAMENTE AUTORIZADO PELO RESPONSÁVEL EM 2026-11-08** ao responder “autorizado” à pergunta específica sobre executar o AIA-FT01-F1-03 com código mockado e testes sintéticos, sem merge, despesas, integrações reais ou infraestrutura. **Permissão restrita ao lote descrito e condicionada ao preflight**; não autoriza merge de código, deploy, F1-04 ou fechamento dos gates. Autorização não equivale a código/testes já executados.
 >
 > Repositório: `rafhael100/imagine-ai-agents`. Branch documental: `docs/ft01-f1-03-autorizacao-executiva-proposta-2026-11-08`; base: `dev/ft01-aia-core-mocks-2026-11-06`.
 >
 > **Gates vinculantes:** R01-G01–G11 TODOS ABERTOS e CORE/SEG/AUT CRM ABERTOS. Sem alteração da `main`, outros repositórios, servidores ou sistemas reais.
 
-## 1. Fundamento e limites da futura execução
+## 1. Fundamento e limites da execução autorizada
 
 - **F1-01:** PR #71 integrado somente na branch dev; modelos PHP puros e mocks.
 - **F1-02:** PR #76 integrado somente na branch dev; `SupervisedCoordinator`, `MockSupervisedGateway`, 12 casos sintéticos. Resultado histórico de validação independente: 19/19 PHP sem erros de sintaxe e 22/22 testes unitários sintéticos aprovados em PHP 8.4.24.
@@ -15,7 +15,7 @@
 
 Se autorizado futuramente, o F1-03 será um **laboratório de resiliência e auditoria sintéticas**: simular falhas compostas, identificar evidências insuficientes, classificar estado como indeterminado quando aplicável, e reproduzir **somente a interpretação de rastros**, sem repetir efeitos ou efetuar chamadas de produção.
 
-## 2. Branch e política de trabalho propostas — NENHUMA BRANCH DE CÓDIGO CRIADA
+## 2. Branch e política de trabalho autorizadas — criação após preflight
 
 | Parâmetro | Valor proposto |
 | --- | --- |
@@ -27,9 +27,9 @@ Se autorizado futuramente, o F1-03 será um **laboratório de resiliência e aud
 | `main` | Absolutamente inalterada |
 | F1-04 | Não autorizado |
 
-A branch de código **só pode ser criada após autorização executiva expressa separada**; antes, confirmar que não existe. Nunca sobrescrever branch existente, fazer force-push, alterar `main` ou mergear por dedução do aceite documental.
+O responsável concedeu **autorização executiva expressa separada em 2026-11-08**, permitindo criar a branch filha de código **após** verificação do preflight; antes da criação, confirmar que não existe. Nunca sobrescrever branch existente, fazer force-push, alterar `main` ou mergear por dedução do aceite documental.
 
-## 3. Preflight obrigatório caso haja autorização futura
+## 3. Preflight obrigatório para a execução autorizada
 
 1. Conferir autenticação GitHub e remoto: `gh auth status`, `git remote -v`, `git ls-remote`; conferir `git status`, branch ativa, SHA da `main`, base e eventual branch filha. Se houver conflito, parar.
 2. Ler `AGENTS.md`, `README.md`, `STATUS-ATUAL.md`, documentação R01/R02/R03/R04, contratos F1-01/F1-02 e os dois documentos F1-03 (proposta e esta ordem).
@@ -37,7 +37,7 @@ A branch de código **só pode ser criada após autorização executiva expressa
 4. Verificar se `php` 8.1+ **já está disponível** no ambiente de execução; **não instalar** PHP, Composer, PHPUnit, containers, extensões ou SDKs. Se PHP não existir, documentar lint/testes **não executados**, sem alegar sucesso.
 5. Declarar executor real, ambiente, SHA inicial, arquivos planejados e quaisquer pré-requisitos que impeçam a execução. Nenhum acesso a dados reais.
 
-## 4. Código PHP puro FUTURO — superfícies limitadas
+## 4. Código PHP puro autorizado — superfícies limitadas
 
 | Superfície | Permitido sob autorização específica | Fora de escopo |
 | --- | --- | --- |
@@ -66,9 +66,9 @@ Não criar `composer.json`, lockfiles, migrations, SQL, `.env`, ações de CI, D
 11. **Compatibilidade:** preservar os 22 testes existentes sem alteração oportunista. Se precisar mudar regressões para fazê-las passar, bloquear e pedir revisão.
 12. **Auditoria sem fechamento de gates:** nenhum teste mockado comprova ACL, conformidade LGPD, concorrência, idempotência durável, integração CRM real ou segurança de produção.
 
-## 6. Escopo de testes futuros — 12 novos + 22 regressões = 34
+## 6. Escopo de testes autorizados — 12 novos + 22 regressões = 34
 
-Os 12 casos **U03-01 a U03-12**, documentados no PR #78, deverão ser implementados **somente após autorização expressa F1-03**:
+Os 12 casos **U03-01 a U03-12**, documentados no PR #78, foram **autorizados expressamente em 2026-11-08** exclusivamente como testes unitários sintéticos; devem ser implementados e, havendo PHP previamente disponível, executados dentro dos limites previstos:
 
 | ID | Resultado exigido no ambiente exclusivamente sintético |
 | --- | --- |
@@ -102,7 +102,7 @@ Parar e relatar, sem prosseguir por conta própria, diante de qualquer necessida
 - usar branch não autenticada, detectar divergência no remoto, testes sem runtime ou conflito de estado;
 - iniciar F1-04, fechar gates R01/CORE/SEG/AUT ou efetuar merge/deploy.
 
-## 8. Entregáveis para revisão de PR de código FUTURO
+## 8. Entregáveis para revisão de PR de código
 
 - Um PR **draft**, filho `dev/ft01-f1-03-resilience-mocks-2026-11-08` → base dev, **sem merge**.
 - Diff apenas das superfícies autorizadas, com alteração mínima das regressões.
@@ -111,20 +111,20 @@ Parar e relatar, sem prosseguir por conta própria, diante de qualquer necessida
 - Evidência de preservação da `main`, de todos os gates R01-G01–G11/CORE/SEG/AUT CRM e das demais aplicações.
 - **Novo aceite específico** para qualquer merge futuro na branch dev. Nunca fazer merge sem essa decisão.
 
-## 9. Modelo para decisão executiva separada — AINDA NÃO APROVADO
+## 9. Autorização executiva concedida em decisão separada
 
-O responsável poderá emitir uma mensagem específica como:
+O responsável respondeu **“autorizado”** à pergunta objetiva: **“Você autoriza expressamente o desenvolvimento do AIA-FT01-F1-03, limitado ao código mockado e aos testes unitários sintéticos, sem merge, despesas, integrações reais ou alterações na infraestrutura?”**. A autorização executiva está concedida **somente nos limites desta ordem**. Texto operacional:
 
 > **Autorizo expressamente o AIA-FT01-F1-03 para desenvolvimento puramente mockado**, exclusivamente em `rafhael100/imagine-ai-agents`, criando `dev/ft01-f1-03-resilience-mocks-2026-11-08` a partir da branch `dev/ft01-aia-core-mocks-2026-11-06` após preflight Git autenticado. Autorizo código PHP puro determinístico de falhas compostas, análise read-only de rastros e auditoria sintética nas superfícies `src/MockResilience/`, `src/Mocks/`, `src/Domain/`, `tests/Unit/`, `README.md` e `STATUS-ATUAL.md`. Permito até 12 testes sintéticos novos U03-01–U03-12 e regressão dos 22 existentes onde PHP 8.1+ já estiver disponível; se faltar, não instalar, registrar testes não executados. Quero PR draft filha → dev, sem merge. Não autorizo mudanças em `main`, `src/Contracts/`, `SupervisedCoordinator`, `AGENTS.md`, outras aplicações, SQL/ALLOW, APIs reais, dados privados, credenciais, Composer/PHP instalado, GitHub Actions, despesas, servidores, deploy, F1-04 ou fechamento dos gates R01-G01–G11 e CORE/SEG/AUT CRM. Interromper em caso de conflito e apresentar resultados reais.
 
-O bloco acima é um **modelo**, não aprovação executiva atual. O responsável deverá aprovar **expressamente a execução do F1-03 em decisão posterior**; mesmo que este PR documental seja merged, isso não libera Codex nem criação de branch de código.
+O texto acima é a **ordem executiva ratificada em 2026-11-08**. O executor deve validar Git autenticado, branch, SHA e guardrails antes de executar; **não há autorização para merge do PR de código, deploy ou F1-04**. Esta ratificação não prova que a implementação ou os 34 testes já ocorreram.
 
 ## 10. Próximo ato solicitado
 
 - [x] F103-D01 a D10 alternativas A ratificadas **somente documentalmente**, PR #78.
-- [ ] Revisar e, se apropriado, aprovar **apenas como minuta técnica** esta autorização executiva proposta.
-- [ ] Emitir decisão executiva expressa separada para autorizar F1-03 e testes.
-- [ ] Somente depois, criar branch de código, executar Codex, revisar PR e validar 34 testes.
+- [x] O responsável autorizou **expressamente** executar F1-03 e testes sintéticos em 2026-11-08, com todas as restrições desta ordem.
+- [ ] Executar preflight Git e confirmar SHA antes de criar/usar branch filha de código.
+- [ ] Executar Codex apenas no ramo filho, criar PR draft e validar os 34 testes quando PHP 8.1+ previamente disponível.
 - [ ] Obter autorização específica para eventual merge em dev. `main` e F1-04 bloqueados.
 
-**Estado vinculante:** planejamento F1-03 aprovado documentalmente; **nenhuma programação F1-03 autorizada**. R01-G01–G11 e CORE/SEG/AUT permanecem ABERTOS.
+**Estado vinculante:** planejamento F1-03 aprovado documentalmente, **execução de código PHP puramente mockado e testes sintéticos F1-03 EXPRESSAMENTE AUTORIZADOS em 2026-11-08**, sujeita a preflight e evidências verificáveis. **Merge de código, deploy, F1-04, integrações e fechamento de gates NÃO AUTORIZADOS**. R01-G01–G11 e CORE/SEG/AUT permanecem ABERTOS.
