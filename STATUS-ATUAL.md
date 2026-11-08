@@ -596,3 +596,13 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - **Branch candidata de código NÃO CRIADA/NÃO AUTORIZADA:** `dev/ft01-f1-07-knowledge-context-mocks-2026-11-08`. Qualquer programação/teste dependerá de ordem executiva específica em ato separado, e qualquer merge exigirá autorização adicional; PR de código futuro deve ser DRAFT filha → dev, SEM MERGE.
 - `main` observada intacta em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; PR documental histórico #90, todos os outros repositórios, infraestrutura e VPS preservados. **R01-G01 a G11 e CORE/SEG/AUT CRM TODOS ABERTOS**. Sem SQL/ALLOW, credenciais, GitHub Actions, pagamentos, modelo/fornecedor externo ou deploy. F1-08 não autorizado.
 - **Próximo passo:** apresentar as alternativas A de F107-D01 a D10 para avaliação e eventual ratificação **somente DOCUMENTAL**, sem presumir ordem executiva.
+
+## Ratificação exclusivamente DOCUMENTAL F107-D01 a D10 — 2026-11-08
+
+- Após a apresentação das dez alternativas A no [PR #93](https://github.com/rafhael100/imagine-ai-agents/pull/93), o responsável respondeu **“sim aprovado”** à pergunta específica de aprovar **DOCUMENTALMENTE F107-D01 a D10**. Todas as alternativas A foram ratificadas **somente no nível documental**; alternativas B não adotadas.
+- **Escopo ratificado:** recuperação somente sintética e read-only; escopo por empresa/produto/principal/finalidade/recurso; origem, versão e validade da fonte; revogação/rechecagem antes da entrega; conteúdo tratado como dado não confiável, isolamento, dados transacionais pertencentes ao CRM, contexto mínimo, sem memória persistente; PHP puro e aprovação em atos separados.
+- Os **12 casos U07-01..U07-12 permanecem NÃO IMPLEMENTADOS/NÃO EXECUTADOS**; os 70 testes anteriores F1-01..F1-06 são regressão futura. **82/82 é somente META, não resultado validado.**
+- O **PR #93 permanece DOCUMENTAL, DRAFT e SEM MERGE**. Minuta executiva F1-07 a preparar em branch/PR documental separados, **sem autorização para código, testes, branch de implementação, merge ou deploy**. A aprovação documental não equivale a ordem executiva.
+- PR #92 de correção F1-06 e PR #90 documental F1-06 permanecem separados; nenhuma interferência nesses PRs, `main`, demais projetos ou infraestrutura.
+- R01-G01–G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**. Sem dados reais, OAuth/ACL real, SQL/ALLOW, API/LLM real, GitHub Actions, fornecedores pagos, VPS/Cloudflare/n8n ou publicação. **F1-08 não autorizado**.
+- **Próximo ato:** avaliar a minuta executiva e/ou autorizar, em decisão separada, o **merge documental** do PR #93. Nenhum desses atos deve ser presumido.
