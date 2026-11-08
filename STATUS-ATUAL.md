@@ -507,3 +507,22 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - Durante o primeiro teste local, U04-08 teve fixture de grant vencido simultaneamente à aprovação; corrigiu-se a **fixture** com concessão vigente para comprovar bloqueio por aprovação expirada. Reexecutados todos os casos com **46/46 PASS** sem relaxar controles.
 - Sem Composer, GitHub Actions, deploy, redes/APIs/LLM reais, SQL/ALLOW, banco, filas, dados pessoais, tokens, custos, VPS/Cloudflare/n8n ou mudanças em outros repositórios. `main` permanece fora do escopo.
 - **Próximo passo condicionado:** abrir PR de código **draft**, base exclusivamente na branch dev. Revisão humana e nova autorização expressa são exigidas antes de qualquer merge. R01-G01–G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**; F1-05 não autorizado.
+
+## FT01-F1-05 — planejamento documental de uso, cotas e observabilidade (2026-11-08)
+
+- O responsável respondeu **“sim”** ao pedido para iniciar **exclusivamente a documentação F1-05**, após a integração da F1-04 pelo PR #84. Isso NÃO autoriza branch de código, programação, testes F1-05, merge, provisionamento ou deploy.
+- **PROPOSTA AINDA NÃO RATIFICADA:** `docs/AIA-FT01-F1-05-USO-COTAS-OBSERVABILIDADE-MOCK-PROPOSTA.md` na branch `docs/ft01-f1-05-consumo-cotas-observabilidade-mock-2026-11-08`, com base `dev/ft01-aia-core-mocks-2026-11-06`.
+- **F105-D01 a D10 TODAS ABERTAS:** medição de unidades técnicas, quota fake por contexto, deduplicação e reconciliação conservadora de eventos, alertas e traces sintéticos mínimos, sem plano/crédito/cobrança comercial.
+- **12 cenários U05-01..12 PROPOSTOS, NÃO IMPLEMENTADOS NEM EXECUTADOS**; preservar 46 regressões já verificadas nos lotes F1-01..F1-04. A meta de **58 casos** é futura, não resultado.
+- **F1-05 SEM AUTORIZAÇÃO EXECUTIVA:** nenhuma branch de código, alteração PHP, testes, SQL/ALLOW, API/CRM real, credenciais, dados privados, Composer/Actions, custos, VPS/Cloudflare/n8n ou deploy. F1-06 não autorizado.
+- `main`, demais projetos e infra inalterados; R01-G01–G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**.
+- **Próximo passo:** apresentar F105-D01 a D10, alternativas A, para avaliação e possível ratificação **somente documental**; depois, se aprovado, preparar ordem executiva em ato separado.
+
+## Ratificação documental F105-D01 a D10 — 2026-11-08
+
+- Após apresentar as dez alternativas A no [PR #85](https://github.com/rafhael100/imagine-ai-agents/pull/85), o responsável respondeu **“sim”** à pergunta específica de **ratificação documental das decisões F105-D01 a D10**. A aprovação é DOCUMENTAL, separada de futura autorização de implementação.
+- **F105-D01–D10: alternativas A APROVADAS SOMENTE DOCUMENTALMENTE**; as B não foram adotadas. Recorte: medição técnica e políticas de cotas sintéticas, deduplicação de eventos de uso, reconciliação conservadora, alertas referenciais mínimos, segregação por produto/tenant/finalidade e distinção absoluta entre uso técnico AIA e créditos/cobrança CRM.
+- **12 testes U05-01..U05-12 continuam apenas propostos, não implementados e NÃO EXECUTADOS.** Os 46 anteriores F1-01..F1-04 permanecem como regressão futura; **58 é META, não resultado**.
+- O [PR #85](https://github.com/rafhael100/imagine-ai-agents/pull/85) permanece **DOCUMENTAL, DRAFT e SEM MERGE**, até autorização específica. A minuta executiva a preparar é **proposta separada não aprovada**.
+- **NÃO AUTORIZADOS:** programação F1-05, Codex, branch de código, novos testes, alterações `main`/CRM/Portal/outros projetos, APIs reais, SQL/ALLOW, dados privados, credenciais, GitHub Actions, despesas, VPS/Cloudflare/n8n, deploy, F1-06 ou fechamento de gates.
+- **R01-G01 a G11 e CORE/SEG/AUT CRM TODOS ABERTOS.** Próxima decisão independente: revisar e autorizar, ou não, a **ordem executiva F1-05**; merge de código exigirá autorização ainda posterior.
