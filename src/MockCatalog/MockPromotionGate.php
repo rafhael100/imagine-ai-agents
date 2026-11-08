@@ -9,6 +9,8 @@ use ImagineAI\Domain\{MockError, TenantContext};
 final class MockPromotionGate
 {
     private ?string $active = null;
+    /** Last selected snapshot is kept so suspension remains possible after catalog disable. */
+    private ?MockAgentVersionSnapshot $activeSnapshot = null;
     private array $decisions = [];
     private array $history = [];
     private array $events = [];
@@ -44,6 +46,13 @@ final class MockPromotionGate
         $this->allowedTools = array_values(array_filter(
             $this->allowedTools, static fn (string $tool): bool => $tool !== $ref
         ));
+        // A revoked capability immediately invalidates the local selection, without any external action.
+        if ($this->activeSnapshot !== null && in_array($ref, $this->activeSnapshot->manifest['tools'], true)) {
+            $snapshot = $this->activeSnapshot;
+            $this->active = null;
+            $this->activeSnapshot = null;
+            $this->trace('SUSPENDED_TOOL_REVOKED', $snapshot);
+        }
     }
 
     private function eligible(MockAgentVersionSnapshot $snapshot, MockVersionReview $review,
@@ -92,6 +101,7 @@ final class MockPromotionGate
             return 'ATIVO_SIMULADO'; // Original result, no replayed effect or state change.
         }
         $this->active = $snapshot->ref;
+        $this->activeSnapshot = $snapshot;
         $this->history[$snapshot->ref] = $snapshot->digest;
         $this->trace('PROMOTED', $snapshot);
         return 'ATIVO_SIMULADO';
@@ -103,13 +113,17 @@ final class MockPromotionGate
         MockAgentVersionSnapshot::syntheticRef($decisionRef);
         if (isset($this->decisions[$decisionRef])) {
             $record = $this->decisions[$decisionRef];
-            if ($record[0] !== 'SUSPEND') MockError::fail('PROMOTION_CONFLICT');
+            // A past suspension may only be replayed when no later selection is active.
+            if ($record[0] !== 'SUSPEND' || $this->active !== null) MockError::fail('PROMOTION_CONFLICT');
             return 'SUSPENSO';
         }
-        if ($this->active === null) MockError::fail('RELEASE_DENIED');
-        $snapshot = $this->catalog->get($this->active, $context);
+        if ($this->active === null || $this->activeSnapshot === null) MockError::fail('RELEASE_DENIED');
+        // Suspension is still allowed after the catalog has disabled this snapshot.
+        // Re-reading via catalog->get() would incorrectly deny the safe action.
+        $snapshot = $this->activeSnapshot;
         $this->record($decisionRef, 'SUSPEND', $snapshot->ref, $snapshot->digest);
         $this->active = null;
+        $this->activeSnapshot = null;
         $this->trace('SUSPENDED', $snapshot);
         return 'SUSPENSO';
     }
@@ -125,11 +139,27 @@ final class MockPromotionGate
             return 'ATIVO_SIMULADO';
         }
         $this->active = $snapshot->ref;
+        $this->activeSnapshot = $snapshot;
         $this->trace('ROLLED_BACK', $snapshot);
         return 'ATIVO_SIMULADO';
     }
 
-    public function current(): ?string { return $this->active; }
+    /** The visible selection fails closed when its catalog entry or tool eligibility is revoked. */
+    public function current(): ?string
+    {
+        if ($this->active === null || $this->activeSnapshot === null) return null;
+        try {
+            $known = $this->catalog->get($this->active, $this->context);
+        } catch (MockError $error) {
+            if ($error->getMessage() === 'SNAPSHOT_DENIED') return null;
+            throw $error;
+        }
+        if ($known->digest !== $this->activeSnapshot->digest) return null;
+        foreach ($this->activeSnapshot->manifest['tools'] as $tool) {
+            if (!in_array($tool, $this->allowedTools, true)) return null;
+        }
+        return $this->active;
+    }
 
     /** Closed codes + hashes only; no raw manifest, text, secrets, or identities. */
     public function events(): array { return $this->events; }
