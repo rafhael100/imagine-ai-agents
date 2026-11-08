@@ -1,10 +1,10 @@
 # AIA-FT01/F1-06 — Catálogo de versões, avaliações e promoção simulada de agentes | Proposta documental v0.1
 
-> **ESTADO: PROPOSTA DOCUMENTAL. F106-D01 a D10 TODAS ABERTAS, SEM RATIFICAÇÃO.**
+> **ESTADO: F106-D01 a D10, alternativas A, RATIFICADAS EXCLUSIVAMENTE DOCUMENTALMENTE em 2026-11-08.**
 >
 > **Data:** 2026-11-08. Repositório: `rafhael100/imagine-ai-agents`. Branch exclusivamente documental `docs/ft01-f1-06-catalogo-versoes-avaliacao-mock-2026-11-08`, baseada na `dev/ft01-aia-core-mocks-2026-11-06`.
 >
-> **Autorização efetiva:** o responsável respondeu **“sim”** somente ao pedido de **iniciar o planejamento documental da F1-06**. Não autorizou criar branch de programação, Codex, escrever PHP, executar testes F1-06, merge documental/de código, serviços externos, integrações reais, gastos, servidores ou deploy.
+> **Autorização efetiva:** o responsável primeiro respondeu **“sim”** ao pedido de **iniciar o planejamento documental F1-06** e, posteriormente, respondeu **“sim”** à pergunta específica de aprovar **as dez alternativas A de F106-D01 a D10 exclusivamente como diretrizes documentais**. Esta ratificação **NÃO autoriza** criar branch de programação, executar Codex, escrever PHP, executar testes F1-06, realizar merge documental/de código, serviços externos, integrações reais, gastos, servidores ou deploy.
 >
 > **Gates:** R01-G01 a G11, CORE/SEG/AUT CRM e demais homologações **TODOS ABERTOS**. `main`, outros repositórios, CRM, Portal, Performance AI, Sites, Universidade e VPS/Cloudflare/n8n inalterados. Nada de SQL/ALLOW, dados privados, autenticação real, JWT/tokens, LLM/API, Composer/Actions, credenciais, custos ou publicação real. F1-07 não autorizada.
 
@@ -88,9 +88,9 @@ Apenas após autorização de programação e testes F1-06 independente: **12 no
 
 **Regressões futuras:** preservar os 58 casos F1-01..F1-05, sem editar casos antigos para tornar uma versão nova aparentemente compatível. Meta futura **70/70**, não resultado obtido. Com PHP CLI 8.1+ **preexistente** e autorização executiva separada, comandos candidatos: `php -v`, lint de arquivos PHP e `php tests/Unit/run.php`. Se ausente, documentar **NÃO EXECUTADOS**, sem instalar PHP/Composer ou usar GitHub Actions. Validar hashes do commit exato testado.
 
-## 7. Decisões F106-D01 a D10 — TODAS ABERTAS
+## 7. Decisões F106-D01 a D10 — ALTERNATIVAS A RATIFICADAS DOCUMENTALMENTE
 
-| ID | Alternativa A RECOMENDADA para ratificação exclusivamente documental | Alternativa B NÃO recomendada |
+| ID | Alternativa A RATIFICADA exclusivamente documentalmente | Alternativa B NÃO adotada |
 | --- | --- | --- |
 | **F106-D01 — escopo** | Catálogo, snapshots e promoção/rollback **somente simulados** | Publicar agentes operacionais neste lote |
 | **F106-D02 — autoridade** | Versão elegível não é grant, permissão, quota ou aprovação CRM | Template libera ferramenta por simples ativação |
@@ -103,7 +103,7 @@ Apenas após autorização de programação e testes F1-06 independente: **12 no
 | **F106-D09 — tecnologia/custos** | PHP puro, in-memory, sem dependências/infra | LLM, banco, filas, Actions, API real, despesas |
 | **F106-D10 — gates** | Ratificação apenas documental; execução e merge de código em atos separados | Aprovação genérica implica deploy/produção |
 
-**F106-D01 a D10 permanecem ABERTAS, não aprovadas.** A eventual aprovação das alternativas A não permite iniciar programação, testes F1-06 ou merge.
+**F106-D01 a D10: alternativas A RATIFICADAS EXCLUSIVAMENTE DOCUMENTALMENTE em 2026-11-08.** As alternativas B não foram adotadas. A decisão **não autoriza** iniciar programação, testes F1-06, criar branch de código, merge ou deploy.
 
 ## 8. Riscos, lacunas e condições de parada
 
@@ -123,10 +123,10 @@ Apenas após autorização de programação e testes F1-06 independente: **12 no
 
 ## 10. Aceite exclusivamente documental
 
-- [ ] Responsável avaliar e, se concordar, ratificar **somente documentalmente** as alternativas A F106-D01 a D10.
-- [ ] Após ratificação documental, preparar minuta executiva separada com arquivos, SHAs, cenários e bloqueios — **ainda sem programação**.
+- [x] Responsável **ratificou somente documentalmente** as alternativas A de F106-D01 a D10 em 2026-11-08.
+- [ ] Preparar minuta executiva **separada** com arquivos, SHAs, cenários e bloqueios, **ainda sem programação** e sem autorização implícita.
 - [ ] Somente autorização executiva distinta permitirá programação e testes F1-06; autorização de merge de código deverá ocorrer em outro ato.
 - [ ] Preservar 58 regressões e declarar 12 casos U06 como **propostos, não executados**.
 - [ ] Manter R01-G01–G11, CORE/SEG/AUT CRM e demais gates **ABERTOS**, sem declarar homologação de produção.
 
-**Estado efetivo:** apenas planejamento documental F1-06 preparado. Próxima decisão: ratificação documental F106-D01 a D10; execução/merge/implantação não autorizados.
+**Estado efetivo:** F106-D01 a D10 **RATIFICADAS DOCUMENTALMENTE**, sem execução F1-06 autorizada. Próxima decisão independente: avaliação de minuta executiva específica; programação, testes, merge e implantação continuam não autorizados.
