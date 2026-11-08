@@ -137,11 +137,14 @@ return [
             'SYNTHETIC_BAD', $ctx, 'SYNTHETIC_BASE', 'SYNTHETIC_VERSION_V1',
             [['bad']], 10, 60));
         $refs = ['SYNTHETIC_SOURCE_A', 'SYNTHETIC_SOURCE_B', 'SYNTHETIC_SOURCE_C'];
+        $largeCatalog = new MockKnowledgeCatalog();
         foreach ($refs as $ref) {
-            $catalog->add(f107Source($ctx, ['ref' => $ref,
+            $largeCatalog->add(f107Source($ctx, ['ref' => $ref,
                 'text' => 'SYNTHETIC_' . str_repeat('X', 220)]));
         }
-        denied('CONTEXT_LIMIT_DENIED', fn () => $retriever->select($grant, $ctx, $refs, 15)->deliver($ctx, 15));
+        $largeRetriever = new MockKnowledgeRetriever($largeCatalog, new MockKnowledgeTrace());
+        denied('CONTEXT_LIMIT_DENIED', fn () => $largeRetriever->select(
+            $grant, $ctx, $refs, 15)->deliver($ctx, 15));
     },
     'U07-11 repeat reads do not persist memory and closed envelope cannot reopen' => function (): void {
         [$ctx, , $source, $grant, $trace, $retriever] = f107Fixture();
