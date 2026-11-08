@@ -400,3 +400,15 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - O registro de aprovação permite iniciar trabalho mockado no Codex **sem qualquer efeito real**; não comprova que Codex tenha rodado ou que os 34 testes tenham passado. Se PHP ausente, não instalar; registrar testes NÃO EXECUTADOS.
 - PR de código deve permanecer DRAFT filha → dev, **SEM MERGE**, até nova autorização expressa. `main`, src/Contracts/, SupervisedCoordinator, outros produtos, AGENTS.md e infraestrutura permanecem inalterados.
 - SQL, ALLOW, APIs reais, dados privados, credenciais, GitHub Actions, Composer, instalações, gastos, VPS/Cloudflare/n8n, deploy e F1-04 não autorizados. R01-G01 a G11 **TODOS ABERTOS**; CORE/SEG/AUT CRM **ABERTOS**.
+
+## FT01-F1-03 — execução mockada autorizada; revisão pendente (2026-11-08)
+
+- **Autorização executiva expressa**: depois de ratificar documentalmente as decisões F103-D01 a D10 no [PR #78](https://github.com/rafhael100/imagine-ai-agents/pull/78), o responsável respondeu **“sim”** ao pedido separado de autorização para programação e testes sintéticos F1-03, **sem merge nem deploy**.
+- Branch filha exclusiva: `dev/ft01-f1-03-resilience-mocks-2026-11-08` → base `dev/ft01-aia-core-mocks-2026-11-06`. `main` observada preservada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`.
+- Arquivos novos: `src/MockResilience/MockFaultGateway.php` (falhas de transporte determinísticas), `src/MockResilience/ReadOnlyTraceReview.php` (análise fail-closed estritamente de leitura), `tests/Unit/resilience.php` (12 cenários U03-01–U03-12).
+- `tests/Unit/run.php` alterado SOMENTE para carregar nova suíte após as 22 verificações existentes. `README.md` e `docs/AIA-FT01-F1-03-ORDEM-EXECUTIVA-2026-11-08.md` documentam escopo e limitações.
+- **Validação auxiliar já efetuada:** PHP CLI 8.4.24 disponível em ambiente local isolado; lint PHP dos três arquivos novos sem erros; **12/12 casos novos PASS, 0 FAIL** com reprodução local das classes anteriores em memória, sem APIs reais, dependências, rede, credenciais, custos ou GitHub Actions. SHA-1 Git blob das três cópias locais dos arquivos novos conferiu com o GitHub.
+- **Pendência de aceite:** os **34 casos completos ainda NÃO foram executados contra o checkout integral exato da branch do PR**. Os 22 testes anteriores foram validados separadamente no PR #76; tal validação anterior não substitui reexecução dos 34 juntos. Não declarar 34/34 PASS até execução real e comprovação.
+- `src/Contracts/`, `src/Domain/`, `src/MockOrchestration/`, `AGENTS.md`, CRM, Portal e infraestrutura não alterados neste lote; não existe persistência, fila, CRM real, IA real, ACL real ou recuperação durável.
+- **PR de código obrigatório em DRAFT, sem merge; F1-04 não autorizado.** R01-G01–G11 e CORE/SEG/AUT CRM permanecem ABERTOS. Nenhum deploy, gasto ou CI.
+- Próximo ato: executar `php -l` em todos os arquivos e `php tests/Unit/run.php` no checkout completo em ambiente já equipado com PHP 8.1+, documentar resultados e submeter para revisão humana antes de qualquer solicitação de merge.
