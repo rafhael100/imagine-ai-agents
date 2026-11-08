@@ -354,3 +354,12 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - **Limites do aceite:** apenas comportamento sintético de mocks PHP 8.4.24; **não é homologação** de autenticação/ACL real, isolamento SaaS em produção, LGPD, durabilidade, concorrência, transações, serviços de IA/CRM ou compatibilidade de runtime em todas as versões PHP 8.1+.
 - **Git:** PR #76 permanece **OPEN/DRAFT**, **SEM MERGE**. Branch base, `main`, outros repositórios e VPS/Cloudflare/n8n inalterados. F1-03 e deploy não autorizados.
 - **Governança:** R01-G01 a G11 **TODOS ABERTOS** e CORE/SEG/AUT CRM **ABERTOS**. Eventual merge do PR #76 somente na branch de desenvolvimento exige autorização expressa separada do responsável.
+
+## Encerramento controlado FT01-F1-02 — 2026-11-08
+
+- O responsável **APROVOU EXPRESSAMENTE** o merge do [PR #76](https://github.com/rafhael100/imagine-ai-agents/pull/76) **somente** na branch `dev/ft01-aia-core-mocks-2026-11-06`.
+- PR #76 **MERGED via squash**, commit `c9cfa8a41706b9fb3daf444cbe4c0fb483aa5f0a`, branch filha `dev/ft01-f1-02-supervised-mocks-2026-11-07` → dev. O estado histórico registrado acima, anterior ao merge, permanece como evidência temporal, não representa o estado atual do PR.
+- **Validação previamente executada:** PHP 8.4.24 isolado, 19/19 arquivos no lint, 22/22 testes sintéticos PASS (10 do F1-01 e 12 do F1-02), 0 falhas e hashes Git blob correspondentes. Aceite técnico **somente para comportamento mockado**, sem equivaler a homologação de segurança/integrações reais.
+- `main` permaneceu em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; nenhuma alteração no CRM, Portal, demais repositórios ou VPS/Cloudflare/n8n. Sem GitHub Actions, novas dependências, custos, deploy, dados pessoais, SQL/ALLOW ou APIs reais.
+- **F1-03 NÃO AUTORIZADO.** Próximo passo sugerido: apresentar proposta documental F1-03 para revisão e aprovação em processo separado antes de qualquer código.
+- R01-G01 a G11 **TODOS ABERTOS**; CORE/SEG/AUT CRM e demais gates **ABERTOS**.
