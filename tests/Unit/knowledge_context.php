@@ -53,7 +53,7 @@ return [
         check(count($trace->events()) === 2);
     },
     'U07-02 tenant product principal purpose and resource isolation' => function (): void {
-        [$ctx, , $source, $grant, , $retriever] = f107Fixture();
+        [$ctx, $catalog, $source, $grant, , $retriever] = f107Fixture();
         foreach ([
             ['SYNTHETIC_OTHER', $ctx->tenant, $ctx->principal, $ctx->purpose, $ctx->resource],
             [$ctx->product, 'SYNTHETIC_OTHER', $ctx->principal, $ctx->purpose, $ctx->resource],
@@ -64,6 +64,17 @@ return [
             $other = new TenantContext(...$parts);
             denied('KNOWLEDGE_DENIED', fn () => $retriever->select($grant, $other, [$source->ref], 15));
         }
+        // The same synthetic source ID in another tenant is a separate scoped entry.
+        $tenantB = new TenantContext($ctx->product, 'SYNTHETIC_B',
+            $ctx->principal, $ctx->purpose, $ctx->resource);
+        $sourceB = f107Source($tenantB);
+        $catalog->add($sourceB);
+        $grantB = new MockRetrievalGrant('SYNTHETIC_GRANT_B', $tenantB,
+            'SYNTHETIC_BASE', 'SYNTHETIC_VERSION_V1', [$sourceB->ref], 10, 60);
+        $resultB = $retriever->select($grantB, $tenantB, [$sourceB->ref], 15)->deliver($tenantB, 15);
+        check($resultB['passages'][0]['digest'] === $sourceB->digest);
+        check($source->digest !== $sourceB->digest);
+        check($catalog->get($source->ref, $source->version, $ctx, 15) === $source);
     },
     'U07-03 missing revoked expired and version-mismatched grants deny' => function (): void {
         [$ctx, , $source, $grant, , $retriever] = f107Fixture();
