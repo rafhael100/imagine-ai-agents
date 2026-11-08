@@ -1,16 +1,16 @@
-# AIA-FT01/F1-04 — Proposta de autorização executiva restrita | v0.1
+# AIA-FT01/F1-04 — Autorização executiva restrita ratificada | v0.1
 
-> **ESTADO: MINUTA EXECUTIVA EM AVALIAÇÃO. F1-04 NÃO AUTORIZADO PARA CÓDIGO, TESTES OU MERGE.**
+> **ESTADO: F1-04 AUTORIZADO EXPRESSAMENTE EM 2026-11-08 PARA CÓDIGO MOCKADO E TESTES UNITÁRIOS SINTÉTICOS, SOMENTE CONFORME LIMITES DESTA ORDEM.** O responsável respondeu “sim” à pergunta explícita sobre autorizar o desenvolvimento do AIA-FT01-F1-04, sem merge, custos, integrações reais ou mudanças de infraestrutura. **Não há autorização para merge de código, implantação, F1-05 ou fechamento de gates.**
 >
 > **Data:** 2026-11-08. **Repo:** `rafhael100/imagine-ai-agents`. **Base documental:** `dev/ft01-aia-core-mocks-2026-11-06`. **Branch de minuta:** `docs/ft01-f1-04-autorizacao-executiva-proposta-2026-11-08`.
 >
-> **Precedência:** F104-D01 a D10, alternativas A, **APROVADAS SOMENTE DOCUMENTALMENTE** pelo responsável e integradas no PR #82 (squash `84f882bb4b9c5ed22514114491e5138cc599bb07`). Esta minuta, sua aprovação documental ou eventual merge documental **NÃO autorizam Codex, criação de branch de código ou testes F1-04**.
+> **Precedência:** F104-D01 a D10, alternativas A, **APROVADAS SOMENTE DOCUMENTALMENTE** e integradas no PR #82 (squash `84f882bb4b9c5ed22514114491e5138cc599bb07`). **Além da ratificação documental, o responsável CONCEDEU AUTORIZAÇÃO EXECUTIVA EXPRESSA SEPARADA em 2026-11-08** para código e testes sintéticos F1-04, após preflight e somente nos limites deste documento. Nenhum código ou teste F1-04 é presumido executado pela autorização.
 >
 > **Gates:** R01-G01 a G11 **TODOS ABERTOS** e CORE/SEG/AUT CRM **ABERTOS**. `main` intacta; sem SQL/ALLOW, APIs reais, autenticação funcional, credenciais, dados privados, PHP/Composer instalado, GitHub Actions, despesas, VPS/Cloudflare/n8n, alterações nos produtos ou deploy.
 
-## 1. Objetivo restrito do lote futuro
+## 1. Objetivo restrito do lote autorizado
 
-Implementar, **somente se houver autorização executiva expressa separada**, um **catálogo local determinístico de ferramentas e capacidades fictícias** e um **despachante supervisionado puramente mockado**, aproveitando os modelos do F1-01, o coordenador F1-02 e a resiliência F1-03.
+Implementar, **sob autorização executiva expressa separada concedida em 2026-11-08**, um **catálogo local determinístico de ferramentas e capacidades fictícias** e um **despachante supervisionado puramente mockado**, aproveitando os modelos do F1-01, o coordenador F1-02 e a resiliência F1-03.
 
 O laboratório deverá distinguir:
 - **catálogo:** ferramenta fictícia existe, está ativa e tem versão de esquema suportada;
@@ -22,21 +22,21 @@ O laboratório deverá distinguir:
 
 **Não é objetivo** criar clientes HTTP, schemas/API homologados com o CRM, autenticação/ACL real, automações configuráveis de clientes, filas, persistência, motor LLM, n8n ou custos.
 
-## 2. Branch FUTURA, não criada nem autorizada
+## 2. Branch de código autorizada, criação somente após preflight
 
 | Item | Regra de autorização proposta |
 | --- | --- |
 | Repositório | `rafhael100/imagine-ai-agents` |
 | Branch base de desenvolvimento | `dev/ft01-aia-core-mocks-2026-11-06` |
-| Branch de implementação proposta — ainda **NÃO CRIADA** | `dev/ft01-f1-04-tool-catalog-mocks-2026-11-08` |
+| Branch de implementação autorizada — **ainda não criada no preflight inicial** | `dev/ft01-f1-04-tool-catalog-mocks-2026-11-08` |
 | Ponto inicial | SHA corrente da base aferida via GitHub autenticado antes da criação |
 | Destino do PR de código | **Draft filha → branch base**, sem merge |
 | `main`, outros produtos e VPS | Inalterados |
-| Autorização atual | **Somente minuta documental**, F1-04 executável bloqueado |
+| Autorização atual | **F1-04 código mockado e testes sintéticos EXPRESSAMENTE AUTORIZADOS**, sem merge de código/integrações reais/deploy |
 
-Ao receber eventual autorização executiva, confirmar a inexistência de branch de código antes de criá-la; se já existir, examinar SHA e conteúdo sem sobrescrever ou dar force-push. Divergências exigem intervenção humana.
+A autorização executiva foi concedida em 2026-11-08; confirmar a inexistência de branch de código antes de criá-la, sempre após preflight; se já existir, examinar SHA e conteúdo sem sobrescrever ou dar force-push. Divergências exigem intervenção humana.
 
-## 3. Preflight obrigatório para eventual executor Codex
+## 3. Preflight obrigatório para executor autorizado
 
 1. Conferir `gh auth status`, `git remote -v`, `git status`, `git branch --show-current` e `git ls-remote`; verificar SHA da base e da `main` sem forçar atualização.
 2. Ler `AGENTS.md`, `README.md`, `STATUS-ATUAL.md`, AIA-04, AIA-07, AIA-08, AIA-09, R04/S01 e S02, R01/R02/R03, documentos e testes F1-01–F1-03, proposta F1-04 e esta minuta.
@@ -44,9 +44,9 @@ Ao receber eventual autorização executiva, confirmar a inexistência de branch
 4. Verificar se PHP CLI 8.1+ **já existe**. Proibido instalar PHP, Composer, PHPUnit, extensões ou SDKs; na ausência, registrar lint/testes não executados, sem inventar resultados.
 5. Anotar SHA base, ambiente, comandos propostos, arquivos-alvo e limites da autorização antes de trabalhar.
 
-## 4. Superfícies candidatas autorizáveis em decisão FUTURA
+## 4. Superfícies autorizadas sob esta decisão executiva
 
-| Superfície | Permitido somente após autorização | Proibido |
+| Superfície | Permitido após preflight, por autorização expressa | Proibido |
 | --- | --- | --- |
 | `src/MockTooling/` | Catálogo puro, validador de requisição/schema, política de capability fixture e despacho simulado | HTTP, auto-discovery de APIs, bindings de serviços reais, eval/código dinâmico |
 | `src/Mocks/` | Adaptadores mínimos de fake leitura/sugestão/mutação compatíveis com gateways existentes | Substituir autoridade de `CrmEffectGateway` ou permitir bypass de aprovação |
@@ -106,25 +106,25 @@ Interromper se houver necessidade de modificar módulos/contratos anteriores, fa
 
 ## 8. Entregas e política de revisão futuras
 
-- Código limitado às superfícies acima e **apenas depois de aprovação executiva expressa**.
+- Código limitado às superfícies acima, sob **autorização executiva expressa concedida em 2026-11-08** e somente após preflight Git.
 - 12 testes unitários novos e preservação rigorosa dos 34 anteriores; evidências reais/limitações em `STATUS-ATUAL.md`.
 - PR de código **draft da branch filha → branch dev**, sem merge.
 - Relato da SHA da base, commits, diff, testes/lint e confirmações de ausência de CI/custos/infra.
 - Nova autorização **independente** para eventual merge SOMENTE na branch dev; nunca `main`.
 - F1-05 bloqueado até autorização própria.
 
-## 9. Texto sugerido para autorização executiva posterior — NÃO CONCEDIDA
+## 9. Autorização executiva concedida em decisão separada
 
 > **Autorizo expressamente executar AIA-FT01-F1-04**, exclusivamente no repositório `rafhael100/imagine-ai-agents`, em branch filha `dev/ft01-f1-04-tool-catalog-mocks-2026-11-08` criada após preflight autenticado a partir de `dev/ft01-aia-core-mocks-2026-11-06`. Autorizo somente PHP puro sintético de catálogo/capabilities e despacho supervisionado de ferramentas fake, validações fail-closed de escopo, versão e parâmetros, auditoria mínima, até 12 casos U04-01–U04-12 e regressão dos 34 existentes, nos diretórios `src/MockTooling/`, `src/Mocks/`, `src/Domain/` se necessário, `tests/Unit/`, `README.md` e `STATUS-ATUAL.md`. Rodar lint e até 46 testes locais somente se PHP 8.1+ já estiver disponível, sem instalações; registrar não executados se indisponível. Criar PR draft filha → branch dev, **sem merge**. Não autorizo alterar `main`, `AGENTS.md`, `src/Contracts/`, `SupervisedCoordinator`, `ReadOnlyTraceReview`, outros repositórios, banco/SQL/ALLOW, APIs reais, dados privados, credenciais, PHP/Composer instalados, GitHub Actions, infraestrutura, custos, deploy, F1-05 nem gates R01-G01 a G11/CORE/SEG/AUT CRM. Diante de divergência, parar e reportar.
 
-O bloco acima é uma **sugestão a aprovar em decisão executiva separada**. Aprovar esta proposta/documentação NÃO basta para programar.
+A autorização executiva **FOI CONCEDIDA em 2026-11-08**, quando o responsável respondeu **“sim”** à pergunta explícita: **“Você autoriza expressamente o desenvolvimento do AIA-FT01-F1-04, limitado ao código PHP simulado e aos testes unitários sintéticos, sem merge, custos, integrações reais ou alterações na infraestrutura?”**. O texto acima é a **ordem operacional restrita**; não autoriza merge do PR de código, F1-05, dados reais, gastos, deploy ou alteração de gates.
 
 ## 10. Próximas decisões
 
 - [x] F104-D01 a D10, alternativas A, **ratificadas SOMENTE documentalmente** em 2026-11-08, PR #82.
-- [ ] Responsável revisar a **minuta de autorização executiva**.
-- [ ] Responsável emitir **autorização expressa própria para executar F1-04** e testes sintéticos; nenhuma autorização atual.
-- [ ] Somente após autorização: criar/verificar branch de código, Codex implementar, PR draft, validar 46 cenários quando PHP disponível.
+- [x] O responsável **autorizou expressamente a execução F1-04** com PHP mockado e testes sintéticos em 2026-11-08, sem merge/infra/gastos.
+- [ ] Verificar preflight Git, SHA/branch e limites de arquivos antes de iniciar código.
+- [ ] Criar/verificar branch filha, Codex implementar em PR draft **sem merge**, e validar até 46 cenários onde PHP já disponível.
 - [ ] Autorização de merge específica após revisão; manter `main`/F1-05/gates bloqueados.
 
-**Estado vinculante:** F1-04 DOCUMENTAL aprovado; **EXECUÇÃO F1-04 NÃO AUTORIZADA**. Todos os gates R01-G01 a G11 e CORE/SEG/AUT CRM continuam ABERTOS.
+**Estado vinculante:** F1-04 DOCUMENTAL aprovado e **EXECUÇÃO DE CÓDIGO PHP MOCKADO + TESTES SINTÉTICOS EXPRESSAMENTE AUTORIZADA**, sob preflight e escopo restrito. **MERGE DE CÓDIGO, F1-05, PRODUÇÃO, INTEGRAÇÕES REAIS E DEPLOY NÃO AUTORIZADOS.** Gates R01-G01 a G11 e CORE/SEG/AUT CRM continuam ABERTOS.
