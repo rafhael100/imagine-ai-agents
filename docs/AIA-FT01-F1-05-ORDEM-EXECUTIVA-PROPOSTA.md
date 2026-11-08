@@ -1,16 +1,16 @@
-# AIA-FT01/F1-05 — Minuta de autorização executiva condicionada | v0.1
+# AIA-FT01/F1-05 — Autorização executiva restrita ratificada | v0.1
 
-> **ESTADO: MINUTA NÃO APROVADA. PROGRAMAÇÃO E TESTES F1-05 CONTINUAM BLOQUEADOS.**
+> **ESTADO: AUTORIZAÇÃO EXECUTIVA EXPRESSA F1-05 CONCEDIDA PELO RESPONSÁVEL EM 2026-11-08.** O responsável respondeu **“sim”** à pergunta objetiva de autorização do AIA-FT01-F1-05 para PHP puro mockado e testes unitários sintéticos, **sem merge de código, custos, integrações reais ou alterações na infraestrutura**. A aprovação é restrita ao escopo desta ordem e condicionada ao preflight. Não equivale a código/testes já executados.
 >
 > Data: 2026-11-08. Repo: `rafhael100/imagine-ai-agents`. Branch **somente documental**: `docs/ft01-f1-05-ordem-executiva-revisao-2026-11-08`. Destino deste PR documental: `dev/ft01-aia-core-mocks-2026-11-06` (**somente a documentação**); a `main` continua preservada.
 >
-> **Precedência:** o responsável ratificou **exclusivamente como diretrizes documentais** as alternativas A de F105-D01 a D10 no PR #85. Esta ratificação ou esta minuta **NÃO autorizam** criar branch de implementação, chamar Codex, escrever PHP, executar novos testes, fazer merge de código, implantar ou contratar serviços. **O PR #85 já foi integrado documentalmente à branch dev em 2026-11-08, commit `93ca068dbbb6e4962a532a5f98994b55fd097621`, após autorização expressa.**
+> **Precedência:** o responsável ratificou as alternativas A F105-D01 a D10 **documentalmente** no PR #85, integrado somente na dev (commit `93ca068dbbb6e4962a532a5f98994b55fd097621`). **Posteriormente concedeu autorização executiva separada em 2026-11-08** para código e testes F1-05 exclusivamente mockados, após preflight. Esta autorização **NÃO** libera merge de código, produção, integração CRM/LLM real, despesas, F1-06 ou fechamento dos gates.
 >
 > **Bloqueios:** `main`, CRM, Portal, Performance AI, Universidade, Sites e demais projetos preservados; R01-G01 a G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**; F1-06 também bloqueado. Sem SQL, ALLOW, dados reais, APIs de fornecedores, LLM, autenticação/ACL real, credenciais, custos, Docker, Composer, GitHub Actions, VPS/Cloudflare/n8n ou deploy.
 
-## 1. Objetivo restrito para eventual ordem executiva
+## 1. Objetivo restrito da execução autorizada
 
-Caso o responsável conceda **autorização expressa distinta**, implementar em **PHP puro e memória volátil** um laboratório de:
+Sob a **autorização executiva expressa concedida em 2026-11-08**, implementar em **PHP puro e memória volátil** um laboratório de:
 1. Política de unidades técnicas e cota fictícia por contexto completo (produto, tenant, principal, finalidade, recurso, operação e versão) e tempo lógico explícito.
 2. Registro técnico local de `Usage` e eventos de tentativa, deduplicação estrita por identidade material, sem recontar em retry.
 3. Diferenciação entre `ESTIMADO`, `OBSERVADO`, `AJUSTADO`, `CONCILIADO` como estados de **evidências sintéticas**, nunca créditos comerciais.
@@ -21,7 +21,7 @@ Caso o responsável conceda **autorização expressa distinta**, implementar em 
 
 Nenhum número de quota da fixture corresponde a plano ou preço Imagine. Nenhuma moeda ou tarifa real será embutida.
 
-## 2. Proposta de branch FUTURA — não autorizada e não criada
+## 2. Branch de implementação autorizada — criação apenas após preflight
 
 | Item | Regra |
 | --- | --- |
@@ -35,7 +35,7 @@ Nenhum número de quota da fixture corresponde a plano ou preço Imagine. Nenhum
 
 Se houver branch homônima ou commits não previstos, inspecionar sem sobrescrever, force-push ou reutilização automática; interromper e reportar divergência.
 
-## 3. Verificações obrigatórias antes de eventual execução
+## 3. Verificações obrigatórias antes de executar
 
 1. Confirmar autenticação GitHub, remote, branch ativa, árvore limpa e SHAs de dev e main; verificar que o PR #85 já está **MERGED apenas na dev**, sem tentar mesclá-lo de novo.
 2. Ler `AGENTS.md`, `README.md`, `STATUS-ATUAL.md`, `Domain/Usage.php`, `Domain/Attempt.php`, `Domain/TenantContext.php`, contratos e testes F1-01..F1-04, AIA-10, R03/S04, R04/S01–S02 e a proposta documental F1-05.
@@ -43,7 +43,7 @@ Se houver branch homônima ou commits não previstos, inspecionar sem sobrescrev
 4. Verificar PHP CLI 8.1+ **já disponível**. Se ausente, registrar lint/testes **NÃO EXECUTADOS**, sem instalar PHP, Composer, ferramentas ou acionar CI.
 5. Registrar SHA da base, lista de arquivos pretendidos, testes, zero fornecedores reais, zero dados pessoais e critérios de parada.
 
-## 4. Superfícies candidatas à futura programação — ainda BLOQUEADAS
+## 4. Superfícies autorizadas exclusivamente após preflight
 
 | Local | Uso permitido somente se autorizado | Proibição |
 | --- | --- | --- |
@@ -70,7 +70,7 @@ Não criar `composer.json`, lockfiles, banco, migrations, `.env`, cliente HTTP/L
 
 Caso uma invariante exija mudar F1-01..F1-04, **parar e solicitar ampliação explícita**, sem adaptar testes para esconder a falha.
 
-## 6. Matriz de testes FUTUROS — 12 novos + 46 regressões = 58
+## 6. Matriz de testes sintéticos autorizados — 12 novos + 46 regressões = 58
 
 | ID | Critério de aceite proposto |
 | --- | --- |
@@ -105,11 +105,11 @@ Registrar SHA de checkout, versão, hashes de blobs e códigos de saída reais; 
 4. Eventual merge de código exigirá autorização separada do responsável, após revisão técnica.
 5. `main`, os gates R01-G01–G11 e CORE/SEG/AUT CRM, e F1-06 permanecerão bloqueados mesmo se laboratório futuro for aprovado.
 
-## 8. Texto de autorização executiva sugerida — NÃO CONCEDIDA
+## 8. Texto da autorização executiva expressamente concedida
 
 > **Autorizo expressamente a programação e os testes sintéticos da FT01-F1-05 no repositório `rafhael100/imagine-ai-agents`**, exclusivamente em uma branch filha isolada `dev/ft01-f1-05-usage-quotas-mocks-2026-11-08` a ser criada após verificação de SHA e base `dev/ft01-aia-core-mocks-2026-11-06` e da homologação documental/merge específico do PR #85. Autorizo somente PHP puro em memória em `src/MockUsage/`, `tests/Unit/`, `README.md` e `STATUS-ATUAL.md`, com política de uso e cota técnica fictícia, deduplicação de eventos, reconciliação conservadora e alertas locais mínimos, mais 12 casos U05-01..U05-12 e regressão dos 46 anteriores. Rodar lint e até 58 casos somente se PHP 8.1+ já estiver disponível, sem instalações; registrar NÃO EXECUTADOS se ausente. Criar PR de código DRAFT filha → branch dev, SEM MERGE. Não autorizo alterar contratos anteriores, `main`, CRM/Portal/outros projetos, infra, APIs reais, dados pessoais, SQL/ALLOW, Composer, GitHub Actions, credenciais, custos, deploy, F1-06 ou gates R01-G01 a G11/CORE/SEG/AUT CRM. Qualquer divergência interrompe a execução.
 
-O texto é apenas minuta; **não houve autorização executiva nesta conversa**.
+O responsável **CONCEDEU autorização executiva expressa em 2026-11-08**, respondendo **“sim”** à pergunta: **“Você autoriza expressamente o desenvolvimento do AIA-FT01-F1-05, limitado ao código PHP mockado e aos testes unitários sintéticos, sem merge, despesas, integrações reais ou alterações na infraestrutura?”**. O texto acima passa a ser a **ordem operacional restrita**. Continua **proibido** merge de código, F1-06, implantação, gastos ou alteração de gates.
 
 **Próximo ato:** o responsável deve revisar a minuta e decidir em ato independente sobre executar ou não o lote. Antes disso, F1-05 permanece **documental ratificada, execução bloqueada**.
 
@@ -119,3 +119,15 @@ O texto é apenas minuta; **não houve autorização executiva nesta conversa**.
 - A **minuta executiva atual** está em branch documental limpa derivada diretamente da branch dev após o merge #85, evitando duplicar o histórico documental anterior. O PR da minuta deve continuar **DRAFT/SEM MERGE** até revisão específica. A execução de código permanece bloqueada.
 - **F1-05 AINDA NÃO AUTORIZADO PARA CÓDIGO/TESTES:** nenhuma branch de código, Codex, runtime, CI, integrações, despesas ou implantação autorizados por esta minuta.
 - R01-G01–G11 e CORE/SEG/AUT CRM **ABERTOS**. `main`, demais repositórios, VPS/Cloudflare/n8n inalterados; F1-06 bloqueado.
+
+## 10. Registro vinculante da autorização — 2026-11-08
+
+- O responsável **AUTORIZOU EXECUTAR** F1-05 estritamente como laboratório PHP puro em memória, com 12 novos testes unitários sintéticos U05-01–U05-12 e regressão dos 46 anteriores, meta **58 testes**, sem presumir nenhum PASS F1-05 nesta etapa.
+- Repositório e destino: `rafhael100/imagine-ai-agents`, branch base `dev/ft01-aia-core-mocks-2026-11-06`, branch filha de código `dev/ft01-f1-05-usage-quotas-mocks-2026-11-08`, a **criar ou verificar somente após preflight autenticado**; base no SHA remoto vigente, sem sobrescrever refs ou executar força.
+- Superfícies: `src/MockUsage/`, `tests/Unit/`, `README.md` e `STATUS-ATUAL.md`; **não modificar** `src/Contracts/`, `AGENTS.md`, `SupervisedCoordinator`, `MockToolDispatcher`, `ReadOnlyTraceReview`, outros módulos/contratos existentes e decisões documentais ratificadas. `src/Domain/` fora do escopo sem nova justificativa e autorização.
+- PHP 8.1+ **já disponível**: executar lint e runner completo, documentando versão, SHA, hashes, saídas e códigos. PHP indisponível: testes **NÃO EXECUTADOS**, não instalar PHP/Composer nem criar workflow GitHub Actions.
+- Entrega futura deve abrir **PR de código DRAFT filha → dev, SEM MERGE**. A aprovação desta execução **não** autoriza merge desse PR; solicitar autorização separada após revisão humana e validação.
+- **NÃO AUTORIZADOS**: `main`, CRM/Portal/outros repositórios, dados reais, credenciais, SQL/ALLOW, APIs/LLM, banco, infraestrutura, VPS/Cloudflare/n8n, dependências, compras, CI/Actions, custos, deploy, F1-06, fechamento dos gates R01-G01 a G11 e CORE/SEG/AUT CRM. **TODOS ABERTOS**.
+- Se algum passo exigir alterar contratos existentes, permissões reais, dependências, instalar runtime, ou houver divergência Git, **parar** e pedir revisão. Nenhum deploy ou homologação de produção decorre dos testes.
+
+**Estado mais recente (prevalece sobre notas históricas): F1-05 AUTORIZADO PARA CÓDIGO MOCKADO E TESTES SINTÉTICOS; MERGE DE CÓDIGO E PRODUÇÃO NÃO AUTORIZADOS.**
