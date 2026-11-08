@@ -1,10 +1,10 @@
 # AIA-FT01/F1-05 — Medição técnica, cotas e observabilidade sintéticas | Proposta documental v0.1
 
-> **ESTADO: PROPOSTA DOCUMENTAL. F105-D01 a D10 ABERTAS, AINDA NÃO RATIFICADAS.**
+> **ESTADO: F105-D01 a D10, alternativas A, RATIFICADAS EXCLUSIVAMENTE DOCUMENTALMENTE em 2026-11-08.**
 >
 > Data de referência: 2026-11-08. Repositório: `rafhael100/imagine-ai-agents`. Branch apenas documental: `docs/ft01-f1-05-consumo-cotas-observabilidade-mock-2026-11-08`. Base: `dev/ft01-aia-core-mocks-2026-11-06`.
 >
-> O responsável respondeu **“sim”** ao pedido de iniciar **somente o planejamento documental F1-05**, após a integração controlada do PR #84. Isso **NÃO AUTORIZA** criação de branch de código, PHP, testes F1-05, merge, implantação, credenciais, compras ou integrações reais.
+> O responsável primeiro respondeu **“sim”** ao pedido de iniciar **somente o planejamento documental F1-05** e, depois de apresentada a matriz F105-D01 a D10 no PR #85, respondeu **“sim”** à pergunta específica de **ratificação documental das dez alternativas A**. Esta segunda aprovação é **apenas documental**: **NÃO AUTORIZA** criação de branch de código, PHP, testes F1-05, merge de documentação ou código, implantação, credenciais, compras ou integrações reais.
 >
 > **Gates imutáveis:** R01-G01 a G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**; `main`, demais projetos, CRM/Portal, VPS/Cloudflare/n8n e infraestrutura inalterados. Sem SQL/ALLOW, API/LLM real, uso de dados pessoais, contratação, GitHub Actions, instalação de PHP/Composer, gastos ou deploy. F1-06 não autorizado.
 
@@ -85,9 +85,9 @@ As **46 regressões** dos lotes F1-01–F1-04 devem permanecer intactas e serem 
 
 Caso PHP CLI 8.1+ esteja previamente disponível no ambiente executante, os comandos candidatos são `php -v`, lint de todos os arquivos PHP e `php tests/Unit/run.php` no checkout exato validado por SHA. Caso não esteja, declarar testes **NÃO EXECUTADOS** no executor: sem instalação, Composer, Actions ou despesa. Um ambiente independente pode ser autorizado em ato posterior para validar hashes e execução.
 
-## 6. Alternativas F105-D01 a D10 — TODAS ABERTAS
+## 6. Alternativas F105-D01 a D10 — ALTERNATIVAS A RATIFICADAS DOCUMENTALMENTE
 
-| Decisão | Alternativa A RECOMENDADA (documental) | Alternativa B NÃO recomendada |
+| Decisão | Alternativa A RATIFICADA (somente documental) | Alternativa B NÃO adotada |
 | --- | --- | --- |
 | **F105-D01 — recorte** | Medição, cotas e alertas **técnicos mockados**, não cobrança | Implantar orçamento comercial/produtor real |
 | **F105-D02 — autoridade** | CRM conserva créditos, planos e cobranças; AIA só simula uso técnico | AIA débita créditos ou presume plano ativo |
@@ -100,7 +100,7 @@ Caso PHP CLI 8.1+ esteja previamente disponível no ambiente executante, os coma
 | **F105-D09 — tecnologia/custo** | PHP puro in-memory e relógio explícito, nenhuma dependência/infra | Banco, filas, provider, API, Actions e custos |
 | **F105-D10 — governança** | Ratificação somente documental; ordem executiva e merge independentes | Interpretar aprovação documental como comando para Codex |
 
-**F105-D01 a D10: propostas NÃO RATIFICADAS.** A eventual ratificação das alternativas A não autoriza criar branch de código ou executar F1-05.
+**F105-D01 a D10: alternativas A RATIFICADAS SOMENTE DOCUMENTALMENTE em 2026-11-08.** As alternativas B não foram adotadas. Essa decisão não autoriza criar branch de código, executar Codex, testar F1-05, fazer merge, alterar gates ou iniciar F1-06.
 
 ## 7. Branch, limites e fluxo FUTUROS
 
@@ -113,10 +113,10 @@ Caso PHP CLI 8.1+ esteja previamente disponível no ambiente executante, os coma
 
 ## 8. Critérios de aceite DOCUMENTAL
 
-- [ ] Responsável revisar e, se desejar, **ratificar exclusivamente documentalmente** F105-D01 a D10 alternativas A.
-- [ ] Somente depois, preparar minuta executiva separada com escopo de arquivos, SHA de base, condições de parada e meta futura de 58 testes.
+- [x] Responsável **ratificou exclusivamente documentalmente** F105-D01 a D10 alternativas A em 2026-11-08.
+- [ ] Preparar minuta executiva **separada** com escopo de arquivos, SHA de base, condições de parada e meta futura de 58 testes, sem executá-la nem presumir autorização.
 - [ ] Exigir aprovação específica para programação e testes F1-05, e outra aprovação para merge exclusivo em dev.
 - [ ] Manter `main`, outros produtos, infraestrutura e todos os gates R01-G01–G11 e CORE/SEG/AUT CRM **ABERTOS**.
 - [ ] Não declarar custos reais nem aptidão operacional a partir de simulação.
 
-**Próximo ato:** apresentar esta proposta ao responsável para avaliação das **dez alternativas A de F105-D01 a D10**. Nenhum código nem teste F1-05 foi autorizado ou executado.
+**Próximo ato:** preparar e apresentar **minuta executiva F1-05 separada**, para decisão posterior. A ratificação documental não constitui ordem executiva. Nenhum código ou teste F1-05 foi autorizado ou executado.
