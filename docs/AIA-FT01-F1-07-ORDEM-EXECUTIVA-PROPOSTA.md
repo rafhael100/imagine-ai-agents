@@ -108,3 +108,14 @@ Registrar saída real, exit codes, quantidade de arquivos testados, SHA do check
 Este parágrafo é **somente uma sugestão para futura autorização**, não um comando vigente.
 
 **Conclusão:** F1-07 tem diretrizes documentais ratificadas, mas o desenvolvimento e os testes novos permanecem BLOQUEADOS até ordem executiva específica. Nenhum merge da presente minuta é autorizado por este ato.
+
+## Atualização de precedência — decisão posterior de 2026-11-08
+
+**Este adendo prevalece sobre as referências históricas a bloqueios executivos anteriores**, sem alterar o texto original da minuta.
+
+- **PR #93:** diretrizes F107-D01..D10 alternativas A ratificadas DOCUMENTALMENTE e integradas exclusivamente à branch `dev/ft01-aia-core-mocks-2026-11-06` no squash `40a71cb2797d8c954f392e94ef4b02b4cd04e55d`. As afirmações anteriores de que o PR #93 está aberto/sem merge são históricas e não mais atuais.
+- **Autorização posterior do responsável:** autorizou amplamente o desenvolvimento do Imagine AI Agents e pediu autonomia para decisões não críticas. Esse ato autoriza o recorte sintético de código e testes F1-07 antes previsto como futuro, **mas não homologação operacional, despesas, infraestrutura, dados reais ou produção**.
+- **PR de código #95:** [F1-07 conhecimento/contexto sintéticos](https://github.com/rafhael100/imagine-ai-agents/pull/95), branch `dev/ft01-f1-07-knowledge-context-mocks-2026-11-08`, criada e publicada, ainda **OPEN/DRAFT/SEM MERGE**. Contém seis classes PHP novas, U07-01..U07-12, runner e documentação. PHP CLI 8.4.24 local: lint das seis classes e hashes 6/6 verificados, 13/13 casos em runner auxiliar PASS; **82 testes oficiais ainda NÃO foram executados**, apenas registrados estaticamente.
+- **PR corretivo #92:** permanece OPEN/DRAFT/SEM MERGE, independente, com três testes F1-06 adicionais e regressão integral pendente. Quando #92 e #95 estiverem integrados à mesma dev, a meta conjunta será 85 testes, sem presumir o resultado.
+- **PR #94:** permanece como **minuta histórica DOCUMENTAL em DRAFT / SEM MERGE**. Não substitui a ordem posterior nem deve ser utilizada para negar a existência do código F1-07. Não integra o PR #95 nem altera `main` ou código.
+- **Gates:** R01-G01..G11 e CORE/SEG/AUT CRM ABERTOS; sem credenciais, dados privados, API/LLM real, SQL/ALLOW, CI pago, fornecedores, implantação ou alterações de infraestrutura.
