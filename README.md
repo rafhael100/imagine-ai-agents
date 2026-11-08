@@ -171,3 +171,17 @@ completa no SHA atual. Aceite permanece pendente de execução posterior.
 **Limitações:** somente **processo único, memória volátil e dados inventados**. Sem reserva de quota atômica, durabilidade, validação real de identidade ou permissão, custos efetivos, preço, cobrança, saldo de créditos, provedor, faturamento, conciliação financeira, LGPD operacional, alertas externos ou CRM real. Não há qualquer fonte de verdade além das fixtures do laboratório.
 
 **Segurança/governança:** `src/Contracts/`, domínio anterior, coordenador F1-02, resiliência F1-03, despacho F1-04, `AGENTS.md` e documentos ratificados permanecem intactos. Código somente na branch filha, PR futuro **draft e sem merge**, `main` e infraestrutura intocadas, R01-G01–G11 e CORE/SEG/AUT CRM **ABERTOS**, F1-06 não autorizado.
+
+## FT01-F1-06 — catálogo e revisão de versões SOMENTE sintéticos (2026-11-08)
+
+**Autorização executiva delimitada:** após integrar documentalmente a F1-06 (PR #89), o responsável respondeu **"sim"** à pergunta específica de executar programação e testes **somente sintéticos** em branch filha isolada, **sem merge, deploy ou integrações reais**.
+
+- `src/MockCatalog/MockAgentVersionSnapshot.php`: manifesto de referências `SYNTHETIC_*`, tipado, com versão e digest material determinístico; snapshot imutável, `safeView` limitado.
+- `src/MockCatalog/MockAgentTemplateCatalog.php`: catálogo fechado por contexto de produto/empresa/principal/finalidade/recurso, sem consultas externas; versões conflitantes e suspensas negadas.
+- `src/MockCatalog/MockVersionReview.php`: revisão fictícia vinculada ao SHA de manifesto, dataset, regra, revisor e intervalo lógico; revogação explícita; **não é assinatura nem homologação**.
+- `src/MockCatalog/MockPromotionGate.php`: promoção, suspensão e rollback **apenas locais**; estado fail-closed, elegibilidade vigente, idempotência e trilha mínima (hashes/códigos), sem chamadas de ferramentas, concessão de capacidades ou publicação.
+- `tests/Unit/catalog_release.php`: 12 casos U06-01 a U06-12; runner passou a carregar os 58 casos anteriores intactos + os 12 novos.
+
+**Validação realizada sobre código idêntico à branch GitHub:** PHP CLI **8.4.24**, lint `find src tests/Unit -type f -name '*.php' -print0 | xargs -0 -n1 php -l` → **35/35 PASS, exit 0**; `php tests/Unit/run.php` → **70/70 PASS, zero falhas, exit 0**. Os **35 hashes Git blob SHA-1** dos arquivos PHP da branch foram confrontados com os 35 arquivos locais testados, sem divergências. Inclui verificação adversarial de arrays de ferramentas malformados, sem suprimir avisos.
+
+**Limites obrigatórios:** processo único e estado volátil, sem agentes/identidades/permissões reais, modelo LLM, assinatura criptográfica, publicação operacional, rede, CRM, autenticação, persistência, concorrência, custo ou rollback de infraestrutura. Catálogo fictício não altera cota, approval, ferramentas ou crédito comercial. O PR de código permanece **DRAFT e SEM MERGE**; `main` e VPS intocadas. Gates R01-G01–G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**, F1-07 bloqueado.
