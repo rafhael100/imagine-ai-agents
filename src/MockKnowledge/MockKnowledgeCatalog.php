@@ -14,7 +14,7 @@ final class MockKnowledgeCatalog
 
     public function add(MockKnowledgeSource $source): void
     {
-        $key = json_encode([$source->ref, $source->version], JSON_THROW_ON_ERROR);
+        $key = json_encode([$source->context->key(), $source->ref, $source->version], JSON_THROW_ON_ERROR);
         if (isset($this->sources[$key])) {
             if ($this->sources[$key]->digest !== $source->digest) MockError::fail('KNOWLEDGE_CONFLICT');
             return;
@@ -26,7 +26,7 @@ final class MockKnowledgeCatalog
     {
         MockAgentVersionSnapshot::syntheticRef($ref);
         MockAgentVersionSnapshot::syntheticRef($version);
-        $key = json_encode([$ref, $version], JSON_THROW_ON_ERROR);
+        $key = json_encode([$context->key(), $ref, $version], JSON_THROW_ON_ERROR);
         $source = $this->sources[$key] ?? null;
         if ($source === null || isset($this->disabled[$key])
             || $source->context->key() !== $context->key()
@@ -40,7 +40,7 @@ final class MockKnowledgeCatalog
     {
         MockAgentVersionSnapshot::syntheticRef($ref);
         MockAgentVersionSnapshot::syntheticRef($version);
-        $key = json_encode([$ref, $version], JSON_THROW_ON_ERROR);
+        $key = json_encode([$context->key(), $ref, $version], JSON_THROW_ON_ERROR);
         $source = $this->sources[$key] ?? null;
         if ($source === null || $source->context->key() !== $context->key()) {
             MockError::fail('KNOWLEDGE_DENIED');
