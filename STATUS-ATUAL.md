@@ -586,3 +586,23 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - **Sem autoridade real:** `SYNTHETIC_*` significa fixture, não sanitização, grant, ACL, assinatura, publicação ou homologação; promoção/rollback são apenas estados em memória e não alteram catálogo/CRM/provedor reais. Traces limitados a hash e códigos, não expõem instruções, tokens, leads ou prompts.
 - **Limitações:** estado efêmero, processo único, sem concorrência/persistência, identidade ou credenciais reais, JSON/API homologados, provedores/modelos, teste semântico de qualidade, custos, compliance de produção, reserva de quotas, publicação ou rollback operacional.
 - **Bloqueios:** abrir PR de código obrigatoriamente **DRAFT filha → dev, SEM MERGE**; revisão e aprovação expressa adicional exigida para qualquer merge de código. `main`, CRM/Portal/Sites/Performance/Universidade, VPS/Cloudflare/n8n, GitHub Actions, dados reais, SQL/ALLOW, licenças, custos e deploy preservados. **R01-G01 a G11 e CORE/SEG/AUT CRM TODOS ABERTOS**. F1-07 NÃO autorizado.
+
+## FT01-F1-07 — proposta DOCUMENTAL de conhecimento e contexto mockados (2026-11-08)
+
+- **Autorização expressa recebida:** o responsável respondeu **“autorizado”** à proposta de **iniciar apenas a documentação F1-07**, após integração do PR #91 (squash `02ed376c7be5258d091b26667ca00f63a0db46ab`) na branch dev.
+- **Proposta NÃO RATIFICADA** em `docs/AIA-FT01-F1-07-CONHECIMENTO-CONTEXTO-MOCK-PROPOSTA.md`, branch documental isolada `docs/ft01-f1-07-retrieval-context-mocks-2026-11-08`, base `dev/ft01-aia-core-mocks-2026-11-06`. **F107-D01 a D10 ABERTAS.**
+- **Recorte futuro recomendado:** catálogo fechado de fontes fictícias, recuperação determinística read-only, escopo por empresa/produto/principal/finalidade/recurso, validade e revogação, composição mínima de contexto e rastreabilidade. Texto recuperado não confere autoridade. **Sem memória persistente, LLM/RAG real, embeddings, OCR, API, CRM ou dados pessoais**.
+- **U07-01 a U07-12 SOMENTE PROPOSTOS, NÃO IMPLEMENTADOS/NÃO EXECUTADOS**. Os 70 testes sintéticos anteriores F1-01..F1-06 são regressão planejada; **82 é meta futura, não resultado comprovado**.
+- **Branch candidata de código NÃO CRIADA/NÃO AUTORIZADA:** `dev/ft01-f1-07-knowledge-context-mocks-2026-11-08`. Qualquer programação/teste dependerá de ordem executiva específica em ato separado, e qualquer merge exigirá autorização adicional; PR de código futuro deve ser DRAFT filha → dev, SEM MERGE.
+- `main` observada intacta em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; PR documental histórico #90, todos os outros repositórios, infraestrutura e VPS preservados. **R01-G01 a G11 e CORE/SEG/AUT CRM TODOS ABERTOS**. Sem SQL/ALLOW, credenciais, GitHub Actions, pagamentos, modelo/fornecedor externo ou deploy. F1-08 não autorizado.
+- **Próximo passo:** apresentar as alternativas A de F107-D01 a D10 para avaliação e eventual ratificação **somente DOCUMENTAL**, sem presumir ordem executiva.
+
+## Ratificação exclusivamente DOCUMENTAL F107-D01 a D10 — 2026-11-08
+
+- Após a apresentação das dez alternativas A no [PR #93](https://github.com/rafhael100/imagine-ai-agents/pull/93), o responsável respondeu **“sim aprovado”** à pergunta específica de aprovar **DOCUMENTALMENTE F107-D01 a D10**. Todas as alternativas A foram ratificadas **somente no nível documental**; alternativas B não adotadas.
+- **Escopo ratificado:** recuperação somente sintética e read-only; escopo por empresa/produto/principal/finalidade/recurso; origem, versão e validade da fonte; revogação/rechecagem antes da entrega; conteúdo tratado como dado não confiável, isolamento, dados transacionais pertencentes ao CRM, contexto mínimo, sem memória persistente; PHP puro e aprovação em atos separados.
+- Os **12 casos U07-01..U07-12 permanecem NÃO IMPLEMENTADOS/NÃO EXECUTADOS**; os 70 testes anteriores F1-01..F1-06 são regressão futura. **82/82 é somente META, não resultado validado.**
+- O **PR #93 permanece DOCUMENTAL, DRAFT e SEM MERGE**. Minuta executiva F1-07 a preparar em branch/PR documental separados, **sem autorização para código, testes, branch de implementação, merge ou deploy**. A aprovação documental não equivale a ordem executiva.
+- PR #92 de correção F1-06 e PR #90 documental F1-06 permanecem separados; nenhuma interferência nesses PRs, `main`, demais projetos ou infraestrutura.
+- R01-G01–G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**. Sem dados reais, OAuth/ACL real, SQL/ALLOW, API/LLM real, GitHub Actions, fornecedores pagos, VPS/Cloudflare/n8n ou publicação. **F1-08 não autorizado**.
+- **Próximo ato:** avaliar a minuta executiva e/ou autorizar, em decisão separada, o **merge documental** do PR #93. Nenhum desses atos deve ser presumido.
