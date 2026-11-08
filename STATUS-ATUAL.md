@@ -388,8 +388,15 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 
 - O [PR #78](https://github.com/rafhael100/imagine-ai-agents/pull/78) foi **MERGED somente na branch** `dev/ft01-aia-core-mocks-2026-11-06`, SHA `6ed2e77b9d3366252a5258ffd4f2dcdad4b43de4`, com ratificação documental de F103-D01 a D10 (alternativas A), sem autorizar código F1-03.
 - A documentação histórica acima que descreve #78 como draft/open corresponde à situação **anterior** ao merge; o registro atual prevalece.
-- **Nova minuta executiva, AINDA NÃO APROVADA:** `docs/AIA-FT01-F1-03-ORDEM-EXECUTIVA-PROPOSTA.md`, na branch **documental** `docs/ft01-f1-03-autorizacao-executiva-proposta-2026-11-08`.
-- Propõe para futura autorização separada a branch de código `dev/ft01-f1-03-resilience-mocks-2026-11-08` (**NÃO CRIADA**), PHP puro, laboratório de falhas/replay somente leitura e até 12 novos testes sintéticos com regressão dos 22 existentes, sem depender de PHP instalado pelo Codex.
-- **F1-03 AINDA NÃO AUTORIZADO PARA CÓDIGO/TESTES:** não executar Codex, não criar branch de código, não fazer merge de código, nem permitir acesso real, infraestrutura, GitHub Actions, instalações, despesas ou deploy.
+- **ORDEM EXECUTIVA EXPRESSAMENTE AUTORIZADA em 2026-11-08, restrita ao escopo F1-03 mockado:** `docs/AIA-FT01-F1-03-ORDEM-EXECUTIVA-PROPOSTA.md`, na branch **documental** `docs/ft01-f1-03-autorizacao-executiva-proposta-2026-11-08`.
+- Autoriza após preflight Git a branch de código `dev/ft01-f1-03-resilience-mocks-2026-11-08` (**ainda não criada neste registro inicial, mas agora autorizada a criação após preflight**), PHP puro, laboratório de falhas/replay somente leitura e até 12 novos testes sintéticos com regressão dos 22 existentes, sem instalar PHP no Codex.
+- **F1-03 EXPRESSAMENTE AUTORIZADO PARA CÓDIGO MOCKADO E TESTES SINTÉTICOS EM 2026-11-08** pelo responsável, que respondeu “autorizado” à pergunta explícita sobre executar F1-03. Permite Codex e branch filha após preflight; **NÃO** permite merge de código, acesso real, infraestrutura, GitHub Actions, instalações, despesas ou deploy.
 - `main` observada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; CRM, Portal e demais produtos/VPS/Cloudflare/n8n preservados. **R01-G01 a G11 TODOS ABERTOS; CORE/SEG/AUT CRM ABERTOS.** F1-04 também não autorizado.
-- Próxima decisão do responsável: revisar minuta executiva e, em ato separado e inequívoco, autorizar ou não a execução F1-03.
+- Próximo ato: preflight Git, criar/confirmar branch filha autorizada, executar código pelo Codex (executor externo) em PR draft e apresentar evidências e 34 testes, sem merge. Exigir aprovação específica antes de eventual merge.
+
+## Autorização executiva específica FT01-F1-03 — 2026-11-08
+
+- O responsável **AUTORIZOU EXPRESSAMENTE** o F1-03 limitado a PHP puro de resiliência/replay apenas leitura e auditoria **simulados**, 12 casos sintéticos novos + 22 regressões, exclusivamente em `rafhael100/imagine-ai-agents`, branch `dev/ft01-f1-03-resilience-mocks-2026-11-08` derivada da `dev/ft01-aia-core-mocks-2026-11-06` após preflight.
+- O registro de aprovação permite iniciar trabalho mockado no Codex **sem qualquer efeito real**; não comprova que Codex tenha rodado ou que os 34 testes tenham passado. Se PHP ausente, não instalar; registrar testes NÃO EXECUTADOS.
+- PR de código deve permanecer DRAFT filha → dev, **SEM MERGE**, até nova autorização expressa. `main`, src/Contracts/, SupervisedCoordinator, outros produtos, AGENTS.md e infraestrutura permanecem inalterados.
+- SQL, ALLOW, APIs reais, dados privados, credenciais, GitHub Actions, Composer, instalações, gastos, VPS/Cloudflare/n8n, deploy e F1-04 não autorizados. R01-G01 a G11 **TODOS ABERTOS**; CORE/SEG/AUT CRM **ABERTOS**.
