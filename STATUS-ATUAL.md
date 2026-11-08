@@ -615,3 +615,15 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - **Evidência efetiva:** PHP CLI 8.4.24 pré-existente; lint de **6/6 classes novas PASS**; **6/6 Git blob SHA-1 coincidentes** com as classes executadas localmente. Runner auxiliar sintético das 12 categorias U07 + um caso extra de IDs repetidos entre tenants, **13/13 PASS, zero falhas**. Os 12 casos oficiais constam na branch, mas **NÃO foram executados como `php tests/Unit/run.php`**; 82 casos é **META**, não resultado. Quando integradas as 3 correções U06-C01..C03 do PR #92, nova meta conjunta passa a 85.
 - **Bloqueios de integração:** executar lint de todos os PHP e regressão oficial no checkout exato, revisar diffs/SHAs e registrar eventuais correções. PR F1-07 deverá permanecer DRAFT sem merge automático até aceite técnico; nenhuma ativação real.
 - **Gates preservados:** R01-G01–G11 e CORE/SEG/AUT CRM todos ABERTOS; sem deploy, SQL/ALLOW, APIs/LLM reais, persistência, dados privados, credenciais, fornecedores pagos ou modificações em `main`. F1-08 exige escopo próprio e não foi iniciado nesta rodada.
+
+### Demonstração offline executável F1-07 (2026-11-08)
+
+O arquivo `examples/knowledge_context_demo.php` é um exemplo sem infraestrutura, Composer, banco, API ou LLM. Execute no checkout da branch com PHP 8.1+ já instalado:
+
+```sh
+php examples/knowledge_context_demo.php
+```
+
+O exemplo materializa uma única passagem fictícia (`READY` / `UNTRUSTED_DATA`), simula revogação antes da entrega (`DENIED`) e tenta reutilizar o grant de outra empresa (`DENIED`). A saída não contém dados de clientes nem autoriza ferramentas.
+
+**Validação reproduzida:** PHP 8.4.24 já presente; `php -l` do exemplo PASS; execução exit 0. Hash Git blob do exemplo `0d9fe667bb3e09e34228618b6b9234b19d1ef9fc`, idêntico ao arquivo publicado. Um pacote portátil offline de demonstração foi criado no ambiente de revisão (não implantado). Os **82 testes oficiais da branch F1-07 não foram executados**, nem os **85 futuros combinados** com a correção #92. PR de código continua DRAFT sem merge.
