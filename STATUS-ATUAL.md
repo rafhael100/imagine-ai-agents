@@ -383,3 +383,13 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - PR #78 permanece **DRAFT/OPEN**, exclusivamente documental; não fazer merge por aprovação genérica. `main`, demais repositórios e infraestrutura não são objeto de mudanças nesta ratificação.
 - **R01-G01 a G11 e CORE/SEG/AUT CRM permanecem TODOS ABERTOS**, assim como homologações reais. F1-04 não autorizado.
 - Próximo passo: **preparar e submeter ordem executiva F1-03 separada para avaliação**, com escopo, arquivos, cenários, condições de interrupção e aprovação explícita exigida antes de execução.
+
+## F1-03 — Ratificação documental e proposta executiva separada — 2026-11-08
+
+- O [PR #78](https://github.com/rafhael100/imagine-ai-agents/pull/78) foi **MERGED somente na branch** `dev/ft01-aia-core-mocks-2026-11-06`, SHA `6ed2e77b9d3366252a5258ffd4f2dcdad4b43de4`, com ratificação documental de F103-D01 a D10 (alternativas A), sem autorizar código F1-03.
+- A documentação histórica acima que descreve #78 como draft/open corresponde à situação **anterior** ao merge; o registro atual prevalece.
+- **Nova minuta executiva, AINDA NÃO APROVADA:** `docs/AIA-FT01-F1-03-ORDEM-EXECUTIVA-PROPOSTA.md`, na branch **documental** `docs/ft01-f1-03-autorizacao-executiva-proposta-2026-11-08`.
+- Propõe para futura autorização separada a branch de código `dev/ft01-f1-03-resilience-mocks-2026-11-08` (**NÃO CRIADA**), PHP puro, laboratório de falhas/replay somente leitura e até 12 novos testes sintéticos com regressão dos 22 existentes, sem depender de PHP instalado pelo Codex.
+- **F1-03 AINDA NÃO AUTORIZADO PARA CÓDIGO/TESTES:** não executar Codex, não criar branch de código, não fazer merge de código, nem permitir acesso real, infraestrutura, GitHub Actions, instalações, despesas ou deploy.
+- `main` observada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; CRM, Portal e demais produtos/VPS/Cloudflare/n8n preservados. **R01-G01 a G11 TODOS ABERTOS; CORE/SEG/AUT CRM ABERTOS.** F1-04 também não autorizado.
+- Próxima decisão do responsável: revisar minuta executiva e, em ato separado e inequívoco, autorizar ou não a execução F1-03.
