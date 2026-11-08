@@ -121,3 +121,25 @@ recuperação durável ou prova de serviço real. Run concluída não indica efe
 confirmado; cancelamento não apaga efeitos existentes. Novos objetos/coordenadores
 não representam recuperação de processo. Sem merge, F1-03 ou deploy. R01-G01 a G11
 e CORE/SEG/AUT CRM continuam abertos.
+
+## FT01-F1-03 — laboratório sintético de resiliência (2026-11-08)
+
+Escopo executado com autorização específica do responsável **somente** na branch filha de desenvolvimento `dev/ft01-f1-03-resilience-mocks-2026-11-08`. Nenhuma execução real, merge ou deploy autorizado.
+
+- `MockFaultGateway` envolve o gateway fake existente e permite perda determinística da **resposta** de submit após entrega ao fake, mais falhas de consulta status. Não possui retry, rede, relógio ou persistência.
+- `ReadOnlyTraceReview` interpreta cópias de eventos estritamente sintéticos e nega confirmação sem `Effect` fake compatível; resiste a truncamento, conflito, contexto divergente, eventos desconhecidos e clocks explícitos regressivos. `afterSimulatedRestart` SEMPRE sinaliza ausência de estado durável, sem invocar efeitos.
+- `tests/Unit/resilience.php` adiciona **12** cenários U03-01 a U03-12 ao runner, preservando as 22 regressões F1-01/F1-02. **34** é a meta de execução do runner oficial, não um resultado presumido.
+- Nova verificação local auxiliar: PHP 8.4.24, sintaxe dos 3 arquivos novos aprovada, 12/12 cenários sintéticos aprovados contra reprodução local dos contratos F1-01/F1-02. As três cópias de arquivos novos exibiram hashes Git blob SHA-1 idênticos aos do GitHub. **Não é evidência de execução dos 34 testes contra o checkout integral do PR**; essa pendência permanece.
+- Em ambiente autorizado que tenha PHP 8.1+ **já disponível**, executar `find src tests/Unit -type f -name '*.php' -print0 | xargs -0 -n1 php -l` e `php tests/Unit/run.php`, registrar os códigos de saída, versão e os 34 resultados efetivos. Não instalar PHP/Composer por iniciativa própria nem habilitar GitHub Actions.
+
+**Limitações:** estado e provas apenas fictícios e voláteis; nenhum journal durável, autenticação/ACL real, integração CRM/IA, garantias de concorrência, idempotência entre processos, conformidade operacional ou recuperação após queda de produção. Não armazenar dados pessoais nesses testes. Os gates R01-G01–G11 e CORE/SEG/AUT CRM permanecem abertos.
+
+Revisão Codex F1-03 em 2026-11-08: o trabalho já existente na filha e no PR #80
+foi preservado. A leitura do trace agora exige início explícito, rejeita nova
+submissão na mesma sequência e regressão de efeito terminal, compara a prova
+com o último efeito observado e rejeita relógio/assinatura opcionais nulos.
+Os casos U03-04/U03-05/U03-12 incluem essas entradas adversariais, mantendo os 12
+casos F1-03 e as 22 regressões anteriores. Neste ambiente, `php -v` retorna 127
+(`php: command not found`): lint e os **34 casos NÃO EXECUTADOS pelo Codex**.
+A evidência auxiliar histórica acima não valida estas correções nem a suíte
+completa no SHA atual. Aceite permanece pendente de execução posterior.
