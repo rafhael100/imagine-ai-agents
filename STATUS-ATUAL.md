@@ -517,3 +517,12 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - **F1-05 SEM AUTORIZAÇÃO EXECUTIVA:** nenhuma branch de código, alteração PHP, testes, SQL/ALLOW, API/CRM real, credenciais, dados privados, Composer/Actions, custos, VPS/Cloudflare/n8n ou deploy. F1-06 não autorizado.
 - `main`, demais projetos e infra inalterados; R01-G01–G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**.
 - **Próximo passo:** apresentar F105-D01 a D10, alternativas A, para avaliação e possível ratificação **somente documental**; depois, se aprovado, preparar ordem executiva em ato separado.
+
+## Ratificação documental F105-D01 a D10 — 2026-11-08
+
+- Após apresentar as dez alternativas A no [PR #85](https://github.com/rafhael100/imagine-ai-agents/pull/85), o responsável respondeu **“sim”** à pergunta específica de **ratificação documental das decisões F105-D01 a D10**. A aprovação é DOCUMENTAL, separada de futura autorização de implementação.
+- **F105-D01–D10: alternativas A APROVADAS SOMENTE DOCUMENTALMENTE**; as B não foram adotadas. Recorte: medição técnica e políticas de cotas sintéticas, deduplicação de eventos de uso, reconciliação conservadora, alertas referenciais mínimos, segregação por produto/tenant/finalidade e distinção absoluta entre uso técnico AIA e créditos/cobrança CRM.
+- **12 testes U05-01..U05-12 continuam apenas propostos, não implementados e NÃO EXECUTADOS.** Os 46 anteriores F1-01..F1-04 permanecem como regressão futura; **58 é META, não resultado**.
+- O [PR #85](https://github.com/rafhael100/imagine-ai-agents/pull/85) permanece **DOCUMENTAL, DRAFT e SEM MERGE**, até autorização específica. A minuta executiva a preparar é **proposta separada não aprovada**.
+- **NÃO AUTORIZADOS:** programação F1-05, Codex, branch de código, novos testes, alterações `main`/CRM/Portal/outros projetos, APIs reais, SQL/ALLOW, dados privados, credenciais, GitHub Actions, despesas, VPS/Cloudflare/n8n, deploy, F1-06 ou fechamento de gates.
+- **R01-G01 a G11 e CORE/SEG/AUT CRM TODOS ABERTOS.** Próxima decisão independente: revisar e autorizar, ou não, a **ordem executiva F1-05**; merge de código exigirá autorização ainda posterior.
