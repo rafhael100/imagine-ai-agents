@@ -4,7 +4,7 @@
 >
 > **Data:** 2026-11-08. Repo `rafhael100/imagine-ai-agents`. Branch somente documental `docs/ft01-f1-06-ordem-executiva-proposta-2026-11-08`, criada separadamente da branch de planejamento; base `dev/ft01-aia-core-mocks-2026-11-06`.
 >
-> **Precedência:** o responsável ratificou as alternativas A de F106-D01 a D10 **exclusivamente no nível documental** no PR #89. **PR #89 está aberto em rascunho, sem merge.** Esta minuta não integra o PR #89 e não modifica sua branch. Eventual merge documental do PR #89 exigirá autorização expressa própria; não presume programação ou merge de código.
+> **Precedência:** o responsável ratificou as alternativas A de F106-D01 a D10 **exclusivamente no nível documental** no PR #89. **O PR #89 foi integrado exclusivamente à branch dev**, mediante merge documental `2453b3cd3a0283136c35b64dd03f559a0d4ca053` (verificado em 2026-11-08). Esta minuta não modifica o PR #89 e não presume programação, aprovação executiva F1-06 nem merge de código.
 >
 > **Bloqueios intactos:** `main`, outros repositórios, CRM, Portal, Sites, Performance AI, Universidade, VPS/Cloudflare/n8n e infraestrutura. R01-G01 a G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**. Sem SQL/ALLOW, API/LLM real, banco, filas, autenticação de produção, dados pessoais, credenciais, GitHub Actions, instalação PHP/Composer, compras, custos, deploy ou F1-07.
 
@@ -24,7 +24,7 @@ O laboratório **não** publica agentes reais, não gera UI, não estabelece per
 | Critério | Proposta para decisão posterior |
 | --- | --- |
 | Repositório | `rafhael100/imagine-ai-agents` |
-| Branch base futura | `dev/ft01-aia-core-mocks-2026-11-06`, **após** eventual merge documental EXPRESSAMENTE autorizado do PR #89 |
+| Branch base futura | `dev/ft01-aia-core-mocks-2026-11-06`, **já com o merge documental do PR #89**; validar novamente SHA atual antes de qualquer execução futura |
 | Nova branch de código CANDIDATA | `dev/ft01-f1-06-agent-release-mocks-2026-11-08` — **NÃO CRIADA** |
 | Origem | SHA atual autenticado da branch dev após verificação de histórico, `AGENTS.md` e árvore limpa |
 | PR de código futuro | **DRAFT**, filha → branch dev, **SEM MERGE** |
@@ -35,7 +35,7 @@ Se branch homônima já existir, interromper para inspeção; não usar force-pu
 
 ## 3. Preflight obrigatório a eventual executor
 
-1. Confirmar autenticação GitHub, remoto, `AGENTS.md`, `README.md`, `STATUS-ATUAL.md`, estado da branch base, SHA de `main`, PR #89 e eventuais divergências. NÃO fazer merge do PR #89 automaticamente.
+1. Confirmar autenticação GitHub, remoto, `AGENTS.md`, `README.md`, `STATUS-ATUAL.md`, estado da branch base, SHA de `main`, que o PR #89 segue integrado apenas à dev, e eventuais divergências. NÃO repetir o merge do PR #89.
 2. Ler AIA-01, AIA-02, AIA-08, AIA-09, AIA-R03/R04, planejamento F1-06 e os componentes PHP de F1-01..F1-05.
 3. Inspecionar `src/Domain/`, `src/MockTooling/`, `src/MockUsage/`, `src/MockOrchestration/`, `src/MockResilience/`, `tests/Unit/run.php`; preservar contratos, esquema de autorização e suites anteriores.
 4. Conferir que PHP CLI 8.1+ **já** esteja disponível. Se não houver, declarar `NÃO EXECUTADO` para lint e testes, sem instalar PHP, Composer, dependências, GitHub Actions ou usar fornecedores pagos.
@@ -106,14 +106,16 @@ O executor deverá apresentar arquivos alterados, testes e limitações; nunca a
 
 ## 8. Texto sugerido de autorização EXECUTIVA futura — NÃO CONCEDIDA
 
-> **Autorizo expressamente executar apenas o laboratório sintético AIA-FT01/F1-06** no repositório `rafhael100/imagine-ai-agents`, em branch filha `dev/ft01-f1-06-agent-release-mocks-2026-11-08` criada de SHA verificada da branch `dev/ft01-aia-core-mocks-2026-11-06` após confirmação de aprovação e merge documental específicos do PR #89. Autorizo PHP puro e memória volátil em `src/MockCatalog/`, `tests/Unit/catalog_release.php`, inclusão mínima no runner, `README.md` e `STATUS-ATUAL.md`, somente para catálogo/versionamento de templates e snapshots fictícios, avaliação local e promoção/suspensão/rollback exclusivamente simulados. Autorizo até 12 novos casos U06-01–U06-12 e regressão dos 58 anteriores, se PHP CLI 8.1+ já estiver disponível; sem instalações ou Actions. Abrir PR de código DRAFT filha → dev, **SEM MERGE**. Não autorizo `main`, outros projetos, contratos/classes estáveis, API/CRM/LLM reais, bancos/SQL/ALLOW, dados privados, credenciais, VPS/Cloudflare/n8n, despesas, deploy, F1-07 ou fechamento dos gates R01/CORE/SEG/AUT. Se houver bloqueio, parar e apresentar a divergência.
+> **Autorizo expressamente executar apenas o laboratório sintético AIA-FT01/F1-06** no repositório `rafhael100/imagine-ai-agents`, em branch filha `dev/ft01-f1-06-agent-release-mocks-2026-11-08` criada de SHA verificada da branch `dev/ft01-aia-core-mocks-2026-11-06` após verificar que o merge documental já realizado do PR #89 permanece na branch dev e que a base não apresenta divergências. Autorizo PHP puro e memória volátil em `src/MockCatalog/`, `tests/Unit/catalog_release.php`, inclusão mínima no runner, `README.md` e `STATUS-ATUAL.md`, somente para catálogo/versionamento de templates e snapshots fictícios, avaliação local e promoção/suspensão/rollback exclusivamente simulados. Autorizo até 12 novos casos U06-01–U06-12 e regressão dos 58 anteriores, se PHP CLI 8.1+ já estiver disponível; sem instalações ou Actions. Abrir PR de código DRAFT filha → dev, **SEM MERGE**. Não autorizo `main`, outros projetos, contratos/classes estáveis, API/CRM/LLM reais, bancos/SQL/ALLOW, dados privados, credenciais, VPS/Cloudflare/n8n, despesas, deploy, F1-07 ou fechamento dos gates R01/CORE/SEG/AUT. Se houver bloqueio, parar e apresentar a divergência.
 
 Este texto é **proposta para futura decisão independente**, não ordem concedida por ratificação documental.
 
 ## 9. Estado e próximas decisões
 
+> **Atualização de preflight documental (2026-11-08):** o PR #89 já consta como MERGED, exclusivamente na dev (`2453b3cd3a0283136c35b64dd03f559a0d4ca053`). O PR #90 continua DRAFT, sem merge. A branch documental do PR #90 foi criada antes da integração do #89; não realizar rebase, force-push ou alteração da base sem revisão adicional. A minuta atualiza apenas fatos documentais: **nenhuma execução ou autorização de código F1-06 foi concedida**.
+
 - [x] F106-D01 a D10, alternativas A, ratificadas **documentalmente** pelo responsável em 2026-11-08, registradas no PR #89.
-- [ ] Avaliação e possível autorização do **merge exclusivamente documental do PR #89** na dev.
+- [x] **Merge exclusivamente documental do PR #89** realizado na dev em 2026-11-08, commit `2453b3cd3a0283136c35b64dd03f559a0d4ca053`; isso não concede autorização de código F1-06.
 - [ ] Revisão e autorização **executiva explícita** da F1-06 em novo ato.
 - [ ] Somente depois: branch de código, desenvolvimento, validação sintética, PR draft sem merge.
 - [ ] Merge de código e qualquer deploy sempre exigem aprovações **adicionais e específicas**.
