@@ -143,3 +143,16 @@ casos F1-03 e as 22 regressões anteriores. Neste ambiente, `php -v` retorna 127
 (`php: command not found`): lint e os **34 casos NÃO EXECUTADOS pelo Codex**.
 A evidência auxiliar histórica acima não valida estas correções nem a suíte
 completa no SHA atual. Aceite permanece pendente de execução posterior.
+
+## FT01-F1-04 — ferramentas e capabilities simuladas (2026-11-08)
+
+**Autorização executiva específica:** o responsável autorizou **somente programação e testes unitários sintéticos F1-04**. Branch filha `dev/ft01-f1-04-tool-catalog-mocks-2026-11-08`; PR de código apenas **draft** contra `dev/ft01-aia-core-mocks-2026-11-06`, sem merge ou deploy.
+
+- `src/MockTooling/MockToolCatalog.php`: catálogo fechado e versionado de três ferramentas fictícias (leitura, sugestão e mutação fake), com validação de parâmetros, whitelist e limites.
+- `src/MockTooling/MockCapabilityGrant.php`: concessão puramente fictícia injetada fora de textos de IA; exige produto, empresa, principal, finalidade, recurso e versão idênticos; permite revogação e prazo explícito.
+- `src/MockTooling/MockToolDispatcher.php`: despacho somente local, leitura pelo reader fake, sugestão pelo coordenador anterior e mutação fake **apenas via SupervisedCoordinator** já autorizado. Nunca concede aprovação, envia HTTP ou retenta gravação cega. Rastro limitado a códigos fechados e referências sintéticas hash.
+- `tests/Unit/tool_dispatch.php`: 12 cenários novos U04-01 a U04-12. O runner carrega as 34 regressões anteriores sem reescrevê-las.
+
+**Evidência independente do código publicado:** PHP CLI 8.4.24; **26/26 arquivos PHP lint PASS**; **46/46 testes sintéticos PASS, zero falhas**; **exit code 0**. Os hashes Git blob SHA-1 de todos os 26 arquivos PHP locais testados coincidem com os blobs correspondentes da branch GitHub. Uma fixture de teste U04-08 foi ajustada para distinguir concessão ainda vigente de aprovação expirada; todas as regras de autorização foram mantidas.
+
+**Não é produção:** grants sintéticos **não são identidade/ACL**, resultados fake não são confirmações reais do CRM, ausência de persistência, filas, concorrência, APIs, modelo LLM, dados reais e validação bilateral. Gates R01-G01–G11 e CORE/SEG/AUT CRM continuam **ABERTOS**; `main`, infra e demais projetos intocados. Merge e F1-05 **não autorizados**.
