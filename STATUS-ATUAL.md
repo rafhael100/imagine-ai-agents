@@ -340,3 +340,17 @@ independentemente em ambiente isolado de análise, sem GitHub Actions.
   credenciais de produto, dados pessoais, SQL/ALLOW, infraestrutura, serviço pago,
   deploy ou F1-03. GitHub utilizado somente no versionamento autorizado.
 - R01-G01 a G11 TODOS ABERTOS; CORE/SEG/AUT CRM ABERTOS.
+
+## Validação independente FT01-F1-02 — 2026-11-08
+
+Este registro **supera a limitação histórica de ausência do PHP no executor Codex** para o código do PR #76, sem alterar o fato de que o PHP continua ausente naquele ambiente.
+
+- **Escopo testado:** código PHP do head `13a7b001e34dfa7bf5f3dbd2ecfdbe2f572ff170` do PR #76, filial `dev/ft01-f1-02-supervised-mocks-2026-11-07`, sem alteração funcional.
+- **Execução independente:** ChatGPT em ambiente local isolado, PHP CLI **8.4.24**, sem autenticação com sistemas Imagine, sem PHP/Composer instalado para este trabalho, sem rede ou dependências pagas.
+- **Proveniência:** 19 arquivos `.php` reproduzidos do conteúdo retornado pelo conector GitHub e todos os **19/19 hashes SHA-1 de Git blob conferidos** contra os identificadores do GitHub. Não houve edição do código usado para os testes.
+- **Lint:** `find src tests/Unit -type f -name '*.php' -print0 | xargs -0 -n1 php -l` → **19/19** sem erros de sintaxe, retorno **0**.
+- **Testes:** `php tests/Unit/run.php` → **22 PASS, 0 FAIL**, última linha `22 cases, 0 failures`, retorno **0**; incluem 10 cenários F1-01 e 12 cenários F1-02.
+- **GitHub Actions:** zero execuções verificadas no ramo; nenhum workflow criado para esta validação e nenhum minuto consumido. Sem instalações, APIs reais ou despesas adicionais.
+- **Limites do aceite:** apenas comportamento sintético de mocks PHP 8.4.24; **não é homologação** de autenticação/ACL real, isolamento SaaS em produção, LGPD, durabilidade, concorrência, transações, serviços de IA/CRM ou compatibilidade de runtime em todas as versões PHP 8.1+.
+- **Git:** PR #76 permanece **OPEN/DRAFT**, **SEM MERGE**. Branch base, `main`, outros repositórios e VPS/Cloudflare/n8n inalterados. F1-03 e deploy não autorizados.
+- **Governança:** R01-G01 a G11 **TODOS ABERTOS** e CORE/SEG/AUT CRM **ABERTOS**. Eventual merge do PR #76 somente na branch de desenvolvimento exige autorização expressa separada do responsável.
