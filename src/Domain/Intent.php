@@ -22,7 +22,12 @@ final class Intent
         $this->context = $step->context;
     }
     public function signature(): string {
-        return json_encode([$this->id, $this->context->key(), $this->operation, $this->material], JSON_THROW_ON_ERROR);
+        // Bind the approval and idempotency fingerprint to the originating run and step.
+        // These are synthetic identifiers, not authenticated actors or CRM authority.
+        return json_encode([
+            $this->id, $this->idempotencyKey, $this->step->run->id, $this->step->id,
+            $this->context->key(), $this->operation, $this->material,
+        ], JSON_THROW_ON_ERROR);
     }
     public function key(): string {
         return json_encode([$this->context->product, $this->context->tenant, $this->idempotencyKey], JSON_THROW_ON_ERROR);
