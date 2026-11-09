@@ -116,7 +116,8 @@ return [
         $effect = $c->execute($intent, $approval, 15);
         [, , , , $otherIntent] = resilienceFixture([], [], $ctx, 'SYNTHETIC_OTHER_MATERIAL');
         check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $otherIntent, $effect)['reason'] === 'EFFECT_CONFLICT');
-        denied('IDEMPOTENCY_CONFLICT', fn() => $c->reconcile($otherIntent));
+        // Same logical run ID but a distinct object: ownership fails first.
+        denied('RUN_NOT_OWNED', fn() => $c->reconcile($otherIntent));
         check($gateway->submitCount() === 1);
     },
     'U03-11 simulated restart without shared memory cannot claim durable recovery' => function (): void {

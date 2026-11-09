@@ -20,6 +20,6 @@ As fixtures legadas que constroem `Run` e `Step` fora do coordenador continuam a
 
 ## Testes
 
-Os 15 casos `U22-01` a `U22-15` verificam IDs duplicados de execução e etapa, instância diferente com ID igual em leitura, sugestão, transição, envio e status, tentativa de aprovar uma etapa recriada, fluxo válido, execução desconhecida, compatibilidade legada e isolamento por contexto. A suíte oficial prevista sobe para **303 casos PHP e 78 arquivos de sintaxe**; validar o resultado da CI do PR e do merge antes de afirmar integração concluída.
+Os 16 casos `U22-01` a `U22-16` verificam IDs duplicados de execução e etapa, instância diferente com ID igual em leitura, sugestão, transição, envio e status, tentativa de aprovar uma etapa recriada, fluxo válido, execução desconhecida, compatibilidade legada e isolamento por contexto. A suíte oficial prevista sobe para **304 casos PHP e 78 arquivos de sintaxe**; validar o resultado da CI do PR e do merge antes de afirmar integração concluída.
 
 **Gates:** [Imagine CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) continua OPEN/DRAFT; R01-G01..G11 e CORE/SEG/AUT permanecem ABERTOS. Estado operacional **NO-GO**. Não alterar `main`, VPS, clientes, APIs, produção ou despesas.

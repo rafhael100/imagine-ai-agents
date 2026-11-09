@@ -148,4 +148,15 @@ return [
         denied('CONTEXT_DENIED', fn() => $c->step($wrong, 'SYNTHETIC_F22_STEP'));
         check(count($c->events()) === 1);
     },
+    'U22-16 changed material on the canonical Step still conflicts by idempotency' => function (): void {
+        [$c, $run, $gateway] = f22();
+        $valid = f22intent($c, $run);
+        $effect = $c->execute($valid, f22approval($valid), 15);
+        $changed = new Intent($valid->id, $valid->step, $valid->idempotencyKey,
+            $valid->operation, 'SYNTHETIC_CHANGED_MATERIAL');
+        $snapshot = $c->events();
+        denied('IDEMPOTENCY_CONFLICT', fn() => $c->execute($changed, f22approval($changed), 15));
+        check($effect->isConfirmed() && $c->events() === $snapshot
+            && $gateway->submitCount() === 1 && $gateway->statusCount() === 0);
+    },
 ];
