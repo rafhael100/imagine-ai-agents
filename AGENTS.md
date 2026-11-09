@@ -4,6 +4,8 @@
 
 Este repositório será a camada compartilhada de agentes de IA para CRM, Portal, Performance AI e Universidade Imagine. Está em **desenvolvimento controlado de protótipos sintéticos em branch dev**, sem integração ou homologação de produção. Os recortes FT01 F1-01 a F1-12 já foram integrados **exclusivamente à dev** (F1-12: PR #106, squash `562896763f900a8a264ea46aa35e2aeacd5e0903`, **144/144 testes PHP**, **60/60 lint e hashes Git blob**); a `main` permanece sem essa implementação.
 
+**F1-13 em andamento:** branch filha com auditoria redigida e 12 testes sintéticos; **156/156 testes oficiais e 63/63 lint ainda pendentes**. Não integrar a dev sem prova completa. A F1-12 continua sendo o último recorte integrado na dev.
+
 ## Regras obrigatórias para agentes de desenvolvimento / Codex
 
 - **Autorização vigente do responsável (08/11/2026):** avançar autonomamente no código **sintético/offline** e em seus testes, em branches isoladas, com PRs, preflight de SHA, evidências reproduzíveis e merge controlado **somente na dev** quando os gates técnicos do recorte forem satisfeitos. Perguntar apenas quando houver decisão estritamente crítica; autorização ampla não libera produção ou gastos.
