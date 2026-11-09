@@ -8,6 +8,6 @@ O PR #57 do Imagine CRM está em DRAFT e não integrado. Seu documento de propos
 
 `tools/op01_php_parser_probe.php` recebe apenas fixtures JSON sintéticas em stdin, preserva a diferença entre objetos e listas e retorna booleanos do construtor PHP F1-12. O teste Python `tests/Contracts/test_op01_contract_parity.py` aplica casos positivos, negativos e adulterações. Não executa API real, ACL, SQL ou autenticação.
 
-**Regressão esperada após CI:** testes documentais EVID-02 e EVID-03 e regressão PHP **228/228**, lint **74/74** (um PHP a mais pelo probe). Não declarar sucesso antes do workflow verificar o SHA exato.
+**Regressão esperada após CI:** testes documentais EVID-02 e EVID-03 e regressão PHP **228/228**, lint **73/73** pelo validador oficial, mais **1 lint dedicado** para o probe em `tools/`. Não declarar sucesso antes do workflow verificar o SHA exato.
 
 **Gates:** R01-G01..G11, CRM CORE/SEG/AUT e aceite formal do PR CRM #57 ABERTOS. Nenhum deploy, credencial, servidor, mudança em `main`, despesa ou acesso a dados reais.

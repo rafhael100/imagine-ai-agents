@@ -21,6 +21,7 @@ jobs:
       - name: Validate pinned draft and offline negative cases
         shell: bash
         run: |
+          php -l tools/op01_php_parser_probe.php
           python3 tools/check_op01_contract_parity.py
           python3 -m unittest discover -s tests/Contracts -p test_op01_contract_parity.py -v
           python3 tools/check_r01_readiness.py
@@ -29,7 +30,7 @@ jobs:
         shell: bash
         env:
           EXPECTED_SHA: ${{ github.sha }}
-          EXPECTED_PHP: '74'
+          EXPECTED_PHP: '73'
           EXPECTED_CASES: '228'
         run: |
           php -v

@@ -4,7 +4,7 @@
 
 - PR CRM #57 preservado em snapshot identificado por SHA e conferido com o schema JSON e o parser PHP sintéticos dos Agentes.
 - Testes negativos detectam alterações de versão, operação, campos e alegações falsas de aprovação. O resultado permanece `NO_GO` independentemente da integridade dos arquivos.
-- Regressão esperada pela CI: 228 testes PHP e 74 arquivos PHP. Ver `docs/AIA-R01-EVID-03-CONFERENCIA-PARIDADE-CRM-OP01.md`.
+- Regressão esperada pela CI: 228 testes PHP e 73 arquivos na validação oficial, mais 1 probe PHP com lint separado. Ver `docs/AIA-R01-EVID-03-CONFERENCIA-PARIDADE-CRM-OP01.md`.
 
 ---
 ## Estado vigente — R01/EVID-02 e análise G09 integrados à dev (09/11/2026)
