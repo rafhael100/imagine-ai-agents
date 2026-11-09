@@ -39,7 +39,7 @@ final class MockCrmReadAuditedBoundary
         if (!$error instanceof MockError) return 'OTHER';
         return match ($error->getMessage()) {
             'BRIDGE_CONTEXT_DENIED', 'CONTEXT_DENIED' => 'CONTEXT',
-            'TRUST_DENIED', 'BRIDGE_TRUST_DENIED' => 'TRUST',
+            'TRUST_DENIED', 'BRIDGE_TRUST_DENIED', 'TRUST_STATE_UNAVAILABLE' => 'TRUST',
             'OWNER_DENIED' => 'OWNER',
             'TRUST_REPLAY_DENIED' => 'REPLAY',
             'RESOURCE_DENIED_OR_MISSING' => 'RESOURCE',
