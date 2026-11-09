@@ -60,7 +60,7 @@ return [
         $later['sequence'] = count($events) + 1;
         $later['code'] = 'SYNTHETIC_INDETERMINADO';
         $events[] = $later;
-        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'EFFECT_CONFLICT');
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'STATE_CONFLICT');
         check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $effect)['state'] === 'CONFIRMADO');
     },
     'U03-05 out-of-order and regressive injected clocks fail closed' => function (): void {

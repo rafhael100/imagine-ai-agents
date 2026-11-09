@@ -133,6 +133,9 @@ final class ReadOnlyTraceReview
             }
             if (in_array($code, ['CONFIRMADO', 'NEGADO', 'PENDENTE', 'INDETERMINADO'], true)) {
                 if (!$seenSubmit || $event['intent'] === null) return self::unknown('TRACE_INVALID');
+                // Only the first post-submission result can appear without a
+                // status query. Every later result needs its own request.
+                if ($sawEffect && !$awaitingStatusResult) return self::unknown('STATE_CONFLICT');
                 $awaitingStatusResult = false;
                 if ($lastEffect !== null && in_array($lastEffect, ['CONFIRMADO', 'NEGADO'], true)
                     && $code !== $lastEffect) return self::unknown('EFFECT_CONFLICT');
