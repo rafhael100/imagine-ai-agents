@@ -1,0 +1,36 @@
+name: R01 OP-01 offline draft contract parity
+
+on:
+  push:
+    branches:
+      - dev/r01-evid-03-crm-contract-parity-2026-11-09
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event.repository.private == false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Checkout exact reviewed commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate pinned draft and offline negative cases
+        shell: bash
+        run: |
+          python3 tools/check_op01_contract_parity.py
+          python3 -m unittest discover -s tests/Contracts -p test_op01_contract_parity.py -v
+          python3 tools/check_r01_readiness.py
+          python3 -m unittest discover -s tests/Contracts -p test_r01_readiness.py -v
+      - name: Preserve full synthetic PHP regression
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_PHP: '74'
+          EXPECTED_CASES: '228'
+        run: |
+          php -v
+          bash tools/validate_ft01_offline.sh
