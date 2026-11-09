@@ -1,6 +1,20 @@
 # STATUS-ATUAL — Imagine AI Agents
 
-## FT01/F1-09 — desenvolvimento isolado e regressão PHP validada (08/11/2026)
+## ESTADO VIGENTE — F1-09 integrado somente à dev (09/11/2026)
+
+- **PR de código [#100](https://github.com/rafhael100/imagine-ai-agents/pull/100): MERGED na `dev/ft01-aia-core-mocks-2026-11-06`**, squash `da1710b4cc2cabe7eddf87da0605a1ba69a08724`. A `main` foi conferida em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a` e permaneceu inalterada.
+- **Entrega:** `src/MockEvaluation/` (suíte sintética, snapshot de versão, comparador com gates críticos e revisão humana), 12 testes U09, exemplo PHP `examples/f109-evaluation-demo.php`, laboratório visual `examples/f109-comparador-versoes-offline.html`, smoke Node `tests/Browser/f109_smoke.cjs` e QA responsiva opcional `tests/Browser/f109_responsive_qa.py`.
+- **Provas executadas:** `php tests/Unit/run.php` → **97 cases, 0 failures, exit 0**; **48/48 PHP lint PASS** e **48/48 hashes de blobs PHP idênticos** ao PR. `node tests/Browser/f109_smoke.cjs` em Node.js 22.16 → `F109_SMOKE_PASS`. `python tests/Browser/f109_responsive_qa.py` em Chromium real com Playwright já instalado → **5/5 viewports PASS** (1440×900, 1024×768, 768×1024, 390×844, 320×680), três decisões corretas, navegação por teclado, tabela com rolagem interna acessível, zero erros JS ou requisições externas. Correção mobile feita antes do merge.
+- **Integridade pós-merge:** todos os **53 arquivos de código, testes e demos** do commit integrado possuem blobs Git idênticos ao head do PR #100 verificado. HTML F1-09 SHA-1 Git `ccca71572725ba6e6900a5d189d24c5fadf1334b`, smoke Node `f8f3ca01e8256adb99faff79cef5a6b6a1f126e0`, QA Chromium `6d2c59545d1166cafa988a68c20731083a819885`.
+- **Limites:** execução **sintética e offline**, sem agentes/LLM, autenticação, CRM real, memória persistente, dados pessoais, custo de fornecedor, VPS, SQL, API, Cloudflare, publicação ou deploy. Browser QA executado via `page.set_content` sobre bytes idênticos; **Firefox e abertura `file://` ainda não foram testados**. A aprovação de testes não homologa uso real.
+- **Gates ainda abertos:** R01-G01 a G11, CORE/SEG/AUT CRM, integração e segurança operacional. Autorização ampla vale apenas para desenvolvimento, testes locais e integração controlada na `dev`; não habilita merge na `main` ou produção.
+
+**Precedência:** qualquer texto histórico abaixo que descreva PR #100 como DRAFT, Node/Chromium como pendentes ou F1-09 apenas em branch filha foi escrito antes do merge; consulte o registro vigente acima.
+
+---
+
+
+## HISTÓRICO FT01/F1-09 — desenvolvimento isolado e regressão PHP validada (08/11/2026); registro histórico
 
 - **Base imutável na abertura:** `dev/ft01-aia-core-mocks-2026-11-06` em `0fc74060c5fdfe914fd2a1c89f58d22818f775a2` (F1-08 já integrada). `main` preservada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`.
 - **Branch:** `dev/ft01-f1-09-evaluation-comparison-2026-11-08`. Três classes `src/MockEvaluation/`, 12 testes `U09-01..12` em `tests/Unit/evaluation_compare.php`, runner PHP, exemplo `examples/f109-evaluation-demo.php`, painel `examples/f109-comparador-versoes-offline.html`, teste `tests/Browser/f109_smoke.cjs` e documento técnico F1-09.
