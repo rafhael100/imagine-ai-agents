@@ -1,12 +1,12 @@
 # Imagine AI Agents — Transição dos mocks FT01 para piloto controlado
 
-**Situação em 09/11/2026:** preparação exclusivamente documental, não autorização de integração. Os recortes sintéticos FT01/F1-01 a F1-10 estão integrados à **dev**; último squash `70d81bf58d3e3e0b1e3ac87250538451a9c166e9`. A `main` permanece `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`. Nenhum serviço real foi ativado.
+**Situação em 09/11/2026:** preparação exclusivamente documental, não autorização de integração. Os recortes sintéticos FT01/F1-01 a F1-11 estão integrados à **dev**; último squash `68161e82a2ca36a34634f67b6e34f332c78c1ee8`. A `main` permanece `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`. Nenhum serviço real foi ativado.
 
 ## 1. Resultado atingido, sem extrapolação
 
-O laboratório tem orquestração sintética, segregação simulada de contexto, autorizações fictícias, ferramentas e idempotência mockadas, cotas sintéticas, catálogo/versionamento de agentes, recuperação de conhecimento marcado não confiável, comparação A/B com regressão crítica eliminatória e, no F1-10, revisão simulada de Produto e Segurança com digest/revogação.
+O laboratório tem orquestração sintética, segregação simulada de contexto, autorizações fictícias, ferramentas e idempotência mockadas, cotas sintéticas, catálogo/versionamento de agentes, recuperação de conhecimento marcado não confiável, comparação A/B com regressão crítica eliminatória e, no F1-10, revisão simulada de Produto e Segurança com digest/revogação; no F1-11, contexto sintético serviço-serviço, audience/issuer, autorização fictícia pelo produto dono e replay in-memory.
 
-A suíte PHP executada tem **111 testes e zero falhas**, **52/52 lints PASS** e **52/52 hashes de blobs Git idênticos** ao head integrado. Isso **não valida autenticação real, autorização dos produtos, LGPD operacional, throughput, custos, continuidade, rastreamento assinado nem produção**.
+A suíte PHP executada tem **127 testes e zero falhas**, **57/57 lints PASS** e **57/57 hashes de blobs Git idênticos** ao head integrado. Isso **não valida autenticação real, autorização dos produtos, LGPD operacional, throughput, custos, continuidade, rastreamento assinado nem produção**.
 
 ## 2. Dependências antes de conectar o primeiro produto
 
@@ -30,7 +30,7 @@ Os gates próprios do CRM (CORE/SEG/AUT) também continuam abertos. Não aprovar
 
 ## 3. Ordem técnica recomendada, sem precisar de despesas
 
-1. **F1-11 documental / contratos sintéticos:** contratos de confiança serviço-serviço, contexto, audiences, recursos e negação uniforme. Gerar testes de contrato com atores e recursos exclusivamente fictícios; **não emitir credencial real**.
+1. **F1-11 sintético CONCLUÍDO:** contratos de confiança serviço-serviço, contexto, audience, recurso e negação uniforme, 16 testes negativos de confiança (127 no total); **nenhuma credencial real emitida**. Próximo detalhamento: `docs/AIA-R01-G01-G02-CONTRATO-CONFIANCA-PROPOSTA.md` para autenticação e ACL reais, ainda somente documental.
 2. **F1-12 documental / read-only boundary:** definir primeiro piloto CRM com consulta limitada a contexto autorizado, resumo e sugestão; negar escrita por padrão. Não acessar endpoints do CRM até suas políticas serem homologadas.
 3. **Revisão transversal de segurança:** ownership por produto, correlação, rollback, timeout, recuperação de dados, logs mínimos, retenção e teste contra acesso cross-tenant. Acompanhamento de G01–G10 com responsáveis.
 4. **Gate executivo crítico G11:** escopo de integração real, infraestrutura isolada, teto de custo explícito e responsável por segurança/aceite. Só após isso contratar/ativar tecnologia ou tocar VPS/credenciais.

@@ -1,5 +1,8 @@
 # Imagine AI Agents — F1-11 | Contratos sintéticos de confiança serviço-serviço
 
+> **Estado vigente (09/11/2026):** PR #104 integrado **somente na dev** no SHA `68161e82a2ca36a34634f67b6e34f332c78c1ee8`. PHP **127/127 PASS**, lint/hash **57/57 PASS**; 63 arquivos de código, scripts e testes idênticos aos blobs do head PR testado. O trecho abaixo que diz "branch isolada" refere-se ao período anterior ao merge. **Nenhuma identidade real, ACL real, token, API, produção, VPS ou fechamento de gates foi homologado.**
+
+
 **Data:** 09/11/2026. **Estado:** laboratório local em PHP puro, implementado em branch isolada. **Não é autenticação, IAM, JWT, OAuth, mTLS, assinatura criptográfica nem integração real com CRM.**
 
 ## Objetivo e vínculo com os gates
