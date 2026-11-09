@@ -67,6 +67,7 @@ for required in \
   tests/Unit/trace_capacity.php \
   tests/Unit/run_projection.php \
   tests/Unit/run_identity.php \
+  tests/Unit/status_outage_trace.php \
   tests/Unit/run.php; do
   if [[ ! -f "$required" ]]; then
     echo "BLOCKED: incomplete checkout, missing $required" >&2
@@ -74,8 +75,8 @@ for required in \
   fi
 done
 
-expected_php="${EXPECTED_PHP:-78}"
-expected_cases="${EXPECTED_CASES:-304}"
+expected_php="${EXPECTED_PHP:-79}"
+expected_cases="${EXPECTED_CASES:-320}"
 [[ "$expected_php" =~ ^[0-9]+$ && "$expected_cases" =~ ^[0-9]+$ ]] || {
   echo 'BLOCKED: expected counts must be integers' >&2
   exit 2

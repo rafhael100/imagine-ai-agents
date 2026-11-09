@@ -80,7 +80,8 @@ return [
     'U21-07 status query for A does not contaminate B projection' => function (): void {
         [$c, $gateway, $runA, $runB, $intentA, $intentB, $proofA, $proofB] = f21Fixture();
         check($c->reconcile($intentA) === $proofA);
-        check(count($c->eventsForRun($runA)) === 5
+        // The successful status query now records its CONFIRMADO result.
+        check(count($c->eventsForRun($runA)) === 6
             && count($c->eventsForRun($runB)) === 4);
         check(ReadOnlyTraceReview::inspect($c->eventsForRun($runA), context(), $intentA, $proofA)['state'] === 'CONFIRMADO');
         check(ReadOnlyTraceReview::inspect($c->eventsForRun($runB), context(), $intentB, $proofB)['state'] === 'CONFIRMADO');

@@ -114,8 +114,23 @@ final class SupervisedCoordinator
         // STATUS_REQUESTED + at most one observed status result.
         $this->assertTraceCapacity(2);
         $this->trace($intent->step->run, 'STATUS_REQUESTED', $intent);
-        $effect = $this->gateway->status($this->context, $intent);
-        return $this->remember($intent, $effect);
+        try {
+            $effect = $this->gateway->status($this->context, $intent);
+        } catch (\Throwable $error) {
+            // Preserve the exception and prior effect, but close the audit
+            // attempt with a fixed, privacy-minimized event.
+            $this->trace($intent->step->run, 'STATUS_UNAVAILABLE', $intent);
+            throw $error;
+        }
+        try {
+            return $this->remember($intent, $effect);
+        } catch (MockError $error) {
+            // The gateway answered, but the returned synthetic evidence was
+            // inconsistent. Close the status attempt without certifying it.
+            // Never leak the raw error, mutate a prior effect or re-submit.
+            $this->trace($intent->step->run, 'STATUS_REJECTED', $intent);
+            throw $error;
+        }
     }
 
     public function transition(Run $run, string $state): void
@@ -189,6 +204,10 @@ final class SupervisedCoordinator
             if ($effect->state !== $prior->state || $effect->id !== $prior->id || $effect->source !== $prior->source) {
                 MockError::fail('STATE_CONFLICT');
             }
+            // A successful status recheck must close STATUS_REQUESTED in the
+            // trace even when it confirms the same immutable prior proof.
+            // It does not resubmit, mutate or replace the original Effect.
+            $this->trace($intent->step->run, $prior->state, $intent);
             return $prior;
         }
         // A missing record after dispatch cannot prove that nothing happened.

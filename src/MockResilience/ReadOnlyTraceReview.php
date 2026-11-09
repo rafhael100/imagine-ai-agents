@@ -11,7 +11,7 @@ final class ReadOnlyTraceReview
     private const FIELDS = ['sequence', 'product', 'tenant', 'run', 'step', 'intent', 'code', 'run_state'];
     private const CODES = [
         'STARTED', 'STEP_CREATED', 'SUGGESTED', 'APPROVAL_DENIED', 'SUBMITTED',
-        'STATUS_REQUESTED', 'TIMEOUT', 'INDETERMINADO', 'PENDENTE',
+        'STATUS_REQUESTED', 'STATUS_UNAVAILABLE', 'STATUS_REJECTED', 'TIMEOUT', 'INDETERMINADO', 'PENDENTE',
         'CONFIRMADO', 'NEGADO', 'RUN_CHANGED',
     ];
     private const STATES = ['RECEBIDA', 'EXECUTANDO', 'AGUARDANDO', 'CONCLUIDA', 'FALHOU', 'CANCELADA'];
@@ -50,6 +50,7 @@ final class ReadOnlyTraceReview
         $terminal = null;
         $seenSubmit = false;
         $seenExpectedStep = false;
+        $awaitingStatusResult = false;
         $lastEffect = null;
         foreach ($events as $index => $event) {
             if (!is_array($event)) return self::unknown('TRACE_INVALID');
@@ -98,15 +99,30 @@ final class ReadOnlyTraceReview
             // A proof cannot repair missing or detached trace bindings:
             // require the hashed run/step/idempotency/material signature, too.
             if (in_array($code, [
-                'APPROVAL_DENIED', 'SUBMITTED', 'STATUS_REQUESTED', 'TIMEOUT',
+                'APPROVAL_DENIED', 'SUBMITTED', 'STATUS_REQUESTED', 'STATUS_UNAVAILABLE', 'STATUS_REJECTED', 'TIMEOUT',
                 'INDETERMINADO', 'PENDENTE', 'CONFIRMADO', 'NEGADO',
             ], true) && ($event['intent'] === null || $event['step'] === null
                 || !array_key_exists('intent_signature', $event))) {
                 return self::unknown('INTENT_CONFLICT');
             }
-            // Status requests and timeouts can only follow a recorded submission.
-            if (in_array($code, ['STATUS_REQUESTED', 'TIMEOUT'], true) && !$seenSubmit) {
+            // Only a synthetic effect or fixed outage can complete a status request.
+            // No new submit, lifecycle event, or another status request may silently
+            // skip the outcome of the earlier query.
+            $statusClosures = ['STATUS_UNAVAILABLE', 'STATUS_REJECTED', 'INDETERMINADO',
+                'PENDENTE', 'CONFIRMADO', 'NEGADO'];
+            if ($awaitingStatusResult && !in_array($code, $statusClosures, true)) {
                 return self::unknown('STATE_CONFLICT');
+            }
+            // Status requests, timeouts and outages require a prior submission.
+            if (in_array($code, ['STATUS_REQUESTED', 'STATUS_UNAVAILABLE', 'STATUS_REJECTED', 'TIMEOUT'], true)
+                && !$seenSubmit) {
+                return self::unknown('STATE_CONFLICT');
+            }
+            if ($code === 'STATUS_REQUESTED') {
+                $awaitingStatusResult = true;
+            } elseif (in_array($code, ['STATUS_UNAVAILABLE', 'STATUS_REJECTED'], true)) {
+                if (!$awaitingStatusResult) return self::unknown('STATE_CONFLICT');
+                $awaitingStatusResult = false;
             }
             if ($code === 'SUBMITTED') {
                 if ($terminal !== null || $runState !== 'EXECUTANDO' || $seenSubmit) return self::unknown('STATE_CONFLICT');
@@ -117,6 +133,7 @@ final class ReadOnlyTraceReview
             }
             if (in_array($code, ['CONFIRMADO', 'NEGADO', 'PENDENTE', 'INDETERMINADO'], true)) {
                 if (!$seenSubmit || $event['intent'] === null) return self::unknown('TRACE_INVALID');
+                $awaitingStatusResult = false;
                 if ($lastEffect !== null && in_array($lastEffect, ['CONFIRMADO', 'NEGADO'], true)
                     && $code !== $lastEffect) return self::unknown('EFFECT_CONFLICT');
                 $lastEffect = $code;
@@ -124,6 +141,7 @@ final class ReadOnlyTraceReview
                 $effectStates[$code] = true;
             }
         }
+        if ($awaitingStatusResult) return self::unknown('STATE_CONFLICT');
         if (isset($effectStates['CONFIRMADO'], $effectStates['NEGADO'])) return self::unknown('EFFECT_CONFLICT');
         if (!$sawEffect || $proof === null) return self::unknown('PROOF_UNAVAILABLE');
         // Confirmations/denials are never derived from a log, only from compatible fake evidence.
