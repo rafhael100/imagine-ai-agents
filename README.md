@@ -1,5 +1,18 @@
 # Imagine AI Agents
 
+## Estado vigente — F1-13 integrado exclusivamente à dev (09/11/2026)
+
+- **PR [#108](https://github.com/rafhael100/imagine-ai-agents/pull/108) MERGED por squash apenas em `dev/ft01-aia-core-mocks-2026-11-06`**, commit `92a2f0a5f01a0014051594f24d96988e111f85c7`. A `main` foi preservada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; nenhum deploy, VPS, fornecedor, dados privados, CRM real ou gasto foi executado.
+- **Validação efetiva:** [GitHub Actions run #42579753806](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42579753806), commit exato `d09b3c57ac7d9c601afcd9a5cbd6d4b61b895620`, PHP CLI 8.3.6, **156 cases / 0 failures**, **63/63 PHP lint PASS**, validador SHA-fixado `VALIDATION_PASS`.
+- **Escopo integrado:** duas classes `src/MockAudit/`, 12 casos U13, documentação e verificador offline; trilha volátil de categorias de decisão e fingerprints de IDs fictícios, sem conteúdo de lead ou credenciais. O workflow de teste usa executor GitHub padrão apenas quando o repositório é público.
+- **Não se confundir com segurança real:** fingerprints de laboratório não são credenciais ou pseudonimização de produção; não há autenticação, ACL CRM, storage durável, anti-replay distribuído, gateway real, LGPD operacional, IA ou serviços. O CRM [PR #57](https://github.com/rafhael100/imagine-crm/pull/57) segue apenas documental e draft.
+- **Gates:** R01-G01 a G11 e CRM CORE/SEG/AUT ainda **ABERTOS**. A próxima fase autorizada pode fazer somente simulações offline de falhas entre instâncias, sem uso de clientes, produção, `main` ou serviços externos.
+
+**Precedência:** os registros inferiores de F1-13 “ainda em revisão/sem merge” são históricos, anteriores à aprovação da suíte e ao squash #108.
+
+---
+
+
 ## FT01/F1-13 — trilha de auditoria sintética sob revisão (09/11/2026)
 
 - **Branch isolada:** `dev/ft01-f1-13-audit-read-synthetic-2026-11-09`, derivada da dev após F1-12. **Ainda não integrada à dev ou main; sem deploy**.
