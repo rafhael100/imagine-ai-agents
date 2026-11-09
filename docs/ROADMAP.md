@@ -1,5 +1,13 @@
 # Roadmap proposto — Imagine AI Agents
 
+## SEC-06/SEC-07 — integridade da trilha e recuperação sintética (09/11/2026)
+
+- **PR #143 / SEC-06:** `SupervisedCoordinator::trace` adiciona somente hash da assinatura completa de `Intent` em eventos vinculados; o revisor exige essa correspondência, impedindo troca silenciosa de material/chave. Nove testes de regressão U03-19..27; [CI integrada #42662578637](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42662578637) PASS (**266 PHP / 75 lint**).
+- **PR #144 / SEC-07:** timeout de intenção não enviada falha antes de alterar a trilha. O revisor rejeita eventos de timeout e status anteriores ao envio. Sete testes U03-28..34; [CI integrada #42663498033](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42663498033) PASS no commit `ab3d8a1ecd0e74ceaa65038c036134126b2a3c6e` (**273 PHP / 75 lint**).
+- **Próximo marco independente:** revisão e aceite bilateral dos contratos reais CORE/SEG/AUT e do [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57), ainda OPEN/DRAFT. As trilhas permanecem **voláteis e não autenticadas**; SHA-256 da assinatura é apenas uma checagem referencial. Gates R01-G01..G11 e CRM CORE/SEG/AUT abertos. **Não subir código para `main` nem ativar API, acesso a cliente, VPS ou despesas.**
+
+---
+
 ## Verificação integrada da segurança de trilhas e aprovações (09/11/2026)
 
 - **SEC-04 / PR #140:** correção de sequência e vínculo de eventos sintéticos (`STEP_CREATED`, `SUBMITTED`, status/timeout/efeitos). Seis testes de resiliência U03-13..18. [CI de integração #42658449082](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42658449082) PASS, suíte 246/74 no commit `f7ffe7881668cb1a4423ad7d2b77c6ca7104a4a2`.
