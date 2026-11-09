@@ -1,6 +1,6 @@
 # AIA-R01/EVID-05 — Painel OP-01 determinístico a partir de CSV
 
-**Situação:** revisão técnica em branch isolada; sujeito à CI do commit exato. **Não autoriza acesso real, homologação CRM ou produção.**
+**Situação vigente (09/11/2026):** [PR #127](https://github.com/rafhael100/imagine-ai-agents/pull/127) integrado somente à dev, squash `44bab6e8a1c01bc6b30761018fe6271b94374bd6`. [CI #42628509823](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42628509823) PASS em head exato `5e3f0485d03a47d084332837d39f7fafe3169f75`, incluindo regressão 228/228 PHP, 73/73 lint oficiais, probe e testes negativos do gerador. **NÃO autoriza acesso real, homologação CRM ou produção.**
 
 ## Problema que esta entrega resolve
 
@@ -27,4 +27,4 @@ python3 tools/check_op01_readiness_dashboard.py
 
 O workflow `r01-op01-generated-dashboard-offline.yml` exige esses comandos, as suítes anteriores de prontidão e paridade, além da regressão PHP 228/228 e 73 arquivos lint, mais o probe individual. Testes exigem rejeição de gates autoaprovados, linhas ausentes, marcadores inválidos, HTML/atributos não confiáveis, células com fórmulas e snapshot desatualizado.
 
-**O status da CI permanece pendente até validação do SHA do PR.** EVID-05 não fecha R01-G01..G11 ou CRM CORE/SEG/AUT; PR CRM #57 continua rascunho. Nenhum gasto, servidor, cliente, API, SQL, `main` ou deploy.
+**A CI de SHA exato do PR foi aprovada; novo workflow unificado EVID-06 também passou na dev (run #42629209058).** EVID-05 não fecha R01-G01..G11 ou CRM CORE/SEG/AUT; PR CRM #57 continua rascunho. Nenhum gasto, servidor, cliente, API, SQL, `main` ou deploy.

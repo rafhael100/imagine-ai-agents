@@ -1,5 +1,15 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## Estado vigente — EVID-05/EVID-06 integrados e CI da dev comprovada (09/11/2026)
+
+- **Painel gerado EVID-05:** [PR #127](https://github.com/rafhael100/imagine-ai-agents/pull/127), squash `44bab6e8a1c01bc6b30761018fe6271b94374bd6`, integrado apenas à dev. A [CI #42628509823](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42628509823) validou no SHA `5e3f0485d03a47d084332837d39f7fafe3169f75` o gerador determinístico, testes negativos, os validadores anteriores e a regressão PHP **228/228 testes e 73/73 lint** (mais o probe isolado).
+- **CI consolidada EVID-06:** [PR #128](https://github.com/rafhael100/imagine-ai-agents/pull/128), squash `e8f8ee2bc2353b2e8c3d7ce5b38bdcb38f9d5c0c`, integrado somente à dev. A CI de revisão [#42629105845](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42629105845) passou; sobretudo, a [CI #42629209058](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42629209058) foi disparada **automaticamente pelo próprio merge na dev** no HEAD exato `e8f8ee2bc2353b2e8c3d7ce5b38bdcb38f9d5c0c` e concluiu `success` em todos os passos, inclusive a suíte PHP.
+- **Governança e limites:** CRM [PR #57](https://github.com/rafhael100/imagine-crm/pull/57) continua **OPEN/DRAFT/sem merge**. R01-G01..G11 e CRM CORE/SEG/AUT continuam ABERTOS; o painel e a CI retornam evidência de **laboratório, não autorização**. Estado operacional **NO-GO**, sem mudanças em `main`, CRM real, VPS, clientes, credenciais, contratos comerciais ou produção.
+
+**Próximo passo que depende de terceiros:** pareceres bilaterais formais de CORE/SEG/AUT, Privacidade, Infra e direção sobre OP-01, com identidade, ACL, finalidade, revogação, topologia e custos. Até essas evidências, não iniciar piloto real.
+
+---
+
 ## R01/EVID-06 — CI unificada na branch dev (09/11/2026)
 
 - Workflow `.github/workflows/r01-dev-integrity.yml` concentra os validadores de gates, paridade contratual, gerador do painel e regressão PHP em alterações relevantes de `dev` ou PRs direcionados à dev.
@@ -12,7 +22,7 @@
 
 - Novo template HTML e gerador offline `tools/generate_op01_dashboard.py`. As **27 linhas** do painel agora provêm dos CSVs validados, sem edição manual duplicada.
 - A verificação `--check` reprova divergências entre página e registros; `--write` regenera somente o HTML local, escapando conteúdo não confiável.
-- O estado permanece **NO-GO**, com CRM PR #57 DRAFT e todos os gates ABERTOS. CI ainda sujeita à execução no commit revisado. Ver `docs/AIA-R01-EVID-05-GERADOR-PAINEL-OP01.md`.
+- O estado permanece **NO-GO**, com CRM PR #57 DRAFT e todos os gates ABERTOS. CI concluída em SHA exato no [run #42628509823](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42628509823). Ver `docs/AIA-R01-EVID-05-GERADOR-PAINEL-OP01.md`.
 
 ---
 
