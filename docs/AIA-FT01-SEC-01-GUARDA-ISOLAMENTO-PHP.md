@@ -19,3 +19,5 @@ python3 -m unittest discover -s tests/Contracts -p test_synthetic_php_isolation.
 O workflow `.github/workflows/r01-dev-integrity.yml` executa esses comandos antes de `tools/validate_ft01_offline.sh`, mantendo a verificação de checkout no SHA do commit. Os testes são 100% offline; as fixtures contendo nomes de funções proibidas **não as executam**. **Uma saída PASS não implica que há autorização para CRM, VPS, provedores, credenciais ou produção.**
 
 Gates R01-G01..G11 e CRM CORE/SEG/AUT permanecem abertos e [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) continua documental/DRAFT. Nenhuma alteração na `main`, dados de clientes ou serviços externos.
+
+**Conclusão verificada (09/11/2026):** [PR #132](https://github.com/rafhael100/imagine-ai-agents/pull/132) integrado exclusivamente à dev (`1c4cdbf87d8a7b003b5564e76784f9333dc5900c`), com [CI após merge #42632148664](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42632148664) `success`. A verificação é preventiva e limitada ao código direto, sem homologação real.
