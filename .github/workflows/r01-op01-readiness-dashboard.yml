@@ -1,0 +1,36 @@
+name: R01 OP-01 offline readiness review dashboard
+
+on:
+  push:
+    branches:
+      - dev/r01-evid-04-readiness-dashboard-2026-11-09
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event.repository.private == false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Checkout exact reviewed commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate offline dashboard, register, CRM proposal and parser
+        run: |
+          python3 tools/check_op01_readiness_dashboard.py
+          python3 -m unittest discover -s tests/Contracts -p test_op01_readiness_dashboard.py -v
+          python3 tools/check_r01_readiness.py
+          python3 -m unittest discover -s tests/Contracts -p test_r01_readiness.py -v
+          python3 tools/check_op01_contract_parity.py
+          python3 -m unittest discover -s tests/Contracts -p test_op01_contract_parity.py -v
+          php -l tools/op01_php_parser_probe.php
+      - name: Preserve synthetic PHP regression
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_PHP: '73'
+          EXPECTED_CASES: '228'
+        run: |
+          bash tools/validate_ft01_offline.sh

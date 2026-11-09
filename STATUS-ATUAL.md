@@ -1,5 +1,12 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## R01/EVID-04 — painel de prontidão OP-01 offline (09/11/2026)
+
+- Novo painel navegável `examples/r01-op01-readiness-offline.html` para consulta local dos **14 gates** e **13 casos** de homologação sem dados reais.
+- Filtros e pesquisa funcionam sem servidor. A visualização exibe **NO-GO** e não permite aprovar ou alterar os registros.
+- Verificador e testes negativos em `tools/check_op01_readiness_dashboard.py` e `tests/Contracts/test_op01_readiness_dashboard.py`, sujeitos à CI SHA-fixada. Nenhuma integração CRM ou alteração em `main`.
+
+---
 ## R01/EVID-03 — paridade documental CRM/Agents (09/11/2026)
 
 - PR CRM #57 preservado em snapshot identificado por SHA e conferido com o schema JSON e o parser PHP sintéticos dos Agentes.
