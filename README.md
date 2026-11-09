@@ -1,5 +1,13 @@
 # Imagine AI Agents
 
+## FT01/SEC-08 — limite de capacidade das trilhas sintéticas (09/11/2026)
+
+- O coordenador agora respeita o mesmo teto de **1.024 eventos** aceito pelo revisor de trilhas e reserva capacidade antes de gerar eventos ou chamar gateways/provedores simulados.
+- Sete testes de fronteira U20-01..07 verificam o limite exato, ausência de envios/consultas duplicados, transições bloqueadas e eventos de rejeição. A meta da suíte passa a **280 testes PHP e 76 lint**.
+- Limite preventivo de laboratório, sem retenção ou armazenamento de produção. Gates R01/CRM seguem ABERTOS e `NO-GO` para serviços reais.
+
+---
+
 ## FT01/SEC-07 — timeout e consulta exigem envio prévio (09/11/2026)
 
 - `SupervisedCoordinator::afterTimeout` agora rejeita a tentativa de timeout de uma intenção não enviada **antes** de registrar qualquer evento. O revisor de trilhas também recusa `STATUS_REQUESTED` e `TIMEOUT` que apareçam antes de `SUBMITTED`.
