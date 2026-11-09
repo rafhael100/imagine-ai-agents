@@ -1,5 +1,16 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## FT01/F1-13 — trilha de auditoria sintética sob revisão (09/11/2026)
+
+- **Branch isolada:** `dev/ft01-f1-13-audit-read-synthetic-2026-11-09`, derivada da dev após F1-12. **Ainda não integrada à dev ou main; sem deploy**.
+- **Entregue para revisão:** `MockCrmReadAuditTrail` e `MockCrmReadAuditedBoundary` sobre a fronteira fictícia F1-12; registro em memória somente de categorias permitida/negada, fingerprints de IDs sintéticos, nenhuma projeção ou identificador de cliente em claro. Falta de capacidade da trilha nega a operação antes da leitura fictícia.
+- **Testes adicionados:** 12 casos U13; runner e validador atualizados para **metas de 156 testes e 63 PHP**. PHP 8.4.24: lint dos três arquivos novos PASS; harness isolado com dublês locais da F1-12: **12/12 PASS**; comparação Git blob SHA-1 dos três arquivos contra o conteúdo testado PASS. **Suite oficial 156/156, lint completo 63/63 e SHA-fixado ainda não executados**; não declarar homologação.
+- **Governança:** PR em rascunho para revisão; não fazer merge antes das evidências integrais, revisão de diff e preflight da branch. **CRM PR #57 permanece apenas documento draft, sem integração real.** Gates R01-G01–G11 e CRM CORE/SEG/AUT abertos; `main`, produção, VPS, contratos e despesas sem alteração.
+- **Documento técnico:** `docs/AIA-FT01-F1-13-AUDITORIA-SINTETICA-OFFLINE.md`. A trilha volátil e SHA-256 sem segredo não equivalem à auditoria/privacidade de produção.
+
+---
+
+
 ## Estado vigente — FT01/F1-12 integrado na dev, CRM em revisão (09/11/2026)
 
 - **Agents PR [#106](https://github.com/rafhael100/imagine-ai-agents/pull/106) MERGED somente em `dev/ft01-aia-core-mocks-2026-11-06`**, squash `562896763f900a8a264ea46aa35e2aeacd5e0903`. A `main` está preservada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`.
