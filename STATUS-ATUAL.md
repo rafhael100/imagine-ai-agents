@@ -1,5 +1,16 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## FT01/F1-16 — revalidação fictícia da autorização pelo CRM (09/11/2026)
+
+- **Branch filha em revisão:** `dev/ft01-f1-16-owner-policy-recheck-2026-11-09`, partindo da dev após F1-15 (PR #112, squash `4a2a3b31bb422446a62e563616bd98b45ca3536c`; PR documental #113 também integrado).
+- **Código:** `MockCrmOwnerPolicy` negando por padrão e rechecando ficticiamente empresa, vínculo, recurso e campos imediatamente antes de `MockCrmReader`; falha da política nega. Integração opcional mantém F1-12 histórico apenas para testes.
+- **Novos testes:** 18 cenários U16; metas de regressão **198 casos PHP** e **68 arquivos lint**. **Ainda não afirmar PASS até validar o SHA exato em CI.**
+- **Escopo estritamente sintético/offline:** sem CRM real, RLS, banco, credencial, fornecedor, VPS, `main`, deploy ou dados pessoais. R01-G01..G11 e CRM CORE/SEG/AUT **ABERTOS**. CRM PR #57 permanece documental DRAFT.
+- **Documento:** `docs/AIA-FT01-F1-16-REVALIDACAO-POLITICA-CRM-SINTETICA.md`.
+
+---
+
+
 ## Estado vigente — F1-15 integrado exclusivamente à dev (09/11/2026)
 
 - **PR [#112](https://github.com/rafhael100/imagine-ai-agents/pull/112) MERGED por squash somente em `dev/ft01-aia-core-mocks-2026-11-06`**, commit `4a2a3b31bb422446a62e563616bd98b45ca3536c`. A `main` preservada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; sem deploy, VPS, CRM real, segredos ou fornecedor pago.
