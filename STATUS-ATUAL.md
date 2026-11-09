@@ -1,5 +1,25 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## FT01/F1-10 — revisão independente sintética (branch em validação)
+
+O recorte F1-10 acrescenta **encaminhamento humano simulado** após a comparação A/B do F1-09. A evidência de avaliação é recomputada e vinculada por SHA-256 a dataset, rubrica, contexto, baseline e candidata. Dois papéis fictícios, Produto e Segurança, precisam reconhecer o pacote com revisores diferentes do autor; mudança de evidência, expiração, revogação, falha crítica ou caso não executado bloqueia o encaminhamento.
+
+**Nenhum reconhecimento autoriza promoção:** `promotion_allowed=false` e `real_authorization=false` em todos os estados. Não existe autenticação, assinatura ou armazenamento persistente. O hash é apenas vínculo de conteúdo, não certificado de identidade.
+
+Comandos de validação sem fornecedores:
+```sh
+php tests/Unit/run.php
+php examples/f110-review-demo.php
+# Em checkout Git íntegro do HEAD aprovado:
+EXPECTED_SHA=<SHA_EXATO> bash tools/validate_ft01_offline.sh
+```
+
+**Evidência executada:** PHP 8.4.24, **111/111 testes PASS**, **52/52 lint PASS**, **52/52 hashes Git blob coincidentes** com a árvore publicada (fingerprint de pares caminho/hash FNV32 `1e3ddd48`). Exemplo PHP em memória retorna `READY_FOR_HUMAN_HANDOFF` após dois reconhecimentos, com `promotion_allowed=false` e `external_calls=0`. Esta evidência não valida atores ou ferramentas reais.
+
+Especificação em `docs/AIA-FT01-F1-10-REVISAO-INDEPENDENTE-SINTETICA.md`. Código em branch isolada `dev/ft01-f1-10-independent-review-mocks-2026-11-09`, com integração planejada **somente na dev** após preflight de SHAs, testes, diff e mergeabilidade. A `main`, produção, VPS, conectores reais, fornecedores e gates R01/CORE/SEG/AUT estão preservados.
+
+
+
 ## ESTADO VIGENTE — F1-09 integrado somente à dev (09/11/2026)
 
 - **PR de código [#100](https://github.com/rafhael100/imagine-ai-agents/pull/100): MERGED na `dev/ft01-aia-core-mocks-2026-11-06`**, squash `da1710b4cc2cabe7eddf87da0605a1ba69a08724`. A `main` foi conferida em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a` e permaneceu inalterada.
