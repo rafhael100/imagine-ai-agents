@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src 'none'; img-src data:; font-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Imagine AI Agents | Laboratório sintético F1-08</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#17243b;background:#f4f6fa;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0}button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #78adff;outline-offset:2px}
+.app{display:grid;grid-template-columns:252px minmax(0,1fr);min-height:100vh}.sidebar{background:#101c32;color:#d6e1f3;display:flex;flex-direction:column;padding:27px 18px;gap:32px}
+.brand{display:flex;gap:12px;align-items:center;padding:2px 10px}.brandmark{width:41px;height:41px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#6a96f7,#7d5ae7);color:white;font-size:27px;font-weight:800}
+.brand strong{color:white;font-size:15px;letter-spacing:-.3px}.brand small{display:block;color:#91a6c4;font-size:11px;margin-top:2px}
+.sidegroup{font-size:10px;color:#788daa;font-weight:750;letter-spacing:1.5px;padding:0 14px;text-transform:uppercase}
+.nav{display:grid;gap:6px;margin-top:-20px}.nav button{display:flex;align-items:center;gap:11px;text-align:left;border:0;border-radius:11px;color:#a9b8d2;background:transparent;padding:13px 14px;font-weight:650;font-size:13px}
+.nav button span{font-size:17px;width:21px;text-align:center}.nav button:hover,.nav button[aria-current="page"]{color:#fff;background:#263a59}.nav button[aria-current="page"]{box-shadow:inset 3px 0 #80aaff}
+.sidebottom{margin-top:auto;border:1px solid #344560;border-radius:14px;padding:15px;background:#172740}.sidebottom strong{font-size:12px;color:white}.sidebottom p{color:#9cb0ce;font-size:11px;line-height:1.6;margin:7px 0 0}.sidebottom .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#57d8b2;margin-right:6px}
+.workspace{min-width:0}.topbar{height:89px;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid #e4e9f0;background:#fff;padding:0 clamp(23px,4.2vw,65px)}
+.eyebrow{color:#8492a6;font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:1.5px}.topbar strong{display:block;margin-top:4px;font-size:15px;color:#253550}
+.mode{border:1px solid #d1def3;background:#f2f7ff;color:#40649c;border-radius:100px;font-size:11px;font-weight:800;padding:9px 12px;white-space:nowrap}
+.content{max-width:1300px;margin:auto;padding:39px clamp(23px,4.2vw,65px) 70px}
+.page[hidden]{display:none!important}.sectiontitle{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:23px}
+h1{font-size:clamp(26px,3vw,35px);letter-spacing:-1.2px;line-height:1.15;margin:6px 0 8px;color:#13213a}h2{font-size:17px;letter-spacing:-.45px;margin:0;color:#182740}h3{font-size:13px;margin:0}.muted{font-size:13px;color:#7c8da5;line-height:1.6;margin:0}.overline{font-size:10px;color:#7288aa;font-weight:800;letter-spacing:1.35px;text-transform:uppercase}
+.hero{border-radius:22px;padding:32px 33px;background:linear-gradient(110deg,#182a4b,#293f70 68%,#4654a2);color:white;display:flex;gap:30px;justify-content:space-between;align-items:center;overflow:hidden;position:relative}.hero:after{content:"";position:absolute;border:1px solid #ffffff26;border-radius:50%;width:300px;height:300px;right:-83px;top:-177px}.hero h2{font-size:27px;max-width:570px;color:#fff;line-height:1.2;margin:12px 0}.hero p{font-size:12px;line-height:1.7;color:#d2dcf5;max-width:540px}.hero .pill{border:1px solid #ffffff56;background:#ffffff15;color:white;padding:6px 10px;font-size:10px;border-radius:50px;font-weight:800}.herostat{flex:none;border:1px solid #ffffff35;background:#ffffff19;padding:18px 22px;border-radius:16px;position:relative;z-index:1;min-width:175px}.herostat strong{font-size:36px;letter-spacing:-1px;display:block}.herostat small{color:#cbd6ed;font-size:11px}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin:20px 0 24px}.panel{background:#fff;border:1px solid #e4eaf2;border-radius:16px;box-shadow:0 4px 21px #1c37600a}.metric{padding:20px 21px}.metric small{display:block;font-size:11px;font-weight:700;color:#8090a5}.metric strong{display:block;font-size:29px;letter-spacing:-1px;margin:7px 0 3px;color:#1a2c4b}.metric .hint{font-size:11px;color:#8b9bb0}.twocol{display:grid;grid-template-columns:1.35fr 1fr;gap:20px}.panelhead{display:flex;align-items:center;justify-content:space-between;padding:21px 23px;border-bottom:1px solid #edf0f5}.panelbody{padding:22px 23px}.flow{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;margin:5px 0 19px}.node{flex:1;min-width:108px;padding:17px 13px;border:1px solid #dfe8f5;background:#f9fbff;border-radius:11px}.node .step{font-size:10px;font-weight:800;color:#6685b4}.node b{display:block;font-size:12px;margin:6px 0}.node small{font-size:10px;color:#8b9ab0}.securityrow{display:flex;gap:11px;align-items:flex-start;margin:0 0 18px}.securityrow:last-child{margin-bottom:0}.square{width:27px;height:27px;border-radius:8px;background:#fff3dc;color:#b77d24;display:grid;place-items:center;font-weight:900;flex:none}.securityrow strong{display:block;font-size:12px;color:#26344c}.securityrow p{font-size:11px;color:#8594a9;margin:3px 0;line-height:1.5}
+.linkbtn{border:0;background:#ebf2ff;color:#375fac;font-weight:750;font-size:12px;border-radius:9px;padding:10px 14px}.linkbtn:hover{background:#dfeaff}
+.gridagents{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.agent{padding:21px}.agent .avatar{width:48px;height:48px;border-radius:15px;background:#eaf1ff;color:#5578ca;display:grid;place-items:center;font-size:22px;margin-bottom:20px}.agent h2{font-size:16px;margin-bottom:9px}.agent p{font-size:12px;color:#7d8ba2;line-height:1.65;min-height:59px}.tag{display:inline-flex;align-items:center;border-radius:20px;padding:6px 9px;background:#eef3fc;color:#5b739a;font-size:10px;font-weight:800}.tag.warn{background:#fff4e5;color:#a47327}.agent .agentfoot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:23px;border-top:1px solid #eff2f7;padding-top:18px}.agent .agentfoot small{font-size:10px;color:#8d9bae}
+.labgrid{display:grid;grid-template-columns:350px minmax(0,1fr);gap:20px}.scenario{padding:12px}.scenario button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:9px;text-align:left;border-radius:11px;border:1px solid transparent;padding:13px 14px;background:transparent;color:#3d526f}.scenario button:hover{background:#f3f7ff}.scenario button.selected{background:#eef4ff;border-color:#cddffa}.scenario b{display:block;font-size:12px}.scenario small{display:block;color:#8d9bb0;font-size:10px;margin-top:5px;line-height:1.45}.scenario em{font-size:10px;font-style:normal;font-weight:800;color:#6588c3;white-space:nowrap;flex-shrink:0}.scenario button span{min-width:0}
+.console{padding:25px}.console-top{display:flex;justify-content:space-between;align-items:start;gap:14px;padding-bottom:18px;border-bottom:1px solid #edf1f6}.codeid{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11px;color:#577abb;background:#eff5ff;padding:5px 9px;border-radius:7px}.console h2{font-size:19px;margin:10px 0}.console .fixture{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}.fixture div{border-radius:9px;background:#f5f7fb;padding:11px 13px}.fixture small{display:block;font-size:10px;color:#8998ae}.fixture strong{display:block;font-size:11px;margin-top:4px;color:#30415e;word-break:break-word}
+.primary{background:#356ed0;color:white;border:0;border-radius:10px;padding:12px 16px;font-size:12px;font-weight:800}.primary:hover{background:#265fbd}.secondary{background:white;color:#4d6280;border:1px solid #dbe4f0;border-radius:10px;padding:12px 16px;font-size:12px;font-weight:700}.secondary:hover{background:#f6f8fc}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:21px}
+.result{border:1px dashed #d6e1ef;background:#fafcff;border-radius:12px;padding:20px;min-height:160px}.result .placeholder{font-size:12px;color:#8a9ab1;margin:5px 0}.result .status{font-size:12px;font-weight:850;display:inline-block;border-radius:20px;padding:7px 11px;background:#e9eef8;color:#51627c}.result .status.good{background:#e3f8f1;color:#168267}.result .status.blocked{background:#fff0eb;color:#b5543d}.result .status.neutral{background:#fff3dd;color:#9d7429}.result p{font-size:12px;line-height:1.65;color:#607089}.result code,.auditrow code{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:#516c9e}.result .note{color:#8c99ad;font-size:11px}
+.audittable{padding:0 22px 8px}.auditrow{display:grid;grid-template-columns:75px 170px minmax(0,1fr);gap:12px;align-items:center;border-bottom:1px solid #eef2f7;padding:17px 0}.auditrow:last-child{border-bottom:0}.auditrow small{font-size:11px;color:#8090a4}.auditrow strong{font-size:11px;color:#35547e}.auditrow .description{font-size:11px;color:#71839b}.empty{color:#91a0b3;font-size:12px;padding:32px 7px}.trace-footer{display:flex;justify-content:space-between;gap:14px;align-items:center;border-top:1px solid #edf0f5;padding:16px 22px}.trace-footer small{font-size:10px;color:#8998ab}.footnote{font-size:11px;color:#8b99ae;line-height:1.6;margin-top:27px}.statusdot{display:inline-block;background:#33b48a;width:7px;height:7px;border-radius:50%;margin-right:6px}
+@media(max-width:1100px){.metrics{grid-template-columns:repeat(2,1fr)}.labgrid{grid-template-columns:310px minmax(0,1fr)}.gridagents{grid-template-columns:repeat(2,1fr)}.herostat{min-width:130px}}
+@media(max-width:850px){.app{display:block}.sidebar{position:relative;padding:13px 17px;gap:10px}.brand{padding:0}.brandmark{width:33px;height:33px;font-size:22px;border-radius:10px}.sidegroup,.sidebottom{display:none}.nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:0;overflow:visible}.nav button{font-size:11px;padding:10px;white-space:nowrap}.nav button span{font-size:13px;width:auto}.topbar{height:70px}.twocol,.labgrid{grid-template-columns:1fr}.content{padding-top:28px}.hero{padding:25px}.gridagents{grid-template-columns:1fr 1fr}}
+@media(max-width:550px){.metrics,.gridagents{grid-template-columns:1fr 1fr}.herostat{display:none}.hero h2{font-size:23px}.sectiontitle{align-items:start}.sectiontitle h1{font-size:26px}.metric{padding:16px}.metric strong{font-size:25px}.topbar .eyebrow{display:none}.mode{font-size:9px;padding:7px}.auditrow{grid-template-columns:55px 1fr;gap:6px}.auditrow .description{grid-column:2}.console{padding:18px}.gridagents{grid-template-columns:1fr}.nav{grid-template-columns:repeat(2,minmax(0,1fr))}.nav button{white-space:normal;min-height:40px}.fixture strong{overflow-wrap:anywhere;font-size:10px;line-height:1.35}.content{padding-left:17px;padding-right:17px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="brandmark" aria-hidden="true">◈</div><div><strong>Imagine AI Agents</strong><small>Central de laboratório</small></div></div>
+  <div class="sidegroup">Ambiente demonstrativo</div>
+  <nav class="nav" aria-label="Navegação do laboratório">
+    <button type="button" data-page-button="overview" aria-current="page"><span aria-hidden="true">▦</span> Visão geral</button>
+    <button type="button" data-page-button="agents"><span aria-hidden="true">◇</span> Agentes fictícios</button>
+    <button type="button" data-page-button="lab"><span aria-hidden="true">◉</span> Testar cenários</button>
+    <button type="button" data-page-button="audit"><span aria-hidden="true">▤</span> Trilha local</button>
+  </nav>
+  <div class="sidebottom"><strong><span class="dot"></span> Modo offline</strong><p>Dados 100% fictícios. Sem autenticação, APIs, banco de dados, IA real ou publicação.</p></div>
+</aside>
+<div class="workspace">
+<header class="topbar">
+ <div><span class="eyebrow">Ecossistema Imagine</span><strong>Ambiente de exploração · F1-08</strong></div>
+ <span class="mode">● SIMULAÇÃO · SEM CONEXÃO REAL</span>
+</header>
+<main class="content">
+<section class="page" id="page-overview">
+ <div class="sectiontitle"><div><span class="overline">Panorama</span><h1>Central de Agentes de IA</h1><p class="muted">Acompanhe o funcionamento conceitual do núcleo Imagine sem acessar sistemas reais.</p></div></div>
+ <div class="hero"><div><span class="pill">FT01 · Laboratório visual</span><h2>Segurança verificável antes de autonomia.</h2><p>Uma prévia interativa do fluxo supervisionado: agentes, escopos, recuperação de conhecimento, revogação e evidências de teste.</p><button class="secondary" type="button" data-goto="lab">Explorar cenários de segurança</button></div><div class="herostat"><strong>85/85</strong><small>Testes PHP sintéticos validados no F1-07<br>Não representa homologação real</small></div></div>
+ <div class="metrics">
+  <div class="panel metric"><small>Regressão FT01 registrada</small><strong>85 / 85</strong><span class="hint">Última base simulada validada</span></div>
+  <div class="panel metric"><small>Arquivos PHP validados</small><strong>43</strong><span class="hint">Hashes e lint históricos</span></div>
+  <div class="panel metric"><small>Cenários nesta prévia</small><strong>06</strong><span class="hint">Interações apenas no navegador</span></div>
+  <div class="panel metric"><small>Chamadas externas</small><strong>0</strong><span class="hint">Nenhum servidor é acionado</span></div>
+ </div>
+ <div class="twocol">
+  <article class="panel"><div class="panelhead"><h2>Fluxo supervisionado conceitual</h2><span class="tag">Sem efeitos reais</span></div><div class="panelbody"><div class="flow">
+   <div class="node"><span class="step">01 · ENTRADA</span><b>Contexto</b><small>Produto e empresa</small></div>
+   <div class="node"><span class="step">02 · CONTROLE</span><b>Permissão</b><small>Escopo fictício</small></div>
+   <div class="node"><span class="step">03 · BUSCA</span><b>Conhecimento</b><small>Fonte e versão</small></div>
+   <div class="node"><span class="step">04 · SAÍDA</span><b>Resposta</b><small>Sem ação externa</small></div>
+  </div><p class="muted">A simulação enfatiza negação por padrão, proveniência e rechecagem antes da entrega. Nenhuma operação de CRM é executada.</p></div></article>
+  <article class="panel"><div class="panelhead"><h2>Gates que permanecem abertos</h2><span class="tag warn">Não homologado</span></div><div class="panelbody">
+    <div class="securityrow"><span class="square">!</span><div><strong>Identidade e permissões reais</strong><p>Autenticação e validação final pertencem ao produto.</p></div></div>
+    <div class="securityrow"><span class="square">!</span><div><strong>Integração e proteção de dados</strong><p>Sem dados privados, contratos ou fontes dinâmicas.</p></div></div>
+    <div class="securityrow"><span class="square">!</span><div><strong>Produção e custos</strong><p>Nenhum deploy, provedor ou cobrança em uso.</p></div></div>
+  </div></article>
+ </div>
+</section>
+<section class="page" id="page-agents" hidden>
+ <div class="sectiontitle"><div><span class="overline">Catálogo fictício</span><h1>Agentes para explorar</h1><p class="muted">Personas demonstrativas, não instâncias ativas nem modelos de IA conectados.</p></div></div>
+ <div class="gridagents">
+ <article class="panel agent"><div class="avatar" aria-hidden="true">✦</div><span class="tag">SINTÉTICO · CRM</span><h2>Assistente de Qualificação</h2><p>Demonstra como conhecimento autorizado e escopo de empresa influenciam uma recomendação sem criar tarefas reais.</p><div class="agentfoot"><small>Versão ilustrativa v0.1</small><button class="linkbtn" type="button" data-agent-scenario="allow">Testar</button></div></article>
+ <article class="panel agent"><div class="avatar" aria-hidden="true">◈</div><span class="tag">SINTÉTICO · PERFORMANCE</span><h2>Analista de Campanhas</h2><p>Mostra a recusa conservadora quando alguém solicita preço, saldo ou desempenho dinâmico sem consultar a fonte oficial.</p><div class="agentfoot"><small>Versão ilustrativa v0.1</small><button class="linkbtn" type="button" data-agent-scenario="dynamic">Testar</button></div></article>
+ <article class="panel agent"><div class="avatar" aria-hidden="true">▧</div><span class="tag">SINTÉTICO · UNIVERSIDADE</span><h2>Tutor de Conhecimento</h2><p>Explora o tratamento de um documento com instruções maliciosas como conteúdo não confiável, sem executar comandos.</p><div class="agentfoot"><small>Versão ilustrativa v0.1</small><button class="linkbtn" type="button" data-agent-scenario="injection">Testar</button></div></article>
+ </div>
+ <p class="footnote">Os produtos aqui são apenas exemplos conceituais. O protótipo não permite acesso a informações de empresas ou clientes.</p>
+</section>
+<section class="page" id="page-lab" hidden>
+ <div class="sectiontitle"><div><span class="overline">Laboratório F1-08</span><h1>Testar decisões de segurança</h1><p class="muted">Selecione um cenário e execute uma resposta determinística simulada.</p></div><span class="tag warn">Sem IA / sem API</span></div>
+ <div class="labgrid">
+  <div class="panel"><div class="panelhead"><h2>Casos disponíveis</h2><span class="tag">06 casos</span></div><div class="scenario" id="scenario-list">
+   <button type="button" data-scenario="allow" class="selected"><span><b>Fonte autorizada</b><small>Mesma empresa, fonte e versão</small></span><em>U07-01</em></button>
+   <button type="button" data-scenario="tenant"><span><b>Isolamento multiempresa</b><small>Empresa diferente tenta recuperar fonte</small></span><em>U07-02</em></button>
+   <button type="button" data-scenario="revoke"><span><b>Revogação antes da entrega</b><small>Permissão suspensa após seleção</small></span><em>U07-05</em></button>
+   <button type="button" data-scenario="conflict"><span><b>Fontes contraditórias</b><small>Não inventar uma decisão</small></span><em>U07-07</em></button>
+   <button type="button" data-scenario="dynamic"><span><b>Informação transacional</b><small>Saldo/preço exigem produto proprietário</small></span><em>U07-08</em></button>
+   <button type="button" data-scenario="injection"><span><b>Injeção em documento</b><small>Texto da fonte não vira instrução</small></span><em>U07-09</em></button>
+  </div></div>
+  <article class="panel console">
+   <div class="console-top"><div><span class="codeid" id="case-id">U07-01</span><h2 id="case-title">Fonte autorizada</h2><p class="muted" id="case-subtitle">Escopo completo e fonte válida.</p></div><span class="tag">FIXTURE</span></div>
+   <div class="fixture">
+    <div><small>Produto</small><strong id="fixture-product">SYNTHETIC_CRM</strong></div>
+    <div><small>Empresa consultante</small><strong id="fixture-tenant">SYNTHETIC_A</strong></div>
+    <div><small>Fonte / versão</small><strong id="fixture-source">SYNTHETIC_FAQ / V1</strong></div>
+    <div><small>Autorização</small><strong id="fixture-grant">Válida (fictícia)</strong></div>
+   </div>
+   <div class="actions"><button class="primary" id="run-button" type="button">Executar cenário</button><button class="secondary" id="clear-result" type="button">Limpar resultado</button></div>
+   <div class="result" aria-live="polite" id="result"><span class="status">AINDA NÃO EXECUTADO</span><p class="placeholder">Execute o cenário para visualizar a decisão e a trilha local correspondente.</p></div>
+   <p class="footnote">O resultado apresentado é calculado por regras fixas em JavaScript, apenas para demonstrar o comportamento esperado. Não é o executor PHP real.</p>
+  </article>
+ </div>
+</section>
+<section class="page" id="page-audit" hidden>
+ <div class="sectiontitle"><div><span class="overline">Evidências locais</span><h1>Trilha de simulação</h1><p class="muted">Eventos criados somente nesta aba. Ao atualizar a página, a trilha desaparece.</p></div></div>
+ <div class="metrics">
+  <div class="panel metric"><small>Cenários executados</small><strong id="audit-runs">0</strong><span class="hint">Nesta sessão local</span></div>
+  <div class="panel metric"><small>Decisões negadas</small><strong id="audit-denials">0</strong><span class="hint">Controles de escopo</span></div>
+  <div class="panel metric"><small>Conflitos detectados</small><strong id="audit-conflicts">0</strong><span class="hint">Sem resposta fabricada</span></div>
+  <div class="panel metric"><small>Envios a servidores</small><strong>0</strong><span class="hint">Bloqueados por desenho</span></div>
+ </div>
+ <div class="panel"><div class="panelhead"><h2>Eventos sintéticos</h2><span class="tag" id="audit-count">0 eventos</span></div><div class="audittable" id="audit-list"><div class="empty">Nenhuma simulação executada. Abra o Laboratório e selecione um caso.</div></div><div class="trace-footer"><small>Somente códigos fechados e identificadores fictícios. Nenhum conteúdo privado é registrado.</small><button type="button" class="secondary" id="reset-audit">Zerar trilha</button></div></div>
+</section>
+</main>
+</div>
+</div>
+<script>
+(function(){
+"use strict";
+const scenarios=Object.freeze({
+ allow:{id:"U07-01",title:"Fonte autorizada",desc:"Escopo completo e fonte válida.",product:"SYNTHETIC_CRM",tenant:"SYNTHETIC_A",source:"SYNTHETIC_FAQ / V1",grant:"Válida (fictícia)",state:"READY",kind:"good",message:"A fonte fictícia foi selecionada e revalidada. A passagem permanece UNTRUSTED_DATA, sem conceder permissões.",events:["SYNTHETIC_SELECTED","SYNTHETIC_DELIVERED"]},
+ tenant:{id:"U07-02",title:"Isolamento multiempresa",desc:"Uma empresa distinta tenta usar a mesma referência.",product:"SYNTHETIC_CRM",tenant:"SYNTHETIC_B",source:"SYNTHETIC_FAQ / V1",grant:"Outro contexto",state:"KNOWLEDGE_DENIED",kind:"blocked",message:"A fonte não é entregue. O retorno não informa se existe material de outra empresa.",events:["SYNTHETIC_SCOPE_CHECK","SYNTHETIC_DENIED"]},
+ revoke:{id:"U07-05",title:"Revogação antes da entrega",desc:"O grant fictício é revogado entre seleção e composição.",product:"SYNTHETIC_CRM",tenant:"SYNTHETIC_A",source:"SYNTHETIC_FAQ / V1",grant:"Revogada antes da entrega",state:"KNOWLEDGE_DENIED",kind:"blocked",message:"A rechecagem impede que um envelope pendente entregue o conteúdo após a revogação.",events:["SYNTHETIC_SELECTED","SYNTHETIC_REVOKED","SYNTHETIC_DENIED"]},
+ conflict:{id:"U07-07",title:"Fontes contraditórias",desc:"Duas fontes fictícias trazem fatos incompatíveis.",product:"SYNTHETIC_CRM",tenant:"SYNTHETIC_A",source:"SYNTHETIC_FAQ_A + FAQ_B",grant:"Válida (fictícia)",state:"CONFLICT",kind:"neutral",message:"O laboratório sinaliza contradição sem escolher uma fonte ou criar uma resposta factual.",events:["SYNTHETIC_SELECTED","SYNTHETIC_CONFLICT"]},
+ dynamic:{id:"U07-08",title:"Informação transacional",desc:"Uma FAQ não substitui dado atual do produto proprietário.",product:"SYNTHETIC_PERFORMANCE",tenant:"SYNTHETIC_A",source:"SYNTHETIC_STATIC_FAQ",grant:"Consulta dinâmica exigida",state:"DYNAMIC_SOURCE_REQUIRED",kind:"blocked",message:"Não é apresentado saldo, preço ou campanha atual. A operação real exigiria API e autorização do produto dono.",events:["SYNTHETIC_SCOPE_CHECK","SYNTHETIC_DYNAMIC_DENIED"]},
+ injection:{id:"U07-09",title:"Injeção em documento",desc:"Uma passagem tenta ordenar a execução de uma ferramenta.",product:"SYNTHETIC_UNIVERSIDADE",tenant:"SYNTHETIC_A",source:"SYNTHETIC_UNTRUSTED_DOC / V1",grant:"Válida (fictícia)",state:"READY · UNTRUSTED_DATA",kind:"good",message:"O texto hostil é mantido apenas como dado. Nenhuma ferramenta, política ou privilégio é alterado.",events:["SYNTHETIC_SELECTED","SYNTHETIC_UNTRUSTED_DATA","SYNTHETIC_DELIVERED"]}
+});
+const get=id=>document.getElementById(id);
+let chosen="allow",runs=0,denials=0,conflicts=0,sequence=0,logs=[];
+function page(name){for(const p of ["overview","agents","lab","audit"]){get("page-"+p).hidden=p!==name;}for(const b of document.querySelectorAll("[data-page-button]")){if(b.dataset.pageButton===name)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");}window.scrollTo(0,0);if(name==="audit")drawAudit();}
+function choose(id){if(!Object.prototype.hasOwnProperty.call(scenarios,id))return;chosen=id;const s=scenarios[id];get("case-id").textContent=s.id;get("case-title").textContent=s.title;get("case-subtitle").textContent=s.desc;get("fixture-product").textContent=s.product;get("fixture-tenant").textContent=s.tenant;get("fixture-source").textContent=s.source;get("fixture-grant").textContent=s.grant;for(const b of document.querySelectorAll("[data-scenario]")){const selected=b.dataset.scenario===id;b.classList.toggle("selected",selected);b.setAttribute("aria-pressed",String(selected));}clearResult();}
+function clearResult(){const el=get("result");el.replaceChildren();const t=document.createElement("span");t.className="status";t.textContent="AINDA NÃO EXECUTADO";const p=document.createElement("p");p.className="placeholder";p.textContent="Clique em Executar cenário para visualizar a decisão.";el.append(t,p);}
+function run(){const s=scenarios[chosen];runs++;if(s.kind==="blocked")denials++;if(s.state==="CONFLICT")conflicts++;for(const code of s.events){logs.push({seq:++sequence,code:code,caseId:s.id});}
+const el=get("result");el.replaceChildren();const t=document.createElement("span");t.className="status "+s.kind;t.textContent=s.state;const p=document.createElement("p");p.textContent=s.message;const note=document.createElement("p");note.className="note";note.textContent="ID do caso: "+s.id+" · Execução nº "+runs+" · Nenhuma chamada externa";el.append(t,p,note);drawAudit();}
+function drawAudit(){get("audit-runs").textContent=String(runs);get("audit-denials").textContent=String(denials);get("audit-conflicts").textContent=String(conflicts);get("audit-count").textContent=String(logs.length)+" eventos";const root=get("audit-list");root.replaceChildren();if(logs.length===0){const e=document.createElement("div");e.className="empty";e.textContent="Nenhuma simulação executada. Abra o Laboratório e selecione um caso.";root.append(e);return;}for(const x of logs.slice().reverse()){const row=document.createElement("div");row.className="auditrow";const a=document.createElement("small");a.textContent="#"+String(x.seq).padStart(3,"0");const b=document.createElement("code");b.textContent=x.code;const c=document.createElement("span");c.className="description";c.textContent=x.caseId+" · Evento local fictício";row.append(a,b,c);root.append(row);}}
+function reset(){runs=0;denials=0;conflicts=0;sequence=0;logs=[];drawAudit();}
+for(const b of document.querySelectorAll("[data-page-button]"))b.addEventListener("click",()=>page(b.dataset.pageButton));
+for(const b of document.querySelectorAll("[data-goto]"))b.addEventListener("click",()=>page(b.dataset.goto));
+for(const b of document.querySelectorAll("[data-scenario]"))b.addEventListener("click",()=>choose(b.dataset.scenario));
+for(const b of document.querySelectorAll("[data-agent-scenario]"))b.addEventListener("click",()=>{choose(b.dataset.agentScenario);page("lab");});
+get("run-button").addEventListener("click",run);
+get("clear-result").addEventListener("click",clearResult);
+get("reset-audit").addEventListener("click",reset);
+choose("allow");drawAudit();page("overview");
+})();
+</script>
+</body></html>

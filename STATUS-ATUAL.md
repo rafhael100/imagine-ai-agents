@@ -1,5 +1,17 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## FT01/F1-08 — Laboratório visual sintético em branch isolada (08/11/2026)
+
+- **Base validada:** `dev/ft01-aia-core-mocks-2026-11-06` em `23c076c623a47b9dc6c91122eb72c6c271d27a78`, após PRs #96 e #97 integrados; 85 testes PHP sintéticos previamente aprovados.
+- **Branch F1-08:** `dev/ft01-f1-08-visual-lab-2026-11-08`, derivada desse SHA. Adicionou `examples/f108-laboratorio-navegavel.html`, `tests/Browser/f108_smoke.cjs` e a especificação `docs/AIA-FT01-F1-08-LABORATORIO-VISUAL-OFFLINE.md`. Nenhum arquivo PHP existente alterado.
+- **Objetivo:** permitir navegar em quatro telas e executar seis cenários **exclusivamente JS local**. O laboratório visual **não utiliza o executor PHP** e não representa sistemas ou clientes conectados.
+- **Verificação feita:** arquivos exatos obtidos do GitHub; smoke de DOM executado em isolado V8 com adaptadores de módulos nativos de Node: **PASS** em quatro telas, seis casos, 14 eventos, contadores, reset e atalhos. Content Security Policy com `connect-src 'none'`; sem chamadas de rede ou storage persistente.
+- **QA concluído:** teste em Node.js v22.16.0 real `F108_SMOKE_PASS`; Chromium real com Playwright em cinco resoluções 1440, 1024, 768, 390 e 320 px, sem erros JavaScript, chamadas de rede ou overflow horizontal. Seis cenários e 14 eventos auditados por viewport; capturas desktop/mobile revisadas; menu mobile, IDs, fixtures e `aria-pressed` corrigidos. HTML e teste com SHA-1 de blob Git conferidos. Firefox não foi testado; HTML servido via `set_content` devido ao bloqueio de file:// no sandbox. `php tests/Unit/run.php` reexecutado localmente na cópia de F1-07: 85 casos, zero falhas; este resultado permanece histórico e não é uma homologação da interface.
+- **Limites:** PR #98 ainda em branch isolada até reconfirmar SHAs antes do merge exclusivamente na dev; `main`, VPS, produção, integração CRM/Portal/Performance/Universidade, provedor/LLM, SQL/ALLOW, dados privados ou custos. Gates R01-G01 a G11 e CORE/SEG/AUT CRM permanecem abertos.
+
+**Nota de precedência:** este parágrafo registra a proposta técnica F1-08 na branch filha. O estado vigente da dev continua sendo F1-07 integrado e validado até eventual merge específico da nova proposta.
+
+
 ## ESTADO VIGENTE — 08/11/2026, pós-merge FT01 (prevalece sobre históricos abaixo)
 
 - **Branch de desenvolvimento:** `dev/ft01-aia-core-mocks-2026-11-06`, SHA `550aa742b10754ffa0cc1502e22bbfb72d966a81` (squash **PR #96** F1-06 corretivo + F1-07 sintético). **PR #96 MERGED somente na dev.**
