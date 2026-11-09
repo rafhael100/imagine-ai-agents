@@ -25,3 +25,9 @@ Eventos e provas permanecem transitórios, de processo único e sem autenticidad
 **Regressão adicional:** uma consulta de status que encontra o mesmo efeito terminal conhecido deve fechar a sequência com novo evento `CONFIRMADO` ou `NEGADO` sem duplicar a chamada `submit`. O caso U23-13 verifica essa condição, e U21-07 ajusta a contagem de eventos da projeção A. A identidade do `Effect` original é preservada.
 
 **Cobertura de estado terminal negado (U23-14):** um resultado `NEGADO` já conhecido precisa igualmente encerrar a consulta com um novo evento `NEGADO`, sem alterar o mesmo `Effect` ou reenviar a operação simulada. Esse estado não concede autorização de mutação.
+
+## Complemento F1-23 — resposta inconsistente após consulta (09/11/2026)
+
+Quando o gateway **responde**, mas `remember` rejeita uma evidência sintética conflitante (`MockError`), a tentativa agora recebe o evento fixo `SYNTHETIC_STATUS_REJECTED` e a exceção original é relançada. Isso é distinto de `STATUS_UNAVAILABLE` (falha da própria consulta). A trilha não contém payload, detalhes do erro nem prova falsa; a evidência terminal anterior permanece imutável. `ReadOnlyTraceReview` exige `STATUS_REQUESTED` imediatamente antes da rejeição e não considera o evento rejeitado como novo efeito.
+
+Os testes U23-15 e U23-16 exercitam a rejeição de `NEGADO` após `CONFIRMADO`, ausência de segundo envio, preservação da prova anterior e negação de rejeição fabricada sem consulta. Meta consolidada **320 testes PHP / 79 arquivos PHP**, sujeita à CI no SHA exato. Não autoriza integração real nem produção; **NO-GO**.
