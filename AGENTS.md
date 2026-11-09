@@ -16,6 +16,8 @@ Este repositório será a camada compartilhada de agentes de IA para CRM, Portal
 
 **F1-18 integrado apenas à dev:** [CI #42610138453](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42610138453) aprovou **228/228 testes** e **73/73 PHP lint**, após PR [#118](https://github.com/rafhael100/imagine-ai-agents/pull/118), squash `2603c8da0a7ac7392cf5a27289249d776a095e81`. A borda agrega apenas contagens em memória; todos os gates reais permanecem abertos. Evitar mocks repetitivos sem ganho mensurável e priorizar preparação de evidências G01..G11.
 
+**Licenciamento G09 (análise 09/11/2026):** não usar n8n Community para compilar/operar automações editadas indiretamente por clientes nem presumir licença gratuita para backend SaaS. Preservar motor configurável nativo CRM; avaliar qualquer uso n8n com `docs/AIA-R01-G09-ANALISE-LICENCIAMENTO-N8N-2026-11-09.md`. G09 ABERTO, nenhuma despesa autorizada.
+
 ## Regras obrigatórias para agentes de desenvolvimento / Codex
 
 - **Autorização vigente do responsável (08/11/2026):** avançar autonomamente no código **sintético/offline** e em seus testes, em branches isoladas, com PRs, preflight de SHA, evidências reproduzíveis e merge controlado **somente na dev** quando os gates técnicos do recorte forem satisfeitos. Perguntar apenas quando houver decisão estritamente crítica; autorização ampla não libera produção ou gastos.
