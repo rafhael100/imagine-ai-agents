@@ -43,7 +43,7 @@ class WorkflowGuardrails(unittest.TestCase):
     def test_full_suite_bound_to_commit_sha(self):
         expected = "EXPECTED_SHA: " + chr(36) + "{{ github.sha }}"
         self.assertIn(expected, self.workflow)
-        self.assertIn("bash tools/validate_ft01_offline.sh", self.workflow)
+        self.assertIn("bash tools/run_r01_offline_quality_gate.sh", self.workflow)
 
     def test_no_installation_or_credential_reference(self):
         for command in ("pip install", "npm install", "apt-get install",
