@@ -16,10 +16,12 @@ A guarda de capacidade já introduzida em SEC-08 reserva duas posições para `S
 
 ## Regressão
 
-Treze testes PHP em `tests/Unit/status_outage_trace.php` (U23-01..13) cobrem: falha após confirmação, falha após resultado indeterminado, timeout com consulta indisponível, evento fabricado sem consulta, indisponibilidade antes de envio, resposta duplicada, consulta sem fechamento, interferência de evento não relacionado, minimização de detalhes de erro e reexecução do caminho `execute` sem novo envio. A suíte espera **317 testes PHP e 79 lint**, condicionados à CI no SHA exato.
+Quatorze testes PHP em `tests/Unit/status_outage_trace.php` (U23-01..14) cobrem: falha após confirmação, falha após resultado indeterminado, timeout com consulta indisponível, evento fabricado sem consulta, indisponibilidade antes de envio, resposta duplicada, consulta sem fechamento, interferência de evento não relacionado, minimização de detalhes de erro e reexecução do caminho `execute` sem novo envio. A suíte espera **318 testes PHP e 79 lint**, condicionados à CI no SHA exato.
 
 ## Limitações e pendências
 
 Eventos e provas permanecem transitórios, de processo único e sem autenticidade criptográfica. O evento `STATUS_UNAVAILABLE` registra somente a falha **da consulta**, não o estado do efeito na origem. Não há armazenamento, alertas operacionais, transações, integração real ou validação das permissões do CRM. [PR #57 do CRM](https://github.com/rafhael100/imagine-crm/pull/57) segue OPEN/DRAFT; R01-G01..G11 e CORE/SEG/AUT continuam ABERTOS. Não modificar `main`, VPS, clientes, tokens, serviços pagos ou produção.
 
 **Regressão adicional:** uma consulta de status que encontra o mesmo efeito terminal conhecido deve fechar a sequência com novo evento `CONFIRMADO` ou `NEGADO` sem duplicar a chamada `submit`. O caso U23-13 verifica essa condição, e U21-07 ajusta a contagem de eventos da projeção A. A identidade do `Effect` original é preservada.
+
+**Cobertura de estado terminal negado (U23-14):** um resultado `NEGADO` já conhecido precisa igualmente encerrar a consulta com um novo evento `NEGADO`, sem alterar o mesmo `Effect` ou reenviar a operação simulada. Esse estado não concede autorização de mutação.

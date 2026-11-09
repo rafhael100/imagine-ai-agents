@@ -173,4 +173,22 @@ return [
         check($gateway->submitCount() === 1 && $gateway->statusCount() === 1);
         check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $original)['state'] === 'CONFIRMADO');
     },
+    'U23-14 denied terminal status is closed without another submit' => function (): void {
+        $gateway = new MockSupervisedGateway('NEGADO');
+        $c = new SupervisedCoordinator(context(), $gateway, new MockAiSuggestionProvider());
+        $run = $c->start('SYNTHETIC_F23_DENIED_RUN');
+        $intent = new Intent('SYNTHETIC_F23_DENIED_INTENT',
+            $c->step($run, 'SYNTHETIC_F23_DENIED_STEP'),
+            'SYNTHETIC_F23_DENIED_KEY', 'mock.task.create', 'SYNTHETIC_TASK');
+        $approval = new Approval('SYNTHETIC_F23_DENIED_APPROVAL',
+            $intent, 'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+        $original = $c->execute($intent, $approval, 15);
+        check($original->state === 'NEGADO' && !$original->isConfirmed());
+        check($c->reconcile($intent) === $original);
+        check(array_slice(array_column($c->events(), 'code'), -2) === [
+            'SYNTHETIC_STATUS_REQUESTED', 'SYNTHETIC_NEGADO',
+        ]);
+        check(ReadOnlyTraceReview::inspect($c->events(), context(), $intent, $original)['state'] === 'NEGADO');
+        check($gateway->submitCount() === 1 && $gateway->statusCount() === 1);
+    },
 ];
