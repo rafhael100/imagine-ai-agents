@@ -18,6 +18,8 @@ Este repositório será a camada compartilhada de agentes de IA para CRM, Portal
 
 **Licenciamento G09 (análise 09/11/2026):** não usar n8n Community para compilar/operar automações editadas indiretamente por clientes nem presumir licença gratuita para backend SaaS. Preservar motor configurável nativo CRM; avaliar qualquer uso n8n com `docs/AIA-R01-G09-ANALISE-LICENCIAMENTO-N8N-2026-11-09.md`. G09 ABERTO, nenhuma despesa autorizada.
 
+**EVID-02 integrado somente na dev:** CI [#42621128657](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42621128657) verificou 15 testes adicionais do inventário OP-01, 228/228 PHP e 73/73 lint, squash #121 `9bf82e93466903e42dbbdaf981736b50a6ec8638`. Verificador retorna sempre `NO_GO`, sem autorizar integração real. **G09 em revisão:** documentação #122 integrada à dev `ab31c28afeac4cf75fa3e09a33cec9db37916865`, mas NÃO aprova n8n Community como backend SaaS; G09 permanece aberto.
+
 ## Regras obrigatórias para agentes de desenvolvimento / Codex
 
 - **Autorização vigente do responsável (08/11/2026):** avançar autonomamente no código **sintético/offline** e em seus testes, em branches isoladas, com PRs, preflight de SHA, evidências reproduzíveis e merge controlado **somente na dev** quando os gates técnicos do recorte forem satisfeitos. Perguntar apenas quando houver decisão estritamente crítica; autorização ampla não libera produção ou gastos.

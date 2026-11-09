@@ -1,5 +1,13 @@
 # Roadmap proposto — Imagine AI Agents
 
+## Estado vigente — R01/EVID-02 e análise G09 integrados à dev (09/11/2026)
+
+- **PR [#121](https://github.com/rafhael100/imagine-ai-agents/pull/121) integrado exclusivamente à dev** no squash `9bf82e93466903e42dbbdaf981736b50a6ec8638`. [GitHub Actions #42621128657](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42621128657) executou, no head exato `bf5fabe8d151bf6d9988017b4df0cf74a4ec0e1f`, **15/15 testes do inventário OP-01**, **228/228 PHP** e **73/73 lint PHP**, todos com conclusão `success`. O teste do inventário devolve sempre `NO_GO` para integração real, mesmo que o registro tenha integridade válida.
+- **PR [#122](https://github.com/rafhael100/imagine-ai-agents/pull/122) documental integrado exclusivamente à dev** no squash `ab31c28afeac4cf75fa3e09a33cec9db37916865`. Estudo de cinco cenários de licenciamento n8n com fontes oficiais; possível exigência Enterprise para backend SaaS, sem concluir licença ou autorizar aquisição. **G09 ABERTO**.
+- **Gates ainda ABERTOS:** R01-G01..G11 e CRM CORE/SEG/AUT; [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) segue DRAFT. Sem `main`, servidores, clientes, APIs reais, credenciais, compras ou deploy.
+
+---
+
 ## R01-G09 — investigação do licenciamento n8n (09/11/2026)
 
 Fontes oficiais do n8n (FAQ atualizada em 06/10/2026, termos SUL e oferta OEM) foram confrontadas com o desenho multiempresa Imagine. O uso Community **não foi homologado** para backend SaaS; automações configuráveis do cliente permanecem responsabilidade do motor próprio do CRM. Ver `docs/AIA-R01-G09-ANALISE-LICENCIAMENTO-N8N-2026-11-09.md` e matriz `docs/evidencias/aia-g09-matriz-uso-n8n.csv`. **G09 ABERTO**, sem compras ou integração.
