@@ -1,5 +1,8 @@
 # AIA-FT01 / F1-08 — Laboratório visual navegável, somente offline
 
+> **Atualização vigente de 08/11/2026:** PR #98 integrado exclusivamente na dev, squash `d37cd9a603981c3d963823307119c402b67edf89`. Node real e Chromium (5 viewports) PASS, hashes Git conferidos; Firefox não testado. Nenhum deploy; autorização, privacidade e integração real permanecem bloqueadas por gates. Trechos abaixo que citam PR DRAFT são históricos.
+
+
 **Recorte de prototipação aprovado pela autorização ampla de desenvolvimento do responsável em 08/11/2026.** Este F1-08 é uma **numeração operacional proposta para a demonstração visual**, não uma nova homologação dos módulos funcionais AIA-01 a AIA-12. Seu conteúdo está alinhado ao laboratório AIA-09, à revisão AIA-R01 e aos mocks F1-01..F1-07 já implementados na branch `dev/ft01-aia-core-mocks-2026-11-06`.
 
 **Branch de trabalho:** `dev/ft01-f1-08-visual-lab-2026-11-08`, derivada de `23c076c623a47b9dc6c91122eb72c6c271d27a78` (PRs #96 e #97 já integrados à dev). **Sem alteração da main, VPS ou outros repositórios.**

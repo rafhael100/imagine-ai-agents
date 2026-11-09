@@ -1,5 +1,19 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## ESTADO VIGENTE — FT01/F1-08 integrado à dev (08/11/2026)
+
+- **Código e protótipo:** PR #98 **MERGED exclusivamente em `dev/ft01-aia-core-mocks-2026-11-06`**, squash `d37cd9a603981c3d963823307119c402b67edf89`. `main` inalterada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`. Nenhum deploy, VPS, integração, gasto ou fornecedor acionado.
+- **Entrega:** `examples/f108-laboratorio-navegavel.html` (quatro telas e seis decisões offline), `tests/Browser/f108_smoke.cjs`, especificação F1-08 e melhorias mobile/acessibilidade. HTML no commit da dev: blob SHA-1 `a6ff332f520a55089efa6178aeda98cb4a9008eb`; smoke Node: `38360656fa421275075be054d71680a84078e0d4`, iguais aos testados.
+- **QA realmente executado:** Node.js 22.16.0 em processo real `F108_SMOKE_PASS`; Chromium headless real com Playwright `page.set_content` em cinco viewports (`1440×900`, `1024×768`, `768×1024`, `390×844`, `320×680`), **5/5 PASS**, seis casos e 14 eventos por viewport, sem erros de JS/console, requisições externas ou overflow horizontal. Capturas desktop/mobile inspecionadas; `aria-pressed` e foco por teclado conferidos. **Firefox não testado**; navegação `file://` bloqueada pelo sandbox, por isso renderização foi por `set_content`.
+- **Regressão anterior preservada:** `php tests/Unit/run.php` na base sintética reconstruída → `85 cases, 0 failures`; os **43 arquivos PHP da dev pós-merge #98 têm blobs idênticos aos da base validada**. Estes números não significam homologação de segurança, ACL, LGPD, RAG, APIs ou produção real.
+- **Autorização vigente:** responsável concedeu autorização ampla para desenvolver/provar mocks sintéticos e fazer merges **somente na dev** após validações, com solicitações apenas para decisões críticas. `AGENTS.md` foi atualizado documentalmente para refletir esse processo.
+- **Bloqueios preservados:** R01-G01..G11 e CORE/SEG/AUT CRM abertos; `main`, produção, infraestrutura, serviços reais, dados de clientes, credenciais, migrações, SQL/ALLOW e despesas exigem novas decisões específicas.
+
+**Precedência:** trechos históricos abaixo que descrevem F1-08 como PR DRAFT, ou o QA visual como pendente, são registros do desenvolvimento anterior à integração #98 e não definem o estado atual.
+
+---
+
+
 ## FT01/F1-08 — Laboratório visual sintético em branch isolada (08/11/2026)
 
 - **Base validada:** `dev/ft01-aia-core-mocks-2026-11-06` em `23c076c623a47b9dc6c91122eb72c6c271d27a78`, após PRs #96 e #97 integrados; 85 testes PHP sintéticos previamente aprovados.

@@ -2,11 +2,12 @@
 
 ## Escopo
 
-Este repositório será a camada compartilhada de agentes de IA para CRM, Portal, Performance AI e Universidade Imagine. Encontra-se em **fase documental**.
+Este repositório será a camada compartilhada de agentes de IA para CRM, Portal, Performance AI e Universidade Imagine. Está em **desenvolvimento controlado de protótipos sintéticos em branch dev**, sem integração ou homologação de produção. Os recortes FT01 F1-01 a F1-08 já foram integrados exclusivamente à dev (F1-08: PR #98, squash `d37cd9a603981c3d963823307119c402b67edf89`); a `main` permanece sem essa implementação.
 
 ## Regras obrigatórias para agentes de desenvolvimento / Codex
 
-- Não desenvolver código, executar migrações, provisionar infraestrutura, usar chaves reais ou realizar deploy sem autorização explícita.
+- **Autorização vigente do responsável (08/11/2026):** avançar autonomamente no código **sintético/offline** e em seus testes, em branches isoladas, com PRs, preflight de SHA, evidências reproduzíveis e merge controlado **somente na dev** quando os gates técnicos do recorte forem satisfeitos. Perguntar apenas quando houver decisão estritamente crítica; autorização ampla não libera produção ou gastos.
+- **Não executar** migrações ou SQL/ALLOW reais, provisionar infraestrutura, usar segredos/dados reais, ligar APIs/LLM/CRM reais, contratar fornecedores ou fazer deploy sem autorização específica e cumprimento de gates correspondentes.
 - Não alterar os repositórios `rafhael100/imagine-crm`, `rafhael100/imagine-portal` ou outros projetos da Imagine por iniciativa própria.
 - Não fazer merge na `main` nem publicar releases sem autorização específica. Exceção: publicações documentais expressamente autorizadas no processo de criação deste repositório.
 - Documentar premissas, decisões abertas, dependências e riscos; não transformar propostas em aprovações presumidas.
@@ -21,6 +22,6 @@ Este repositório será a camada compartilhada de agentes de IA para CRM, Portal
 
 1. Ler `README.md` e `STATUS-ATUAL.md`.
 2. Planejar cada alteração, listar arquivos afetados e riscos.
-3. Produzir somente documentação enquanto os gates de implementação estiverem bloqueados.
+3. Desenvolver documentação, mocks sintéticos e demonstrações offline na branch filha, sem ativar contratos, integrações ou privilégios reais. Revisar diferenciação entre laboratório aprovado e homologação real pendente.
 4. Registrar decisões em `STATUS-ATUAL.md` e na documentação correspondente.
-5. Solicitar aprovação antes de programação, testes reais, integração com provedores, despesas ou deploy.
+5. Executar testes locais sintéticos e registrar resultados reais, hashes e eventuais limitações. Só fazer merge controlado na **dev** após suíte e revisão do escopo; não exigir aprovação repetitiva para operações rotineiras já abrangidas pela autorização vigente. Escalar ao responsável **decisões críticas**: `main`, produção, integração com dados/clientes/provedores reais, credenciais, alteração de gates de segurança, gastos, contratos ou riscos não resolvidos.
