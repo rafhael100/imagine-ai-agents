@@ -129,7 +129,7 @@ final class SupervisedCoordinator
     private function trace(Run $run, string $code, ?Intent $intent = null, ?Step $step = null): void
     {
         // Hash caller-supplied references as well: SYNTHETIC prefix is not sanitization.
-        $this->events[] = [
+        $event = [
             'sequence' => count($this->events) + 1,
             'product' => self::traceReference($this->context->product),
             'tenant' => self::traceReference($this->context->tenant),
@@ -139,6 +139,11 @@ final class SupervisedCoordinator
             'code' => 'SYNTHETIC_' . $code,
             'run_state' => 'SYNTHETIC_' . $run->state(),
         ];
+        if ($intent !== null) {
+            // Hash the complete run/step/key-bound signature, never its raw material.
+            $event['intent_signature'] = self::traceReference($intent->signature());
+        }
+        $this->events[] = $event;
     }
 
     private static function traceReference(string $value): string

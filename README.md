@@ -1,5 +1,13 @@
 # Imagine AI Agents
 
+## FT01/SEC-06 — hash da intenção vinculado à trilha sintética (09/11/2026)
+
+- O coordenador registra apenas o hash da assinatura completa de `Intent` nos eventos de envio, aprovação negada, consulta, timeout e efeito. O revisor exige correspondência com a intenção alvo, impedindo que uma trilha antiga sustente uma prova fictícia de outro conteúdo ou chave.
+- Nove novos testes PHP (U03-19..27) cobrem alteração de conteúdo, idempotência, adulteração e ausência do hash, preservando trilhas válidas com relógios monotônicos. Expectativa: **266 testes PHP / 75 lint**.
+- Esse hash **não autentica a origem dos eventos** nem autoriza CRM real. [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) continua DRAFT, gates R01/CORE/SEG/AUT abertos, estado **NO-GO**.
+
+---
+
 ## FT01/SEC-05 — aprovação vinculada a execução, etapa e chave (09/11/2026)
 
 - A assinatura de `Intent` agora inclui a chave de idempotência e os identificadores de `Run` e `Step`. Uma aprovação fictícia de uma execução não pode ser reutilizada em outra com a mesma operação e conteúdo.

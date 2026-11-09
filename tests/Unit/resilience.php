@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use ImagineAI\Domain\{Approval, Attempt, Intent, MockError, TenantContext};
+use ImagineAI\Domain\{Approval, Attempt, Effect, Intent, MockError, TenantContext};
 use ImagineAI\MockOrchestration\SupervisedCoordinator;
 use ImagineAI\Mocks\{MockAiSuggestionProvider, MockSupervisedGateway};
 use ImagineAI\MockResilience\{MockFaultGateway, ReadOnlyTraceReview};
@@ -204,5 +204,82 @@ return [
         }
         unset($event);
         check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'INTENT_CONFLICT');
+    },
+    'U03-19 synthetic trace carries hashed intent signature on submission and effect' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        $expected = 'SYNTHETIC_' . hash('sha256', $intent->signature());
+        check($events[2]['intent_signature'] === $expected
+            && $events[3]['intent_signature'] === $expected);
+        check(!array_key_exists('intent_signature', $events[0])
+            && !array_key_exists('intent_signature', $events[1]));
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['state'] === 'CONFIRMADO');
+    },
+    'U03-20 omitted signature on SUBMITTED cannot be repaired by proof' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        unset($events[2]['intent_signature']);
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'INTENT_CONFLICT');
+    },
+    'U03-21 omitted signature on CONFIRMADO cannot be repaired by proof' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        unset($events[3]['intent_signature']);
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'INTENT_CONFLICT');
+    },
+    'U03-22 same intent id with different material cannot reuse original trace' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $c->execute($intent, $approval, 15);
+        $other = new Intent($intent->id, $intent->step, $intent->idempotencyKey,
+            $intent->operation, 'SYNTHETIC_ALTERED_MATERIAL');
+        $falseProof = new Effect($other, 'CONFIRMADO', 'SYNTHETIC_EFFECT_OTHER', 'SYNTHETIC_MOCK_CRM');
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $other, $falseProof)['reason'] === 'INTENT_CONFLICT');
+    },
+    'U03-23 same intent id with different idempotency key cannot reuse original trace' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $c->execute($intent, $approval, 15);
+        $other = new Intent($intent->id, $intent->step, 'SYNTHETIC_NEW_KEY',
+            $intent->operation, $intent->material);
+        $falseProof = new Effect($other, 'CONFIRMADO', 'SYNTHETIC_EFFECT_OTHER', 'SYNTHETIC_MOCK_CRM');
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $other, $falseProof)['reason'] === 'INTENT_CONFLICT');
+    },
+    'U03-24 tampered but syntactically valid intent signature is rejected' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        $events[2]['intent_signature'] = 'SYNTHETIC_' . str_repeat('0', 64);
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'INTENT_CONFLICT');
+    },
+    'U03-25 raw synthetic material cannot leak through signature field' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture([], [], null,
+            'SYNTHETIC_SECRET_payload_marker');
+        $effect = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        foreach ($events as $event) {
+            if ($event['intent'] !== null) {
+                check(preg_match('/^SYNTHETIC_[a-f0-9]{64}$/D', $event['intent_signature']) === 1);
+            }
+        }
+        check(!str_contains(json_encode($events, JSON_THROW_ON_ERROR), 'payload_marker'));
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['state'] === 'CONFIRMADO');
+    },
+    'U03-26 old trace without signature fields cannot claim confirmation' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        foreach ($events as &$event) unset($event['intent_signature']);
+        unset($event);
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'INTENT_CONFLICT');
+    },
+    'U03-27 monotonic synthetic clocks preserve valid signed trace' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        foreach ($events as $i => &$event) $event['clock'] = $i + 1;
+        unset($event);
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['state'] === 'CONFIRMADO');
     },
 ];
