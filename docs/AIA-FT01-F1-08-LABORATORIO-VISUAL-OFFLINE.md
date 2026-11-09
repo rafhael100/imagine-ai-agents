@@ -42,18 +42,18 @@ Permitir uma primeira navegação demonstrativa dentro do repositório Imagine A
 
 ## Testes / evidências de hoje
 
-- Arquivo HTML criado na branch; **27.053 caracteres** de fonte (Unicode incluído).
+- Arquivo HTML da branch recuperado por conector autorizado e conferido por Git blob SHA-1. Layout responsivo e rótulo permanente de simulação.
 - Smoke de DOM com os arquivos exatos obtidos do GitHub, executado em V8 com adaptadores in-memory de `fs`/`path`/`vm` e `assert`: **PASS** (4 páginas, 6 respostas, 14 eventos, contadores de auditoria, reset, atalho de agente, CSP e ausência de rede).
-- `tests/Browser/f108_smoke.cjs` usa exclusivamente módulos nativos do Node, devendo ser executado como `node tests/Browser/f108_smoke.cjs` no checkout local para obter evidência adicional de processo Node real.
+- `node tests/Browser/f108_smoke.cjs` executado em processo Node.js v22.16.0 com código exato e **F108_SMOKE_PASS**. Teste também cobre o atributo `aria-pressed` em todos os cenários.
 - O código F1-08 não altera nenhum PHP da base. Regressores PHP da cópia reconstruída do PR #96: **85 cases, 0 failures** reexecutados localmente; não é novo teste de segurança operacional.
-- **Ainda não executada a verificação visual em navegador real** (Chromium/Firefox) deste arquivo exato; a abertura responsiva, foco e layout devem ser conferidos antes de eventual merge.
+- **Chromium real validado:** QA em ambiente isolado: HTML exato do GitHub reconstruído e validado por hash Git blob SHA-1; Node.js 22.16.0 executou o smoke original com PASS; Chromium headless real com Playwright renderizou o HTML via set_content nas resoluções 1440×900, 1024×768, 768×1024, 390×844 e 320×680: 5/5 PASS, sem rolagem horizontal, erros JavaScript, erros de console nem requisições externas. As seis decisões, navegação, contadores, 14 eventos e reset foram reproduzidos em cada viewport. Revisão visual de capturas desktop/mobile feita; corrigidos menu mobile em duas colunas, textos de fixtures e IDs de cenário. Estado selecionado agora usa aria-pressed; teste por teclado com Tab em Chromium PASS. Firefox não foi executado. O sandbox bloqueia navegação file://, portanto o teste visual usou set_content sobre os bytes exatos conferidos por hash.
 
 ## Governança e próximos passos
 
-- PR F1-08 será criado **DRAFT / SEM MERGE AUTOMÁTICO** e revisado; a `dev` continuará inalterada até aprovação técnica do protótipo e teste de renderização.
+- PR #98 criado em DRAFT. Após a bateria técnica e revisão visual em Chromium, está candidato a integração controlada exclusivamente na `dev`, mediante confirmação de SHA, integridade, diff e ausência de conflitos. Nenhum merge na `main`, deploy ou promoção a produção.
 - Para testar offline: abrir `examples/f108-laboratorio-navegavel.html` localmente; para testar interações por código: `node tests/Browser/f108_smoke.cjs`.
 - Após validar UI, considerar uma futura camada de demonstração PHP que sirva conteúdo inteiramente sintético na VPS de desenvolvimento **somente mediante decisão de arquitetura/segurança separada**.
 - `main`, produção, VPS, n8n, Cloudflare, CRM/Portal/Performance/Universidade, credenciais, APIs/LLM, dados privados, SQL/ALLOW, fornecedores e gastos permanecem intocados.
 - Gates R01-G01 a G11 e CORE/SEG/AUT CRM **todos abertos**; a demonstração não os fecha.
 
-**Estado efetivo:** F1-08 **protótipo navegável e testes de lógica DOM disponíveis**, sem publicação web, sem integração real e sem afirmações de homologação em navegador real.
+**Estado efetivo:** F1-08 **protótipo visual offline testado em Chromium/Node**, ainda sem publicação web, Firefox testado, integração real ou homologação de produção.
