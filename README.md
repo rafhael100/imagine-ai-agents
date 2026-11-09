@@ -1,5 +1,16 @@
 # Imagine AI Agents
 
+## F1-14 — estado compartilhado de confiança sintético (09/11/2026)
+
+- **Branch isolada:** `dev/ft01-f1-14-shared-trust-state-2026-11-09`, derivada da dev após F1-13. Ainda não integrada, `main` e produção inalteradas.
+- **Código em revisão:** objeto `MockSharedTrustState` volátil partilhado por dois gateways apenas no mesmo processo; simula nonce consumido, revogação por digest e indisponibilidade com negação por padrão. `MockTrustGateway` só usa esse objeto se explicitamente fornecido; testes anteriores mantêm seu contrato legado.
+- **Testes adicionados:** 12 casos U14, novas metas `168/168` casos e `65/65` arquivos PHP. **Não declarar que passaram até existir CI do commit exato**.
+- **Sem segurança distribuída real:** ausência de autenticação, banco, múltiplos processos, ACL CRM, credenciais, logs de produção ou contratos habilitados. R01-G01..G11 e CORE/SEG/AUT seguem ABERTOS.
+- **Documento:** `docs/AIA-FT01-F1-14-ESTADO-COMPARTILHADO-SINTETICO.md`.
+
+---
+
+
 ## Estado vigente — F1-13 integrado exclusivamente à dev (09/11/2026)
 
 - **PR [#108](https://github.com/rafhael100/imagine-ai-agents/pull/108) MERGED por squash apenas em `dev/ft01-aia-core-mocks-2026-11-06`**, commit `92a2f0a5f01a0014051594f24d96988e111f85c7`. A `main` foi preservada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; nenhum deploy, VPS, fornecedor, dados privados, CRM real ou gasto foi executado.

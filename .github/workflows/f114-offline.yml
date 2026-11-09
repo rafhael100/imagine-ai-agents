@@ -1,0 +1,29 @@
+name: F1-14 shared trust offline regression
+
+on:
+  push:
+    branches:
+      - dev/ft01-f1-14-shared-trust-state-2026-11-09
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event.repository.private == false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact reviewed commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate all PHP and synthetic tests without external providers
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_PHP: '65'
+          EXPECTED_CASES: '168'
+        run: |
+          php -v
+          bash tools/validate_ft01_offline.sh
