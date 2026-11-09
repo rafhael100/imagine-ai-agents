@@ -34,6 +34,7 @@ Em **todos** os resultados `promotion_allowed=false`. O avaliador é exclusivame
 - Executa **regras fixas em JavaScript local**, que espelham os conceitos do PHP, mas **não invocam o executor PHP**.
 - Arquivo único, CSP `connect-src 'none'`, sem `fetch`/WebSocket, `localStorage`, `sessionStorage`, provedores, iframe, scripts remotos ou formulários; histórico efêmero que desaparece ao atualizar a página.
 - `tests/Browser/f109_smoke.cjs`: testes sem dependências externas de navegação, gates dos três candidatos, tabela de seis casos, histórico, limpeza e política offline. Comando: `node tests/Browser/f109_smoke.cjs`.
+- `tests/Browser/f109_responsive_qa.py`: teste reproduzível em Chromium instalado, via Playwright Python opcional **já disponível**, sem instalação automática. Verifica cinco viewports, navegação por teclado, três versões, histórico, tabela acessível com rolagem interna e ausência de requisições externas. Comando: `python tests/Browser/f109_responsive_qa.py`. Se Chromium/Playwright não estiverem instalados, o teste retorna `BLOCKED` e não instala componentes.
 
 ## Evidência efetivamente produzida
 
@@ -41,7 +42,9 @@ Em **todos** os resultados `promotion_allowed=false`. O avaliador é exclusivame
 - **48/48 arquivos PHP** sintéticos existentes na cópia de verificação: `php -l` sem erros.
 - Os **seis arquivos PHP novos/modificados** (três classes, suíte, runner e exemplo) conferidos por hash Git de blob SHA-1 idêntico aos arquivos publicados no GitHub.
 - Comparação local executável PHP: `REVIEW_REQUIRED` (6/6), `BLOCKED_CRITICAL` (4/6, duas críticas), `INCONCLUSIVE` (5/6, um caso não executado), sem chamadas externas.
-- Verificador `f109_smoke.cjs` executado em V8 isolado usando adaptadores DOM e módulos nativos de Node: **F109_SMOKE_PASS** para três telas, três candidatos e histórico. Esta verificação **ainda não equivale à execução em processo Node real ou à inspeção visual em Chromium/Firefox** do HTML exato.
+- **Node.js 22.16.0 em processo real:** `node tests/Browser/f109_smoke.cjs` → **F109_SMOKE_PASS**, arquivo CJS conferido por SHA-1 de blob Git `f8f3ca01e8256adb99faff79cef5a6b6a1f126e0`.
+- **Chromium real headless com Playwright Python:** `python tests/Browser/f109_responsive_qa.py` → **F109_CHROMIUM_PASS em 5/5 viewports** (`1440×900`, `1024×768`, `768×1024`, `390×844`, `320×680`), três gates e seis linhas por comparação, histórico/reset, acesso por teclado e `aria-pressed`, zero JS exceptions, zero erros de console e zero requisições externas. Foi encontrado e corrigido overflow horizontal após execução no celular; o elemento `.layout>.card{min-width:0}` mantém toda a página na largura da viewport e a tabela possui região focável e orientação de rolagem no mobile. Revisão visual de capturas desktop/mobile concluída.
+- **Integridade verificada:** HTML corrigido recuperado do GitHub, blob SHA-1 `ccca71572725ba6e6900a5d189d24c5fadf1334b`, igual ao byte-a-byte testado. Arquivo do verificador de Chromium blob `6d2c59545d1166cafa988a68c20731083a819885`, igual ao executado. **Firefox não foi testado**. Chromium recebeu conteúdo exato via `page.set_content` devido a DNS/restrições do sandbox; a execução local por endereço `file://` não foi homologada.
 - A base anterior F1-08 estava em `dev/ft01-aia-core-mocks-2026-11-06`, SHA `0fc74060c5fdfe914fd2a1c89f58d22818f775a2`, com 85 testes sintéticos previamente verificados.
 
 ## Falhas eliminatórias simuladas e controles
@@ -51,8 +54,8 @@ Os casos U09 cobrem isolamento entre empresas, revogação, idempotência, inje�
 ## Estado e limites de integração
 
 - **Somente branch de desenvolvimento isolada**, com PR de revisão; não integrar `main` ou publicar automaticamente.
-- Antes de merge, exigir SHA HEAD congelado, diff revisado, lint e regressão PHP reexecutados, smoke Node real e **inspeção responsiva em Chromium/Firefox ou justificativa técnica documentada**.
+- Antes do merge na `dev`, exigir SHA HEAD congelado, diff revisado, lint e regressão PHP reexecutados, smoke Node real e inspeção responsiva em Chromium; **esses testes foram concluídos** em 09/11/2026. Firefox permanece pendente como cobertura adicional não bloqueante para protótipo offline. Não realizar merge na `main`, deploy ou conexões reais.
 - Instruções de versões reais, permissões, assinatura, acesso API, dados, observabilidade persistente, LGPD operacional, auditoria, custos reais, credenciais e fornecimento de modelos continuam fora do escopo.
 - Gates **R01-G01..G11** e **CORE/SEG/AUT CRM** permanecem abertos. Não fechar automaticamente pela aprovação genérica do desenvolvimento.
 
-**Conclusão:** mecanismo de comparação A/B sintético implementado e regressão PHP executada; interface visual aguarda inspeção em navegador real antes de integração da proposta completa.
+**Conclusão técnica de 09/11/2026:** comparação A/B sintética e interface visual validadas em PHP, Node e Chromium; prontas para proposta de integração **exclusivamente na dev**, sem afirmar homologação real, Firefox testado ou liberação de produção.
