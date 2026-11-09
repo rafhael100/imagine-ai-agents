@@ -120,7 +120,7 @@ $tests['all outcomes retain their state and timeout never resubmits'] = function
         check($gateway->count() === 1 && $effect->state === $state);
     }
 };
-$tests = array_merge($tests, require __DIR__ . '/supervised.php', require __DIR__ . '/resilience.php', require __DIR__ . '/tool_dispatch.php', require __DIR__ . '/usage_quota.php', require __DIR__ . '/catalog_release.php', require __DIR__ . '/knowledge_context.php', require __DIR__ . '/evaluation_compare.php', require __DIR__ . '/review_handoff.php', require __DIR__ . '/trust_contract.php', require __DIR__ . '/crm_read_contract.php', require __DIR__ . '/crm_read_audit.php');
+$tests = array_merge($tests, require __DIR__ . '/supervised.php', require __DIR__ . '/resilience.php', require __DIR__ . '/tool_dispatch.php', require __DIR__ . '/usage_quota.php', require __DIR__ . '/catalog_release.php', require __DIR__ . '/knowledge_context.php', require __DIR__ . '/evaluation_compare.php', require __DIR__ . '/review_handoff.php', require __DIR__ . '/trust_contract.php', require __DIR__ . '/crm_read_contract.php', require __DIR__ . '/crm_read_audit.php', require __DIR__ . '/shared_trust_state.php');
 $failed = 0;
 foreach ($tests as $name => $test) {
     try { $test(); echo "PASS $name\n"; }
