@@ -1,5 +1,18 @@
 # Imagine AI Agents
 
+## Estado vigente — F1-17 integrado exclusivamente à dev (09/11/2026)
+
+- **PR [#116](https://github.com/rafhael100/imagine-ai-agents/pull/116) MERGED por squash somente em `dev/ft01-aia-core-mocks-2026-11-06`**, commit `69992f878c7b3d6e16b60ff4f446f47c3e23edba`. A `main` foi conferida no SHA `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; sem deploy, VPS, CRM real, credenciais ou gastos de fornecedor.
+- **Prova efetivamente executada:** [GitHub Actions #42583032672](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42583032672), HEAD testado `9e60e0574bc5dfe8f277e4822a3adf6b93777936`, PHP 8.3.6, **214 cases / 0 failures**, **70/70 PHP lint**, `VALIDATION_PASS` de SHA fixado.
+- **Escopo entregue:** `MockCrmReadPublicFacade` exige mocks da política proprietária F1-16 e auditoria F1-13 para produzir conteúdo público uniforme `DENIED_OR_NOT_FOUND` em falhas simuladas, com 16 testes U17. Não há HTTP, dados privados ou garantia de indistinguibilidade de tempo/status de rede.
+- **Gates ABERTOS:** R01-G01..G11, CRM CORE/SEG/AUT e aceite bilateral do CRM. O [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) segue apenas documental DRAFT. O laboratório não autoriza `ALLOW`, API real, IAM, SQL, operações com clientes nem produção.
+- **Riscos seguintes:** validar futuramente observabilidade da borda para erros de parsing sem registrar payload, política de falhas HTTP/latência, identidade verificável, revogação persistente, autorização final por recurso/campo pelo CRM e fluxos de incidentes. Isso requer gates de integração específicos; testes de mock não os encerram.
+
+**Precedência:** menções abaixo a F1-17 pendente/sem CI são históricas, anteriores ao merge #116.
+
+---
+
+
 ## FT01/F1-17 — envelope público uniforme fictício (09/11/2026)
 
 - **Branch filha em revisão:** `dev/ft01-f1-17-safe-public-read-2026-11-09`, derivada da dev após F1-16 (PR #114, squash `447672eda494ff365f74e2e39fbaae76a57d115f`; PR documental #115 integrado).
