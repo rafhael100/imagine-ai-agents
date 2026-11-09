@@ -62,6 +62,7 @@ for required in \
   contracts/fixtures/f115-crm-op01-conformance.synthetic.json \
   contracts/crm-aia-readonly.v1.synthetic.schema.json \
   tests/Contracts/test_crm_aia_readonly_schema.py \
+  tests/Unit/context_ref_strict.php \
   tests/Unit/run.php; do
   if [[ ! -f "$required" ]]; then
     echo "BLOCKED: incomplete checkout, missing $required" >&2
@@ -69,8 +70,8 @@ for required in \
   fi
 done
 
-expected_php="${EXPECTED_PHP:-73}"
-expected_cases="${EXPECTED_CASES:-228}"
+expected_php="${EXPECTED_PHP:-74}"
+expected_cases="${EXPECTED_CASES:-240}"
 [[ "$expected_php" =~ ^[0-9]+$ && "$expected_cases" =~ ^[0-9]+$ ]] || {
   echo 'BLOCKED: expected counts must be integers' >&2
   exit 2
