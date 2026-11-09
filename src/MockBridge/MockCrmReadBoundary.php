@@ -13,6 +13,7 @@ final class MockCrmReadBoundary
     public function __construct(
         private readonly MockTrustGateway $gateway,
         private readonly MockCrmReader $reader,
+        private readonly ?MockCrmOwnerPolicy $ownerPolicy = null,
     ) {}
 
     public function evaluate(
@@ -30,6 +31,10 @@ final class MockCrmReadBoundary
         if ($trusted['real_authorization'] !== false || $trusted['external_calls'] !== 0) {
             MockError::fail('BRIDGE_TRUST_DENIED');
         }
+        // In F1-16 only, an injected fake CRM-owner policy rechecks current
+        // membership, tenant/resource and field scope independent of old evidence.
+        // The legacy no-policy path is retained solely for earlier offline tests.
+        $this->ownerPolicy?->assertAllowed($trustedContext, $request->fields);
         // The reader has a hard-coded fictional dataset and denies unknown fields/resources.
         $projection = $this->reader->lead($trustedContext, $request->fields);
         if (count($projection) !== count($request->fields)) {
