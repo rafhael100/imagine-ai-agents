@@ -1,5 +1,14 @@
 # Roadmap proposto — Imagine AI Agents
 
+## Estado vigente — EVID-07 integrado, integridade do contrato reforçada (09/11/2026)
+
+- [PR #130](https://github.com/rafhael100/imagine-ai-agents/pull/130) integrado **somente à dev**, squash `21300c5e518166e7ac51ad5020d645c17668edb0`. A [CI do PR #42630115145](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42630115145) passou no SHA revisado `0277abf91012bfc12f51a2625fce296abab1a689`; a [CI integrada #42630193545](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42630193545) passou no HEAD exato `21300c5e518166e7ac51ad5020d645c17668edb0`.
+- EVID-07 acrescentou seis testes negativos à paridade OP-01: o snapshot CRM PR #57 agora exige **commit e blob exatos**, e o contrato JSON rejeita palavras-chave raiz adicionais e metadados falsos de produção. A regressão PHP **228/228** e **73/73 lint** permaneceu aprovada na CI.
+- [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57): **OPEN/DRAFT, sem merge e sem aceite bilateral**. Os gates R01-G01..G11 e CRM CORE/SEG/AUT continuam ABERTOS. **NO-GO operacional**: nenhum endpoint CRM, identidade real, autorização, dado de cliente, `main`, VPS, gasto ou deploy foi ativado.
+- **Prioridade seguinte:** obter decisões formais de CORE/SEG/AUT/Privacidade e donos do piloto. Não ampliar o escopo do laboratório sintético enquanto a segurança contratual real segue pendente.
+
+---
+
 ## Estado vigente — EVID-05/EVID-06 integrados e CI da dev comprovada (09/11/2026)
 
 - **Painel gerado EVID-05:** [PR #127](https://github.com/rafhael100/imagine-ai-agents/pull/127), squash `44bab6e8a1c01bc6b30761018fe6271b94374bd6`, integrado apenas à dev. A [CI #42628509823](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42628509823) validou no SHA `5e3f0485d03a47d084332837d39f7fafe3169f75` o gerador determinístico, testes negativos, os validadores anteriores e a regressão PHP **228/228 testes e 73/73 lint** (mais o probe isolado).

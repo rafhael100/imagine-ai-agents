@@ -1,5 +1,14 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## Estado vigente — EVID-07 integrado, integridade do contrato reforçada (09/11/2026)
+
+- [PR #130](https://github.com/rafhael100/imagine-ai-agents/pull/130) integrado **somente à dev**, squash `21300c5e518166e7ac51ad5020d645c17668edb0`. A [CI do PR #42630115145](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42630115145) passou no SHA revisado `0277abf91012bfc12f51a2625fce296abab1a689`; a [CI integrada #42630193545](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42630193545) passou no HEAD exato `21300c5e518166e7ac51ad5020d645c17668edb0`.
+- EVID-07 acrescentou seis testes negativos à paridade OP-01: o snapshot CRM PR #57 agora exige **commit e blob exatos**, e o contrato JSON rejeita palavras-chave raiz adicionais e metadados falsos de produção. A regressão PHP **228/228** e **73/73 lint** permaneceu aprovada na CI.
+- [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57): **OPEN/DRAFT, sem merge e sem aceite bilateral**. Os gates R01-G01..G11 e CRM CORE/SEG/AUT continuam ABERTOS. **NO-GO operacional**: nenhum endpoint CRM, identidade real, autorização, dado de cliente, `main`, VPS, gasto ou deploy foi ativado.
+- **Prioridade seguinte:** obter decisões formais de CORE/SEG/AUT/Privacidade e donos do piloto. Não ampliar o escopo do laboratório sintético enquanto a segurança contratual real segue pendente.
+
+---
+
 ## EVID-07 — procedência fixa e schema fechado do contrato OP-01 (09/11/2026)
 
 Reforço do verificador offline: commit e blob exatos do CRM PR #57 ficam fixados e palavras-chave inesperadas na raiz do schema são rejeitadas. Novos testes negativos para mudança de origem, rehash de snapshot e falsas regras/alegações de produção. **Nenhuma homologação ou permissão real foi concedida.**
