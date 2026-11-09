@@ -2,7 +2,7 @@
 
 ## Escopo
 
-Este repositório será a camada compartilhada de agentes de IA para CRM, Portal, Performance AI e Universidade Imagine. Está em **desenvolvimento controlado de protótipos sintéticos em branch dev**, sem integração ou homologação de produção. Os recortes FT01 F1-01 a F1-16 já foram integrados **exclusivamente à dev** (F1-12: PR #106, squash `562896763f900a8a264ea46aa35e2aeacd5e0903`, **144/144 testes PHP**, **60/60 lint e hashes Git blob**); a F1-13 foi integrada pelo PR #108, squash `92a2f0a5f01a0014051594f24d96988e111f85c7`, com **156/156 testes e 63/63 lint PHP em CI**; a `main` permanece sem essa implementação.
+Este repositório será a camada compartilhada de agentes de IA para CRM, Portal, Performance AI e Universidade Imagine. Está em **desenvolvimento controlado de protótipos sintéticos em branch dev**, sem integração ou homologação de produção. Os recortes FT01 F1-01 a F1-17 já foram integrados **exclusivamente à dev** (F1-12: PR #106, squash `562896763f900a8a264ea46aa35e2aeacd5e0903`, **144/144 testes PHP**, **60/60 lint e hashes Git blob**); a F1-13 foi integrada pelo PR #108, squash `92a2f0a5f01a0014051594f24d96988e111f85c7`, com **156/156 testes e 63/63 lint PHP em CI**; a `main` permanece sem essa implementação.
 
 **F1-13 integrado apenas à dev:** CI de SHA-fixado [run #42579753806](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42579753806) aprovou 156/156 testes e 63/63 lint. A próxima fase pode simular falhas multi-instância sem credenciais reais, backend CRM ou deploy.
 
@@ -12,7 +12,7 @@ Este repositório será a camada compartilhada de agentes de IA para CRM, Portal
 
 **F1-16 integrado apenas à dev:** [CI #42582545247](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42582545247) aprovou 198/198 testes, 68/68 lint, commit integrado `447672eda494ff365f74e2e39fbaae76a57d115f` (PR #114). Os grants e a política de owner continuam fictícios; todos os gates operacionais seguem abertos.
 
-**F1-17 em revisão:** envelope de resposta pública uniforme somente em memória, 16 cenários novos; alvo de **214 testes e 70 lint PHP** ainda não validado no CI. Não interpretar isso como API, autenticação ou proteção de latência/HTTP real.
+**F1-17 integrado apenas à dev:** CI [#42583032672](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42583032672) passou 214/214 testes e 70/70 PHP lint; PR #116 squash `69992f878c7b3d6e16b60ff4f446f47c3e23edba`. O envelope é somente um objeto PHP offline, sem HTTP ou integração CRM; gates ainda abertos.
 
 ## Regras obrigatórias para agentes de desenvolvimento / Codex
 
