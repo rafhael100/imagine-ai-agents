@@ -9,9 +9,10 @@ Comandos locais sem serviços ou dependências:
 php tests/Unit/run.php                     # regressão sintética completa — 97 testes
 php examples/f109-evaluation-demo.php      # três relatórios A/B fictícios
 node tests/Browser/f109_smoke.cjs          # comparador visual offline
+python tests/Browser/f109_responsive_qa.py # Chromium + Playwright se já instalados
 ```
 
-Para navegar: abrir `examples/f109-comparador-versoes-offline.html` em navegador. A especificação está em `docs/AIA-FT01-F1-09-AVALIACAO-COMPARACAO-OFFLINE.md`. Código PHP: **97/97 testes, 48/48 lint, 48/48 hashes de blobs conferidos contra o GitHub**. Smoke visual executado em V8 com DOM simulado; **Chrome/Firefox e processo Node real ainda não foram testados para F1-09**. PR F1-09 permanece DRAFT até cumprir esses gates. Sem LLM, APIs, dados reais, custos, deployment, main, nem fechamento de R01/CORE/SEG/AUT.
+Para navegar: abrir `examples/f109-comparador-versoes-offline.html` em navegador. A especificação está em `docs/AIA-FT01-F1-09-AVALIACAO-COMPARACAO-OFFLINE.md`. Código PHP: **97/97 testes, 48/48 lint, 48/48 hashes de blobs conferidos contra o GitHub**. Smoke executado em **Node.js 22.16 real**, e o comparador HTML foi verificado em **Chromium real, cinco resoluções, sem erros JS, chamadas de rede ou rolagem horizontal externa**, com acesso por teclado e tabela móvel corrigida. O HTML do GitHub foi conferido por hash Git; **Firefox não testado**. Os gates técnicos de laboratório estão cumpridos; nenhum gate de produção, autenticação ou integração foi encerrado. Sem LLM, APIs, dados reais, custos, deployment, main, nem fechamento de R01/CORE/SEG/AUT.
 
 
 ## ESTADO VIGENTE — FT01/F1-08 integrado à dev (08/11/2026)
