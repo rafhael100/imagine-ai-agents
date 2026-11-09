@@ -21,3 +21,11 @@ O workflow `.github/workflows/r01-dev-integrity.yml` executa esses comandos ante
 Gates R01-G01..G11 e CRM CORE/SEG/AUT permanecem abertos e [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) continua documental/DRAFT. Nenhuma alteração na `main`, dados de clientes ou serviços externos.
 
 **Conclusão verificada (09/11/2026):** [PR #132](https://github.com/rafhael100/imagine-ai-agents/pull/132) integrado exclusivamente à dev (`1c4cdbf87d8a7b003b5564e76784f9333dc5900c`), com [CI após merge #42632148664](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42632148664) `success`. A verificação é preventiva e limitada ao código direto, sem homologação real.
+
+## SEC-03 — ampliação do isolamento contra execução indireta (09/11/2026)
+
+A revisão do scanner SEC-01 identificou três desvios não detectados: execução por variável chamável (`$fn(...)` e `($fn)(...)`), execução por crases PHP e aliases de importação de funções (`use function ... as ...`). Foram incluídos os casos de classe dinâmica (`new $class`), nome de método em variável e nome relativo ao namespace.
+
+O scanner continua analisando somente tokens, sem executar qualquer fixture. Sete novos testes Python verificam os desvios e protegem comentários e strings inertes contra falsos positivos. A CI unificada executa esta suíte, sem dependências ou serviços externos.
+
+**Limitação:** não é sandbox nem análise estática exaustiva; não garante ausência de efeitos indiretos em callbacks, bibliotecas, reflexão ou autoloaders. Gates de CRM continuam abertos; o estado operacional permanece `NO-GO`.

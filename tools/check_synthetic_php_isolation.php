@@ -42,17 +42,50 @@ final class SyntheticIsolationCheck
         $tokens = token_get_all($content, TOKEN_PARSE);
         $bad = [];
         foreach ($tokens as $i => $tok) {
+            // PHP shell backticks appear as single-character tokens.
+            if ($tok === chr(96)) {
+                $bad[] = 'backtick_execution';
+                continue;
+            }
             if (!is_array($tok)) continue;
             [$type, $value] = $tok;
             if (in_array($type, [T_EVAL, T_INCLUDE, T_INCLUDE_ONCE, T_REQUIRE, T_REQUIRE_ONCE], true)) {
                 $bad[] = 'dynamic_php_execution';
                 continue;
             }
-            if ($type === T_VARIABLE && in_array($value, self::SUPERGLOBALS, true)) {
-                $bad[] = 'global_runtime_input';
+            if ($type === T_USE) {
+                $lookAhead = self::significant($tokens, $i + 1, 1);
+                if ($lookAhead >= 0 && is_array($tokens[$lookAhead])
+                    && $tokens[$lookAhead][0] === T_FUNCTION) {
+                    // Function aliases can hide the original blocked callable.
+                    $bad[] = 'function_import_alias';
+                }
+            }
+            if ($type === T_VARIABLE) {
+                if (in_array($value, self::SUPERGLOBALS, true)) {
+                    $bad[] = 'global_runtime_input';
+                }
+                $next = self::significant($tokens, $i + 1, 1);
+                $prior = self::significant($tokens, $i - 1, -1);
+                $priorToken = $prior >= 0 ? $tokens[$prior] : null;
+                $priorType = is_array($priorToken) ? $priorToken[0] : null;
+                if ($priorType === T_NEW) {
+                    $bad[] = 'dynamic_constructor';
+                }
+                if ($next >= 0 && $tokens[$next] === '(') {
+                    // $fn(...) and $object->$method(...), regardless of contents.
+                    $bad[] = 'dynamic_dispatch';
+                } elseif ($prior >= 0 && $priorToken === '('
+                    && $next >= 0 && $tokens[$next] === ')') {
+                    // Parenthesized callable: ($fn)(...).
+                    $after = self::significant($tokens, $next + 1, 1);
+                    if ($after >= 0 && $tokens[$after] === '(') {
+                        $bad[] = 'dynamic_dispatch';
+                    }
+                }
                 continue;
             }
-            if (!in_array($type, [T_STRING, T_NAME_FULLY_QUALIFIED, T_NAME_QUALIFIED], true)) continue;
+            if (!in_array($type, [T_STRING, T_NAME_FULLY_QUALIFIED, T_NAME_QUALIFIED, T_NAME_RELATIVE], true)) continue;
             $name = strtolower(substr(strrchr('\\' . $value, '\\'), 1));
             $next = self::significant($tokens, $i + 1, 1);
             $prior = self::significant($tokens, $i - 1, -1);

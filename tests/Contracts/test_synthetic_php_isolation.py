@@ -87,6 +87,57 @@ class SyntheticIsolationTests(unittest.TestCase):
                 self.assertEqual(code, 1)
                 self.assertIn("dynamic_php_execution", report["violation_categories"])
 
+    def test_variable_function_dispatch_denied(self):
+        for statement in (
+            "$fn = 'system'; $fn('echo synthetic');",
+            "$fn = 'curl_exec'; $fn($handle);",
+            "$cb = 'system'; ($cb)('echo synthetic');",
+        ):
+            with self.subTest(statement=statement):
+                rc, report = self.scan("<?php " + statement)
+                self.assertEqual(rc, 1)
+                self.assertIn("dynamic_dispatch", report["violation_categories"])
+
+    def test_dynamic_method_dispatch_denied(self):
+        rc, report = self.scan("<?php $o->$method();")
+        self.assertEqual(rc, 1)
+        self.assertIn("dynamic_dispatch", report["violation_categories"])
+
+    def test_dynamic_constructor_denied(self):
+        for statement in ("$x = new $class();", "$x = new $factory;"):
+            with self.subTest(statement=statement):
+                rc, report = self.scan("<?php " + statement)
+                self.assertEqual(rc, 1)
+                self.assertIn("dynamic_constructor", report["violation_categories"])
+
+    def test_backtick_shell_expression_denied(self):
+        payload = "<?php $x = " + chr(96) + "echo synthetic" + chr(96) + ";"
+        rc, report = self.scan(payload)
+        self.assertEqual(rc, 1)
+        self.assertIn("backtick_execution", report["violation_categories"])
+
+    def test_imported_function_alias_denied(self):
+        rc, report = self.scan("<?php use function system as helper; helper('x');")
+        self.assertEqual(rc, 1)
+        self.assertIn("function_import_alias", report["violation_categories"])
+
+    def test_relative_namespaced_effect_call_denied(self):
+        rc, report = self.scan(r"<?php namespace\system('echo synthetic');")
+        self.assertEqual(rc, 1)
+        self.assertIn("external_or_effectful_call", report["violation_categories"])
+
+    def test_inert_backtick_and_variable_in_comments_and_strings(self):
+        source = r'''<?php
+        // $fn('unsafe'); use function system as bypass;
+        $label = "words: $fn";
+        /* new $class; namespace\system('synthetic') */
+        return strlen($label);
+        '''
+        source = source.replace("words: $fn", "words: $fn " + chr(96) + "echo synthetic" + chr(96))
+        rc, report = self.scan(source)
+        self.assertEqual(rc, 0)
+        self.assertTrue(report["isolation_check_passed"])
+
     def test_rejected_parse_error_does_not_disclose_source(self):
         code, report = self.scan("<?php invalid syntax !!! secret-token")
         self.assertEqual(code, 1)
