@@ -11,7 +11,7 @@ final class ReadOnlyTraceReview
     private const FIELDS = ['sequence', 'product', 'tenant', 'run', 'step', 'intent', 'code', 'run_state'];
     private const CODES = [
         'STARTED', 'STEP_CREATED', 'SUGGESTED', 'APPROVAL_DENIED', 'SUBMITTED',
-        'STATUS_REQUESTED', 'STATUS_UNAVAILABLE', 'TIMEOUT', 'INDETERMINADO', 'PENDENTE',
+        'STATUS_REQUESTED', 'STATUS_UNAVAILABLE', 'STATUS_REJECTED', 'TIMEOUT', 'INDETERMINADO', 'PENDENTE',
         'CONFIRMADO', 'NEGADO', 'RUN_CHANGED',
     ];
     private const STATES = ['RECEBIDA', 'EXECUTANDO', 'AGUARDANDO', 'CONCLUIDA', 'FALHOU', 'CANCELADA'];
@@ -99,7 +99,7 @@ final class ReadOnlyTraceReview
             // A proof cannot repair missing or detached trace bindings:
             // require the hashed run/step/idempotency/material signature, too.
             if (in_array($code, [
-                'APPROVAL_DENIED', 'SUBMITTED', 'STATUS_REQUESTED', 'STATUS_UNAVAILABLE', 'TIMEOUT',
+                'APPROVAL_DENIED', 'SUBMITTED', 'STATUS_REQUESTED', 'STATUS_UNAVAILABLE', 'STATUS_REJECTED', 'TIMEOUT',
                 'INDETERMINADO', 'PENDENTE', 'CONFIRMADO', 'NEGADO',
             ], true) && ($event['intent'] === null || $event['step'] === null
                 || !array_key_exists('intent_signature', $event))) {
@@ -108,19 +108,19 @@ final class ReadOnlyTraceReview
             // Only a synthetic effect or fixed outage can complete a status request.
             // No new submit, lifecycle event, or another status request may silently
             // skip the outcome of the earlier query.
-            $statusClosures = ['STATUS_UNAVAILABLE', 'INDETERMINADO',
+            $statusClosures = ['STATUS_UNAVAILABLE', 'STATUS_REJECTED', 'INDETERMINADO',
                 'PENDENTE', 'CONFIRMADO', 'NEGADO'];
             if ($awaitingStatusResult && !in_array($code, $statusClosures, true)) {
                 return self::unknown('STATE_CONFLICT');
             }
             // Status requests, timeouts and outages require a prior submission.
-            if (in_array($code, ['STATUS_REQUESTED', 'STATUS_UNAVAILABLE', 'TIMEOUT'], true)
+            if (in_array($code, ['STATUS_REQUESTED', 'STATUS_UNAVAILABLE', 'STATUS_REJECTED', 'TIMEOUT'], true)
                 && !$seenSubmit) {
                 return self::unknown('STATE_CONFLICT');
             }
             if ($code === 'STATUS_REQUESTED') {
                 $awaitingStatusResult = true;
-            } elseif ($code === 'STATUS_UNAVAILABLE') {
+            } elseif (in_array($code, ['STATUS_UNAVAILABLE', 'STATUS_REJECTED'], true)) {
                 if (!$awaitingStatusResult) return self::unknown('STATE_CONFLICT');
                 $awaitingStatusResult = false;
             }
