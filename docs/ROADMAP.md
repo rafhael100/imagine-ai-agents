@@ -1,3 +1,11 @@
+## R01/EVID-09 — reconciliação F1-23 e gate bilateral CRM (09/11/2026)
+
+- [PR Agents #151](https://github.com/rafhael100/imagine-ai-agents/pull/151) integrado **somente à dev** em `f50e15f906169d0c12a11c69ec79aab3cdc3e901`, após [CI #42678725023](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42678725023) `success` no HEAD do PR `b69f76bcc24f21d8255af5c06582c187c9ebb048`. Gate de revisão: **320 testes PHP / 79 lint**. Os eventos `STATUS_UNAVAILABLE` e `STATUS_REJECTED` fecham consultas sintéticas sem substituir provas anteriores.
+- **Próximo trabalho com valor operacional:** obter aceite bilateral OP-01 de identidade, autorização, finalidade, contrato e operação; reconciliar [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) (OPEN/DRAFT, base da dev avançada). Consulte [EVID-09](AIA-R01-EVID-09-RECONCILIACAO-F123-CRM.md) para provas, pendências e sequência.
+- R01-G01..G11 e CRM CORE/SEG/AUT continuam abertos. **NO-GO** de acesso real, API, VPS, produção, gastos e `main`.
+
+---
+
 # Roadmap proposto — Imagine AI Agents
 
 ## FT01/SEC-09 — registro canônico de execuções e etapas sintéticas (09/11/2026)
