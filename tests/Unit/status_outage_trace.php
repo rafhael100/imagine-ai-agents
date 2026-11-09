@@ -191,4 +191,47 @@ return [
         check(ReadOnlyTraceReview::inspect($c->events(), context(), $intent, $original)['state'] === 'NEGADO');
         check($gateway->submitCount() === 1 && $gateway->statusCount() === 1);
     },
+    'U23-15 contradictory terminal status is rejected and closes audit without resubmit' => function (): void {
+        $gateway = new class implements CrmEffectGateway {
+            private MockSupervisedGateway $inner;
+            public int $statusCalls = 0;
+            public function __construct() { $this->inner = new MockSupervisedGateway('CONFIRMADO'); }
+            public function submit(Intent $intent, ?Approval $approval, int $now): Effect
+            {
+                return $this->inner->submit($intent, $approval, $now);
+            }
+            public function status(TenantContext $context, Intent $intent): Effect
+            {
+                $context->assertSame($intent->context);
+                ++$this->statusCalls;
+                return new Effect($intent, 'NEGADO');
+            }
+            public function submitCount(): int { return $this->inner->submitCount(); }
+        };
+        $ctx = context();
+        $c = new SupervisedCoordinator($ctx, $gateway, new MockAiSuggestionProvider());
+        $run = $c->start('SYNTHETIC_F23_CONFLICT_RUN');
+        $intent = new Intent('SYNTHETIC_F23_CONFLICT_INTENT',
+            $c->step($run, 'SYNTHETIC_F23_CONFLICT_STEP'),
+            'SYNTHETIC_F23_CONFLICT_KEY', 'mock.task.create', 'SYNTHETIC_TASK');
+        $approval = new Approval('SYNTHETIC_F23_CONFLICT_APPROVAL',
+            $intent, 'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+        $original = $c->execute($intent, $approval, 15);
+        denied('STATE_CONFLICT', fn() => $c->reconcile($intent));
+        check($gateway->submitCount() === 1 && $gateway->statusCalls === 1);
+        check(array_slice(array_column($c->events(), 'code'), -2) === [
+            'SYNTHETIC_STATUS_REQUESTED', 'SYNTHETIC_STATUS_REJECTED',
+        ]);
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $original)['state'] === 'CONFIRMADO');
+    },
+    'U23-16 forged status rejection without request fails closed' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        $fake = $events[count($events) - 1];
+        $fake['code'] = 'SYNTHETIC_STATUS_REJECTED';
+        $fake['sequence'] = count($events) + 1;
+        $events[] = $fake;
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'STATE_CONFLICT');
+    },
 ];
