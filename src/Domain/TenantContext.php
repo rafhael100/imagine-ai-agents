@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace ImagineAI\Domain;
 
-/** Synthetic references only. Not an authenticated identity. */
+/** Strict synthetic context references; not an authenticated identity or tenant ACL. */
 final class TenantContext
 {
     public function __construct(
@@ -15,7 +15,9 @@ final class TenantContext
         public readonly string $version = 'mock-v1',
     ) {
         foreach ([$product, $tenant, $principal, $purpose, $resource] as $ref) {
-            if (!str_starts_with($ref, 'SYNTHETIC_')) MockError::fail('INVALID_SYNTHETIC_REF');
+            if (preg_match('/^SYNTHETIC_[A-Z0-9_]{1,80}$/D', $ref) !== 1) {
+                MockError::fail('INVALID_SYNTHETIC_REF');
+            }
         }
         if ($version !== 'mock-v1') MockError::fail('VERSION_UNSUPPORTED');
     }

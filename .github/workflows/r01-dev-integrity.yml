@@ -70,7 +70,7 @@ jobs:
         shell: bash
         env:
           EXPECTED_SHA: ${{ github.sha }}
-          EXPECTED_PHP: '73'
-          EXPECTED_CASES: '228'
+          EXPECTED_PHP: '74'
+          EXPECTED_CASES: '240'
         run: |
           bash tools/validate_ft01_offline.sh

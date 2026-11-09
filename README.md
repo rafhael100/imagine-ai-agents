@@ -1,5 +1,13 @@
 # Imagine AI Agents
 
+## FT01/SEC-02 — referências sintéticas de contexto alinhadas ao contrato (09/11/2026)
+
+- O `TenantContext` agora rejeita sufixos vazios, letras minúsculas, Unicode, separadores e controles; utiliza o mesmo formato estrito de **1 a 80 caracteres ASCII** do contrato fictício CRM OP-01.
+- Nova suíte com **12 testes PHP negativos e positivos** no runner oficial. CI da `dev` passa a exigir **240 casos PHP** e **74 arquivos lint**, mantendo o verificador de isolamento e as matrizes de homologação.
+- Este ajuste **não cria autenticação real** nem fecha gates R01/CRM. Ver `docs/AIA-FT01-SEC-02-REFERENCIAS-CONTEXTO-SINTETICO.md`.
+
+---
+
 ## FT01/SEC-01 — guarda de isolamento do núcleo sintético (09/11/2026)
 
 - Novo verificador PHP por tokens, aplicado ao diretório `src/` sem executar código-fonte. Identifica introdução direta de chamadas de rede, banco, processo, arquivos, carregamento dinâmico e superglobais.
