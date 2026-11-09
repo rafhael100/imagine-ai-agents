@@ -1,5 +1,11 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## R01-G09 — investigação do licenciamento n8n (09/11/2026)
+
+Fontes oficiais do n8n (FAQ atualizada em 06/10/2026, termos SUL e oferta OEM) foram confrontadas com o desenho multiempresa Imagine. O uso Community **não foi homologado** para backend SaaS; automações configuráveis do cliente permanecem responsabilidade do motor próprio do CRM. Ver `docs/AIA-R01-G09-ANALISE-LICENCIAMENTO-N8N-2026-11-09.md` e matriz `docs/evidencias/aia-g09-matriz-uso-n8n.csv`. **G09 ABERTO**, sem compras ou integração.
+
+---
+
 ## R01/EVID-02 — verificador automatizado de inventário de gates (09/11/2026)
 
 - Novo utilitário offline `tools/check_r01_readiness.py`, matriz de 13 cenários e suíte negativa `tests/Contracts/test_r01_readiness.py`.

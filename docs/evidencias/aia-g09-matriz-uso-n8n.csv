@@ -1,0 +1,6 @@
+cenario,titular_edicao,gatilho_operacional,cenario_licenca,risco,estado,evidencia_pendente
+G09-S01,IMAGINE,FLUXO_INTERNO,SUL_CONDICIONAL,MEDIO,EM_ANALISE,confirmacao-escopo-servico
+G09-S02,CLIENTE_INDIRETO,CRM_CONFIGURAVEL,COMERCIAL_REQUERIDA,ALTO,EM_ANALISE,termos-comerciais-n8n
+G09-S03,IMAGINE,SAAS_CLIENTE,ENTERPRISE_POSSIVEL,ALTO,EM_ANALISE,parecer-escrito-licenciador
+G09-S04,CLIENTE_EDITOR,OEM,OEM_REQUERIDO,ALTO,EM_ANALISE,contrato-oem-caso-necessario
+G09-S05,CRM_PROPRIO,MOTOR_CRM,NAO_DEPENDE_N8N,BAIXO,EM_ANALISE,garantia-arquitetural-crm
