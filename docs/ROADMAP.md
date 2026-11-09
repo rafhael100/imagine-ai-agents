@@ -1,5 +1,11 @@
 # Roadmap proposto — Imagine AI Agents
 
+## Preparação de homologação bilateral CRM/AIA — EVID-01 (09/11/2026)
+
+Foi produzido o dossiê `docs/AIA-R01-EVID-01-DOSSIE-ACEITE-PILOTO-CRM-OP01.md` e a matriz rastreável `docs/evidencias/aia-r01-gates-op01.csv`, confrontando o [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) (OPEN/DRAFT) com os gates do Agents. **Todos os R01-G01..G11 e CRM CORE/SEG/AUT seguem ABERTOS**, sem integração, credencial, custo, `main` ou deploy. Resultado: **NO-GO operacional; material pronto para revisão**.
+
+---
+
 ## Atualização — F1-18 integrada apenas à dev (09/11/2026)
 
 A [CI #42610138453](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42610138453) verificou **228/228 casos PHP e 73/73 arquivos com lint**, no SHA `210ff31ec365267f019aafbf2d4c1e48991b02a7`; o [PR #118](https://github.com/rafhael100/imagine-ai-agents/pull/118) foi integrado somente à dev (`2603c8da0a7ac7392cf5a27289249d776a095e81`). A contagem de falhas de schema antes da auditoria é apenas sintética. Os gates R01 e CRM continuam abertos. **Próxima prioridade:** revisão bilateral de confiança/contrato CRM e critérios formais para um piloto seguro — não criar mocks ilimitadamente. Sem `main` ou produção.
