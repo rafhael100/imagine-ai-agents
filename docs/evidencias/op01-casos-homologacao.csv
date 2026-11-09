@@ -1,0 +1,14 @@
+id,tipo,cenario,resultado_esperado,estado_execucao,evidencia_pendente
+OP01-N01,NEGATIVO,servico-sem-autenticacao-ou-chave-revogada,NEGAR,NAO_EXECUTADO,teste-identidade-real
+OP01-N02,NEGATIVO,issuer-audience-ou-ambiente-divergentes,NEGAR,NAO_EXECUTADO,verificacao-criptografica
+OP01-N03,NEGATIVO,empresa-ou-principal-suspenso-revogado,NEGAR,NAO_EXECUTADO,teste-aut-e-core
+OP01-N04,NEGATIVO,recurso-inexistente-versus-outro-tenant,NEGAR,NAO_EXECUTADO,acl-rls-e-transporte
+OP01-N05,NEGATIVO,projecao-de-campos-pessoais-ou-desconhecidos,NEGAR,NAO_EXECUTADO,contrato-campos-crm
+OP01-N06,NEGATIVO,escrita-ou-versao-nao-reconhecida,NEGAR,NAO_EXECUTADO,compatibilidade-core
+OP01-N07,NEGATIVO,replay-entre-instancias-e-reinicio,NEGAR,NAO_EXECUTADO,estado-distribuido-seguro
+OP01-N08,NEGATIVO,revogacao-durante-espera-em-fila,NEGAR,NAO_EXECUTADO,revalidacao-de-politica
+OP01-N09,NEGATIVO,servico-crm-ou-autorizador-indisponivel,NEGAR,NAO_EXECUTADO,teste-timeout-fail-closed
+OP01-N10,NEGATIVO,observabilidade-com-segredos-ou-payload,NEGAR,NAO_EXECUTADO,teste-privacidade-logs
+OP01-N11,NEGATIVO,falha-telemetria-antes-do-parse,NEGAR,NAO_EXECUTADO,teste-borda-real
+OP01-P01,POSITIVO,leitura-propria-com-escopo-minimo,LEITURA_MINIMA,NAO_EXECUTADO,teste-bilateral-crm
+OP01-P02,POSITIVO,campos-permitidos-em-ordem-alternativa,LEITURA_MINIMA,NAO_EXECUTADO,teste-projecao-exata

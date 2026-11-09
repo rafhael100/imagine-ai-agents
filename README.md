@@ -1,5 +1,13 @@
 # Imagine AI Agents
 
+## R01/EVID-02 — verificador automatizado de inventário de gates (09/11/2026)
+
+- Novo utilitário offline `tools/check_r01_readiness.py`, matriz de 13 cenários e suíte negativa `tests/Contracts/test_r01_readiness.py`.
+- Avalia somente **integridade documental**, nunca autorização. Mesmo com testes aprovados, devolve `pilot_decision=NO_GO`; revisores e evidências técnicas continuam pendentes.
+- Detalhes: `docs/AIA-R01-EVID-02-VALIDADOR-ESTATICO-OP01.md`. `main`, CRM real, infraestrutura e pagamentos preservados.
+
+---
+
 ## Preparação de homologação bilateral CRM/AIA — EVID-01 (09/11/2026)
 
 Foi produzido o dossiê `docs/AIA-R01-EVID-01-DOSSIE-ACEITE-PILOTO-CRM-OP01.md` e a matriz rastreável `docs/evidencias/aia-r01-gates-op01.csv`, confrontando o [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) (OPEN/DRAFT) com os gates do Agents. **Todos os R01-G01..G11 e CRM CORE/SEG/AUT seguem ABERTOS**, sem integração, credencial, custo, `main` ou deploy. Resultado: **NO-GO operacional; material pronto para revisão**.
