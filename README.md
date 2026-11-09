@@ -9,7 +9,7 @@ Para verificar as interações com Node 18+ (somente módulos nativos):
 node tests/Browser/f108_smoke.cjs
 ```
 
-A especificação do recorte está em [docs/AIA-FT01-F1-08-LABORATORIO-VISUAL-OFFLINE.md](docs/AIA-FT01-F1-08-LABORATORIO-VISUAL-OFFLINE.md). O smoke DOM in-memory passou, mas a inspeção visual em um navegador real ainda está pendente. Este protótipo não habilita login, autorizações reais, integrações entre produtos, credenciais, APIs, produção ou gastos. `main` e os gates de segurança permanecem preservados.
+A especificação do recorte está em [docs/AIA-FT01-F1-08-LABORATORIO-VISUAL-OFFLINE.md](docs/AIA-FT01-F1-08-LABORATORIO-VISUAL-OFFLINE.md). O smoke em Node.js real passou; a revisão visual em Chromium real foi concluída em cinco resoluções (desktop, tablet e celular), sem falhas de navegação, scroll horizontal, erro JS ou requisições externas. Corrigidos menu mobile, textos e estado acessível dos cenários. Firefox e qualquer integração real não foram homologados. Este protótipo não habilita login, autorizações reais, integrações entre produtos, credenciais, APIs, produção ou gastos. `main` e os gates de segurança permanecem preservados.
 
 
 ## ESTADO VIGENTE — 08/11/2026, pós-merge FT01 (prevalece sobre históricos abaixo)
