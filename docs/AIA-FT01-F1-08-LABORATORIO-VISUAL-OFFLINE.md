@@ -56,4 +56,4 @@ Permitir uma primeira navegação demonstrativa dentro do repositório Imagine A
 - `main`, produção, VPS, n8n, Cloudflare, CRM/Portal/Performance/Universidade, credenciais, APIs/LLM, dados privados, SQL/ALLOW, fornecedores e gastos permanecem intocados.
 - Gates R01-G01 a G11 e CORE/SEG/AUT CRM **todos abertos**; a demonstração não os fecha.
 
-**Estado efetivo:** F1-08 **protótipo visual offline testado em Chromium/Node**, ainda sem publicação web, Firefox testado, integração real ou homologação de produção.
+**Estado efetivo:** F1-08 **protótipo visual offline testado em Chromium/Node**, ainda sem publicação web, **sem testes em Firefox**, sem integração real e sem homologação de produção.
