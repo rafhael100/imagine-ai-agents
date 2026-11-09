@@ -16,7 +16,11 @@ if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   exit 2
 fi
 head_sha="$(git rev-parse HEAD)"
-if [[ -n "${EXPECTED_SHA:-}" && "$head_sha" != "$EXPECTED_SHA" ]]; then
+if [[ -z "${EXPECTED_SHA:-}" ]]; then
+  echo 'BLOCKED: set EXPECTED_SHA to the exact reviewed GitHub commit SHA' >&2
+  exit 2
+fi
+if [[ "$head_sha" != "$EXPECTED_SHA" ]]; then
   echo "BLOCKED: checkout SHA mismatch (got $head_sha)" >&2
   exit 2
 fi
