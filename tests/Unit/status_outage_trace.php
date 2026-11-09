@@ -29,6 +29,45 @@ final class F23ThrowingStatusGateway implements CrmEffectGateway
     public function submitCount(): int { return $this->inner->submitCount(); }
 }
 
+/** Simulates an acknowledged dispatch accompanied by a proof for a different intent. */
+final class F24MismatchedSubmitGateway implements CrmEffectGateway
+{
+    private MockSupervisedGateway $inner;
+    public function __construct()
+    {
+        $this->inner = new MockSupervisedGateway('CONFIRMADO');
+    }
+    public function submit(Intent $intent, ?Approval $approval, int $now): Effect
+    {
+        // The mock records the actual target, but the response binds to another
+        // intent. The coordinator must not accept this as proof of the target.
+        $this->inner->submit($intent, $approval, $now);
+        $wrong = new Intent('SYNTHETIC_F24_WRONG_INTENT', $intent->step,
+            'SYNTHETIC_F24_WRONG_KEY', $intent->operation,
+            'SYNTHETIC_F24_PRIVATE_DIAGNOSTIC');
+        return new Effect($wrong, 'NEGADO');
+    }
+    public function status(TenantContext $context, Intent $intent): Effect
+    {
+        return $this->inner->status($context, $intent);
+    }
+    public function submitCount(): int { return $this->inner->submitCount(); }
+    public function statusCount(): int { return $this->inner->statusCount(); }
+}
+
+function f24Fixture(): array
+{
+    $context = context();
+    $gateway = new F24MismatchedSubmitGateway();
+    $c = new SupervisedCoordinator($context, $gateway, new MockAiSuggestionProvider());
+    $run = $c->start('SYNTHETIC_F24_RUN');
+    $intent = new Intent('SYNTHETIC_F24_INTENT', $c->step($run, 'SYNTHETIC_F24_STEP'),
+        'SYNTHETIC_F24_KEY', 'mock.task.create', 'SYNTHETIC_TASK');
+    $approval = new Approval('SYNTHETIC_F24_APPROVAL', $intent,
+        'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+    return [$context, $gateway, $c, $intent, $approval];
+}
+
 return [
     'U23-01 confirmed proof survives a later unavailable status response' => function (): void {
         [$ctx, $gateway, $c, , $intent, $approval] = resilienceFixture([], [true]);
@@ -234,4 +273,32 @@ return [
         $events[] = $fake;
         check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'STATE_CONFLICT');
     },
-];
+
+    'U24-01 mismatched submit response stays uncertain and trace closes' => function (): void {
+        [$ctx, $gateway, $c, $intent, $approval] = f24Fixture();
+        $effect = $c->execute($intent, $approval, 15);
+        check($effect->state === 'INDETERMINADO' && !$effect->isConfirmed());
+        check($gateway->submitCount() === 1 && $gateway->statusCount() === 0);
+        check(array_slice(array_column($c->events(), 'code'), -2) === [
+            'SYNTHETIC_SUBMITTED', 'SYNTHETIC_INDETERMINADO',
+        ]);
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $effect)['state'] === 'INDETERMINADO');
+    },
+    'U24-02 repeated execute uses status only to recover valid proof' => function (): void {
+        [$ctx, $gateway, $c, $intent, $approval] = f24Fixture();
+        check($c->execute($intent, $approval, 15)->state === 'INDETERMINADO');
+        $confirmed = $c->execute($intent, $approval, 15);
+        check($confirmed->isConfirmed());
+        check($gateway->submitCount() === 1 && $gateway->statusCount() === 1);
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $confirmed)['state'] === 'CONFIRMADO');
+    },
+    'U24-03 wrong returned intent never enters minimized event payload' => function (): void {
+        [$ctx, $gateway, $c, $intent, $approval] = f24Fixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $trace = json_encode($c->events(), JSON_THROW_ON_ERROR);
+        check(!str_contains($trace, 'SYNTHETIC_F24_WRONG_INTENT'));
+        check(!str_contains($trace, 'SYNTHETIC_F24_PRIVATE_DIAGNOSTIC'));
+        check($gateway->submitCount() === 1);
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $effect)['reason'] === 'SYNTHETIC_PROOF_ONLY');
+    },
+]; 
