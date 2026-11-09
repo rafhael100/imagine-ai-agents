@@ -11,3 +11,11 @@ O PR #57 do Imagine CRM está em DRAFT e não integrado. Seu documento de propos
 **Regressão esperada após CI:** testes documentais EVID-02 e EVID-03 e regressão PHP **228/228**, lint **73/73** pelo validador oficial, mais **1 lint dedicado** para o probe em `tools/`. Não declarar sucesso antes do workflow verificar o SHA exato.
 
 **Gates:** R01-G01..G11, CRM CORE/SEG/AUT e aceite formal do PR CRM #57 ABERTOS. Nenhum deploy, credencial, servidor, mudança em `main`, despesa ou acesso a dados reais.
+
+## EVID-07 — endurecimento de procedência e rejeição de schema (09/11/2026)
+
+O linter OP-01 agora exige **exatamente** o head documental do CRM PR #57 (`a006bd427dbf34afbbbdec3098316c47a59fc608`) e o SHA de blob da proposta (`6a1b076d2dc50cc29ffc802d6b186c623c6b49ca`). Antes, apenas o formato de head era validado; um terceiro poderia editar o snapshot e atualizar o digest no mesmo manifesto sem disparar a regra de integridade. Uma nova versão legítima da proposta exigirá revisão explícita e atualização deliberada do pino, com CI.
+
+O schema sintético também deve ter um conjunto **fechado de palavras-chave na raiz** e metadados explícitos de laboratório. Adições como `allOf`, `not`, `if`, `$ref` ou `unevaluatedProperties`, que poderiam alterar a semântica do contrato sem serem notadas, agora são rejeitadas. Testes negativos cobrem essas variantes e falsa rotulagem de produção.
+
+**Escopo:** melhoria do linter offline, não verificação criptográfica de serviço, assinatura de revisor, API CRM real ou autorização operacional. Todos os gates seguem abertos, com `pilot_decision=NO_GO`.

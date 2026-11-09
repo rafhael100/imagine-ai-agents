@@ -15,6 +15,17 @@ SCHEMA = ROOT / "contracts/crm-aia-readonly.v1.synthetic.schema.json"
 FIELDS = ("contract", "request_ref", "operation", "tenant_ref", "principal_ref",
           "resource_ref", "purpose_ref", "fields")
 REFS = ("request_ref", "tenant_ref", "principal_ref", "resource_ref", "purpose_ref")
+PINNED_CRM_PR_HEAD = "a006bd427dbf34afbbbdec3098316c47a59fc608"
+PINNED_CRM_PROPOSAL_BLOB = "6a1b076d2dc50cc29ffc802d6b186c623c6b49ca"
+ROOT_SCHEMA_KEYS = {
+    "$schema", "$id", "title", "description", "type",
+    "additionalProperties", "required", "properties", "$defs",
+}
+SYNTHETIC_TITLE = "SYNTHETIC ONLY — not a production CRM API contract"
+SYNTHETIC_DESCRIPTION = (
+    "A fixture description for an offline test. "
+    "No authentication or CRM authorization is performed by this schema."
+)
 
 class ParityError(Exception):
     pass
@@ -40,6 +51,8 @@ def check(snapshot: Path, manifest_path: Path, schema_path: Path) -> None:
         or manifest["proposal_status"] != "DRAFT_NOT_APPROVED"
         or not isinstance(manifest["source_pr_head"], str)
         or re.fullmatch(r"[0-9a-f]{40}", manifest["source_pr_head"]) is None
+        or manifest["source_pr_head"] != PINNED_CRM_PR_HEAD
+        or manifest["source_blob_sha"] != PINNED_CRM_PROPOSAL_BLOB
         or manifest["source_path"] !=
         "docs/desenvolvimento/CRM-AIA-RO-01-proposta-contrato-bilateral-offline-2026-11-09.md"):
         raise ParityError("SOURCE_MANIFEST_INVALID")
@@ -64,7 +77,11 @@ def check(snapshot: Path, manifest_path: Path, schema_path: Path) -> None:
     if any(marker not in content for marker in markers):
         raise ParityError("CRM_PROPOSAL_SCOPE_DRIFT")
     props = schema.get("properties", {})
-    if (schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema"
+    if (set(schema) != ROOT_SCHEMA_KEYS
+        or schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema"
+        or schema.get("$id") != "urn:imagine:synthetic:crm-aia:read-only:v1"
+        or schema.get("title") != SYNTHETIC_TITLE
+        or schema.get("description") != SYNTHETIC_DESCRIPTION
         or schema.get("type") != "object"
         or schema.get("additionalProperties") is not False
         or schema.get("required") != list(FIELDS)

@@ -1,5 +1,11 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## EVID-07 — procedência fixa e schema fechado do contrato OP-01 (09/11/2026)
+
+Reforço do verificador offline: commit e blob exatos do CRM PR #57 ficam fixados e palavras-chave inesperadas na raiz do schema são rejeitadas. Novos testes negativos para mudança de origem, rehash de snapshot e falsas regras/alegações de produção. **Nenhuma homologação ou permissão real foi concedida.**
+
+---
+
 ## Estado vigente — EVID-05/EVID-06 integrados e CI da dev comprovada (09/11/2026)
 
 - **Painel gerado EVID-05:** [PR #127](https://github.com/rafhael100/imagine-ai-agents/pull/127), squash `44bab6e8a1c01bc6b30761018fe6271b94374bd6`, integrado apenas à dev. A [CI #42628509823](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42628509823) validou no SHA `5e3f0485d03a47d084332837d39f7fafe3169f75` o gerador determinístico, testes negativos, os validadores anteriores e a regressão PHP **228/228 testes e 73/73 lint** (mais o probe isolado).
