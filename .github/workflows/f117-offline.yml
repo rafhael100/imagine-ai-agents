@@ -1,0 +1,29 @@
+name: F1-17 synthetic public-response regression
+
+on:
+  push:
+    branches:
+      - dev/ft01-f1-17-safe-public-read-2026-11-09
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event.repository.private == false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout reviewed SHA
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Run fully offline PHP checks
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_PHP: '70'
+          EXPECTED_CASES: '214'
+        run: |
+          php -v
+          bash tools/validate_ft01_offline.sh
