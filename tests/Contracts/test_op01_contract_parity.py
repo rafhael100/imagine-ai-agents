@@ -122,6 +122,49 @@ class ContractParityTests(unittest.TestCase):
         self.edit_schema(lambda s: s["$defs"]["syntheticRef"].update(pattern=".*"))
         self.expect_rejection("SCHEMA_CONTRACT_DRIFT")
 
+    def test_pinned_crm_pr_head_cannot_be_replaced_by_other_sha(self):
+        self.edit_manifest("source_pr_head", "a" * 40)
+        self.expect_rejection("SOURCE_MANIFEST_INVALID")
+
+    def test_pinned_crm_blob_cannot_be_replaced(self):
+        self.edit_manifest("source_blob_sha", "b" * 40)
+        self.expect_rejection("SOURCE_MANIFEST_INVALID")
+
+    def test_manifest_snapshot_reshash_cannot_bypass_review_pin(self):
+        import hashlib
+        data = self.snapshot.read_bytes() + b"\nALTERED DRAFT\n"
+        self.snapshot.write_bytes(data)
+        replacement_sha = hashlib.sha1(
+            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
+        ).hexdigest()
+        self.edit_manifest("source_blob_sha", replacement_sha)
+        self.expect_rejection("SOURCE_MANIFEST_INVALID")
+
+    def test_schema_root_extra_keywords_rejected(self):
+        for extra in [
+            {"allOf": [{"not": {}}]},
+            {"if": {"properties": {"contract": {"const": "other"}}}},
+            {"unevaluatedProperties": True},
+            {"$ref": "https://invalid.example/schema"},
+            {"not": {}},
+        ]:
+            with self.subTest(extra=list(extra)):
+                self.schema.write_bytes(SCHEMA.read_bytes())
+                self.edit_schema(lambda s: s.update(extra))
+                self.expect_rejection("SCHEMA_CONTRACT_DRIFT")
+
+    def test_schema_id_mismatch_rejected(self):
+        self.edit_schema(lambda s: s.update(
+            {"$id": "urn:imagine:production:crm-aia:read-only:v1"}
+        ))
+        self.expect_rejection("SCHEMA_CONTRACT_DRIFT")
+
+    def test_schema_false_production_label_rejected(self):
+        self.edit_schema(lambda s: s.update(
+            {"title": "APPROVED PRODUCTION CRM API"}
+        ))
+        self.expect_rejection("SCHEMA_CONTRACT_DRIFT")
+
     def test_php_parser_synthetic_matrix(self):
         valid = baseline()
         cases = [(valid, True)]
