@@ -2,7 +2,7 @@
 
 ## Escopo
 
-Este repositório será a camada compartilhada de agentes de IA para CRM, Portal, Performance AI e Universidade Imagine. Está em **desenvolvimento controlado de protótipos sintéticos em branch dev**, sem integração ou homologação de produção. Os recortes FT01 F1-01 a F1-15 já foram integrados **exclusivamente à dev** (F1-12: PR #106, squash `562896763f900a8a264ea46aa35e2aeacd5e0903`, **144/144 testes PHP**, **60/60 lint e hashes Git blob**); a F1-13 foi integrada pelo PR #108, squash `92a2f0a5f01a0014051594f24d96988e111f85c7`, com **156/156 testes e 63/63 lint PHP em CI**; a `main` permanece sem essa implementação.
+Este repositório será a camada compartilhada de agentes de IA para CRM, Portal, Performance AI e Universidade Imagine. Está em **desenvolvimento controlado de protótipos sintéticos em branch dev**, sem integração ou homologação de produção. Os recortes FT01 F1-01 a F1-16 já foram integrados **exclusivamente à dev** (F1-12: PR #106, squash `562896763f900a8a264ea46aa35e2aeacd5e0903`, **144/144 testes PHP**, **60/60 lint e hashes Git blob**); a F1-13 foi integrada pelo PR #108, squash `92a2f0a5f01a0014051594f24d96988e111f85c7`, com **156/156 testes e 63/63 lint PHP em CI**; a `main` permanece sem essa implementação.
 
 **F1-13 integrado apenas à dev:** CI de SHA-fixado [run #42579753806](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42579753806) aprovou 156/156 testes e 63/63 lint. A próxima fase pode simular falhas multi-instância sem credenciais reais, backend CRM ou deploy.
 
@@ -10,7 +10,7 @@ Este repositório será a camada compartilhada de agentes de IA para CRM, Portal
 
 **F1-15 integrado somente à dev:** CI [#42581627932](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42581627932) com 180/180 testes e lint 66/66; squash do PR #112 em `4a2a3b31bb422446a62e563616bd98b45ca3536c`. O contrato OP-01 continua 100% sintético; gates operacionais e CRM PR #57 abertos.
 
-**F1-16 em revisão:** nova política fictícia do CRM revalidada no instante da leitura, com 18 testes; `198/198` casos e `68/68` lint são **metas não comprovadas** até a CI. Não converter grants de teste em `ALLOW`, endpoint ou ACL operacionais. Nenhuma mudança na `main` ou outros produtos.
+**F1-16 integrado apenas à dev:** [CI #42582545247](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42582545247) aprovou 198/198 testes, 68/68 lint, commit integrado `447672eda494ff365f74e2e39fbaae76a57d115f` (PR #114). Os grants e a política de owner continuam fictícios; todos os gates operacionais seguem abertos.
 
 ## Regras obrigatórias para agentes de desenvolvimento / Codex
 
