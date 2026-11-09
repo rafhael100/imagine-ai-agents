@@ -10,6 +10,8 @@ Este repositório será a camada compartilhada de agentes de IA para CRM, Portal
 
 **F1-15 integrado somente à dev:** CI [#42581627932](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42581627932) com 180/180 testes e lint 66/66; squash do PR #112 em `4a2a3b31bb422446a62e563616bd98b45ca3536c`. O contrato OP-01 continua 100% sintético; gates operacionais e CRM PR #57 abertos.
 
+**F1-16 em revisão:** nova política fictícia do CRM revalidada no instante da leitura, com 18 testes; `198/198` casos e `68/68` lint são **metas não comprovadas** até a CI. Não converter grants de teste em `ALLOW`, endpoint ou ACL operacionais. Nenhuma mudança na `main` ou outros produtos.
+
 ## Regras obrigatórias para agentes de desenvolvimento / Codex
 
 - **Autorização vigente do responsável (08/11/2026):** avançar autonomamente no código **sintético/offline** e em seus testes, em branches isoladas, com PRs, preflight de SHA, evidências reproduzíveis e merge controlado **somente na dev** quando os gates técnicos do recorte forem satisfeitos. Perguntar apenas quando houver decisão estritamente crítica; autorização ampla não libera produção ou gastos.
