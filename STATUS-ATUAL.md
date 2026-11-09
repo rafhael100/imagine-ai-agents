@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## Estado vigente — SEC-01/SEC-02 com CI integrada (09/11/2026)
+
+- **Proteção do núcleo sintético:** [PR #132](https://github.com/rafhael100/imagine-ai-agents/pull/132) integrado só à dev em `1c4cdbf87d8a7b003b5564e76784f9333dc5900c`; [CI integrada #42632148664](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42632148664) PASS. Adicionado scanner estático limitado de operações de rede, processo e banco em `src/`, com dez testes Python.
+- **Referências de contexto:** [PR #133](https://github.com/rafhael100/imagine-ai-agents/pull/133) integrado só à dev em `07088bb58c2e4f4a3d68e11091de50737f875368`; [CI integrada #42632952682](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42632952682) PASS no SHA exato. `TenantContext` agora valida referências de 1 a 80 caracteres ASCII conforme OP-01, com 12 testes novos; suíte oficial **240/240 PHP e 74/74 lint**.
+- **Fronteira de autorização:** scanner e testes **não** equivalem a isolamento de produção, IAM, ACL real ou aprovação do CRM. [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) segue DRAFT/sem merge, R01-G01..G11 e CRM CORE/SEG/AUT permanecem abertos. **NO-GO** para piloto operacional; `main`, VPS, clientes e provedores não foram tocados.
+
+---
+
 ## FT01/SEC-02 — referências sintéticas de contexto alinhadas ao contrato (09/11/2026)
 
 - O `TenantContext` agora rejeita sufixos vazios, letras minúsculas, Unicode, separadores e controles; utiliza o mesmo formato estrito de **1 a 80 caracteres ASCII** do contrato fictício CRM OP-01.
