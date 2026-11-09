@@ -1,5 +1,17 @@
 # FT01/F1-14 — Coordenação de nonce/revogação entre gateways fictícios
 
+## Estado vigente — F1-14 integrado somente à dev (09/11/2026)
+
+- **PR [#110](https://github.com/rafhael100/imagine-ai-agents/pull/110) MERGED por squash exclusivamente em `dev/ft01-aia-core-mocks-2026-11-06`**; commit `9995fb99d3e453ecd1930e4917b63b8846029c24`. A `main` foi verificada antes do merge no SHA `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; sem deploy, VPS, CRM real ou custos de fornecedores.
+- **Prova executada:** [GitHub Actions #42580749791](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42580749791), PHP CLI 8.3.6 sobre head exato `0b820c68fe4dc185ac92ffb0ae483a069bf183ce`; **168 cases / 0 failures**, **65/65 PHP lint PASS**, `VALIDATION_PASS` SHA-fixado.
+- **Escopo:** laboratório `MockSharedTrustState`, injeção opcional em `MockTrustGateway`, auditoria F1-13 para indisponibilidade e 12 casos U14. Apenas dois gateways simulados que compartilham um objeto no mesmo processo, sem replay distribuído real.
+- **Restrições vigentes:** sem persistência/atomicidade real, autenticação, ACL CRM, revogação entre processos, dados reais, ambiente de produção, ou gastos. R01-G01..G11 e CRM CORE/SEG/AUT **ABERTOS**. CRM [PR #57](https://github.com/rafhael100/imagine-crm/pull/57) ainda documental DRAFT. Revisão de infraestrutura e identidade do piloto necessária antes de qualquer integração.
+
+**Precedência:** os relatos abaixo que descrevem F1-14 em revisão e metas não testadas são históricos, anteriores ao CI e squash #110.
+
+---
+
+
 **Data:** 09/11/2026. **Status inicial:** recorte em branch filha, sem integração à dev; laboratório 100% offline e sem credenciais ou dados reais.
 
 ## Objetivo
