@@ -1,5 +1,15 @@
 # Imagine AI Agents
 
+## Estado vigente — paridade contratual e painel offline integrados à dev (09/11/2026)
+
+- **EVID-03:** [PR #124](https://github.com/rafhael100/imagine-ai-agents/pull/124) integrado somente à dev no squash `1a0c41875b477101ff8617da4682f8c7b44889fd`; [CI #42624040384](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42624040384) no SHA `1bca6d5fadf7e46429b81e8cb79699f1f6631066` concluiu `success` nos testes de snapshot do CRM PR #57, paridade do schema JSON/parser PHP e regressão **228/228 testes PHP, 73/73 lint oficiais + 1 lint do probe**. Isso **não verifica API CRM real**.
+- **EVID-04:** [PR #125](https://github.com/rafhael100/imagine-ai-agents/pull/125) integrado somente à dev no squash `53fc200e48b1c05789317e85b9b143efc47b76f0`; [CI #42624860955](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42624860955) no SHA `7ca16416914291f1a6fd7d9f47126228ff2f8526` concluiu `success` no painel offline `examples/r01-op01-readiness-offline.html`, incluindo teste de correspondência dos **14 gates e 13 casos**, testes negativos EVID-02/03/04 e regressão PHP completa.
+- **Governança inalterada:** o [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) permanece **DRAFT, OPEN, sem merge**; R01-G01..G11 e CRM CORE/SEG/AUT continuam ABERTOS. Resultado operacional **NO-GO**. A `main`, a VPS, o CRM funcional, credenciais, clientes e produção não foram alterados.
+
+**Próxima atividade que depende de aceite externo:** revisão bilateral formal de identidade, ACL, campos, privacidade, revogação, topologia, licenciamentos e escopo do piloto; não substituir assinaturas de responsáveis por simulações ou status de CI.
+
+---
+
 ## R01/EVID-04 — painel de prontidão OP-01 offline (09/11/2026)
 
 - Novo painel navegável `examples/r01-op01-readiness-offline.html` para consulta local dos **14 gates** e **13 casos** de homologação sem dados reais.
