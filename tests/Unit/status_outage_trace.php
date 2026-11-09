@@ -68,6 +68,41 @@ function f24Fixture(): array
     return [$context, $gateway, $c, $intent, $approval];
 }
 
+/** Delivers a submitted-only acknowledgment with no verified effect. */
+final class F25SubmittedOnlyGateway implements CrmEffectGateway
+{
+    private MockSupervisedGateway $inner;
+    public function __construct(private readonly bool $onStatus = false)
+    {
+        $this->inner = new MockSupervisedGateway('CONFIRMADO');
+    }
+    public function submit(Intent $intent, ?Approval $approval, int $now): Effect
+    {
+        $proof = $this->inner->submit($intent, $approval, $now);
+        return $this->onStatus ? $proof : new Effect($intent, 'SOLICITADO');
+    }
+    public function status(TenantContext $context, Intent $intent): Effect
+    {
+        $proof = $this->inner->status($context, $intent);
+        return $this->onStatus ? new Effect($intent, 'SOLICITADO') : $proof;
+    }
+    public function submitCount(): int { return $this->inner->submitCount(); }
+    public function statusCount(): int { return $this->inner->statusCount(); }
+}
+
+function f25Fixture(bool $onStatus): array
+{
+    $ctx = context();
+    $gateway = new F25SubmittedOnlyGateway($onStatus);
+    $c = new SupervisedCoordinator($ctx, $gateway, new MockAiSuggestionProvider());
+    $run = $c->start('SYNTHETIC_F25_RUN');
+    $intent = new Intent('SYNTHETIC_F25_INTENT', $c->step($run, 'SYNTHETIC_F25_STEP'),
+        'SYNTHETIC_F25_KEY', 'mock.task.create', 'SYNTHETIC_TASK');
+    $approval = new Approval('SYNTHETIC_F25_APPROVAL', $intent,
+        'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+    return [$ctx, $gateway, $c, $intent, $approval];
+}
+
 return [
     'U23-01 confirmed proof survives a later unavailable status response' => function (): void {
         [$ctx, $gateway, $c, , $intent, $approval] = resilienceFixture([], [true]);
@@ -300,5 +335,34 @@ return [
         check(!str_contains($trace, 'SYNTHETIC_F24_PRIVATE_DIAGNOSTIC'));
         check($gateway->submitCount() === 1);
         check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $effect)['reason'] === 'SYNTHETIC_PROOF_ONLY');
+    },
+
+    'U25-01 submit acknowledgement alone cannot become effect proof' => function (): void {
+        [$ctx, $gateway, $c, $intent, $approval] = f25Fixture(false);
+        $unknown = $c->execute($intent, $approval, 15);
+        check($unknown->state === 'INDETERMINADO' && !$unknown->isConfirmed());
+        check($gateway->submitCount() === 1 && $gateway->statusCount() === 0);
+        check(array_slice(array_column($c->events(), 'code'), -2) === [
+            'SYNTHETIC_SUBMITTED', 'SYNTHETIC_INDETERMINADO',
+        ]);
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $unknown)['state'] === 'INDETERMINADO');
+    },
+    'U25-02 only a subsequent status check can confirm the submitted operation' => function (): void {
+        [$ctx, $gateway, $c, $intent, $approval] = f25Fixture(false);
+        check($c->execute($intent, $approval, 15)->state === 'INDETERMINADO');
+        $confirmed = $c->execute($intent, $approval, 15);
+        check($confirmed->isConfirmed() && $gateway->submitCount() === 1 && $gateway->statusCount() === 1);
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $confirmed)['state'] === 'CONFIRMADO');
+    },
+    'U25-03 status acknowledgement cannot downgrade prior confirmed proof' => function (): void {
+        [$ctx, $gateway, $c, $intent, $approval] = f25Fixture(true);
+        $original = $c->execute($intent, $approval, 15);
+        check($original->isConfirmed());
+        denied('STATE_CONFLICT', fn() => $c->reconcile($intent));
+        check($gateway->submitCount() === 1 && $gateway->statusCount() === 1);
+        check(array_slice(array_column($c->events(), 'code'), -2) === [
+            'SYNTHETIC_STATUS_REQUESTED', 'SYNTHETIC_STATUS_REJECTED',
+        ]);
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $original)['state'] === 'CONFIRMADO');
     },
 ]; 
