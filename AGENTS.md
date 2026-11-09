@@ -2,11 +2,11 @@
 
 ## Escopo
 
-Este repositório será a camada compartilhada de agentes de IA para CRM, Portal, Performance AI e Universidade Imagine. Está em **desenvolvimento controlado de protótipos sintéticos em branch dev**, sem integração ou homologação de produção. Os recortes FT01 F1-01 a F1-13 já foram integrados **exclusivamente à dev** (F1-12: PR #106, squash `562896763f900a8a264ea46aa35e2aeacd5e0903`, **144/144 testes PHP**, **60/60 lint e hashes Git blob**); a F1-13 foi integrada pelo PR #108, squash `92a2f0a5f01a0014051594f24d96988e111f85c7`, com **156/156 testes e 63/63 lint PHP em CI**; a `main` permanece sem essa implementação.
+Este repositório será a camada compartilhada de agentes de IA para CRM, Portal, Performance AI e Universidade Imagine. Está em **desenvolvimento controlado de protótipos sintéticos em branch dev**, sem integração ou homologação de produção. Os recortes FT01 F1-01 a F1-14 já foram integrados **exclusivamente à dev** (F1-12: PR #106, squash `562896763f900a8a264ea46aa35e2aeacd5e0903`, **144/144 testes PHP**, **60/60 lint e hashes Git blob**); a F1-13 foi integrada pelo PR #108, squash `92a2f0a5f01a0014051594f24d96988e111f85c7`, com **156/156 testes e 63/63 lint PHP em CI**; a `main` permanece sem essa implementação.
 
 **F1-13 integrado apenas à dev:** CI de SHA-fixado [run #42579753806](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42579753806) aprovou 156/156 testes e 63/63 lint. A próxima fase pode simular falhas multi-instância sem credenciais reais, backend CRM ou deploy.
 
-**F1-14 em revisão (sem merge):** laboratório com objeto compartilhado em memória para replay/revogação entre gateways fictícios, 12 testes U14 incluídos e meta de validação total 168 casos/65 arquivos PHP. Nenhuma persistência, IAM ou integração real. Não integrar antes de preflight SHA-fixado.
+**F1-14 integrado somente à dev:** CI [run #42580749791](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42580749791) aprovado com 168/168 testes e 65/65 lint; squash #110 em `9995fb99d3e453ecd1930e4917b63b8846029c24`. Nenhuma integração operacional, IAM ou persistência distribuída; gates mantidos abertos.
 
 ## Regras obrigatórias para agentes de desenvolvimento / Codex
 
