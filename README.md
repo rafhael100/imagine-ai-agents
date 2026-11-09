@@ -1,5 +1,17 @@
 # Imagine AI Agents
 
+## FT01/F1-08 — Laboratório visual navegável (branch de demonstração)
+
+Uma prévia offline em português já está disponível em [examples/f108-laboratorio-navegavel.html](examples/f108-laboratorio-navegavel.html). Baixe o HTML e abra-o no navegador, sem servidor ou dependências. Ele contém quatro telas, três agentes **fictícios** e seis cenários determinísticos de segurança. Todos os dados da UI são sintéticos; o JavaScript não invoca as classes PHP, não utiliza IA real, não envia informações a servidores e não guarda dados em disco.
+
+Para verificar as interações com Node 18+ (somente módulos nativos):
+```sh
+node tests/Browser/f108_smoke.cjs
+```
+
+A especificação do recorte está em [docs/AIA-FT01-F1-08-LABORATORIO-VISUAL-OFFLINE.md](docs/AIA-FT01-F1-08-LABORATORIO-VISUAL-OFFLINE.md). O smoke DOM in-memory passou, mas a inspeção visual em um navegador real ainda está pendente. Este protótipo não habilita login, autorizações reais, integrações entre produtos, credenciais, APIs, produção ou gastos. `main` e os gates de segurança permanecem preservados.
+
+
 ## ESTADO VIGENTE — 08/11/2026, pós-merge FT01 (prevalece sobre históricos abaixo)
 
 - **Branch de desenvolvimento:** `dev/ft01-aia-core-mocks-2026-11-06`, SHA `550aa742b10754ffa0cc1502e22bbfb72d966a81` (squash **PR #96** F1-06 corretivo + F1-07 sintético). **PR #96 MERGED somente na dev.**
