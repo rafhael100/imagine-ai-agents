@@ -2,7 +2,7 @@
 
 ## Escopo
 
-Este repositório será a camada compartilhada de agentes de IA para CRM, Portal, Performance AI e Universidade Imagine. Está em **desenvolvimento controlado de protótipos sintéticos em branch dev**, sem integração ou homologação de produção. Os recortes FT01 F1-01 a F1-08 já foram integrados exclusivamente à dev (F1-08: PR #98, squash `d37cd9a603981c3d963823307119c402b67edf89`); a `main` permanece sem essa implementação.
+Este repositório será a camada compartilhada de agentes de IA para CRM, Portal, Performance AI e Universidade Imagine. Está em **desenvolvimento controlado de protótipos sintéticos em branch dev**, sem integração ou homologação de produção. Os recortes FT01 F1-01 a F1-09 já foram integrados **exclusivamente à dev** (F1-09: PR #100, squash `da1710b4cc2cabe7eddf87da0605a1ba69a08724`, PHP 97/97 e Chromium/Node aprovados); a `main` permanece sem essa implementação.
 
 ## Regras obrigatórias para agentes de desenvolvimento / Codex
 

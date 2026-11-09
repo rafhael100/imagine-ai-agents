@@ -1,5 +1,8 @@
 # Imagine AI Agents — FT01/F1-09 | Avaliação A/B de versões sintéticas
 
+> **Atualização vigente de 09/11/2026:** PR #100 [integrado exclusivamente à dev](https://github.com/rafhael100/imagine-ai-agents/pull/100), squash `da1710b4cc2cabe7eddf87da0605a1ba69a08724`. PHP 97/97, lint 48/48, smoke Node real e Chromium 5/5 resoluções PASS; 53 arquivos de código/testes idênticos por hash Git ao head testado. Os trechos históricos abaixo que mencionam branch isolada ou PR em revisão descrevem o estado **antes do merge**. Firefox e abertura por `file://` não foram testados. Sem deploy, produção ou fechamento de gates R01/CORE/SEG/AUT.
+
+
 **Data de referência:** 08/11/2026. **Situação:** implementação isolada, sem integração real ou deploy. Diretrizes AIA09-D01..D10 aprovadas funcionalmente; autorização ampla posterior permite somente desenvolvimento sintético/offline na `dev`. Este documento não homologa modelos, dados, segurança operacional, conectores ou provedores.
 
 ## Objetivo
