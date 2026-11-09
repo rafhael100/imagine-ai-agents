@@ -1,5 +1,19 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## ESTADO VIGENTE — F1-11 integrado apenas na dev (09/11/2026)
+
+- **PR #104 MERGED em `dev/ft01-aia-core-mocks-2026-11-06`**, squash `68161e82a2ca36a34634f67b6e34f332c78c1ee8`. `main` intocada no SHA `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; sem deployment, VPS, APIs reais, credenciais ou despesas.
+- **Escopo:** contratos de confiança exclusivamente **sintéticos** em `src/MockTrust/`: `MockTrustEnvelope`, `MockOwnerScopeEvidence`, `MockTrustGateway`. Negação por padrão de emissor/audience/empresa/principal/recurso/escopo divergentes, validade lógica, revogação e replay de nonce em memória. Nenhuma autenticação ou ACL real.
+- **Validação executada:** PHP CLI 8.4.24 `php tests/Unit/run.php` → **127 cases, 0 failures**; **57/57 PHP lint PASS**, **57/57 hashes Git blob idênticos** (fingerprint FNV32 `de8c8fdc`); exemplo `php examples/f111-trust-demo.php` retorna `SYNTHETIC_READ_ONLY` na primeira operação e `TRUST_REPLAY_DENIED` na repetição, `real_authorization=false`, `external_calls=0`.
+- **Pós-merge:** todos os **63 arquivos de código, scripts e testes** do commit da dev têm SHA-1 de blob Git idêntico ao head validado no PR #104. O validador `tools/validate_ft01_offline.sh` agora exige `EXPECTED_SHA`, 57 PHP e 127 casos.
+- **Riscos que não foram resolvidos:** issuer/audience são strings fictícias sem autenticação criptográfica, evidência do produto dono não valida ACL, nonces e revogação não são persistentes entre processos. Sem credenciais, token real, infraestrutura, CRM/Portal/Performance/Universidade, LLM, banco, LGPD operacional ou produção.
+- **Gates:** R01-G01..G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**. A proposta documental `docs/AIA-R01-G01-G02-CONTRATO-CONFIANCA-PROPOSTA.md` detalha as futuras interfaces sem aprová-las. A `main` e produção seguem bloqueadas. Próximas tarefas sem aprovação incluem apenas documentação técnica e testes de contrato fictícios.
+
+**Precedência:** qualquer trecho antigo que diga F1-11 ainda isolado, ou F1-10 como último recorte, é histórico e foi escrito antes do merge #104. Os resultados dos mocks não homologam identidade/autorização real.
+
+---
+
+
 ## FT01/F1-11 — fronteira de confiança sintética em revisão
 
 O F1-11 avança a preparação de contratos de confiança serviço-serviço **somente com fixtures**. Inclui emissor, destinatário, contexto empresa/produto/usuário/recurso/finalidade, escopos de leitura, validade, revogação, evidência fictícia do produto dono e bloqueio de replay em memória. **Nenhum token, login, ACL, assinatura ou endpoint real é executado.** SHA-256 é apenas vínculo de conteúdo, não autenticação.
