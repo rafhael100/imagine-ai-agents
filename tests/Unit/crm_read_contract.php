@@ -62,7 +62,7 @@ return [
         }
     },
     'U12-06 duplicate, empty or nonlist field projections denied' => function (): void {
-        foreach ([[], ['ref', 'ref'], ['ref', 'stage', 'email'], ['ref' => 'stage']] as $fields) {
+        foreach ([[], ['ref', 'ref'], ['ref', 'stage', 'email'], ['ref' => 'stage'], [['ref']]] as $fields) {
             $w = f112Wire(); $w['fields'] = $fields;
             denied('BRIDGE_SCHEMA_DENIED', fn () => new MockCrmReadRequest($w));
         }
