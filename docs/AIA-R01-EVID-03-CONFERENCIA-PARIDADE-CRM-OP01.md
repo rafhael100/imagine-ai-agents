@@ -19,3 +19,5 @@ O linter OP-01 agora exige **exatamente** o head documental do CRM PR #57 (`a006
 O schema sintético também deve ter um conjunto **fechado de palavras-chave na raiz** e metadados explícitos de laboratório. Adições como `allOf`, `not`, `if`, `$ref` ou `unevaluatedProperties`, que poderiam alterar a semântica do contrato sem serem notadas, agora são rejeitadas. Testes negativos cobrem essas variantes e falsa rotulagem de produção.
 
 **Escopo:** melhoria do linter offline, não verificação criptográfica de serviço, assinatura de revisor, API CRM real ou autorização operacional. Todos os gates seguem abertos, com `pilot_decision=NO_GO`.
+
+**Evidência de conclusão EVID-07:** [PR #130](https://github.com/rafhael100/imagine-ai-agents/pull/130) MERGED na dev (squash `21300c5e518166e7ac51ad5020d645c17668edb0`); [CI #42630115145](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42630115145) PASS antes do merge e [CI #42630193545](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42630193545) PASS após o merge em HEAD exato. Sem homologação bilateral nem autorização real; `NO-GO`.
