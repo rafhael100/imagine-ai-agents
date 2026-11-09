@@ -1,5 +1,16 @@
 # Imagine AI Agents
 
+## FT01/F1-17 — envelope público uniforme fictício (09/11/2026)
+
+- **Branch filha em revisão:** `dev/ft01-f1-17-safe-public-read-2026-11-09`, derivada da dev após F1-16 (PR #114, squash `447672eda494ff365f74e2e39fbaae76a57d115f`; PR documental #115 integrado).
+- **Recorte:** `MockCrmReadPublicFacade` obriga a presença dos mocks de autorização do dono e trilha, e produz uma resposta `DENIED_OR_NOT_FOUND` idêntica para todas as falhas sintéticas. Em sucesso devolve exclusivamente `ref/stage` de fixture e flags `real_authorization=false`, `external_calls=0`.
+- **16 cenários U17** de negação uniforme, falha de owner, audit cheio, replay, escopo, campos privados e corpo adulterado; expectativa de regressão **214 testes PHP e 70 arquivos lint**. **Resultado ainda não comprovado até CI exata.**
+- **Limites explícitos:** sem HTTP, timing, status codes, autenticação, dados reais, CRM, SQL, VPS ou `main`; todos os gates R01-G01..G11 e CRM CORE/SEG/AUT **ABERTOS**.
+- **Documento:** `docs/AIA-FT01-F1-17-ENVELOPE-PUBLICO-SINTETICO.md`.
+
+---
+
+
 ## Estado vigente — F1-16 integrado exclusivamente à dev (09/11/2026)
 
 - **PR [#114](https://github.com/rafhael100/imagine-ai-agents/pull/114) MERGED por squash apenas em `dev/ft01-aia-core-mocks-2026-11-06`**, commit `447672eda494ff365f74e2e39fbaae76a57d115f`. A `main` foi conferida em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; sem VPS, CRM real ou deploy.
