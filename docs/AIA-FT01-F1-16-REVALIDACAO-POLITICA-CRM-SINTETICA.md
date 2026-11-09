@@ -1,5 +1,18 @@
 # FT01/F1-16 — Revalidação de política fictícia pertencente ao CRM
 
+## Estado vigente — F1-16 integrado exclusivamente à dev (09/11/2026)
+
+- **PR [#114](https://github.com/rafhael100/imagine-ai-agents/pull/114) MERGED por squash apenas em `dev/ft01-aia-core-mocks-2026-11-06`**, commit `447672eda494ff365f74e2e39fbaae76a57d115f`. A `main` foi conferida em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; sem VPS, CRM real ou deploy.
+- **Prova efetivamente executada:** [GitHub Actions #42582545247](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42582545247), head testado `b7866bb8dac2973025569c4a76a84082c28377a2`, PHP CLI 8.3.6, **198 casos, 0 falhas**, **68/68 lint PHP**, `VALIDATION_PASS` de SHA fixado.
+- **Entregue:** mock `MockCrmOwnerPolicy` de decisão atual do dono dos recursos, injetado opcionalmente no F1-12; 18 cenários U16 de revogação, suspensão, campo, cross-tenant, falta de política e auditoria. **Não** existe ACL, membership, serviço CRM, autorização ou integração real. O parâmetro opcional mantém retrocompatibilidade apenas para laboratório, não produção.
+- **Gates:** R01-G01..G11, CRM CORE/SEG/AUT, revisão LGPD e contrato bilateral CRM **ABERTOS**; o [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) segue DRAFT, somente documental. Nenhuma operação `ALLOW`, credencial, dado privado, fornecedor pago ou `main` ativada.
+- **Próxima frente segura:** simular envelope de resposta pública que não revele motivos internos de negação; persistência e autorização reais ainda dependem de aprovação específica.
+
+**Precedência:** abaixo podem permanecer trechos históricos de F1-16 em revisão; este estado pós-merge é o vigente.
+
+---
+
+
 **Data:** 09/11/2026. **Estado de abertura:** desenvolvimento isolado, testes ainda pendentes. **Este recorte não implementa ACL real, autenticação, permissões CRM ou API.**
 
 ## Objetivo
