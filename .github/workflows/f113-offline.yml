@@ -1,0 +1,30 @@
+name: F1-13 synthetic offline regression
+
+on:
+  push:
+    branches:
+      - dev/ft01-f1-13-audit-read-synthetic-2026-11-09
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    # Never use hosted minutes if this repository later becomes private.
+    if: ${{ github.event.repository.private == false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact reviewed commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate checkout, PHP syntax and all synthetic tests without network
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_PHP: '63'
+          EXPECTED_CASES: '156'
+        run: |
+          php -v
+          bash tools/validate_ft01_offline.sh
