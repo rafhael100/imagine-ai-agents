@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## FT01/SEC-04 — vínculo de intenção nas trilhas sintéticas (09/11/2026)
+
+- O revisor `ReadOnlyTraceReview::inspect` agora exige referências explícitas de intenção e etapa em eventos de envio, status, timeout e efeito; uma etapa correspondente deve aparecer antes do envio.
+- Seis testes negativos novos (U03-13 a U03-18) cobrem eventos incompletos, etapa errada/ausente e sequência inválida. A suíte oficial passa a verificar **246 testes PHP e 74 arquivos de sintaxe**.
+- A checagem é de **consistência offline**, não autenticação de logs ou autorização de CRM. O PR CRM #57 permanece DRAFT; R01 e CORE/SEG/AUT continuam **NO-GO**.
+
+---
+
 ## R01/CI-OPS-01 — execução offline unificada (09/11/2026)
 
 - Criado `tools/run_r01_offline_quality_gate.sh`, que reúne prontidão, contrato CRM sintético, matriz JSON/PHP, painel, segurança do PHP e regressão oficial em um único comando, sem rede ou instalações.
