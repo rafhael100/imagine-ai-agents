@@ -145,7 +145,14 @@ return [
         $events = $build();
         check($events === $build() && count($events) === 5);
         foreach ($events as $index => $event) {
-            check(array_keys($event) === ['sequence', 'product', 'tenant', 'run', 'step', 'intent', 'code', 'run_state']);
+            $expectedKeys = ['sequence', 'product', 'tenant', 'run', 'step', 'intent', 'code', 'run_state'];
+            if ($event['intent'] !== null) {
+                $expectedKeys[] = 'intent_signature';
+                check(preg_match('/^SYNTHETIC_[a-f0-9]{64}$/D', $event['intent_signature'] ?? '') === 1);
+            } else {
+                check(!array_key_exists('intent_signature', $event));
+            }
+            check(array_keys($event) === $expectedKeys);
             check($event['sequence'] === $index + 1);
             foreach (['product', 'tenant', 'run', 'step', 'intent'] as $key) {
                 check($event[$key] === null || preg_match('/^SYNTHETIC_[a-f0-9]{64}$/D', $event[$key]) === 1);

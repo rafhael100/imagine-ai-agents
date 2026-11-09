@@ -55,8 +55,9 @@ final class ReadOnlyTraceReview
             if (!is_array($event)) return self::unknown('TRACE_INVALID');
             $keys = array_keys($event);
             $expected = self::FIELDS;
-            if (array_key_exists('clock', $event)) $expected[] = 'clock';
+            // Event-owned signature is written before an optional test clock.
             if (array_key_exists('intent_signature', $event)) $expected[] = 'intent_signature';
+            if (array_key_exists('clock', $event)) $expected[] = 'clock';
             if ($keys !== $expected || $event['sequence'] !== $index + 1) return self::unknown('TRACE_INVALID');
             if ($event['product'] !== self::ref($context->product) || $event['tenant'] !== self::ref($context->tenant)) {
                 return self::unknown('CONTEXT_DENIED');
@@ -94,11 +95,13 @@ final class ReadOnlyTraceReview
                 && $event['step'] === $stepRef && $event['intent'] === null) {
                 $seenExpectedStep = true;
             }
-            // A proof cannot repair missing or detached trace bindings.
+            // A proof cannot repair missing or detached trace bindings:
+            // require the hashed run/step/idempotency/material signature, too.
             if (in_array($code, [
                 'APPROVAL_DENIED', 'SUBMITTED', 'STATUS_REQUESTED', 'TIMEOUT',
                 'INDETERMINADO', 'PENDENTE', 'CONFIRMADO', 'NEGADO',
-            ], true) && ($event['intent'] === null || $event['step'] === null)) {
+            ], true) && ($event['intent'] === null || $event['step'] === null
+                || !array_key_exists('intent_signature', $event))) {
                 return self::unknown('INTENT_CONFLICT');
             }
             if ($code === 'SUBMITTED') {
