@@ -39,3 +39,17 @@ O workflow da dev utilizava `actions/checkout@v4`, com aviso de obsolescência d
 O workflow foi atualizado para o SHA exato, mantendo `persist-credentials: false`, `contents: read`, repositório público e limite de 6 minutos, sem dependências adicionais. O arquivo `tests/Contracts/test_ci_guardrails.py` contém oito verificações preventivas contra relaxamento acidental; não substituem inspeção de segurança do GitHub nem homologação IAM/CRM.
 
 **Escopo:** somente o workflow consolidado da dev; não altera workflows históricos por fase, `main`, VPS, dados, credenciais ou produção. A CI real de PR e pós-merge confirmará compatibilidade com o runner. R01-G01..G11 e CRM CORE/SEG/AUT continuam ABERTOS, estado operacional `NO-GO`.
+
+## CI-OPS-01 — mesmo comando na CI e em checkout local
+
+Para evitar deriva entre testes executados no GitHub e em uma futura máquina de desenvolvimento, foi criado o entrypoint `tools/run_r01_offline_quality_gate.sh`. Ele verifica previamente a presença de Python3/PHP e do `EXPECTED_SHA` obrigatório, executa validadores EVID-02/03/04/05/07/08, testes de guardrails de CI, scanner SEC-03, lint do probe e regressão oficial **240 PHP/74 lint** por meio do script existente com guarda de SHA.
+
+A CI unificada passa a executar **o mesmo script**, preservando configuração sem segredos, repositório público, checkout por SHA imutável e timeout de seis minutos. `tests/Contracts/test_quality_gate_coverage.py` adiciona sete verificações estáticas que impedem a retirada acidental de etapas da sequência. O resultado do script explicita `operational_decision=NO_GO` mesmo após sucesso de testes.
+
+Uso em checkout completo com runtimes já instalados, sem necessidade de instalação ou serviços externos:
+
+```sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=74 EXPECTED_CASES=240 bash tools/run_r01_offline_quality_gate.sh
+```
+
+A CI e o script não homologam API/CRM real, identidade, ACL, licenciamento ou VPS. `main` e produção inalteradas; gates R01-G01..G11 e CRM CORE/SEG/AUT continuam ABERTOS.

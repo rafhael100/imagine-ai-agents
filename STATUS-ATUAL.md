@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## R01/CI-OPS-01 — execução offline unificada (09/11/2026)
+
+- Criado `tools/run_r01_offline_quality_gate.sh`, que reúne prontidão, contrato CRM sintético, matriz JSON/PHP, painel, segurança do PHP e regressão oficial em um único comando, sem rede ou instalações.
+- A CI da `dev` agora chama essa mesma sequência, preservando o SHA revisado, limite de 6 minutos, checkout fixado e permissões somente de leitura. Sete testes estruturais verificam a cobertura do gate.
+- O script retorna aprovação **somente da qualidade offline**, nunca `GO` para integração CRM; gates reais ainda abertos.
+
+---
+
 ## R01/CI-SEC-01 — checkout oficial Node.js 24 fixado por SHA (09/11/2026)
 
 - O workflow consolidado da `dev` passou de `checkout@v4` para o commit verificado da release oficial **v7.0.1** (Node.js 24), impedindo deriva silenciosa da tag.
