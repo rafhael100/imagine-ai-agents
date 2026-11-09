@@ -3,7 +3,7 @@
 ## FT01/F1-23 — falha de consulta de status auditável sem mudança de efeito (09/11/2026)
 
 - A reconciliação agora registra o evento fixo `STATUS_UNAVAILABLE` quando o gateway simulado falha. O erro original continua sendo comunicado, mas não é gravado na trilha, nem muda o último estado confirmado.
-- O revisor exige que esse evento corresponda a uma consulta anterior, rejeitando respostas duplicadas, omitidas e fora de ordem. Doze testes U23-01..12; meta **316 testes PHP / 79 lint**.
+- O revisor exige que esse evento corresponda a uma consulta anterior, rejeitando respostas duplicadas, omitidas e fora de ordem. Treze testes U23-01..13; meta **317 testes PHP / 79 lint**.
 - Tudo permanece em memória, sem chamadas externas. Nenhuma integração real com o CRM foi autorizada; os gates continuam abertos, **NO-GO**.
 
 ---

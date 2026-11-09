@@ -161,4 +161,16 @@ return [
         check(count(array_filter($c->events(), static fn(array $event): bool =>
             $event['code'] === 'SYNTHETIC_STATUS_UNAVAILABLE')) === 1);
     },
+    'U23-13 successful terminal status recheck closes the trace without resubmission' => function (): void {
+        [$ctx, $gateway, $c, , $intent, $approval] = resilienceFixture();
+        $original = $c->execute($intent, $approval, 15);
+        $before = count($c->events());
+        check($c->reconcile($intent) === $original);
+        check(count($c->events()) === $before + 2);
+        check(array_slice(array_column($c->events(), 'code'), -2) === [
+            'SYNTHETIC_STATUS_REQUESTED', 'SYNTHETIC_CONFIRMADO',
+        ]);
+        check($gateway->submitCount() === 1 && $gateway->statusCount() === 1);
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $original)['state'] === 'CONFIRMADO');
+    },
 ];

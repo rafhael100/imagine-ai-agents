@@ -196,6 +196,10 @@ final class SupervisedCoordinator
             if ($effect->state !== $prior->state || $effect->id !== $prior->id || $effect->source !== $prior->source) {
                 MockError::fail('STATE_CONFLICT');
             }
+            // A successful status recheck must close STATUS_REQUESTED in the
+            // trace even when it confirms the same immutable prior proof.
+            // It does not resubmit, mutate or replace the original Effect.
+            $this->trace($intent->step->run, $prior->state, $intent);
             return $prior;
         }
         // A missing record after dispatch cannot prove that nothing happened.
