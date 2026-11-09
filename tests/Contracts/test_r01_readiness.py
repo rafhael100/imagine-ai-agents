@@ -100,9 +100,10 @@ class ReadinessInventoryTests(unittest.TestCase):
         self.assert_rejected("CELL_INVALID")
 
     def test_unknown_column_rejected(self):
-        with self.gates.open("a", encoding="utf-8") as stream:
-            stream.write(",EXTRA\n")
-        self.assert_rejected("ROW_SCHEMA_INVALID")
+        lines = self.gates.read_text(encoding="utf-8").splitlines()
+        lines[0] += ",EXTRA"
+        self.gates.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        self.assert_rejected("HEADER_INVALID")
 
     def test_case_missing(self):
         self.alter(self.cases, lambda rows: rows.pop())
