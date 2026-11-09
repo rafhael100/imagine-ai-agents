@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## FT01/SEC-03 — barreira contra execução indireta em PHP (09/11/2026)
+
+- O scanner offline agora identifica chamadas por variáveis, construtores dinâmicos, crases e funções importadas por alias, além das chamadas diretas já cobertas.
+- Sete testes adicionais verificam essas formas e preservam conteúdo inerte. **Não equivale a sandbox, autenticação ou permissão CRM**; gates operacionais seguem abertos.
+- Detalhes: `docs/AIA-FT01-SEC-01-GUARDA-ISOLAMENTO-PHP.md`.
+
+---
+
 ## Estado vigente — SEC-01/SEC-02 com CI integrada (09/11/2026)
 
 - **Proteção do núcleo sintético:** [PR #132](https://github.com/rafhael100/imagine-ai-agents/pull/132) integrado só à dev em `1c4cdbf87d8a7b003b5564e76784f9333dc5900c`; [CI integrada #42632148664](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42632148664) PASS. Adicionado scanner estático limitado de operações de rede, processo e banco em `src/`, com dez testes Python.
