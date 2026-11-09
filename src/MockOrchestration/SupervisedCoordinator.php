@@ -122,7 +122,15 @@ final class SupervisedCoordinator
             $this->trace($intent->step->run, 'STATUS_UNAVAILABLE', $intent);
             throw $error;
         }
-        return $this->remember($intent, $effect);
+        try {
+            return $this->remember($intent, $effect);
+        } catch (MockError $error) {
+            // The gateway answered, but the returned synthetic evidence was
+            // inconsistent. Close the status attempt without certifying it.
+            // Never leak the raw error, mutate a prior effect or re-submit.
+            $this->trace($intent->step->run, 'STATUS_REJECTED', $intent);
+            throw $error;
+        }
     }
 
     public function transition(Run $run, string $state): void
