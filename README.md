@@ -1,5 +1,18 @@
 # Imagine AI Agents
 
+## F1-12 — contrato CRM/AIA de leitura mínima, inteiramente offline (09/11/2026)
+
+- **Branch filha:** `dev/ft01-f1-12-crm-read-contract-synthetic-2026-11-09`, derivada de `dev/ft01-aia-core-mocks-2026-11-06` em `836ca9274f65df2adf0e3c90a5fe8552fc6e93e0`.
+- **Contrato sintético versionado:** `contracts/crm-aia-readonly.v1.synthetic.schema.json`, parser `MockCrmReadRequest` e `MockCrmReadBoundary`, reutilizando a fronteira F1-11 e o `MockCrmReader` **fictício**. Somente `crm.lead.read_minimal`, com projeção de `ref`/`stage`; sem mutação, clientes ou APIs.
+- **Evidência executada localmente:** PHP 8.4.24 `php tests/Unit/run.php` → **144 cases, 0 failures**; **60/60 PHP lint PASS**. Python `jsonschema` → **2 mensagens sintéticas válidas e 18 inválidas rejeitadas**. A implementação e testes PHP foram confrontados com blobs Git, sem serviços ou gastos.
+- **Gates de segurança reais:** todos R01-G01..G11 e CRM CORE/SEG/AUT continuam **abertos**; nenhum serviço emissor foi autenticado, não houve ACL real, dados privados, token, `ALLOW`, servidor, `main` ou deploy.
+- **Especificação:** `docs/AIA-FT01-F1-12-CRM-READ-ONLY-CONTRACT-OFFLINE.md`. A apresentação bilateral no CRM será **somente documental**, sem API/rota/grant novos. Não confundir o mock com integração funcional.
+
+**Precedência:** até integração na dev por PR validado, F1-12 permanece proposta em branch isolada; o estado operacional dos demais produtos não muda.
+
+---
+
+
 ## ESTADO VIGENTE — F1-11 integrado apenas na dev (09/11/2026)
 
 - **PR #104 MERGED em `dev/ft01-aia-core-mocks-2026-11-06`**, squash `68161e82a2ca36a34634f67b6e34f332c78c1ee8`. `main` intocada no SHA `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; sem deployment, VPS, APIs reais, credenciais ou despesas.
