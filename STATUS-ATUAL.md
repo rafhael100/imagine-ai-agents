@@ -1,5 +1,16 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## Estado vigente — F1-18 validada e integrada somente à dev (09/11/2026)
+
+- **PR [#118](https://github.com/rafhael100/imagine-ai-agents/pull/118) MERGED por squash exclusivamente em `dev/ft01-aia-core-mocks-2026-11-06`**, commit `2603c8da0a7ac7392cf5a27289249d776a095e81`. Não houve merge em `main`, deploy, API CRM, VPS, dado real, chave ou contratação.
+- **Evidência executada:** [GitHub Actions #42610138453](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42610138453), SHA testado `210ff31ec365267f019aafbf2d4c1e48991b02a7`, validação do checkout exato, **228 casos PHP/0 falhas** e **73/73 lint PHP**, job `verify` concluído com `success`.
+- **Escopo:** contagem agregada de falhas na borda antes do parser e negação uniforme sem payloads, IDs, timestamps ou credenciais. Tudo em memória e com dados fictícios.
+- **Transição operacional bloqueada:** R01-G01..G11, CRM CORE/SEG/AUT e o aceite bilateral CRM continuam abertos; o [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) é somente documental. A próxima prioridade **não é acumular mocks**: é obter revisão contratual e evidências de segurança para um piloto restrito, sem executar integrações reais antes dos gates.
+
+**Precedência:** os registros F1-18 em revisão, abaixo, são históricos anteriores à CI e ao merge #118.
+
+---
+
 ## FT01/F1-18 — contadores mínimos da borda, somente offline (09/11/2026)
 
 - **Branch em revisão:** `dev/ft01-f1-18-safe-edge-telemetry-2026-11-09`, baseada no commit dev `0c38e1ecb048d8498b85ab1cd6fbebdd48bc773d`; esta entrada não afirma CI executada nem merge.
