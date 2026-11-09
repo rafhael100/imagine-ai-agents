@@ -1,5 +1,13 @@
 # Imagine AI Agents
 
+## FT01/SEC-09 — identidade de execuções e etapas no coordenador (09/11/2026)
+
+- O coordenador passa a rejeitar IDs duplicados de `Run` e `Step` registrados, e impede que outros objetos com o mesmo ID participem da trilha ou da execução de um `Run` já iniciado nele.
+- Novos 15 testes (U22-01..15) cobrem colisão, aprovação não reutilizável por etapa destacada, preservação da trilha, isolamento por empresa e compatibilidade com fixtures legadas. Meta: **304 testes PHP e 78 lint**.
+- É consistência de identidade em **memória sintética**, não autenticação de usuário ou registro distribuído. CRM PR #57 continua em rascunho e gates reais permanecem **NO-GO**.
+
+---
+
 ## FT01/F1-21 — projeção somente leitura das trilhas por execução (09/11/2026)
 
 - O coordenador agora disponibiliza `eventsForRun(Run)`, que separa eventos fictícios de execuções intercaladas e permite revisar cada uma isoladamente, mantendo o histórico global original.
