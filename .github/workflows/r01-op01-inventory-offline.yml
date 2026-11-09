@@ -1,0 +1,34 @@
+name: R01 OP-01 offline readiness inventory
+
+on:
+  push:
+    branches:
+      - dev/r01-evid-02-offline-readiness-check-2026-11-09
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    if: ${{ github.event.repository.private == false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Checkout exact reviewed commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Offline register audit is NO-GO and structurally complete
+        shell: bash
+        run: |
+          python3 tools/check_r01_readiness.py
+          python3 -m unittest discover -s tests/Contracts -p test_r01_readiness.py -v
+      - name: Existing synthetic PHP regression unchanged
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_PHP: '73'
+          EXPECTED_CASES: '228'
+        run: |
+          php -v
+          bash tools/validate_ft01_offline.sh
