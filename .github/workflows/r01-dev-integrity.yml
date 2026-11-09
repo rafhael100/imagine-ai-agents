@@ -57,6 +57,7 @@ jobs:
           python3 tools/check_op01_readiness_dashboard.py
           python3 -m unittest discover -s tests/Contracts -p test_r01_readiness.py -v
           python3 -m unittest discover -s tests/Contracts -p test_op01_contract_parity.py -v
+          python3 -m unittest discover -s tests/Contracts -p test_op01_contract_matrix.py -v
           python3 -m unittest discover -s tests/Contracts -p test_op01_readiness_dashboard.py -v
           python3 -m unittest discover -s tests/Contracts -p test_op01_dashboard_generator.py -v
           php -l tools/op01_php_parser_probe.php

@@ -1,5 +1,13 @@
 # Imagine AI Agents
 
+## R01/EVID-08 — testes diferenciais JSON/PHP do contrato OP-01 (09/11/2026)
+
+- Nova matriz determinística em `tests/Contracts/test_op01_contract_matrix.py`, comparando o schema JSON sintético fixado e o parser PHP F1-12 em mais de 120 fixtures com dados falsos.
+- Os controles cobrem limites, tipo/versão/operação, campos, projeções, identificadores e propriedades extras. Cada resultado permanece **NO-GO**, sem alterar ou consultar a API real do CRM.
+- CI unificada passa a exigir a matriz sem bibliotecas externas. A interpretação JSON é limitada ao **subconjunto fechado deste schema**, não equivale a validador JSON Schema genérico ou homologação.
+
+---
+
 ## FT01/SEC-03 — barreira contra execução indireta em PHP (09/11/2026)
 
 - O scanner offline agora identifica chamadas por variáveis, construtores dinâmicos, crases e funções importadas por alias, além das chamadas diretas já cobertas.
