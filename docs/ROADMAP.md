@@ -1,5 +1,13 @@
 # Roadmap proposto — Imagine AI Agents
 
+## FT01/SEC-09 — registro canônico de execuções e etapas sintéticas (09/11/2026)
+
+- **[PR #149](https://github.com/rafhael100/imagine-ai-agents/pull/149):** `start` rejeita IDs duplicados de Run; passos registrados não podem ter IDs duplicados; `step`, `suggest`, `transition`, `execute`, `reconcile` e `afterTimeout` impedem reutilizar outra instância com o mesmo identificador de uma execução registrada. `eventsForRun` também recusa instância não canônica e preserva visão vazia de ID desconhecido.
+- A primeira execução da CI destacou a alteração de precedência no teste legado U03-10: o objeto de Run externo agora é recusado antes da verificação de idempotência. A correção manteve cobertura específica de idempotência na mesma etapa canônica (U22-16). Resultado após correção: **16 novos testes U22-01..16** e [CI integrada #42670724846](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42670724846) `success` em SHA `f40ce6137b81808d293279e7bad1d2da6e60c36d`, **304 PHP / 78 lint**, sem falhas.
+- **Limitação conhecida:** protótipos legados com Run/Step externos ainda são permitidos quando o coordenador não iniciou nenhum Run, para compatibilidade de laboratório. Identidade por referência em PHP não equivale a IAM, prova de origem, transação ou estado distribuído. A revisão bilateral do [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) segue DRAFT. Gates R01-G01..G11 e CORE/SEG/AUT abertos, **NO-GO**, sem ativação de API, `main`, VPS, custos ou produção.
+
+---
+
 ## FT01 SEC-08 / F1-21 — capacidade e segregação das trilhas (09/11/2026)
 
 - **SEC-08 / [PR #146](https://github.com/rafhael100/imagine-ai-agents/pull/146):** o coordenador falha fechado quando faltam espaços para registrar envio+resultado, consulta, timeout ou transição; alinha o teto a 1.024 eventos aceitos pelo revisor. Sete testes U20-01..07. [CI pós-merge #42665958643](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42665958643) `success`, **280/280 testes PHP e 76/76 lint**.
