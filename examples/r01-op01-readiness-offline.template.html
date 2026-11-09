@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src 'none'; img-src data:; font-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="color-scheme" content="light">
+<title>Imagine AI Agents • Revisão OP-01 offline</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#18263a;background:#f3f6fa;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #91b8f7;outline-offset:2px}
+.layout{display:grid;grid-template-columns:238px minmax(0,1fr);min-height:100vh}
+aside{background:#101f37;color:#e6eefb;padding:31px 20px;display:flex;flex-direction:column;gap:32px}
+.brand{display:flex;align-items:center;gap:11px}.logo{display:grid;place-items:center;border-radius:13px;width:43px;height:43px;font-weight:850;background:#4571d6;color:white;font-size:24px}
+.brand h2{font-size:15px;margin:0}.brand small{display:block;color:#9ab0cd;margin-top:4px;font-size:11px}
+.asideTitle{font-size:10px;letter-spacing:1.7px;text-transform:uppercase;color:#8da3c1;font-weight:800;margin:0 0 11px}
+.sideitem{border:1px solid #304461;background:#1b2c48;border-radius:12px;padding:14px 12px;font-size:12px;line-height:1.5}
+.sideitem strong{font-weight:750;color:#fff}.sideitem span{display:block;color:#aabed8;margin-top:6px}
+.sidebottom{margin-top:auto;color:#90a6c4;font-size:11px;line-height:1.6;border-top:1px solid #2b3f5e;padding-top:20px}
+main{min-width:0}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;background:#fff;border-bottom:1px solid #e0e6ef;padding:23px clamp(22px,4vw,58px)}
+.eyebrow{color:#788da9;font-size:10px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase}.top b{display:block;margin-top:4px;font-size:15px}.offline{border:1px solid #c6d6f4;color:#3457a4;background:#eff4ff;border-radius:50px;padding:9px 12px;font-size:11px;font-weight:800}
+.content{max-width:1270px;padding:35px clamp(22px,4vw,58px) 70px;margin:auto}
+h1{font-size:clamp(25px,3vw,38px);line-height:1.18;letter-spacing:-1.25px;margin:4px 0 11px}
+.lead{max-width:760px;color:#687994;font-size:14px;line-height:1.7;margin:0}
+.hero{background:linear-gradient(110deg,#172a4d,#2e477d);color:white;border-radius:22px;padding:30px 32px;display:flex;justify-content:space-between;align-items:center;gap:24px;margin-top:28px}
+.hero h2{font-size:22px;letter-spacing:-.6px;margin:8px 0}.hero p{color:#c4d4ef;font-size:13px;margin:0;line-height:1.6;max-width:650px}
+.hero .flag{display:inline-flex;font-size:11px;letter-spacing:1.3px;font-weight:900;background:#fff0de;color:#7a3b05;border-radius:10px;padding:12px 15px}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:19px 0 31px}
+.metric{border:1px solid #e1e8f1;background:white;border-radius:16px;padding:20px 19px}.metric strong{font-size:28px;letter-spacing:-1px;display:block}.metric span{font-size:11px;font-weight:700;color:#788aa2;line-height:1.45}
+.panel{background:white;border-radius:19px;border:1px solid #e0e7f0;margin-top:19px;overflow:hidden}.panelHead{display:flex;justify-content:space-between;align-items:center;gap:13px;padding:24px 25px;border-bottom:1px solid #e8edf5}.panelHead h2{font-size:17px;margin:0}.panelHead small{display:block;margin-top:6px;color:#7d8da3;font-size:12px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}.toolbar button{border:1px solid #d5e0ef;background:#fff;color:#425673;border-radius:9px;padding:9px 14px;font-weight:750;font-size:12px}
+.toolbar button[aria-pressed=true]{background:#253f70;color:white;border-color:#253f70}
+.search{margin-left:auto;border:1px solid #cfd9e7;border-radius:9px;padding:11px 13px;min-width:260px;max-width:100%;font-size:13px}
+.tableWrap{overflow-x:auto}table{width:100%;border-collapse:collapse;text-align:left;font-size:12px;min-width:640px}th{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#8292a8;background:#f9fbfd}th,td{padding:15px 21px;border-bottom:1px solid #eff2f6;vertical-align:middle}tr:last-child td{border:0}tr[hidden],section[hidden]{display:none!important}
+td strong{font-size:12px;color:#1d355a}td small{display:block;margin-top:5px;font-size:10px;color:#9aaabd}.tag{background:#f1f4f8;color:#52657e;border-radius:20px;padding:6px 9px;font-weight:750;font-size:10px;white-space:nowrap}
+.expected{display:inline-block;margin-left:6px;font-size:10px;color:#3c5e91;background:#edf3fd;border-radius:5px;padding:4px 6px}
+.note{border-left:3px solid #8ba8d4;background:#f6f9fe;border-radius:0 11px 11px 0;padding:17px 20px;margin:22px 0;color:#4e6485;font-size:12px;line-height:1.65}
+.footer{color:#7b8ca4;font-size:11px;margin-top:27px;line-height:1.8}.footer code{color:#415977}#shown{color:#637898;font-size:11px;margin:12px 4px 0}
+@media(max-width:900px){.layout{display:block}aside{display:none}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{flex-direction:column;align-items:flex-start}.top{padding:20px}.content{padding:27px 20px}.search{margin-left:0;flex:1}}
+@media(max-width:520px){.metrics{grid-template-columns:1fr 1fr}.panelHead{padding:20px}.search{width:100%;min-width:0}.hero{padding:25px}.metric{padding:16px}h1{font-size:27px}}
+@media print{aside,.toolbar,.offline{display:none!important}.layout{display:block}.content{max-width:none;padding:14px}.hero{background:#eee;color:#222;border:1px solid #aaa}.hero p{color:#444}.panel{break-inside:avoid}section[hidden],tr[hidden]{display:table-row!important}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside aria-label="Identificação do dossiê">
+  <div class="brand"><div class="logo">i</div><div><h2>Imagine AI Agents</h2><small>Governança e homologação</small></div></div>
+  <div><p class="asideTitle">Dossiê de revisão</p><div class="sideitem"><strong>CRM • OP-01</strong><span>Consulta mínima de lead, sem mutação e sem API operacional.</span></div></div>
+  <div><p class="asideTitle">Referências de origem</p><div class="sideitem"><strong>CRM PR #57</strong><span>Proposta bilateral em rascunho, sem merge e sem aceite.</span></div></div>
+  <div class="sidebottom">Ambiente: arquivo local de leitura.<br>Sem chamadas de rede, acesso ao CRM ou credenciais.<br>Dados: exclusivamente matriz de revisão.</div>
+</aside>
+<main>
+  <div class="top"><div><span class="eyebrow">Imagine / Arquitetura e segurança</span><b>Painel de prontidão OP-01</b></div><span class="offline">VISUALIZAÇÃO OFFLINE</span></div>
+  <div class="content">
+    <span class="eyebrow">Revisão técnica · 09/11/2026</span>
+    <h1>Homologação CRM + Agentes de IA</h1>
+    <p class="lead">Visão consolidada de pendências técnicas para o primeiro piloto de leitura mínima. O inventário está organizado, mas nenhum gate foi formalmente encerrado nem houve execução integrada em serviços reais.</p>
+    <div class="hero"><div><span class="eyebrow" style="color:#adc6ec">Situação operacional</span><h2>A integração real continua bloqueada</h2><p>Testes com dados fictícios, revisão documental e consistência do contrato não substituem autorização do CRM, identidade real, ACL por recurso, proteção de dados ou aceite executivo.</p></div><span class="flag">NO-GO</span></div>
+    <div class="metrics">
+      <div class="metric"><strong>14</strong><span>Gates e aprovações em aberto</span></div>
+      <div class="metric"><strong>13</strong><span>Cenários de homologação pendentes</span></div>
+      <div class="metric"><strong>0</strong><span>Homologações reais concluídas</span></div>
+      <div class="metric"><strong>0</strong><span>Integrações operacionais autorizadas</span></div>
+    </div>
+    <div class="panel">
+      <div class="panelHead"><div><h2>Matriz de revisão</h2><small>Controle de requisitos por gate e cenários OP-01, sem concessões de acesso.</small></div></div>
+      <div style="padding:16px 21px"><div class="toolbar" role="group" aria-label="Filtrar matriz">
+        <button type="button" data-filter="all" aria-pressed="true">Tudo</button>
+        <button type="button" data-filter="gate" aria-pressed="false">Gates</button>
+        <button type="button" data-filter="case" aria-pressed="false">Cenários</button>
+        <input class="search" id="search" type="search" placeholder="Buscar requisito, responsável, evidência…" aria-label="Pesquisar requisitos">
+      </div><p id="shown" role="status" aria-live="polite">27 registros em exibição</p></div>
+      <section class="records" data-section="gate">
+        <div class="panelHead"><div><h2>Gates e aprovações</h2><small>Revisão documental não fecha gates por si só.</small></div></div>
+        <div class="tableWrap"><table><thead><tr><th>ID</th><th>Estado</th><th>Responsável sugerido</th><th>Evidência necessária</th></tr></thead><tbody>
+{{GATE_ROWS}}
+        </tbody></table></div>
+      </section>
+      <section class="records" data-section="case">
+        <div class="panelHead"><div><h2>Casos de homologação OP-01</h2><small>11 negativos e 2 positivos; todos ainda não executados em ambiente real.</small></div></div>
+        <div class="tableWrap"><table><thead><tr><th>ID</th><th>Execução</th><th>Cenário</th><th>Prova necessária</th></tr></thead><tbody>
+{{CASE_ROWS}}
+        </tbody></table></div>
+      </section>
+    </div>
+    <div class="note"><strong>Como interpretar este painel:</strong> os estados exibidos são congelados no checkout desta versão. A visualização não sincroniza com o GitHub, não recebe aprovação, não fecha gates e não autoriza nenhum piloto. Toda decisão operacional exige evidência externa e aceite formal do produto dono.</div>
+    <p class="footer">Fontes locais: <code>docs/evidencias/aia-r01-gates-op01.csv</code>, <code>docs/evidencias/op01-casos-homologacao.csv</code> e dossiê <code>AIA-R01-EVID-01</code>. Referência documental: CRM PR #57 (DRAFT). <strong>Sem dados de clientes.</strong></p>
+  </div>
+</main>
+</div>
+<script>
+(function () {
+  'use strict';
+  var buttons = Array.from(document.querySelectorAll('[data-filter]'));
+  var sections = Array.from(document.querySelectorAll('section.records'));
+  var rows = Array.from(document.querySelectorAll('tbody tr[data-id]'));
+  var search = document.getElementById('search');
+  var shown = document.getElementById('shown');
+  var filter = 'all';
+  function refresh() {
+    var term = search.value.trim().toLocaleLowerCase('pt-BR');
+    var total = 0;
+    sections.forEach(function (section) {
+      var kind = section.getAttribute('data-section');
+      section.hidden = filter !== 'all' && kind !== filter;
+    });
+    rows.forEach(function (row) {
+      var matches = (filter === 'all' || row.getAttribute('data-kind') === filter)
+        && row.textContent.toLocaleLowerCase('pt-BR').indexOf(term) >= 0;
+      row.hidden = !matches;
+      if (matches) total += 1;
+    });
+    shown.textContent = total + ' registros em exibição';
+  }
+  buttons.forEach(function (button) {
+    button.addEventListener('click', function () {
+      filter = button.getAttribute('data-filter');
+      buttons.forEach(function (other) {
+        other.setAttribute('aria-pressed', String(other === button));
+      });
+      refresh();
+    });
+  });
+  search.addEventListener('input', refresh);
+  refresh();
+}());
+</script>
+</body>
+</html>

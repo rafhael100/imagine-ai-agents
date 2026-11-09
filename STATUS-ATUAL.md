@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## R01/EVID-05 — geração determinística do painel de homologação (09/11/2026)
+
+- Novo template HTML e gerador offline `tools/generate_op01_dashboard.py`. As **27 linhas** do painel agora provêm dos CSVs validados, sem edição manual duplicada.
+- A verificação `--check` reprova divergências entre página e registros; `--write` regenera somente o HTML local, escapando conteúdo não confiável.
+- O estado permanece **NO-GO**, com CRM PR #57 DRAFT e todos os gates ABERTOS. CI ainda sujeita à execução no commit revisado. Ver `docs/AIA-R01-EVID-05-GERADOR-PAINEL-OP01.md`.
+
+---
+
 ## Estado vigente — paridade contratual e painel offline integrados à dev (09/11/2026)
 
 - **EVID-03:** [PR #124](https://github.com/rafhael100/imagine-ai-agents/pull/124) integrado somente à dev no squash `1a0c41875b477101ff8617da4682f8c7b44889fd`; [CI #42624040384](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42624040384) no SHA `1bca6d5fadf7e46429b81e8cb79699f1f6631066` concluiu `success` nos testes de snapshot do CRM PR #57, paridade do schema JSON/parser PHP e regressão **228/228 testes PHP, 73/73 lint oficiais + 1 lint do probe**. Isso **não verifica API CRM real**.
