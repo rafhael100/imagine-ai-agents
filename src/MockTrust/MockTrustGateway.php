@@ -17,6 +17,7 @@ final class MockTrustGateway
         public readonly string $issuerRef,
         public readonly string $audienceRef,
         array $allowedScopes,
+        private readonly ?MockSharedTrustState $sharedState = null,
     ) {
         MockAgentVersionSnapshot::syntheticRef($issuerRef);
         MockAgentVersionSnapshot::syntheticRef($audienceRef);
@@ -46,8 +47,13 @@ final class MockTrustGateway
             MockError::fail('TRUST_DENIED');
         }
         $owner->assertValid($envelope, $context, $scope, $now);
-        if (isset($this->seenNonces[$envelope->nonceRef])) MockError::fail('TRUST_REPLAY_DENIED');
-        $this->seenNonces[$envelope->nonceRef] = $envelope->digest;
+        if ($this->sharedState !== null) {
+            $this->sharedState->consume($envelope);
+        } else {
+            // Historical single-gateway mock: no cross-instance durability.
+            if (isset($this->seenNonces[$envelope->nonceRef])) MockError::fail('TRUST_REPLAY_DENIED');
+            $this->seenNonces[$envelope->nonceRef] = $envelope->digest;
+        }
         return [
             'mode' => 'SYNTHETIC_ONLY', 'state' => 'SYNTHETIC_READ_ONLY',
             'digest' => $envelope->digest, 'scope' => $scope,
