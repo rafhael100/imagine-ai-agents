@@ -1,5 +1,20 @@
 # Imagine AI Agents
 
+## ESTADO VIGENTE — 08/11/2026, pós-merge FT01 (prevalece sobre históricos abaixo)
+
+- **Branch de desenvolvimento:** `dev/ft01-aia-core-mocks-2026-11-06`, SHA `550aa742b10754ffa0cc1502e22bbfb72d966a81` (squash **PR #96** F1-06 corretivo + F1-07 sintético). **PR #96 MERGED somente na dev.**
+- **Validado de fato com PHP CLI 8.4.24:** `php tests/Unit/run.php` **85 cases, 0 failures, exit 0**; lint PHP em **43/43 arquivos PASS**; **43/43 SHA-1 de blob Git iguais** aos arquivos do HEAD `91919913ddbe346f0cdda64e41df7c73a38d7dee` testado. Todos os 43 arquivos PHP da dev pós-squash foram comparados com esse HEAD e os hashes coincidem.
+- **Modo da verificação:** em razão da falta de DNS para `git clone` no sandbox, os 43 arquivos exatos foram reconstruídos a partir dos blobs GitHub e comparados por hash; a cópia reconstruída não tinha diretório `.git`. A evidência comprova conteúdo executado, não simula um checkout Git nem CI.
+- **PRs #92 e #95:** encerrados **sem merge individual**, porque integralmente substituídos pelo PR #96; comentários e commits preservados. **PR #94:** minuta histórica de F1-07, ainda documental e sem merge.
+- **O que foi implementado:** laboratório em memória, dados exclusivamente sintéticos, sem agentes reais conectados, CRM/Portal APIs, LLM, banco, segredo, produção, pagamentos ou custos. O exemplo offline permanece em `examples/knowledge_context_demo.php`. `main` permanece `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`, sem alterações.
+- **Gates NÃO encerrados:** R01-G01..G11, CORE/SEG/AUT CRM e avaliação de integração/segurança real continuam abertos. A cobertura de testes de um mock não equivale à homologação de produção.
+- **Próxima fase:** análise de F1-08 em documentação isolada; nenhuma dependência externa, deploy ou serviço real está automaticamente autorizado.
+
+**Precedência:** qualquer trecho antigo abaixo afirmando que PRs #92/#95 estão abertos, que F1-07 não foi implementado ou que os 85 testes não foram executados refere-se a uma fotografia histórica, **não ao estado vigente**. Mantenha esses registros por rastreabilidade, não para orientar novo merge.
+
+---
+
+
 **Status:** projeto criado no GitHub; fundação documental inicial (05/11/2026).  
 **Repositório:** `rafhael100/imagine-ai-agents` (privado).  
 **Execução:** sem código de produto, sem infraestrutura provisionada e sem deploy.
