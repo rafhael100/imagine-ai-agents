@@ -1,5 +1,20 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## ESTADO VIGENTE — F1-10 integrado exclusivamente à dev (09/11/2026)
+
+- **PR #102 MERGED na `dev/ft01-aia-core-mocks-2026-11-06`**, squash `70d81bf58d3e3e0b1e3ac87250538451a9c166e9`. `main` preservada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`. Sem deploy, infraestrutura alterada ou custos adicionais.
+- **Entregue:** pacote de revisão independente fictícia `MockReviewPacket`/`MockReviewBoard`, duas funções de revisão com segregação entre autor, Produto e Segurança, revalidação de digest/expiração/revogação e reconhecimento idempotente, sem promover agentes. Novo `tests/Unit/review_handoff.php` com 14 casos e `examples/f110-review-demo.php`. O validador `tools/validate_ft01_offline.sh` agora exige **111 testes e 52 PHP** em checkout SHA-fixado.
+- **Prova executada:** `php tests/Unit/run.php` → **111 cases, 0 failures, exit 0**; `php -l` **52/52 PASS**; **52/52 hashes SHA-1 Git blob idênticos** ao conteúdo testado (fingerprint FNV32 `1e3ddd48`). Exemplo local concluiu `READY_FOR_HUMAN_HANDOFF` com **`promotion_allowed=false`** e zero chamadas externas.
+- **Conferência pós-squash:** os **58 arquivos de código, testes e scripts** do commit dev possuem hashes iguais aos do head PR #102 validado; os **52 arquivos PHP** permanecem idênticos. Os PRs anteriores F1-01 a F1-09 seguem históricos. A minuta obsoleta PR #90 foi encerrada **sem merge** para não reinstalar bloqueios históricos.
+- **Limite explícito:** os revisores são strings sintéticas, sem autenticação ou assinatura digital. SHA-256 é digest de conteúdo, **não prova de identidade**. Não há persistência, API CRM, LLM real, SQL/ALLOW, dados privados, VPS, Cloudflare, release, produção, gasto ou modificação de `main`.
+- **Gates ainda abertos:** R01-G01 a G11, CORE/SEG/AUT CRM e autorizações de integração real/produção. O roadmap foi atualizado para distinguir o laboratório integrado da fase operacional ainda pendente.
+- **Próxima frente:** `docs/AIA-R01-TRANSICAO-FT01-PILOTO-CONTROLADO.md` organiza G01–G11 e a ordem para um piloto CRM somente leitura. Pode-se seguir com **contratos de confiança e testes sintéticos offline** sem novas decisões; conectar sistemas reais depende do gate executivo correspondente.
+
+**Precedência:** menções históricas abaixo a F1-10 apenas em PR ou F1-09 como etapa atual estão superadas por este registro. Nenhuma evidência de mock deve ser descrita como homologação integrada ou autorização de produção.
+
+---
+
+
 ## FT01/F1-10 — revisão independente sintética (branch em validação)
 
 O recorte F1-10 acrescenta **encaminhamento humano simulado** após a comparação A/B do F1-09. A evidência de avaliação é recomputada e vinculada por SHA-256 a dataset, rubrica, contexto, baseline e candidata. Dois papéis fictícios, Produto e Segurança, precisam reconhecer o pacote com revisores diferentes do autor; mudança de evidência, expiração, revogação, falha crítica ou caso não executado bloqueia o encaminhamento.
