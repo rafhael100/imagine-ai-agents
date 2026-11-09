@@ -1,5 +1,18 @@
 # Imagine AI Agents
 
+## Estado vigente — F1-15 integrado exclusivamente à dev (09/11/2026)
+
+- **PR [#112](https://github.com/rafhael100/imagine-ai-agents/pull/112) MERGED por squash somente em `dev/ft01-aia-core-mocks-2026-11-06`**, commit `4a2a3b31bb422446a62e563616bd98b45ca3536c`. A `main` preservada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; sem deploy, VPS, CRM real, segredos ou fornecedor pago.
+- **Prova executada:** [GitHub Actions run #42581627932](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42581627932), head SHA-fixado `efa6a3b9584c15705716f54f1fb47dbe31d0dab2`, PHP 8.3.6, **180 cases, 0 failures**, **66/66 lint PHP PASS**, `VALIDATION_PASS`.
+- **Conformidade somente fictícia:** 12 cenários OP-01, dos quais 10 negam alterações inválidas de versão/operação/escopo/campo/contexto e 2 permitem apenas projeção sintética `ref/stage`; não existe autorização real do CRM.
+- **Gates e responsabilidades:** R01-G01..G11 e CRM CORE/SEG/AUT **ABERTOS**. O CRM PR #57 permanece proposta documental DRAFT, sem API ou permissão real. Antes do piloto é indispensável definir identidade verificável, ACL no CRM por recurso/campo, contrato bilateral, retenção/privacidade, implantação isolada e responsável/aceite.
+- **Próximo trabalho seguro sem aprovação crítica:** pacote documental de critérios de aceite e fixtures de falhas; não substituir homologação de segurança por testes mockados.
+
+**Precedência:** quaisquer passagens inferiores que indiquem F1-15 em revisão e sem regressão completa são registros históricos anteriores ao CI e squash #112.
+
+---
+
+
 ## FT01/F1-15 — kit de conformidade OP-01 fictício em revisão (09/11/2026)
 
 - **Base integrada atual:** F1-14 pelo [PR #110](https://github.com/rafhael100/imagine-ai-agents/pull/110), squash `9995fb99d3e453ecd1930e4917b63b8846029c24`; [CI oficial #42580749791](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42580749791) aprovou **168/168** e **65/65 PHP lint**.

@@ -2,13 +2,13 @@
 
 ## Escopo
 
-Este repositório será a camada compartilhada de agentes de IA para CRM, Portal, Performance AI e Universidade Imagine. Está em **desenvolvimento controlado de protótipos sintéticos em branch dev**, sem integração ou homologação de produção. Os recortes FT01 F1-01 a F1-14 já foram integrados **exclusivamente à dev** (F1-12: PR #106, squash `562896763f900a8a264ea46aa35e2aeacd5e0903`, **144/144 testes PHP**, **60/60 lint e hashes Git blob**); a F1-13 foi integrada pelo PR #108, squash `92a2f0a5f01a0014051594f24d96988e111f85c7`, com **156/156 testes e 63/63 lint PHP em CI**; a `main` permanece sem essa implementação.
+Este repositório será a camada compartilhada de agentes de IA para CRM, Portal, Performance AI e Universidade Imagine. Está em **desenvolvimento controlado de protótipos sintéticos em branch dev**, sem integração ou homologação de produção. Os recortes FT01 F1-01 a F1-15 já foram integrados **exclusivamente à dev** (F1-12: PR #106, squash `562896763f900a8a264ea46aa35e2aeacd5e0903`, **144/144 testes PHP**, **60/60 lint e hashes Git blob**); a F1-13 foi integrada pelo PR #108, squash `92a2f0a5f01a0014051594f24d96988e111f85c7`, com **156/156 testes e 63/63 lint PHP em CI**; a `main` permanece sem essa implementação.
 
 **F1-13 integrado apenas à dev:** CI de SHA-fixado [run #42579753806](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42579753806) aprovou 156/156 testes e 63/63 lint. A próxima fase pode simular falhas multi-instância sem credenciais reais, backend CRM ou deploy.
 
 **F1-14 integrado somente à dev:** CI [run #42580749791](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42580749791) aprovado com 168/168 testes e 65/65 lint; squash #110 em `9995fb99d3e453ecd1930e4917b63b8846029c24`. Nenhuma integração operacional, IAM ou persistência distribuída; gates mantidos abertos.
 
-**F1-15 em revisão:** fixture de conformidade OP-01 exclusivamente sintética e novos testes U15; expectativa 180 casos e 66 arquivos PHP, ainda a comprovar no CI. Nenhum contrato CRM real, autoridade, `ALLOW`, credencial, custo ou deploy aprovado.
+**F1-15 integrado somente à dev:** CI [#42581627932](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42581627932) com 180/180 testes e lint 66/66; squash do PR #112 em `4a2a3b31bb422446a62e563616bd98b45ca3536c`. O contrato OP-01 continua 100% sintético; gates operacionais e CRM PR #57 abertos.
 
 ## Regras obrigatórias para agentes de desenvolvimento / Codex
 
