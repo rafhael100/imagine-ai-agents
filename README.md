@@ -1,5 +1,13 @@
 # Imagine AI Agents
 
+## R01/CI-SEC-01 — checkout oficial Node.js 24 fixado por SHA (09/11/2026)
+
+- O workflow consolidado da `dev` passou de `checkout@v4` para o commit verificado da release oficial **v7.0.1** (Node.js 24), impedindo deriva silenciosa da tag.
+- Oito testes Python conferem credenciais não persistidas, permissões de leitura, repositório público, timeout e SHA da regressão. Sem gastos contratados ou integrações reais.
+- A alteração vale apenas para o workflow principal da dev e será confirmada por CI antes do merge. CRM segue **NO-GO**.
+
+---
+
 ## R01/EVID-08 — testes diferenciais JSON/PHP do contrato OP-01 (09/11/2026)
 
 - Nova matriz determinística em `tests/Contracts/test_op01_contract_matrix.py`, comparando o schema JSON sintético fixado e o parser PHP F1-12 em mais de 120 fixtures com dados falsos.

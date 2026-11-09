@@ -31,3 +31,11 @@ As entregas EVID-02 a EVID-05 possuem workflows individuais vinculados às branc
 **Verificado:** o diff foi restrito a workflow e documentação; o run de revisão e o run disparado pelo merge concluíram com sucesso. Para alterações futuras, repetir preflight de SHA, exigir CI `success`, proteger `main` e manter controles `NO-GO` até homologação. Se alguma validação falhar, registrar o bloqueio e corrigir na branch, sem silenciar testes.
 
 **Status operacional permanece NO-GO.** CRM PR #57 em rascunho; CORE/SEG/AUT e R01-G01..G11 abertos. `main`, VPS, clientes e produção inalterados.
+
+## CI-SEC-01 — checkout com SHA fixado e Node.js 24 (09/11/2026)
+
+O workflow da dev utilizava `actions/checkout@v4`, com aviso de obsolescência de Node.js 20 nos logs. A release oficial `actions/checkout v7.0.1` foi verificada por API e pelo `action.yml` que declara `runs.using: node24`; SHA imutável: `3d3c42e5aac5ba805825da76410c181273ba90b1`. Referências: https://github.com/actions/checkout/releases/tag/v7.0.1 e https://github.com/actions/checkout/commit/3d3c42e5aac5ba805825da76410c181273ba90b1.
+
+O workflow foi atualizado para o SHA exato, mantendo `persist-credentials: false`, `contents: read`, repositório público e limite de 6 minutos, sem dependências adicionais. O arquivo `tests/Contracts/test_ci_guardrails.py` contém oito verificações preventivas contra relaxamento acidental; não substituem inspeção de segurança do GitHub nem homologação IAM/CRM.
+
+**Escopo:** somente o workflow consolidado da dev; não altera workflows históricos por fase, `main`, VPS, dados, credenciais ou produção. A CI real de PR e pós-merge confirmará compatibilidade com o runner. R01-G01..G11 e CRM CORE/SEG/AUT continuam ABERTOS, estado operacional `NO-GO`.

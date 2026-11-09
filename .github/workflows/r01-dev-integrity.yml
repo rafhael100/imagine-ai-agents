@@ -39,7 +39,7 @@ jobs:
     timeout-minutes: 6
     steps:
       - name: Read-only checkout of reviewed SHA
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 Node24 SHA pinned
         with:
           persist-credentials: false
       - name: Confirm runtime is available without installing dependencies
@@ -58,6 +58,7 @@ jobs:
           python3 -m unittest discover -s tests/Contracts -p test_r01_readiness.py -v
           python3 -m unittest discover -s tests/Contracts -p test_op01_contract_parity.py -v
           python3 -m unittest discover -s tests/Contracts -p test_op01_contract_matrix.py -v
+          python3 -m unittest discover -s tests/Contracts -p test_ci_guardrails.py -v
           python3 -m unittest discover -s tests/Contracts -p test_op01_readiness_dashboard.py -v
           python3 -m unittest discover -s tests/Contracts -p test_op01_dashboard_generator.py -v
           php -l tools/op01_php_parser_probe.php
