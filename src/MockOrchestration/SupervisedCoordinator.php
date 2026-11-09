@@ -221,7 +221,11 @@ final class SupervisedCoordinator
             return $prior;
         }
         // A missing record after dispatch cannot prove that nothing happened.
-        if ($effect->state === 'NAO_SOLICITADO') $effect = new Effect($intent, 'INDETERMINADO');
+        // Neither submission acknowledgement nor absence is evidence of an effect.
+        // The trace reviewer only accepts explicit outcome/uncertainty states.
+        if (in_array($effect->state, ['NAO_SOLICITADO', 'SOLICITADO'], true)) {
+            $effect = new Effect($intent, 'INDETERMINADO');
+        }
         $this->effects[$intent->key()] = $effect;
         $this->trace($intent->step->run, $effect->state, $intent);
         return $effect;

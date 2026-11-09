@@ -76,7 +76,7 @@ for required in \
 done
 
 expected_php="${EXPECTED_PHP:-79}"
-expected_cases="${EXPECTED_CASES:-323}"
+expected_cases="${EXPECTED_CASES:-326}"
 [[ "$expected_php" =~ ^[0-9]+$ && "$expected_cases" =~ ^[0-9]+$ ]] || {
   echo 'BLOCKED: expected counts must be integers' >&2
   exit 2
