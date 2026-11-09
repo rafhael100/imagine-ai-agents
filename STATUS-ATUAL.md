@@ -1,5 +1,17 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## FT01/F1-09 — desenvolvimento isolado e regressão PHP validada (08/11/2026)
+
+- **Base imutável na abertura:** `dev/ft01-aia-core-mocks-2026-11-06` em `0fc74060c5fdfe914fd2a1c89f58d22818f775a2` (F1-08 já integrada). `main` preservada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`.
+- **Branch:** `dev/ft01-f1-09-evaluation-comparison-2026-11-08`. Três classes `src/MockEvaluation/`, 12 testes `U09-01..12` em `tests/Unit/evaluation_compare.php`, runner PHP, exemplo `examples/f109-evaluation-demo.php`, painel `examples/f109-comparador-versoes-offline.html`, teste `tests/Browser/f109_smoke.cjs` e documento técnico F1-09.
+- **Gate real de regressão sintética:** PHP CLI 8.4.24 `php tests/Unit/run.php` → **97 cases, 0 failures, exit 0**; **48/48 PHP lint PASS**, todos os **48/48 blobs PHP têm SHA-1 idêntico à árvore do commit GitHub** (fingerprint ordenado FNV32 `39e991ef`, 48 arquivos); sem dependências instaladas.
+- **Demo PHP:** `php examples/f109-evaluation-demo.php` retornou `REVIEW_REQUIRED` (6/6), `BLOCKED_CRITICAL` (4/6, duas falhas críticas) e `INCONCLUSIVE` (5/6, evidência faltante), `promotion_allowed=false` e zero efeitos externos.
+- **Frontend QA concluído em 09/11/2026:** HTML standalone de três abas, três candidatas e seis casos. Node.js 22.16.0 real `node tests/Browser/f109_smoke.cjs` → **F109_SMOKE_PASS**. Chromium headless real via Playwright, HTML byte-exato do blob Git `ccca71572725ba6e6900a5d189d24c5fadf1334b`, **5/5 resoluções** (1440, 1024, 768, 390, 320 px), três resultados corretos, foco teclado, `aria-pressed`, histórico e reset. Encontrado e corrigido overflow horizontal mobile; tabela com rolagem interna orientada e acessível. Zero erros JS, zero requisições externas e zero overflow global após correção. Teste reprodutível em `tests/Browser/f109_responsive_qa.py` (blob `6d2c59545d1166cafa988a68c20731083a819885`). **Firefox não testado**; Chromium validado via `page.set_content` em ambiente isolado.
+- **Governança:** nenhum caso simulado se refere a clientes reais, nenhum backend CRM/Portal/Performance/Universidade, IA real, SQL, segredo, n8n, Cloudflare, VPS, custo ou implantação. QA visual/Node concluído; integração na `dev` segue condicionada ao preflight final de SHA, diff e mergeabilidade. `main` e produção preservadas. R01-G01..G11 e CORE/SEG/AUT CRM permanecem abertos.
+
+**Precedência:** este é o estado da branch filha F1-09, não implementação ou homologação em produção; a dev principal permanece F1-08 até eventual merge controlado.
+
+
 ## ESTADO VIGENTE — FT01/F1-08 integrado à dev (08/11/2026)
 
 - **Código e protótipo:** PR #98 **MERGED exclusivamente em `dev/ft01-aia-core-mocks-2026-11-06`**, squash `d37cd9a603981c3d963823307119c402b67edf89`. `main` inalterada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`. Nenhum deploy, VPS, integração, gasto ou fornecedor acionado.
