@@ -40,7 +40,7 @@ final class MockCrmReadAuditedBoundary
         return match ($error->getMessage()) {
             'BRIDGE_CONTEXT_DENIED', 'CONTEXT_DENIED' => 'CONTEXT',
             'TRUST_DENIED', 'BRIDGE_TRUST_DENIED', 'TRUST_STATE_UNAVAILABLE' => 'TRUST',
-            'OWNER_DENIED' => 'OWNER',
+            'OWNER_DENIED', 'OWNER_POLICY_UNAVAILABLE' => 'OWNER',
             'TRUST_REPLAY_DENIED' => 'REPLAY',
             'RESOURCE_DENIED_OR_MISSING' => 'RESOURCE',
             'FIELD_DENIED', 'BRIDGE_PROJECTION_DENIED' => 'PROJECTION',
