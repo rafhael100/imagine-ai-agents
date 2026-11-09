@@ -56,6 +56,9 @@ for required in \
   tests/Unit/owner_policy_recheck.php \
   src/MockBridge/MockCrmReadPublicFacade.php \
   tests/Unit/public_read_facade.php \
+  src/MockTelemetry/MockCrmReadEdgeCounters.php \
+  src/MockTelemetry/MockCrmReadEdgeBoundary.php \
+  tests/Unit/edge_telemetry.php \
   contracts/fixtures/f115-crm-op01-conformance.synthetic.json \
   contracts/crm-aia-readonly.v1.synthetic.schema.json \
   tests/Contracts/test_crm_aia_readonly_schema.py \
@@ -66,8 +69,8 @@ for required in \
   fi
 done
 
-expected_php="${EXPECTED_PHP:-70}"
-expected_cases="${EXPECTED_CASES:-214}"
+expected_php="${EXPECTED_PHP:-73}"
+expected_cases="${EXPECTED_CASES:-228}"
 [[ "$expected_php" =~ ^[0-9]+$ && "$expected_cases" =~ ^[0-9]+$ ]] || {
   echo 'BLOCKED: expected counts must be integers' >&2
   exit 2
