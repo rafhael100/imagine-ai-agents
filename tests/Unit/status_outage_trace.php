@@ -365,4 +365,35 @@ return [
         ]);
         check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $original)['state'] === 'CONFIRMADO');
     },
-]; 
+
+    'U26-01 repeated confirmation without status request cannot count as proof' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $original = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        $fake = $events[count($events) - 1];
+        $fake['sequence'] = count($events) + 1;
+        $events[] = $fake;
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $original)['reason'] === 'STATE_CONFLICT');
+    },
+    'U26-02 new pending outcome without query cannot overwrite earlier uncertainty' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture([true]);
+        $original = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        $fake = $events[count($events) - 1];
+        $fake['sequence'] = count($events) + 1;
+        $fake['code'] = 'SYNTHETIC_PENDENTE';
+        $events[] = $fake;
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $original)['reason'] === 'STATE_CONFLICT');
+    },
+    'U26-03 outage cannot silently authorize a later effect event without new request' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture([], [true]);
+        $original = $c->execute($intent, $approval, 15);
+        denied('SYNTHETIC_STATUS_UNAVAILABLE', fn() => $c->reconcile($intent));
+        $events = $c->events();
+        $fake = $events[3];
+        $fake['sequence'] = count($events) + 1;
+        $events[] = $fake;
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $original)['reason'] === 'STATE_CONFLICT');
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $original)['state'] === 'CONFIRMADO');
+    },
+];
