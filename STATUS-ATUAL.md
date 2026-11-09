@@ -1,5 +1,11 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## Preparação de homologação bilateral CRM/AIA — EVID-01 (09/11/2026)
+
+Foi produzido o dossiê `docs/AIA-R01-EVID-01-DOSSIE-ACEITE-PILOTO-CRM-OP01.md` e a matriz rastreável `docs/evidencias/aia-r01-gates-op01.csv`, confrontando o [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) (OPEN/DRAFT) com os gates do Agents. **Todos os R01-G01..G11 e CRM CORE/SEG/AUT seguem ABERTOS**, sem integração, credencial, custo, `main` ou deploy. Resultado: **NO-GO operacional; material pronto para revisão**.
+
+---
+
 ## Estado vigente — F1-18 validada e integrada somente à dev (09/11/2026)
 
 - **PR [#118](https://github.com/rafhael100/imagine-ai-agents/pull/118) MERGED por squash exclusivamente em `dev/ft01-aia-core-mocks-2026-11-06`**, commit `2603c8da0a7ac7392cf5a27289249d776a095e81`. Não houve merge em `main`, deploy, API CRM, VPS, dado real, chave ou contratação.

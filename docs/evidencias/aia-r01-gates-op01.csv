@@ -1,0 +1,15 @@
+id,tipo,autoridade_sugerida,estado,evidencia_pendente
+R01-G01,gate,SEG-IAM+CORE+AIA,ABERTO,identidade-servico-e-revogacao-verificadas
+R01-G02,gate,CORE+SEG,ABERTO,ACL-recurso-campo-e-isolamento-tenant
+R01-G03,gate,CORE+AIA,ABERTO,idempotencia-replay-distribuido-reconciliacao
+R01-G04,gate,AUT+Produto,ABERTO,aprovacoes-autenticadas-e-revogaveis
+R01-G05,gate,Privacidade+CORE,ABERTO,LGPD-finalidade-retencao-provedores
+R01-G06,gate,Financeiro+Produto,ABERTO,uso-tecnico-e-creditos-reconciliados
+R01-G07,gate,QA+SEG+CORE,ABERTO,aceite-seguranca-e-integração-executada
+R01-G08,gate,CORE+Arquitetura,ABERTO,contrato-bilateral-versao-e-rollback
+R01-G09,gate,Jurídico+Operações,ABERTO,licenciamento-subprocessadores
+R01-G10,gate,Infra+SEG,ABERTO,isolamento-segredos-incidentes-recuperacao
+R01-G11,gate,Direção+Lideranças,ABERTO,escopo-piloto-custos-autorizacao
+CRM-CORE,crm,CORE-CRM,ABERTO,propriedade-recurso-e-campos
+CRM-SEG,crm,SEG-CRM,ABERTO,ACL-RLS-e-threat-model
+CRM-AUT,crm,AUT-CRM,ABERTO,identidade-membro-e-revogacao
