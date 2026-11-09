@@ -129,16 +129,21 @@ final class SupervisedCoordinator
     private function trace(Run $run, string $code, ?Intent $intent = null, ?Step $step = null): void
     {
         // Hash caller-supplied references as well: SYNTHETIC prefix is not sanitization.
-        $ref = static fn (string $value): string => 'SYNTHETIC_' . hash('sha256', $value);
         $this->events[] = [
             'sequence' => count($this->events) + 1,
-            'product' => $ref($this->context->product),
-            'tenant' => $ref($this->context->tenant),
-            'run' => $ref($run->id),
-            'step' => ($intent?->step ?? $step) === null ? null : $ref(($intent?->step ?? $step)->id),
-            'intent' => $intent === null ? null : $ref($intent->id),
+            'product' => self::traceReference($this->context->product),
+            'tenant' => self::traceReference($this->context->tenant),
+            'run' => self::traceReference($run->id),
+            'step' => ($intent?->step ?? $step) === null ? null : self::traceReference(($intent?->step ?? $step)->id),
+            'intent' => $intent === null ? null : self::traceReference($intent->id),
             'code' => 'SYNTHETIC_' . $code,
             'run_state' => 'SYNTHETIC_' . $run->state(),
         ];
+    }
+
+    private static function traceReference(string $value): string
+    {
+        // Pure deterministic minimization: never disclose caller-supplied identifiers.
+        return 'SYNTHETIC_' . hash('sha256', $value);
     }
 }

@@ -138,6 +138,19 @@ class SyntheticIsolationTests(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertTrue(report["isolation_check_passed"])
 
+    def test_pure_named_static_trace_hash_allowed(self):
+        source = r'''<?php final class Trace {
+            private static function hashRef(string $value): string {
+                return "SYNTHETIC_" . hash("sha256", $value);
+            }
+            public static function record(string $value): string {
+                return self::hashRef($value);
+            }
+        }'''
+        rc, report = self.scan(source)
+        self.assertEqual(rc, 0)
+        self.assertTrue(report["isolation_check_passed"])
+
     def test_rejected_parse_error_does_not_disclose_source(self):
         code, report = self.scan("<?php invalid syntax !!! secret-token")
         self.assertEqual(code, 1)

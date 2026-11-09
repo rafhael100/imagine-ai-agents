@@ -71,15 +71,20 @@ final class MockToolDispatcher
     /** Minimal synthetic event codes: never text/material, secrets or raw IDs. */
     private function trace(string $toolId, TenantContext $context, string $code): void
     {
-        $ref = static fn (string $value): string => 'SYNTHETIC_' . hash('sha256', $value);
         $this->events[] = [
             'sequence' => count($this->events) + 1,
-            'product' => $ref($context->product),
-            'tenant' => $ref($context->tenant),
-            'tool' => $ref($toolId),
+            'product' => self::traceReference($context->product),
+            'tenant' => self::traceReference($context->tenant),
+            'tool' => self::traceReference($toolId),
             'code' => 'SYNTHETIC_' . $code,
         ];
     }
 
     public function events(): array { return $this->events; }
+
+    private static function traceReference(string $value): string
+    {
+        // Pure deterministic minimization: never disclose caller-supplied identifiers.
+        return 'SYNTHETIC_' . hash('sha256', $value);
+    }
 }

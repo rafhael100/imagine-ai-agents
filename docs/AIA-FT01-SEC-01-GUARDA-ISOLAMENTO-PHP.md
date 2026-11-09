@@ -29,3 +29,5 @@ A revisão do scanner SEC-01 identificou três desvios não detectados: execuç�
 O scanner continua analisando somente tokens, sem executar qualquer fixture. Sete novos testes Python verificam os desvios e protegem comentários e strings inertes contra falsos positivos. A CI unificada executa esta suíte, sem dependências ou serviços externos.
 
 **Limitação:** não é sandbox nem análise estática exaustiva; não garante ausência de efeitos indiretos em callbacks, bibliotecas, reflexão ou autoloaders. Gates de CRM continuam abertos; o estado operacional permanece `NO-GO`.
+
+**Compatibilidade com o núcleo existente (SEC-03):** a primeira execução da CI do PR detectou duas chamadas por variável para calcular hashes de referências em `SupervisedCoordinator::trace` e `MockToolDispatcher::trace`. O ajuste substitui esses callbacks por métodos privados de nome estático, sem alterar o formato dos hashes, a sequência de eventos ou os dados fictícios. A regra de negação para despacho dinâmico permanece ativa. Um teste adicional assegura que chamadas estáticas puras continuem permitidas.
