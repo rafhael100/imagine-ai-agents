@@ -20,6 +20,8 @@ Este repositório será a camada compartilhada de agentes de IA para CRM, Portal
 
 **EVID-02 integrado somente na dev:** CI [#42621128657](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42621128657) verificou 15 testes adicionais do inventário OP-01, 228/228 PHP e 73/73 lint, squash #121 `9bf82e93466903e42dbbdaf981736b50a6ec8638`. Verificador retorna sempre `NO_GO`, sem autorizar integração real. **G09 em revisão:** documentação #122 integrada à dev `ab31c28afeac4cf75fa3e09a33cec9db37916865`, mas NÃO aprova n8n Community como backend SaaS; G09 permanece aberto.
 
+**EVID-03/04 integrados só à dev:** [#124](https://github.com/rafhael100/imagine-ai-agents/pull/124) e [#125](https://github.com/rafhael100/imagine-ai-agents/pull/125), workflows de SHA fixado [#42624040384](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42624040384) e [#42624860955](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42624860955) PASS. EVID-03 compara proposta CRM #57 com schema e parser sintéticos; EVID-04 exibe painel offline de 14 gates + 13 cenários. Tudo é evidência de laboratório; **NO-GO, gates abertos e PR CRM #57 DRAFT**.
+
 ## Regras obrigatórias para agentes de desenvolvimento / Codex
 
 - **Autorização vigente do responsável (08/11/2026):** avançar autonomamente no código **sintético/offline** e em seus testes, em branches isoladas, com PRs, preflight de SHA, evidências reproduzíveis e merge controlado **somente na dev** quando os gates técnicos do recorte forem satisfeitos. Perguntar apenas quando houver decisão estritamente crítica; autorização ampla não libera produção ou gastos.

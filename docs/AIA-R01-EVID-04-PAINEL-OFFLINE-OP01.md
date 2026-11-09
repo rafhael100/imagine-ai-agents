@@ -12,4 +12,4 @@
 
 **Governança:** PR CRM #57 permanece em DRAFT e sem merge; G01..G11/CORE/SEG/AUT abertos. Dados fictícios, sem credenciais, SQL, VPS, fornecedores, cobrança, `main` ou produção.
 
-**Critério de integração apenas à dev:** CI exata com verificador, testes negativos EVID-02/03/04 e suíte oficial PHP 228/228, lint 73/73 mais o probe; não declarar PASS antes dos logs reais.
+**Evidência pós-integração (09/11/2026):** [PR #125](https://github.com/rafhael100/imagine-ai-agents/pull/125) integrado exclusivamente à dev, squash `53fc200e48b1c05789317e85b9b143efc47b76f0`. [CI #42624860955](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42624860955), SHA `7ca16416914291f1a6fd7d9f47126228ff2f8526`, PASS no verificador, testes negativos EVID-02/03/04, 228 testes PHP e 73 lint oficiais mais o probe. **NÃO** aprova integração real; NO-GO e gates abertos.

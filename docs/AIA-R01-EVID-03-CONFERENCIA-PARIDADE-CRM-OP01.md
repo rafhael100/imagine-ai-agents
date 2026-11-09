@@ -1,6 +1,6 @@
 # AIA-R01/EVID-03 — Paridade offline da proposta CRM com contrato sintético Agents
 
-**Estado inicial:** verificação em branch de revisão, sem homologação bilateral. **NO-GO operacional**.
+**Estado vigente (09/11/2026):** [PR #124](https://github.com/rafhael100/imagine-ai-agents/pull/124) integrado apenas à dev, squash `1a0c41875b477101ff8617da4682f8c7b44889fd`. [CI #42624040384](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42624040384) PASS em snapshot/schema/parser sintéticos e 228/228 PHP, 73/73 lint oficiais + probe com lint separado. **NO-GO operacional**.
 
 O PR #57 do Imagine CRM está em DRAFT e não integrado. Seu documento de proposta CRM-AIA-RO-01 foi copiado fielmente para `contracts/reviews/crm-aia-ro-01.pr57.snapshot.md` com SHA de blob e head registrados no manifesto. A verificação de digest prova integridade da cópia local, não identidade de serviço, aprovação jurídica ou integração CRM.
 
