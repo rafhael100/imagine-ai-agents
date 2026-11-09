@@ -54,6 +54,7 @@ vm.runInNewContext(script, { document, window: { scrollTo() {} } },
 
 const byId = id => elements.get(id);
 assert.equal(byId("page-overview").hidden, false, "initial overview");
+assert.equal(selectors["[data-scenario]"].find(x => x.dataset.scenario === "allow").attributes.get("aria-pressed"), "true", "default scenario accessible state");
 const expected = [
     ["allow", "READY"], ["tenant", "KNOWLEDGE_DENIED"],
     ["revoke", "KNOWLEDGE_DENIED"], ["conflict", "CONFLICT"],
@@ -63,6 +64,7 @@ for (const [id, result] of expected) {
     selectors["[data-scenario]"].find(x => x.dataset.scenario === id).click();
     byId("run-button").click();
     assert.equal(byId("result").children[0].textContent, result, "case " + id);
+    assert.equal(selectors["[data-scenario]"].find(x => x.dataset.scenario === id).attributes.get("aria-pressed"), "true", "selected aria-pressed " + id);
 }
 selectors["[data-page-button]"].find(x => x.dataset.pageButton === "audit").click();
 assert.equal(byId("page-audit").hidden, false, "audit navigation");
