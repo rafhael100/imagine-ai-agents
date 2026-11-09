@@ -1,5 +1,13 @@
 # Imagine AI Agents
 
+## FT01/SEC-05 — aprovação vinculada a execução, etapa e chave (09/11/2026)
+
+- A assinatura de `Intent` agora inclui a chave de idempotência e os identificadores de `Run` e `Step`. Uma aprovação fictícia de uma execução não pode ser reutilizada em outra com a mesma operação e conteúdo.
+- Onze casos PHP novos (U19-01 a U19-11) verificam proteção contra reuso de aprovações, conflitos de idempotência e operações legítimas com chaves independentes. A suíte passa a exigir **257 testes PHP e 75 arquivos lint**.
+- A mudança não cria autenticação ou aprovação humana real. O CRM PR #57 continua em rascunho e os gates operacionais permanecem **NO-GO**.
+
+---
+
 ## FT01/SEC-04 — vínculo de intenção nas trilhas sintéticas (09/11/2026)
 
 - O revisor `ReadOnlyTraceReview::inspect` agora exige referências explícitas de intenção e etapa em eventos de envio, status, timeout e efeito; uma etapa correspondente deve aparecer antes do envio.
