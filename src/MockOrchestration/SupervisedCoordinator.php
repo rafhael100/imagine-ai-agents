@@ -114,7 +114,14 @@ final class SupervisedCoordinator
         // STATUS_REQUESTED + at most one observed status result.
         $this->assertTraceCapacity(2);
         $this->trace($intent->step->run, 'STATUS_REQUESTED', $intent);
-        $effect = $this->gateway->status($this->context, $intent);
+        try {
+            $effect = $this->gateway->status($this->context, $intent);
+        } catch (\Throwable $error) {
+            // Preserve the exception and prior effect, but close the audit
+            // attempt with a fixed, privacy-minimized event.
+            $this->trace($intent->step->run, 'STATUS_UNAVAILABLE', $intent);
+            throw $error;
+        }
         return $this->remember($intent, $effect);
     }
 

@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## FT01/F1-23 — falha de consulta de status auditável sem mudança de efeito (09/11/2026)
+
+- A reconciliação agora registra o evento fixo `STATUS_UNAVAILABLE` quando o gateway simulado falha. O erro original continua sendo comunicado, mas não é gravado na trilha, nem muda o último estado confirmado.
+- O revisor exige que esse evento corresponda a uma consulta anterior, rejeitando respostas duplicadas, omitidas e fora de ordem. Dez testes novos U23-01..10; meta **314 testes PHP / 79 lint**.
+- Tudo permanece em memória, sem chamadas externas. Nenhuma integração real com o CRM foi autorizada; os gates continuam abertos, **NO-GO**.
+
+---
+
 ## FT01/SEC-09 — identidade de execuções e etapas no coordenador (09/11/2026)
 
 - O coordenador passa a rejeitar IDs duplicados de `Run` e `Step` registrados, e impede que outros objetos com o mesmo ID participem da trilha ou da execução de um `Run` já iniciado nele.
