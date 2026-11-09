@@ -1,5 +1,13 @@
 # Roadmap proposto — Imagine AI Agents
 
+## FT01 SEC-08 / F1-21 — capacidade e segregação das trilhas (09/11/2026)
+
+- **SEC-08 / [PR #146](https://github.com/rafhael100/imagine-ai-agents/pull/146):** o coordenador falha fechado quando faltam espaços para registrar envio+resultado, consulta, timeout ou transição; alinha o teto a 1.024 eventos aceitos pelo revisor. Sete testes U20-01..07. [CI pós-merge #42665958643](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42665958643) `success`, **280/280 testes PHP e 76/76 lint**.
+- **F1-21 / [PR #147](https://github.com/rafhael100/imagine-ai-agents/pull/147):** `eventsForRun(Run)` devolve visão isolada por execução, sem alterar eventos globais. Sequências locais servem à análise sintética, **não** atestam ordenação global ou autenticidade. Oito testes U21-01..08; [CI pós-merge #42666931411](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42666931411) `success` em `b95a4252eeb031c52a0d64de52c04fac4b054724`, **288/288 PHP e 77/77 lint**.
+- **Pendências reais:** [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) permanece OPEN/DRAFT, sem merge ou aprovação bilateral. Não ativar IAM, API, acesso a clientes, `main`, VPS, produção, licenças ou fornecedores antes dos gates R01/CORE/SEG/AUT. Estado operacional: **NO-GO**.
+
+---
+
 ## SEC-06/SEC-07 — integridade da trilha e recuperação sintética (09/11/2026)
 
 - **PR #143 / SEC-06:** `SupervisedCoordinator::trace` adiciona somente hash da assinatura completa de `Intent` em eventos vinculados; o revisor exige essa correspondência, impedindo troca silenciosa de material/chave. Nove testes de regressão U03-19..27; [CI integrada #42662578637](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42662578637) PASS (**266 PHP / 75 lint**).
