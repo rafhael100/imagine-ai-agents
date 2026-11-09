@@ -1,0 +1,40 @@
+name: R01 OP-01 generated dashboard offline
+
+on:
+  push:
+    branches:
+      - dev/r01-evid-05-generated-dashboard-2026-11-09
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event.repository.private == false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Checkout exact reviewed commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify generated HTML matches validated CSV ledgers
+        shell: bash
+        run: |
+          python3 tools/check_r01_readiness.py
+          python3 tools/generate_op01_dashboard.py --check
+          python3 tools/check_op01_readiness_dashboard.py
+          python3 -m unittest discover -s tests/Contracts -p test_op01_dashboard_generator.py -v
+          python3 -m unittest discover -s tests/Contracts -p test_op01_readiness_dashboard.py -v
+          python3 -m unittest discover -s tests/Contracts -p test_r01_readiness.py -v
+          python3 tools/check_op01_contract_parity.py
+          python3 -m unittest discover -s tests/Contracts -p test_op01_contract_parity.py -v
+          php -l tools/op01_php_parser_probe.php
+      - name: Preserve existing synthetic PHP suite
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_PHP: '73'
+          EXPECTED_CASES: '228'
+        run: |
+          bash tools/validate_ft01_offline.sh
