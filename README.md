@@ -1,5 +1,12 @@
 # Imagine AI Agents
 
+## R01/EVID-03 — paridade documental CRM/Agents (09/11/2026)
+
+- PR CRM #57 preservado em snapshot identificado por SHA e conferido com o schema JSON e o parser PHP sintéticos dos Agentes.
+- Testes negativos detectam alterações de versão, operação, campos e alegações falsas de aprovação. O resultado permanece `NO_GO` independentemente da integridade dos arquivos.
+- Regressão esperada pela CI: 228 testes PHP e 73 arquivos na validação oficial, mais 1 probe PHP com lint separado. Ver `docs/AIA-R01-EVID-03-CONFERENCIA-PARIDADE-CRM-OP01.md`.
+
+---
 ## Estado vigente — R01/EVID-02 e análise G09 integrados à dev (09/11/2026)
 
 - **PR [#121](https://github.com/rafhael100/imagine-ai-agents/pull/121) integrado exclusivamente à dev** no squash `9bf82e93466903e42dbbdaf981736b50a6ec8638`. [GitHub Actions #42621128657](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42621128657) executou, no head exato `bf5fabe8d151bf6d9988017b4df0cf74a4ec0e1f`, **15/15 testes do inventário OP-01**, **228/228 PHP** e **73/73 lint PHP**, todos com conclusão `success`. O teste do inventário devolve sempre `NO_GO` para integração real, mesmo que o registro tenha integridade válida.
