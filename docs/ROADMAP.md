@@ -1,5 +1,13 @@
 # Roadmap proposto — Imagine AI Agents
 
+## Verificação integrada da segurança de trilhas e aprovações (09/11/2026)
+
+- **SEC-04 / PR #140:** correção de sequência e vínculo de eventos sintéticos (`STEP_CREATED`, `SUBMITTED`, status/timeout/efeitos). Seis testes de resiliência U03-13..18. [CI de integração #42658449082](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42658449082) PASS, suíte 246/74 no commit `f7ffe7881668cb1a4423ad7d2b77c6ca7104a4a2`.
+- **SEC-05 / PR #141:** assinatura sintética de intenção reforçada com run/step/idempotencyKey, impedindo que uma aprovação de outra execução seja considerada equivalente. Onze casos U19-01..11. [CI integrada #42659871911](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42659871911) PASS, **257/257 testes PHP e 75/75 lint** no HEAD `0512bbdc8bde815cc3d58dde6e217be6872f1953`.
+- Ambos são aprimoramentos em memória, **não** IAM ou auditoria autenticada. A assinatura sintética mudou intencionalmente, sem migração de dados persistidos; não inferir compatibilidade de digests entre versões. Próximo gate real continua a revisão bilateral do [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) ainda DRAFT, com R01-G01..G11 e CORE/SEG/AUT abertos. `main`, VPS e produção permanecem bloqueados.
+
+---
+
 ## Entregas verificadas da dev — fronteira sintética e CI (09/11/2026)
 
 - **SEC-03 / PR #135:** scanner PHP reforçado contra despacho por variável, construtor dinâmico, crases e alias de função; sanitização de trilhas refatorada para métodos fixos. [CI integrada #42644765532](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42644765532) PASS.
