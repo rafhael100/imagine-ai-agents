@@ -49,6 +49,7 @@ final class ReadOnlyTraceReview
         $effectStates = [];
         $terminal = null;
         $seenSubmit = false;
+        $seenExpectedStep = false;
         $lastEffect = null;
         foreach ($events as $index => $event) {
             if (!is_array($event)) return self::unknown('TRACE_INVALID');
@@ -89,8 +90,22 @@ final class ReadOnlyTraceReview
             $code = substr($event['code'], 10);
             if ($index === 0 && ($code !== 'STARTED' || $runState !== 'EXECUTANDO')) return self::unknown('TRACE_INVALID');
             if ($index > 0 && $code === 'STARTED') return self::unknown('TRACE_INVALID');
+            if ($code === 'STEP_CREATED' && $stepRef !== null
+                && $event['step'] === $stepRef && $event['intent'] === null) {
+                $seenExpectedStep = true;
+            }
+            // A proof cannot repair missing or detached trace bindings.
+            if (in_array($code, [
+                'APPROVAL_DENIED', 'SUBMITTED', 'STATUS_REQUESTED', 'TIMEOUT',
+                'INDETERMINADO', 'PENDENTE', 'CONFIRMADO', 'NEGADO',
+            ], true) && ($event['intent'] === null || $event['step'] === null)) {
+                return self::unknown('INTENT_CONFLICT');
+            }
             if ($code === 'SUBMITTED') {
                 if ($terminal !== null || $runState !== 'EXECUTANDO' || $seenSubmit) return self::unknown('STATE_CONFLICT');
+                // The matching synthetic step must precede the submission.
+                // This is a consistency check, NOT authentication of events.
+                if ($intent !== null && !$seenExpectedStep) return self::unknown('INTENT_CONFLICT');
                 $seenSubmit = true;
             }
             if (in_array($code, ['CONFIRMADO', 'NEGADO', 'PENDENTE', 'INDETERMINADO'], true)) {

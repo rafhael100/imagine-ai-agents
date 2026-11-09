@@ -144,4 +144,65 @@ return [
         check($invalid['state'] === 'INDETERMINADO'
             && !str_contains(json_encode($invalid, JSON_THROW_ON_ERROR), 'payload_marker'));
     },
+    'U03-13 detached submit cannot inherit synthetic proof' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        $events[2]['intent'] = null;
+        $events[2]['step'] = null;
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'INTENT_CONFLICT');
+    },
+    'U03-14 missing step-created event cannot inherit synthetic proof' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        array_splice($events, 1, 1);
+        foreach ($events as $i => &$event) $event['sequence'] = $i + 1;
+        unset($event);
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'INTENT_CONFLICT');
+    },
+    'U03-15 unrelated step creation cannot substitute intended step' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        $events[1]['step'] = 'SYNTHETIC_' . hash('sha256', 'SYNTHETIC_OTHER_STEP');
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'INTENT_CONFLICT');
+    },
+    'U03-16 late step event after submission remains invalid' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        [$events[1], $events[2]] = [$events[2], $events[1]];
+        foreach ($events as $i => &$event) $event['sequence'] = $i + 1;
+        unset($event);
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'INTENT_CONFLICT');
+    },
+    'U03-17 detached status request is not valid review evidence' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $c->reconcile($intent);
+        $events = $c->events();
+        foreach ($events as &$event) {
+            if ($event['code'] === 'SYNTHETIC_STATUS_REQUESTED') {
+                $event['intent'] = null;
+                $event['step'] = null;
+            }
+        }
+        unset($event);
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'INTENT_CONFLICT');
+    },
+    'U03-18 detached timeout event cannot inherit proof' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $c->afterTimeout($intent, new Attempt('SYNTHETIC_TIMEOUT_EVIDENCE', $intent, 'TIMEOUT'));
+        $events = $c->events();
+        foreach ($events as &$event) {
+            if ($event['code'] === 'SYNTHETIC_TIMEOUT') {
+                $event['intent'] = null;
+                $event['step'] = null;
+            }
+        }
+        unset($event);
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'INTENT_CONFLICT');
+    },
 ];
