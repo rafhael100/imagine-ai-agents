@@ -185,3 +185,48 @@ completa no SHA atual. Aceite permanece pendente de execução posterior.
 **Validação realizada sobre código idêntico à branch GitHub:** PHP CLI **8.4.24**, lint `find src tests/Unit -type f -name '*.php' -print0 | xargs -0 -n1 php -l` → **35/35 PASS, exit 0**; `php tests/Unit/run.php` → **70/70 PASS, zero falhas, exit 0**. Os **35 hashes Git blob SHA-1** dos arquivos PHP da branch foram confrontados com os 35 arquivos locais testados, sem divergências. Inclui verificação adversarial de arrays de ferramentas malformados, sem suprimir avisos.
 
 **Limites obrigatórios:** processo único e estado volátil, sem agentes/identidades/permissões reais, modelo LLM, assinatura criptográfica, publicação operacional, rede, CRM, autenticação, persistência, concorrência, custo ou rollback de infraestrutura. Catálogo fictício não altera cota, approval, ferramentas ou crédito comercial. O PR de código permanece **DRAFT e SEM MERGE**; `main` e VPS intocadas. Gates R01-G01–G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**, F1-07 bloqueado.
+
+## FT01-F1-07 — recuperação de conhecimento e contexto SOMENTE sintéticos (2026-11-08)
+
+**Autorização executiva atualizada:** o responsável concedeu autorização ampla para desenvolver o Imagine AI Agents, sem necessidade de consultas rotineiras, mas mantendo isolamento de branch, ausência de despesas e preservação de `main`/produção. Esta autorização mais recente substitui o bloqueio executivo histórico de código F1-07, **sem homologar nenhuma integração real**. F107-D01..D10 alternativas A já estavam ratificadas documentalmente (PR #93, merge exclusivamente documental na dev). O PR #92 de correções F1-06 permanece DRAFT pendente de regressão integral e NÃO é alterado pela F1-07.
+
+**Código novo nesta branch filha da dev:**
+- `src/MockKnowledge/MockKnowledgeSource.php` — metadados sintéticos tipados, versão, fonte, dono, classificação, validade lógica e digest determinístico.
+- `MockKnowledgeCatalog.php` — catálogo fechado e segregado por **contexto integral + referência + versão**; fonte desconhecida, expirada, desativada ou de outro contexto recebe negativa uniforme.
+- `MockRetrievalGrant.php` — grant inteiramente fictício, explícito por fonte/base/versão/contexto, com janela lógica e revogação.
+- `MockKnowledgeRetriever.php` — seleção local, determinística e somente leitura, limitada a três fontes previamente autorizadas; pedidos dinâmicos recebem `DYNAMIC_SOURCE_REQUIRED`.
+- `MockContextEnvelope.php` — rechecagem de grant e de todas as fontes ao entregar, proteção contra material adulterado, teto de conteúdo, sinalização `UNTRUSTED_DATA`, conflito factual sem inventar resposta e encerramento explícito.
+- `MockKnowledgeTrace.php` — somente códigos fechados, sequência e hash de referências fictícias, sem corpo de passagem ou prompt.
+- `tests/Unit/knowledge_context.php` — U07-01..U07-12; `tests/Unit/run.php` inclui a suíte após os **70 testes** históricos. Meta atual desta branch F1-07: **82** casos. Quando o PR #92 de três testes adicionais entrar na dev, a integração conjunta poderá requerer **85** casos, não presumir resultado.
+
+**Evidência executada nesta revisão:** PHP CLI 8.4.24 já disponível, sem instalação nem fornecedor. Lint **6/6 PASS** nas seis classes novas localmente reconstruídas; hashes Git blob SHA-1 **6/6 coincidentes** com os arquivos publicados na branch. Runner auxiliar local exercitando U07-01..U07-12 e isolamento adicional de referência igual entre tenants: **13/13 PASS, 0 falhas**. Essa reprodução **não equivale** à execução do arquivo oficial `tests/Unit/knowledge_context.php` no checkout completo, nem à regressão oficial `php tests/Unit/run.php`; **82/82 NÃO foi executado/comprovado**. O checkout integral segue inacessível por DNS no sandbox; não houve Actions, Composer ou custos.
+
+**Restrições:** laboratório de processo único e memória volátil; nenhum RAG, LLM, OCR, embedding, crawler, banco/SQL, autenticação/ACL real, documentos de cliente, APIs CRM, importação, persistência, retenção legal, cobrança, infraestrutura, publicação ou efeito externo. `main`, contratos/implementações F1-01..F1-06 e outros produtos preservados. PR de código DRAFT sem merge automático; R01-G01–G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**.
+
+### Demonstração offline executável F1-07 (2026-11-08)
+
+O arquivo `examples/knowledge_context_demo.php` é um exemplo sem infraestrutura, Composer, banco, API ou LLM. Execute no checkout da branch com PHP 8.1+ já instalado:
+
+```sh
+php examples/knowledge_context_demo.php
+```
+
+O exemplo materializa uma única passagem fictícia (`READY` / `UNTRUSTED_DATA`), simula revogação antes da entrega (`DENIED`) e tenta reutilizar o grant de outra empresa (`DENIED`). A saída não contém dados de clientes nem autoriza ferramentas.
+
+**Validação reproduzida:** PHP 8.4.24 já presente; `php -l` do exemplo PASS; execução exit 0. Hash Git blob do exemplo `0d9fe667bb3e09e34228618b6b9234b19d1ef9fc`, idêntico ao arquivo publicado. Um pacote portátil offline de demonstração foi criado no ambiente de revisão (não implantado). Os **82 testes oficiais da branch F1-07 não foram executados**, nem os **85 futuros combinados** com a correção #92. PR de código continua DRAFT sem merge.
+
+### Validador offline de regressão (sem rede e sem Actions)
+
+O script `tools/validate_ft01_offline.sh` exige um **checkout Git completo** com PHP 8.1+ já instalado e verifica o SHA, integridade mínima de diretórios, lint de todos os PHP e execução real do runner oficial. Retorna **exit 2 / BLOCKED** se o checkout está incompleto e **exit 1 / FAIL** se lint/testes falham; só devolve `VALIDATION_PASS` em caso de regressão efetiva sem falhas.
+
+```sh
+# Após checkout completo do PR #95 (F1-07 sem #92):
+bash tools/validate_ft01_offline.sh
+
+# Após conciliar também o PR #92 (3 casos F1-06 a mais):
+EXPECTED_CASES=85 bash tools/validate_ft01_offline.sh
+```
+
+A base atual do PR #95 exige **43 arquivos PHP** (incluindo o exemplo) e **82 testes**. Com F1-06 corretivo, permanece 43 PHP e passam a ser exigidos 85 testes. Para fixar uma revisão específica, defina `EXPECTED_SHA` com o SHA completo previamente verificado no GitHub. O validador não instala dependências, não chama rede e não cria CI.
+
+**Evidência desta revisão:** o script exato foi conferido por hash Git blob SHA-1 `2359d514cf2983b2101d87b08393388df04a1970`. Na cópia PARCIAL do sandbox, retornou corretamente `BLOCKED` / exit 2, sem falsificar validação completa. **82/82 e 85/85 não executados**. Os PRs #92 e #95 seguem DRAFT sem merge.

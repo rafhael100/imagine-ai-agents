@@ -606,3 +606,40 @@ Este registro **supera a limitação histórica de ausência do PHP no executor 
 - PR #92 de correção F1-06 e PR #90 documental F1-06 permanecem separados; nenhuma interferência nesses PRs, `main`, demais projetos ou infraestrutura.
 - R01-G01–G11 e CORE/SEG/AUT CRM **TODOS ABERTOS**. Sem dados reais, OAuth/ACL real, SQL/ALLOW, API/LLM real, GitHub Actions, fornecedores pagos, VPS/Cloudflare/n8n ou publicação. **F1-08 não autorizado**.
 - **Próximo ato:** avaliar a minuta executiva e/ou autorizar, em decisão separada, o **merge documental** do PR #93. Nenhum desses atos deve ser presumido.
+
+## FT01/F1-07 — implementação sintética controlada sob autorização ampla posterior (2026-11-08)
+
+- **Autorização vigente mais recente:** o responsável autorizou amplamente o avanço imediato do Imagine AI Agents, solicitando perguntas apenas em decisões estritamente críticas. Essa ordem autoriza desenvolvimento e testes sintéticos F1-07 em branch isolada e supera o bloqueio executivo histórico da minuta #94; não equivale a aprovação de produção, despesas, chaves reais, integração com CRM ou fechamento de gates.
+- **Preflight:** `main` preservada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; dev autenticada em `40a71cb2797d8c954f392e94ef4b02b4cd04e55d` (PR #93 documental já MERGED). Branch filha `dev/ft01-f1-07-knowledge-context-mocks-2026-11-08` criada dessa dev; PR #92 de correções F1-06 permanece OPEN/DRAFT e separado, sem merge ou alteração.
+- **Escopo implementado:** seis classes PHP puras em `src/MockKnowledge/`, 12 casos U07-01..12 em `tests/Unit/knowledge_context.php`, inclusão mínima da suíte em `tests/Unit/run.php`, atualizações documentais `README.md` e `STATUS-ATUAL.md`. Não alterar arquivos antigos de F1-01..F1-06, contratos, `AGENTS.md`, outros produtos ou infraestrutura.
+- **Evidência efetiva:** PHP CLI 8.4.24 pré-existente; lint de **6/6 classes novas PASS**; **6/6 Git blob SHA-1 coincidentes** com as classes executadas localmente. Runner auxiliar sintético das 12 categorias U07 + um caso extra de IDs repetidos entre tenants, **13/13 PASS, zero falhas**. Os 12 casos oficiais constam na branch, mas **NÃO foram executados como `php tests/Unit/run.php`**; 82 casos é **META**, não resultado. Quando integradas as 3 correções U06-C01..C03 do PR #92, nova meta conjunta passa a 85.
+- **Bloqueios de integração:** executar lint de todos os PHP e regressão oficial no checkout exato, revisar diffs/SHAs e registrar eventuais correções. PR F1-07 deverá permanecer DRAFT sem merge automático até aceite técnico; nenhuma ativação real.
+- **Gates preservados:** R01-G01–G11 e CORE/SEG/AUT CRM todos ABERTOS; sem deploy, SQL/ALLOW, APIs/LLM reais, persistência, dados privados, credenciais, fornecedores pagos ou modificações em `main`. F1-08 exige escopo próprio e não foi iniciado nesta rodada.
+
+### Demonstração offline executável F1-07 (2026-11-08)
+
+O arquivo `examples/knowledge_context_demo.php` é um exemplo sem infraestrutura, Composer, banco, API ou LLM. Execute no checkout da branch com PHP 8.1+ já instalado:
+
+```sh
+php examples/knowledge_context_demo.php
+```
+
+O exemplo materializa uma única passagem fictícia (`READY` / `UNTRUSTED_DATA`), simula revogação antes da entrega (`DENIED`) e tenta reutilizar o grant de outra empresa (`DENIED`). A saída não contém dados de clientes nem autoriza ferramentas.
+
+**Validação reproduzida:** PHP 8.4.24 já presente; `php -l` do exemplo PASS; execução exit 0. Hash Git blob do exemplo `0d9fe667bb3e09e34228618b6b9234b19d1ef9fc`, idêntico ao arquivo publicado. Um pacote portátil offline de demonstração foi criado no ambiente de revisão (não implantado). Os **82 testes oficiais da branch F1-07 não foram executados**, nem os **85 futuros combinados** com a correção #92. PR de código continua DRAFT sem merge.
+
+### Validador offline de regressão (sem rede e sem Actions)
+
+O script `tools/validate_ft01_offline.sh` exige um **checkout Git completo** com PHP 8.1+ já instalado e verifica o SHA, integridade mínima de diretórios, lint de todos os PHP e execução real do runner oficial. Retorna **exit 2 / BLOCKED** se o checkout está incompleto e **exit 1 / FAIL** se lint/testes falham; só devolve `VALIDATION_PASS` em caso de regressão efetiva sem falhas.
+
+```sh
+# Após checkout completo do PR #95 (F1-07 sem #92):
+bash tools/validate_ft01_offline.sh
+
+# Após conciliar também o PR #92 (3 casos F1-06 a mais):
+EXPECTED_CASES=85 bash tools/validate_ft01_offline.sh
+```
+
+A base atual do PR #95 exige **43 arquivos PHP** (incluindo o exemplo) e **82 testes**. Com F1-06 corretivo, permanece 43 PHP e passam a ser exigidos 85 testes. Para fixar uma revisão específica, defina `EXPECTED_SHA` com o SHA completo previamente verificado no GitHub. O validador não instala dependências, não chama rede e não cria CI.
+
+**Evidência desta revisão:** o script exato foi conferido por hash Git blob SHA-1 `2359d514cf2983b2101d87b08393388df04a1970`. Na cópia PARCIAL do sandbox, retornou corretamente `BLOCKED` / exit 2, sem falsificar validação completa. **82/82 e 85/85 não executados**. Os PRs #92 e #95 seguem DRAFT sem merge.
