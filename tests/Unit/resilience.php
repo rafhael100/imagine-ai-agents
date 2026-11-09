@@ -282,4 +282,64 @@ return [
         unset($event);
         check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['state'] === 'CONFIRMADO');
     },
+    'U03-28 timeout before any submission is denied without trace pollution' => function (): void {
+        [, $gateway, $c, , $intent] = resilienceFixture();
+        $before = $c->events();
+        denied('INTENT_NOT_SUBMITTED', fn() => $c->afterTimeout(
+            $intent, new Attempt('SYNTHETIC_UNSENT_ATTEMPT', $intent, 'TIMEOUT')));
+        check($c->events() === $before && $gateway->submitCount() === 0 && $gateway->statusCount() === 0);
+    },
+    'U03-29 mismatched attempt before submission cannot create events' => function (): void {
+        [, $gateway, $c, , $intent] = resilienceFixture();
+        $before = $c->events();
+        denied('ATTEMPT_CONFLICT', fn() => $c->afterTimeout(
+            $intent, new Attempt('SYNTHETIC_BAD_ATTEMPT', $intent, 'RESPOSTA')));
+        check($c->events() === $before && $gateway->submitCount() === 0);
+    },
+    'U03-30 status request placed before submission invalidates trace' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        $insert = $events[2];
+        $insert['code'] = 'SYNTHETIC_STATUS_REQUESTED';
+        array_splice($events, 2, 0, [$insert]);
+        foreach ($events as $i => &$event) $event['sequence'] = $i + 1;
+        unset($event);
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'STATE_CONFLICT');
+    },
+    'U03-31 timeout placed before submission invalidates trace' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        $events = $c->events();
+        $insert = $events[2];
+        $insert['code'] = 'SYNTHETIC_TIMEOUT';
+        array_splice($events, 2, 0, [$insert]);
+        foreach ($events as $i => &$event) $event['sequence'] = $i + 1;
+        unset($event);
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'STATE_CONFLICT');
+    },
+    'U03-32 valid lost reply resolves only by status with one submit' => function (): void {
+        [$ctx, $gateway, $c, , $intent, $approval] = resilienceFixture([true]);
+        check($c->execute($intent, $approval, 15)->state === 'INDETERMINADO');
+        $effect = $c->afterTimeout($intent, new Attempt(
+            'SYNTHETIC_SENT_TIMEOUT', $intent, 'TIMEOUT'));
+        check($effect->state === 'CONFIRMADO' && $gateway->submitCount() === 1
+            && $gateway->statusCount() === 1);
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $effect)['state'] === 'CONFIRMADO');
+    },
+    'U03-33 valid post-submit status query retains synthetic confirmation' => function (): void {
+        [$ctx, $gateway, $c, , $intent, $approval] = resilienceFixture();
+        $effect = $c->execute($intent, $approval, 15);
+        check($c->reconcile($intent) === $effect);
+        check($gateway->submitCount() === 1 && $gateway->statusCount() === 1);
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $effect)['state'] === 'CONFIRMADO');
+    },
+    'U03-34 rejected unsent timeout does not prevent later approved submission' => function (): void {
+        [$ctx, $gateway, $c, , $intent, $approval] = resilienceFixture();
+        denied('INTENT_NOT_SUBMITTED', fn() => $c->afterTimeout(
+            $intent, new Attempt('SYNTHETIC_UNSENT_TIMEOUT', $intent, 'TIMEOUT')));
+        $effect = $c->execute($intent, $approval, 15);
+        check($gateway->submitCount() === 1 && $effect->isConfirmed());
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $effect)['state'] === 'CONFIRMADO');
+    },
 ];

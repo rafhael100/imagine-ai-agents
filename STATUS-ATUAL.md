@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## FT01/SEC-07 — timeout e consulta exigem envio prévio (09/11/2026)
+
+- `SupervisedCoordinator::afterTimeout` agora rejeita a tentativa de timeout de uma intenção não enviada **antes** de registrar qualquer evento. O revisor de trilhas também recusa `STATUS_REQUESTED` e `TIMEOUT` que apareçam antes de `SUBMITTED`.
+- Sete testes novos (U03-28..34) cobrem negativas sem poluição de auditoria e recuperações válidas apenas por consulta de status, sem segundo envio. Meta: **273 testes PHP / 75 lint**.
+- Controles totalmente sintéticos; não autorizam integração CRM. PR #57 permanece DRAFT e gates R01/CORE/SEG/AUT **NO-GO**.
+
+---
+
 ## FT01/SEC-06 — hash da intenção vinculado à trilha sintética (09/11/2026)
 
 - O coordenador registra apenas o hash da assinatura completa de `Intent` nos eventos de envio, aprovação negada, consulta, timeout e efeito. O revisor exige correspondência com a intenção alvo, impedindo que uma trilha antiga sustente uma prova fictícia de outro conteúdo ou chave.

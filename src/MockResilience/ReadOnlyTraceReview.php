@@ -104,6 +104,10 @@ final class ReadOnlyTraceReview
                 || !array_key_exists('intent_signature', $event))) {
                 return self::unknown('INTENT_CONFLICT');
             }
+            // Status requests and timeouts can only follow a recorded submission.
+            if (in_array($code, ['STATUS_REQUESTED', 'TIMEOUT'], true) && !$seenSubmit) {
+                return self::unknown('STATE_CONFLICT');
+            }
             if ($code === 'SUBMITTED') {
                 if ($terminal !== null || $runState !== 'EXECUTANDO' || $seenSubmit) return self::unknown('STATE_CONFLICT');
                 // The matching synthetic step must precede the submission.
