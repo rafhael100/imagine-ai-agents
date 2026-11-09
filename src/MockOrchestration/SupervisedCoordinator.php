@@ -78,6 +78,9 @@ final class SupervisedCoordinator
         $this->bind($intent);
         if ($attempt->state !== 'TIMEOUT' || $attempt->intent->signature() !== $intent->signature()
             || $attempt->intent->key() !== $intent->key()) MockError::fail('ATTEMPT_CONFLICT');
+        // A timeout without a prior dispatch is not a transport observation.
+        // Reject BEFORE tracing, otherwise the audit records a fictitious send.
+        if (!isset($this->submitted[$intent->key()])) MockError::fail('INTENT_NOT_SUBMITTED');
         $this->trace($intent->step->run, 'TIMEOUT', $intent);
         return $this->reconcile($intent); // Only status, never submit.
     }
