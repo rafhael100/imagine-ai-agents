@@ -35,14 +35,16 @@ final class MockCrmReadRequest
             }
         }
         if (!is_array($wire['fields']) || !array_is_list($wire['fields'])
-            || count($wire['fields']) < 1 || count($wire['fields']) > 2
-            || count(array_unique($wire['fields'])) !== count($wire['fields'])) {
+            || count($wire['fields']) < 1 || count($wire['fields']) > 2) {
             MockError::fail('BRIDGE_SCHEMA_DENIED');
         }
         foreach ($wire['fields'] as $field) {
             if (!is_string($field) || !in_array($field, ['ref', 'stage'], true)) {
                 MockError::fail('BRIDGE_SCHEMA_DENIED');
             }
+        }
+        if (count(array_unique($wire['fields'])) !== count($wire['fields'])) {
+            MockError::fail('BRIDGE_SCHEMA_DENIED');
         }
         $this->ref = $wire['request_ref'];
         $this->operation = $wire['operation'];
