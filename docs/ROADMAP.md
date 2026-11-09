@@ -1,5 +1,15 @@
 # Roadmap proposto — Imagine AI Agents
 
+## Entregas verificadas da dev — fronteira sintética e CI (09/11/2026)
+
+- **SEC-03 / PR #135:** scanner PHP reforçado contra despacho por variável, construtor dinâmico, crases e alias de função; sanitização de trilhas refatorada para métodos fixos. [CI integrada #42644765532](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42644765532) PASS.
+- **EVID-08 / PR #136:** testes diferenciais de 166 fixtures entre contrato JSON sintético OP-01 e parser PHP; [CI integrada #42645750148](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42645750148) PASS. Não testa o CRM real.
+- **CI-SEC-01 / PR #137:** checkout v7.0.1 Node24 pinado por SHA, com permissão de leitura e verificações estruturais; [CI integrada #42646958562](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42646958562) PASS.
+- **CI-OPS-01 / PR #138:** todos os validadores no comando único `tools/run_r01_offline_quality_gate.sh`, compartilhado por CI e checkout local; [CI integrada #42647428097](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42647428097) PASS em `96bb4d04473842108eba6304d713dbf5bdff5ee0`, **240/240 PHP e 74/74 lint**.
+- **Próximo gate legítimo:** aceite bilateral da proposta CRM PR #57 (DRAFT/sem merge), escopo/finalidade, IAM, ACL/RLS por tenant e campo, revogação, LGPD, licenças, topologia, responsáveis e aprovação expressa do piloto. Até lá, **NO-GO** e nenhuma modificação em `main`, VPS, clientes ou produção.
+
+---
+
 ## Estado vigente — SEC-01/SEC-02 com CI integrada (09/11/2026)
 
 - **Proteção do núcleo sintético:** [PR #132](https://github.com/rafhael100/imagine-ai-agents/pull/132) integrado só à dev em `1c4cdbf87d8a7b003b5564e76784f9333dc5900c`; [CI integrada #42632148664](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42632148664) PASS. Adicionado scanner estático limitado de operações de rede, processo e banco em `src/`, com dez testes Python.
