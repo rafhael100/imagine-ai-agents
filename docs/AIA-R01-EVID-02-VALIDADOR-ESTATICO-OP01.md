@@ -1,6 +1,6 @@
 # AIA-R01/EVID-02 — Verificador offline de prontidão documental do piloto CRM OP-01
 
-**Estado inicial:** implementação e suíte de testes em branch isolada, sujeitas a CI do SHA exato. **NÃO é homologação técnica, aceite bilateral, identidade nem liberação operacional.**
+**Estado vigente (09/11/2026):** [PR #121](https://github.com/rafhael100/imagine-ai-agents/pull/121) MERGED apenas na dev (squash `9bf82e93466903e42dbbdaf981736b50a6ec8638`). [CI #42621128657](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42621128657) **PASS** no SHA `bf5fabe8d151bf6d9988017b4df0cf74a4ec0e1f`: **15/15 testes Python**, **228/228 testes PHP**, **73/73 lint PHP**. A implementação valida **apenas integridade de inventário** e jamais autoriza o piloto; `pilot_decision=NO_GO`. Todos os gates seguem abertos.
 
 ## Finalidade
 Conferir mecanicamente se a matriz de 14 gates (R01-G01..G11 e CRM CORE/SEG/AUT) e os 13 cenários OP-01 (11 negativos, 2 positivos) permanecem presentes, bem formados e sem declarações de aprovação ou execução sem prova independente.

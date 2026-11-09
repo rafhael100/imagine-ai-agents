@@ -1,6 +1,6 @@
 # AIA-R01/G09 — Análise preliminar do licenciamento n8n para o ecossistema Imagine
 
-**Pesquisa:** 09/11/2026. **Estado:** parecer técnico preliminar / **G09 ABERTO**. **Não é opinião jurídica final nem autorização de uso comercial.** Sem contratação, provisionamento ou execução de n8n.
+**Pesquisa:** 09/11/2026. **Estado vigente:** [PR #122](https://github.com/rafhael100/imagine-ai-agents/pull/122) incorporado somente à dev (squash `ab31c28afeac4cf75fa3e09a33cec9db37916865`). Parecer técnico **preliminar** / **G09 ABERTO**, não concluído nem homologado. **Não é opinião jurídica final nem autorização de uso comercial.** Sem contratação, provisionamento ou execução de n8n.
 
 ## 1. Fontes oficiais verificadas
 
