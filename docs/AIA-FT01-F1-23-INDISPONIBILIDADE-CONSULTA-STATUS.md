@@ -16,7 +16,7 @@ A guarda de capacidade já introduzida em SEC-08 reserva duas posições para `S
 
 ## Regressão
 
-Dez testes PHP em `tests/Unit/status_outage_trace.php` (U23-01..10) cobrem: falha após confirmação, falha após resultado indeterminado, timeout com consulta indisponível, evento fabricado sem consulta, indisponibilidade antes de envio, resposta duplicada, consulta sem fechamento, interferência de evento não relacionado, minimização de detalhes de erro e reexecução do caminho `execute` sem novo envio. A suíte espera **314 testes PHP e 79 lint**, condicionados à CI no SHA exato.
+Doze testes PHP em `tests/Unit/status_outage_trace.php` (U23-01..12) cobrem: falha após confirmação, falha após resultado indeterminado, timeout com consulta indisponível, evento fabricado sem consulta, indisponibilidade antes de envio, resposta duplicada, consulta sem fechamento, interferência de evento não relacionado, minimização de detalhes de erro e reexecução do caminho `execute` sem novo envio. A suíte espera **316 testes PHP e 79 lint**, condicionados à CI no SHA exato.
 
 ## Limitações e pendências
 

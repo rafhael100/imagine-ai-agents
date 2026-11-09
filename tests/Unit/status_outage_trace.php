@@ -140,4 +140,25 @@ return [
         ]);
         check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $effect)['state'] === 'CONFIRMADO');
     },
+    'U23-11 missing intent signature on outage event is rejected' => function (): void {
+        [$ctx, , $c, , $intent, $approval] = resilienceFixture([], [true]);
+        $effect = $c->execute($intent, $approval, 15);
+        denied('SYNTHETIC_STATUS_UNAVAILABLE', fn() => $c->reconcile($intent));
+        $events = $c->events();
+        unset($events[count($events) - 1]['intent_signature']);
+        check(ReadOnlyTraceReview::inspect($events, $ctx, $intent, $effect)['reason'] === 'INTENT_CONFLICT');
+    },
+    'U23-12 later confirmed status closes outage without second submission' => function (): void {
+        [$ctx, $gateway, $c, , $intent, $approval] = resilienceFixture([true], [true, false]);
+        $initial = $c->execute($intent, $approval, 15);
+        check($initial->state === 'INDETERMINADO');
+        denied('SYNTHETIC_STATUS_UNAVAILABLE', fn() => $c->afterTimeout(
+            $intent, new Attempt('SYNTHETIC_F23_RETRY_TIMEOUT', $intent, 'TIMEOUT')));
+        $confirmed = $c->reconcile($intent);
+        check($confirmed->isConfirmed() && $gateway->submitCount() === 1
+            && $gateway->statusCount() === 2);
+        check(ReadOnlyTraceReview::inspect($c->events(), $ctx, $intent, $confirmed)['state'] === 'CONFIRMADO');
+        check(count(array_filter($c->events(), static fn(array $event): bool =>
+            $event['code'] === 'SYNTHETIC_STATUS_UNAVAILABLE')) === 1);
+    },
 ];
