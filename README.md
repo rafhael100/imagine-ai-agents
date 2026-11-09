@@ -1,5 +1,13 @@
 # Imagine AI Agents
 
+## R01/EVID-06 — CI unificada na branch dev (09/11/2026)
+
+- Workflow `.github/workflows/r01-dev-integrity.yml` concentra os validadores de gates, paridade contratual, gerador do painel e regressão PHP em alterações relevantes de `dev` ou PRs direcionados à dev.
+- Trabalho somente offline, em repositório público, com permissão de leitura, timeout de seis minutos, sem instalação ou API externa; se o projeto ficar privado, o job não executa para evitar surpresas de cobrança.
+- A CI indica integridade sintética, **não GO de integração**. Ver `docs/AIA-R01-EVID-06-CI-INTEGRIDADE-DEV.md`. Gates R01/CRM continuam abertos.
+
+---
+
 ## R01/EVID-05 — geração determinística do painel de homologação (09/11/2026)
 
 - Novo template HTML e gerador offline `tools/generate_op01_dashboard.py`. As **27 linhas** do painel agora provêm dos CSVs validados, sem edição manual duplicada.

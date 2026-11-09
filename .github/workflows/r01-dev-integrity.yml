@@ -1,0 +1,70 @@
+name: R01 development integrity - offline and read-only
+
+on:
+  push:
+    branches:
+      - dev/ft01-aia-core-mocks-2026-11-06
+      - dev/r01-evid-06-unified-dev-ci-2026-11-09
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'tools/**'
+      - 'contracts/**'
+      - 'docs/evidencias/**'
+      - 'examples/r01-op01-readiness-offline*.html'
+      - '.github/workflows/r01-dev-integrity.yml'
+  pull_request:
+    branches:
+      - dev/ft01-aia-core-mocks-2026-11-06
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'tools/**'
+      - 'contracts/**'
+      - 'docs/evidencias/**'
+      - 'examples/r01-op01-readiness-offline*.html'
+      - '.github/workflows/r01-dev-integrity.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r01-integrity-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integrity:
+    if: ${{ github.event.repository.private == false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Read-only checkout of reviewed SHA
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Confirm runtime is available without installing dependencies
+        shell: bash
+        run: |
+          python3 --version
+          php -v
+          git rev-parse HEAD
+      - name: Validate CRM proposal snapshot, gate inventory and generated dashboard
+        shell: bash
+        run: |
+          python3 tools/check_r01_readiness.py
+          python3 tools/check_op01_contract_parity.py
+          python3 tools/generate_op01_dashboard.py --check
+          python3 tools/check_op01_readiness_dashboard.py
+          python3 -m unittest discover -s tests/Contracts -p test_r01_readiness.py -v
+          python3 -m unittest discover -s tests/Contracts -p test_op01_contract_parity.py -v
+          python3 -m unittest discover -s tests/Contracts -p test_op01_readiness_dashboard.py -v
+          python3 -m unittest discover -s tests/Contracts -p test_op01_dashboard_generator.py -v
+          php -l tools/op01_php_parser_probe.php
+      - name: Full offline PHP baseline and exact commit guard
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_PHP: '73'
+          EXPECTED_CASES: '228'
+        run: |
+          bash tools/validate_ft01_offline.sh
