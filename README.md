@@ -1,5 +1,19 @@
 # Imagine AI Agents
 
+## FT01/F1-09 — avaliação A/B sintética em revisão
+
+O próximo recorte, em branch isolada, acrescenta um **comparador determinístico em PHP** e uma **prévia visual offline**. A suíte de seis casos fictícios fixa dataset, rubrica, escopo e baseline para comparar versões, bloqueando regressões críticas e classificando casos não executados como inconclusivos. **Mesmo um resultado 6/6 exige revisão humana; jamais publica um agente.**
+
+Comandos locais sem serviços ou dependências:
+```sh
+php tests/Unit/run.php                     # regressão sintética completa — 97 testes
+php examples/f109-evaluation-demo.php      # três relatórios A/B fictícios
+node tests/Browser/f109_smoke.cjs          # comparador visual offline
+```
+
+Para navegar: abrir `examples/f109-comparador-versoes-offline.html` em navegador. A especificação está em `docs/AIA-FT01-F1-09-AVALIACAO-COMPARACAO-OFFLINE.md`. Código PHP: **97/97 testes, 48/48 lint, 48/48 hashes de blobs conferidos contra o GitHub**. Smoke visual executado em V8 com DOM simulado; **Chrome/Firefox e processo Node real ainda não foram testados para F1-09**. PR F1-09 permanece DRAFT até cumprir esses gates. Sem LLM, APIs, dados reais, custos, deployment, main, nem fechamento de R01/CORE/SEG/AUT.
+
+
 ## ESTADO VIGENTE — FT01/F1-08 integrado à dev (08/11/2026)
 
 - **Código e protótipo:** PR #98 **MERGED exclusivamente em `dev/ft01-aia-core-mocks-2026-11-06`**, squash `d37cd9a603981c3d963823307119c402b67edf89`. `main` inalterada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`. Nenhum deploy, VPS, integração, gasto ou fornecedor acionado.
