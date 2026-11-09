@@ -51,6 +51,8 @@ for required in \
   tests/Unit/crm_read_audit.php \
   src/MockTrust/MockSharedTrustState.php \
   tests/Unit/shared_trust_state.php \
+  tests/Unit/op01_conformance.php \
+  contracts/fixtures/f115-crm-op01-conformance.synthetic.json \
   contracts/crm-aia-readonly.v1.synthetic.schema.json \
   tests/Contracts/test_crm_aia_readonly_schema.py \
   tests/Unit/run.php; do
@@ -60,8 +62,8 @@ for required in \
   fi
 done
 
-expected_php="${EXPECTED_PHP:-65}"
-expected_cases="${EXPECTED_CASES:-168}"
+expected_php="${EXPECTED_PHP:-66}"
+expected_cases="${EXPECTED_CASES:-180}"
 [[ "$expected_php" =~ ^[0-9]+$ && "$expected_cases" =~ ^[0-9]+$ ]] || {
   echo 'BLOCKED: expected counts must be integers' >&2
   exit 2
