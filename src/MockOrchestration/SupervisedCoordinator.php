@@ -117,6 +117,25 @@ final class SupervisedCoordinator
 
     public function events(): array { return $this->events; }
 
+    /**
+     * Derived per-run view for offline inspection. Renumbering is VIEW-LOCAL;
+     * the original process-level trace and its sequences are never changed.
+     * This is neither a signed audit log nor an access-control boundary.
+     */
+    public function eventsForRun(Run $run): array
+    {
+        $this->context->assertSame($run->context);
+        $runRef = self::traceReference($run->id);
+        $projection = [];
+        foreach ($this->events as $event) {
+            if ($event['run'] !== $runRef) continue;
+            $copy = $event;
+            $copy['sequence'] = count($projection) + 1;
+            $projection[] = $copy;
+        }
+        return $projection;
+    }
+
     private function bind(Intent $intent): void
     {
         $this->context->assertSame($intent->context);

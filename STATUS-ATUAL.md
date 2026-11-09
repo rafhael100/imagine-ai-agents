@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## FT01/F1-21 — projeção somente leitura das trilhas por execução (09/11/2026)
+
+- O coordenador agora disponibiliza `eventsForRun(Run)`, que separa eventos fictícios de execuções intercaladas e permite revisar cada uma isoladamente, mantendo o histórico global original.
+- Oito testes U21-01..08 cobrem duas execuções, rejeição de outro tenant, ausência de vazamento, consultas e cancelamento. Meta da suíte: **288 testes PHP e 77 lint**.
+- As sequências da projeção são locais à visualização, **não** prova de auditoria autenticada. Sem acesso ao CRM real; gates R01/CORE/SEG/AUT permanecem **NO-GO**.
+
+---
+
 ## FT01/SEC-08 — limite de capacidade das trilhas sintéticas (09/11/2026)
 
 - O coordenador agora respeita o mesmo teto de **1.024 eventos** aceito pelo revisor de trilhas e reserva capacidade antes de gerar eventos ou chamar gateways/provedores simulados.
