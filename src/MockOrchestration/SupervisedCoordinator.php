@@ -90,7 +90,17 @@ final class SupervisedCoordinator
             // No raw exception or stack enters trace; no automatic retry or status query.
             return $this->effects[$intent->key()];
         }
-        return $this->remember($intent, $effect);
+        try {
+            return $this->remember($intent, $effect);
+        } catch (MockError $error) {
+            // A gateway may respond successfully with an effect bound to the
+            // wrong intention. It is not proof of this dispatch. Fail closed,
+            // record a fixed uncertainty, and never submit again.
+            $unknown = new Effect($intent, 'INDETERMINADO');
+            $this->effects[$intent->key()] = $unknown;
+            $this->trace($intent->step->run, 'INDETERMINADO', $intent);
+            return $unknown;
+        }
     }
 
     public function afterTimeout(Intent $intent, Attempt $attempt): Effect
