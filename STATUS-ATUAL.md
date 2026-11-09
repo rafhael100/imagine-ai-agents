@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## FT01/F1-18 — contadores mínimos da borda, somente offline (09/11/2026)
+
+- **Branch em revisão:** `dev/ft01-f1-18-safe-edge-telemetry-2026-11-09`, baseada no commit dev `0c38e1ecb048d8498b85ab1cd6fbebdd48bc773d`; esta entrada não afirma CI executada nem merge.
+- **Escopo:** contador agregado sem payload ou identificadores e decorador que registra falhas de parsing antes do auditor F1-13, com limite de 256 tentativas e negação uniforme em saturação. São **14 testes novos**, com metas de regressão **228 casos PHP e 73 lint**.
+- **Restrições:** valores fictícios, zero HTTP/CRM real, zero produção, zero dados privados ou custos; R01-G01..G11 e CRM CORE/SEG/AUT permanecem ABERTOS. Ver `docs/AIA-FT01-F1-18-CONTADORES-BORDA-SINTETICA.md`.
+
+---
+
 ## Estado vigente — F1-17 integrado exclusivamente à dev (09/11/2026)
 
 - **PR [#116](https://github.com/rafhael100/imagine-ai-agents/pull/116) MERGED por squash somente em `dev/ft01-aia-core-mocks-2026-11-06`**, commit `69992f878c7b3d6e16b60ff4f446f47c3e23edba`. A `main` foi conferida no SHA `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; sem deploy, VPS, CRM real, credenciais ou gastos de fornecedor.
