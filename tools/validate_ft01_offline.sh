@@ -32,6 +32,12 @@ for required in \
   tests/Unit/supervised.php \
   tests/Unit/catalog_release.php \
   tests/Unit/knowledge_context.php \
+  src/MockEvaluation/MockEvaluationComparator.php \
+  src/MockReview/MockReviewBoard.php \
+  src/MockReview/MockReviewPacket.php \
+  tests/Unit/evaluation_compare.php \
+  tests/Unit/review_handoff.php \
+  examples/f110-review-demo.php \
   tests/Unit/run.php; do
   if [[ ! -f "$required" ]]; then
     echo "BLOCKED: incomplete checkout, missing $required" >&2
@@ -39,8 +45,8 @@ for required in \
   fi
 done
 
-expected_php="${EXPECTED_PHP:-43}"
-expected_cases="${EXPECTED_CASES:-85}"
+expected_php="${EXPECTED_PHP:-52}"
+expected_cases="${EXPECTED_CASES:-111}"
 [[ "$expected_php" =~ ^[0-9]+$ && "$expected_cases" =~ ^[0-9]+$ ]] || {
   echo 'BLOCKED: expected counts must be integers' >&2
   exit 2
