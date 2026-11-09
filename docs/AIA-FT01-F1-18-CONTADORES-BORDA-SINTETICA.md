@@ -1,6 +1,6 @@
 # FT01/F1-18 — Contadores agregados na borda sintética de leitura CRM
 
-**Data:** 09/11/2026. **Estado:** implementação proposta em branch isolada, aguardando validação do commit exato. **Somente offline.**
+**Data:** 09/11/2026. **Estado vigente:** PR [#118](https://github.com/rafhael100/imagine-ai-agents/pull/118) MERGED somente na dev, squash `2603c8da0a7ac7392cf5a27289249d776a095e81`. [CI #42610138453](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42610138453) aprovou 228/228 testes e 73/73 lint no commit exato `210ff31ec365267f019aafbf2d4c1e48991b02a7`. **Somente offline**. Os trechos de expectativa abaixo documentam o gate pré-merge histórico, não uma pendência atual.
 
 ## Problema
 A F1-17 reduz diferenças de conteúdo entre erros, mas falhas de schema são barradas antes do decorador de auditoria F1-13. Na integração real, esse intervalo não deve produzir uma dependência de logs de payload nem revelar nomes de empresas, identificadores, credenciais ou motivos internos de negativa.

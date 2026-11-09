@@ -1,5 +1,11 @@
 # Roadmap proposto — Imagine AI Agents
 
+## Atualização — F1-18 integrada apenas à dev (09/11/2026)
+
+A [CI #42610138453](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42610138453) verificou **228/228 casos PHP e 73/73 arquivos com lint**, no SHA `210ff31ec365267f019aafbf2d4c1e48991b02a7`; o [PR #118](https://github.com/rafhael100/imagine-ai-agents/pull/118) foi integrado somente à dev (`2603c8da0a7ac7392cf5a27289249d776a095e81`). A contagem de falhas de schema antes da auditoria é apenas sintética. Os gates R01 e CRM continuam abertos. **Próxima prioridade:** revisão bilateral de confiança/contrato CRM e critérios formais para um piloto seguro — não criar mocks ilimitadamente. Sem `main` ou produção.
+
+---
+
 ## Estado vigente em 09/11/2026 — protótipos FT01, sem produção
 
 A fundação documental e os laboratórios **sintéticos F1-01 a F1-12** evoluíram e foram integrados **exclusivamente à dev** (último commit `562896763f900a8a264ea46aa35e2aeacd5e0903`). O runner PHP passou **144/144 testes**, e **60/60 arquivos PHP** tiveram sintaxe e blobs Git conferidos. Nenhum agente real, provedor, autenticação/ACL efetiva, CRM, banco, deploy, custo ou produção foi integrado. Os gates R01-G01..G11 e CORE/SEG/AUT CRM permanecem abertos.
