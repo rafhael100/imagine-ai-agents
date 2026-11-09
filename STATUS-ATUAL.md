@@ -1,5 +1,15 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## FT01/F1-15 — kit de conformidade OP-01 fictício em revisão (09/11/2026)
+
+- **Base integrada atual:** F1-14 pelo [PR #110](https://github.com/rafhael100/imagine-ai-agents/pull/110), squash `9995fb99d3e453ecd1930e4917b63b8846029c24`; [CI oficial #42580749791](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42580749791) aprovou **168/168** e **65/65 PHP lint**.
+- **Próximo recorte somente offline:** `dev/ft01-f1-15-contract-conformance-2026-11-09`; 12 fixtures versionadas de contrato CRM OP-01 e consumidor de teste no runner PHP. As novas metas são **180/180 casos e 66/66 PHP**; **não declarar teste aprovado antes do CI**.
+- **Autoridade CRM intocada:** a fixture não é API de produção, não valida JWT, ACL ou política de um cliente. CRM [PR #57](https://github.com/rafhael100/imagine-crm/pull/57) segue documental DRAFT; G01..G11 e CORE/SEG/AUT abertos.
+- **Documento:** `docs/AIA-FT01-F1-15-CONFORMIDADE-OP01-SINTETICA.md`. `main`, VPS e produção sem mudanças.
+
+---
+
+
 ## Estado vigente — F1-14 integrado somente à dev (09/11/2026)
 
 - **PR [#110](https://github.com/rafhael100/imagine-ai-agents/pull/110) MERGED por squash exclusivamente em `dev/ft01-aia-core-mocks-2026-11-06`**; commit `9995fb99d3e453ecd1930e4917b63b8846029c24`. A `main` foi verificada antes do merge no SHA `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`; sem deploy, VPS, CRM real ou custos de fornecedores.
