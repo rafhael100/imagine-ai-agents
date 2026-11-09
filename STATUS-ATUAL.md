@@ -1,5 +1,19 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## Estado vigente — FT01/F1-12 integrado na dev, CRM em revisão (09/11/2026)
+
+- **Agents PR [#106](https://github.com/rafhael100/imagine-ai-agents/pull/106) MERGED somente em `dev/ft01-aia-core-mocks-2026-11-06`**, squash `562896763f900a8a264ea46aa35e2aeacd5e0903`. A `main` está preservada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`.
+- **Recorte entregue:** duas classes `src/MockBridge/`, JSON Schema de fixture versionado `contracts/crm-aia-readonly.v1.synthetic.schema.json`, 17 testes U12 no runner, teste opcional de esquema e validador de SHA atualizado. Somente operação fictícia OP-01 `crm.lead.read_minimal`, campos fictícios `ref/stage`; sem autenticação, ACL ou chamada CRM real.
+- **Prova realmente executada:** `php tests/Unit/run.php` → **144 cases, 0 failures**; **60/60 PHP lint PASS** e **60/60 blobs Git SHA-1 idênticos** ao conteúdo executado, fingerprint FNV32 `87862107`. JSON Schema equivalente semanticamente entre GitHub e ambiente local (FNV32 canônico `87640c2a`), **2 fixtures válidas e 18 inválidas rejeitadas** com Python `jsonschema` pré-instalado.
+- **Integridade pós-merge:** conteúdo dos arquivos de código/testes do squash idêntico ao head aprovado. Nenhuma conexão, deployment, compra, chamada externa, token, dado pessoal ou alteração em VPS ou `main`.
+- **Proposta bilateral no CRM:** [PR #57](https://github.com/rafhael100/imagine-crm/pull/57) — **DRAFT, SOMENTE DOC, SEM MERGE AUTOMÁTICO**. O CRM exige revisão expressa de donos SEG/CORE/Produto/Privacidade, e `DenyByDefaultAuthorizer` segue negando efeitos. Todos os gates R01-G01 a G11 e CORE/SEG/AUT CRM permanecem **abertos**.
+- **Próxima etapa crítica:** homologar formato operacional, autoridade de identidade serviço-serviço, autorização efetiva por empresa/recurso/campo, revogação persistente e ambiente isolado. Os testes sintéticos **não** substituem essas verificações.
+
+**Precedência:** os registros mais antigos abaixo que chamam o F1-12 de branch ainda em revisão são históricos, anteriores ao merge do PR #106. Nenhuma autorização de produção decorre da integração de mocks na dev.
+
+---
+
+
 ## F1-12 — contrato CRM/AIA de leitura mínima, inteiramente offline (09/11/2026)
 
 - **Branch filha:** `dev/ft01-f1-12-crm-read-contract-synthetic-2026-11-09`, derivada de `dev/ft01-aia-core-mocks-2026-11-06` em `836ca9274f65df2adf0e3c90a5fe8552fc6e93e0`.

@@ -1,12 +1,12 @@
 # Imagine AI Agents — Transição dos mocks FT01 para piloto controlado
 
-**Situação em 09/11/2026:** preparação exclusivamente documental, não autorização de integração. Os recortes sintéticos FT01/F1-01 a F1-11 estão integrados à **dev**; último squash `68161e82a2ca36a34634f67b6e34f332c78c1ee8`. A `main` permanece `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`. Nenhum serviço real foi ativado.
+**Situação em 09/11/2026:** preparação exclusivamente documental, não autorização de integração. Os recortes sintéticos FT01/F1-01 a F1-12 estão integrados à **dev**; último squash `562896763f900a8a264ea46aa35e2aeacd5e0903`. A `main` permanece `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`. Nenhum serviço real foi ativado.
 
 ## 1. Resultado atingido, sem extrapolação
 
-O laboratório tem orquestração sintética, segregação simulada de contexto, autorizações fictícias, ferramentas e idempotência mockadas, cotas sintéticas, catálogo/versionamento de agentes, recuperação de conhecimento marcado não confiável, comparação A/B com regressão crítica eliminatória e, no F1-10, revisão simulada de Produto e Segurança com digest/revogação; no F1-11, contexto sintético serviço-serviço, audience/issuer, autorização fictícia pelo produto dono e replay in-memory.
+O laboratório tem orquestração sintética, segregação simulada de contexto, autorizações fictícias, ferramentas e idempotência mockadas, cotas sintéticas, catálogo/versionamento de agentes, recuperação de conhecimento marcado não confiável, comparação A/B com regressão crítica eliminatória e, no F1-10, revisão simulada de Produto e Segurança com digest/revogação; no F1-11, contexto sintético serviço-serviço, audience/issuer, autorização fictícia pelo produto dono e replay in-memory; no F1-12, contrato estrito OP-01 de leitura mínima com esquema versionado e 17 casos negativos/positivos PHP.
 
-A suíte PHP executada tem **127 testes e zero falhas**, **57/57 lints PASS** e **57/57 hashes de blobs Git idênticos** ao head integrado. Isso **não valida autenticação real, autorização dos produtos, LGPD operacional, throughput, custos, continuidade, rastreamento assinado nem produção**.
+A suíte PHP executada tem **144 testes e zero falhas**, **60/60 lints PASS** e **60/60 hashes de blobs Git idênticos** ao head integrado. Isso **não valida autenticação real, autorização dos produtos, LGPD operacional, throughput, custos, continuidade, rastreamento assinado nem produção**.
 
 ## 2. Dependências antes de conectar o primeiro produto
 
@@ -31,7 +31,7 @@ Os gates próprios do CRM (CORE/SEG/AUT) também continuam abertos. Não aprovar
 ## 3. Ordem técnica recomendada, sem precisar de despesas
 
 1. **F1-11 sintético CONCLUÍDO:** contratos de confiança serviço-serviço, contexto, audience, recurso e negação uniforme, 16 testes negativos de confiança (127 no total); **nenhuma credencial real emitida**. Próximo detalhamento: `docs/AIA-R01-G01-G02-CONTRATO-CONFIANCA-PROPOSTA.md` para autenticação e ACL reais, ainda somente documental.
-2. **F1-12 documental / read-only boundary:** definir primeiro piloto CRM com consulta limitada a contexto autorizado, resumo e sugestão; negar escrita por padrão. Não acessar endpoints do CRM até suas políticas serem homologadas.
+2. **F1-12 laboratório OP-01 CONCLUÍDO apenas como mock:** parser, projeção mínima, contrato versionado JSON Schema e teste offline; o [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) propõe revisão bilateral documental e permanece DRAFT/sem merge. **Não** acessar endpoints até homologação específica de CORE/SEG/AUT e G01/G02/G05/G08/G10/G11.
 3. **Revisão transversal de segurança:** ownership por produto, correlação, rollback, timeout, recuperação de dados, logs mínimos, retenção e teste contra acesso cross-tenant. Acompanhamento de G01–G10 com responsáveis.
 4. **Gate executivo crítico G11:** escopo de integração real, infraestrutura isolada, teto de custo explícito e responsável por segurança/aceite. Só após isso contratar/ativar tecnologia ou tocar VPS/credenciais.
 5. **Piloto supervisionado em desenvolvimento:** integrar primeiro o caminho somente leitura à API autorizada do CRM, com acessos de teste segregados, provas negativas e nenhum envio a LLM externo sem análise própria.

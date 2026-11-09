@@ -1,5 +1,8 @@
 # F1-12 — Contrato CRM ↔ AI Agents, leitura mínima sintética
 
+> **Estado atual 09/11/2026:** integrado somente à dev do Agents pelo [PR #106](https://github.com/rafhael100/imagine-ai-agents/pull/106), squash `562896763f900a8a264ea46aa35e2aeacd5e0903`. O [PR CRM #57](https://github.com/rafhael100/imagine-crm/pull/57) é apenas proposta documental e está DRAFT, sem merge. Trechos abaixo que descrevem o desenvolvimento em branch isolada são históricos. Sem autenticação, API CRM, ACL real ou homologação de produção.
+
+
 **Data:** 09/11/2026. **Status:** teste contratual offline, em branch filha da dev. **Não representa integração de API, autenticação real, permissão CRM, homologação de dados ou implantação.**
 
 ## Objetivo
