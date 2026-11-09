@@ -1,0 +1,120 @@
+{
+  "suite": "SYNTHETIC_F115_CONFORMANCE_V1",
+  "contract": "SYNTHETIC_CRM_AIA_READ_V1",
+  "description": "Illustrative offline fixtures; not a CRM API or authorization certificate",
+  "cases": [
+    {
+      "id": "U15-01",
+      "title": "reject version drift",
+      "patch": {
+        "contract": "SYNTHETIC_CRM_AIA_READ_V2"
+      },
+      "expect": "BRIDGE_SCHEMA_DENIED"
+    },
+    {
+      "id": "U15-02",
+      "title": "reject write operation",
+      "patch": {
+        "operation": "crm.task.create"
+      },
+      "expect": "BRIDGE_SCHEMA_DENIED"
+    },
+    {
+      "id": "U15-03",
+      "title": "reject role injection",
+      "patch": {
+        "role": "SYNTHETIC_ADMIN"
+      },
+      "expect": "BRIDGE_SCHEMA_DENIED"
+    },
+    {
+      "id": "U15-04",
+      "title": "reject spurious grant flag",
+      "patch": {
+        "authorization": "SYNTHETIC_TRUE"
+      },
+      "expect": "BRIDGE_SCHEMA_DENIED"
+    },
+    {
+      "id": "U15-05",
+      "title": "reject private lead field",
+      "patch": {
+        "fields": [
+          "email"
+        ]
+      },
+      "expect": "BRIDGE_SCHEMA_DENIED"
+    },
+    {
+      "id": "U15-06",
+      "title": "reject duplicate projection",
+      "patch": {
+        "fields": [
+          "ref",
+          "ref"
+        ]
+      },
+      "expect": "BRIDGE_SCHEMA_DENIED"
+    },
+    {
+      "id": "U15-07",
+      "title": "reject empty projection",
+      "patch": {
+        "fields": []
+      },
+      "expect": "BRIDGE_SCHEMA_DENIED"
+    },
+    {
+      "id": "U15-08",
+      "title": "reject other tenant in body",
+      "patch": {
+        "tenant_ref": "SYNTHETIC_B"
+      },
+      "expect": "BRIDGE_CONTEXT_DENIED"
+    },
+    {
+      "id": "U15-09",
+      "title": "reject principal body substitution",
+      "patch": {
+        "principal_ref": "SYNTHETIC_OTHER"
+      },
+      "expect": "BRIDGE_CONTEXT_DENIED"
+    },
+    {
+      "id": "U15-10",
+      "title": "reject resource body substitution",
+      "patch": {
+        "resource_ref": "SYNTHETIC_B_LEAD"
+      },
+      "expect": "BRIDGE_CONTEXT_DENIED"
+    },
+    {
+      "id": "U15-11",
+      "title": "allow minimal fake projection only",
+      "patch": {
+        "fields": [
+          "ref"
+        ]
+      },
+      "expect": "READ_SYNTHETIC_ONLY",
+      "expected_fields": [
+        "ref"
+      ]
+    },
+    {
+      "id": "U15-12",
+      "title": "preserve explicit allowed order",
+      "patch": {
+        "fields": [
+          "stage",
+          "ref"
+        ]
+      },
+      "expect": "READ_SYNTHETIC_ONLY",
+      "expected_fields": [
+        "stage",
+        "ref"
+      ]
+    }
+  ]
+}
