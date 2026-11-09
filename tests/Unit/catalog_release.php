@@ -200,4 +200,47 @@ return [
         // Catalog selection has no link to capability grants or the fake CRM effect gateway.
         check((new \ImagineAI\Mocks\MockSupervisedGateway('CONFIRMADO'))->submitCount() === 0);
     },
+    'U06-C01 disabling a selected snapshot cannot block its explicit suspension' => function (): void {
+        [$ctx, $catalog, $v1, $r1, $gate] = f106Fixture();
+        $gate->promote('SYNTHETIC_C01_PROMOTE', $v1, $r1, $ctx, 15);
+        $catalog->disable($v1->ref, $ctx);
+        check($gate->current() === null); // Do not expose a disabled version as eligible.
+        check($gate->suspend('SYNTHETIC_C01_SUSPEND', $ctx) === 'SUSPENSO');
+        check($gate->current() === null);
+        check($gate->suspend('SYNTHETIC_C01_SUSPEND', $ctx) === 'SUSPENSO');
+        check(count($gate->events()) === 2 && $gate->events()[1]['code'] === 'SYNTHETIC_SUSPENDED');
+        denied('SNAPSHOT_DENIED', fn () => $gate->rollback(
+            'SYNTHETIC_C01_ROLLBACK', $v1, $r1, $ctx, 15));
+    },
+    'U06-C02 reusing a suspension reference cannot falsely suspend a later version' => function (): void {
+        [$ctx, $catalog, $v1, $r1, $gate] = f106Fixture();
+        $v2 = f106Snapshot($ctx, 'SYNTHETIC_C02_SNAPSHOT_V2', 'SYNTHETIC_C02_VERSION_V2');
+        $catalog->addSnapshot($v2);
+        $r2 = f106Review($v2);
+        $gate->promote('SYNTHETIC_C02_PROMOTE_ONE', $v1, $r1, $ctx, 15);
+        check($gate->suspend('SYNTHETIC_C02_STOP_ONE', $ctx) === 'SUSPENSO');
+        check($gate->suspend('SYNTHETIC_C02_STOP_ONE', $ctx) === 'SUSPENSO');
+        $gate->promote('SYNTHETIC_C02_PROMOTE_TWO', $v2, $r2, $ctx, 15);
+        denied('PROMOTION_CONFLICT', fn () => $gate->suspend('SYNTHETIC_C02_STOP_ONE', $ctx));
+        check($gate->current() === $v2->ref && count($gate->events()) === 3);
+        check($gate->suspend('SYNTHETIC_C02_STOP_TWO', $ctx) === 'SUSPENSO');
+        check($gate->current() === null && count($gate->events()) === 4);
+    },
+    'U06-C03 capability loss suspends only an affected active mock selection' => function (): void {
+        [$ctx, , $v1, $r1, $gate] = f106Fixture();
+        $gate->promote('SYNTHETIC_C03_PROMOTE', $v1, $r1, $ctx, 15);
+        $gate->revokeTool('SYNTHETIC_TOOL_EFFECT'); // Not used by this snapshot.
+        check($gate->current() === $v1->ref && count($gate->events()) === 1);
+        $gate->revokeTool('SYNTHETIC_TOOL_READ');
+        check($gate->current() === null && count($gate->events()) === 2);
+        check($gate->events()[1]['code'] === 'SYNTHETIC_SUSPENDED_TOOL_REVOKED');
+        $gate->revokeTool('SYNTHETIC_TOOL_READ'); // No duplicate suspension event.
+        check(count($gate->events()) === 2);
+        denied('RELEASE_DENIED', fn () => $gate->promote(
+            'SYNTHETIC_C03_NEW_PROMOTION', $v1, $r1, $ctx, 15));
+        denied('RELEASE_DENIED', fn () => $gate->rollback(
+            'SYNTHETIC_C03_ROLLBACK', $v1, $r1, $ctx, 15));
+        $trace = json_encode($gate->events(), JSON_THROW_ON_ERROR);
+        check(!str_contains($trace, 'SYNTHETIC_TOOL_READ'));
+    },
 ];
