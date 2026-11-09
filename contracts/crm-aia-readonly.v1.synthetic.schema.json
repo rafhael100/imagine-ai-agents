@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:imagine:synthetic:crm-aia:read-only:v1",
+  "title": "SYNTHETIC ONLY — not a production CRM API contract",
+  "description": "A fixture description for an offline test. No authentication or CRM authorization is performed by this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "request_ref",
+    "operation",
+    "tenant_ref",
+    "principal_ref",
+    "resource_ref",
+    "purpose_ref",
+    "fields"
+  ],
+  "properties": {
+    "contract": {
+      "const": "SYNTHETIC_CRM_AIA_READ_V1"
+    },
+    "request_ref": {
+      "$ref": "#/$defs/syntheticRef"
+    },
+    "operation": {
+      "const": "crm.lead.read_minimal"
+    },
+    "tenant_ref": {
+      "$ref": "#/$defs/syntheticRef"
+    },
+    "principal_ref": {
+      "$ref": "#/$defs/syntheticRef"
+    },
+    "resource_ref": {
+      "$ref": "#/$defs/syntheticRef"
+    },
+    "purpose_ref": {
+      "$ref": "#/$defs/syntheticRef"
+    },
+    "fields": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "ref",
+          "stage"
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "syntheticRef": {
+      "type": "string",
+      "pattern": "^SYNTHETIC_[A-Z0-9_]{1,80}$"
+    }
+  }
+}
