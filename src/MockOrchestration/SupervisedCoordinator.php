@@ -15,6 +15,10 @@ final class SupervisedCoordinator
     private array $submitted = [];
     private array $effects = [];
     private array $events = [];
+    /** @var array<string, Run> Canonical run instances started by this coordinator. */
+    private array $startedRuns = [];
+    /** @var array<string, array<string, Step>> Canonical steps for started runs. */
+    private array $startedSteps = [];
 
     public function __construct(
         private readonly TenantContext $context,
@@ -24,25 +28,32 @@ final class SupervisedCoordinator
 
     public function start(string $id): Run
     {
+        if (isset($this->startedRuns[$id])) MockError::fail('RUN_ID_CONFLICT');
         $this->assertTraceCapacity(1);
         $run = new Run($id, $this->context);
         $run->transition('EXECUTANDO');
         $this->trace($run, 'STARTED');
+        // Commit the canonical identity only AFTER the trace is recorded.
+        $this->startedRuns[$id] = $run;
         return $run;
     }
 
     public function step(Run $run, string $id): Step
     {
-        $this->context->assertSame($run->context);
+        $this->assertRunCompatible($run);
+        if (isset($this->startedSteps[$run->id][$id])) MockError::fail('STEP_ID_CONFLICT');
         $this->assertTraceCapacity(1);
         $step = $run->step($id);
         $this->trace($run, 'STEP_CREATED', null, $step);
+        if (isset($this->startedRuns[$run->id])) {
+            $this->startedSteps[$run->id][$id] = $step;
+        }
         return $step;
     }
 
     public function suggest(Run $run, array $fields): array
     {
-        $this->context->assertSame($run->context);
+        $this->assertRunCompatible($run);
         $run->assertActive();
         $this->assertTraceCapacity(1); // Do not call a provider without space to record the event.
         $suggestion = $this->ai->suggest($run, $fields);
@@ -109,7 +120,7 @@ final class SupervisedCoordinator
 
     public function transition(Run $run, string $state): void
     {
-        $this->context->assertSame($run->context);
+        $this->assertRunCompatible($run);
         $this->assertTraceCapacity(1); // Do not mutate lifecycle without space for its trace.
         $run->transition($state);
         $this->trace($run, 'RUN_CHANGED');
@@ -125,6 +136,11 @@ final class SupervisedCoordinator
     public function eventsForRun(Run $run): array
     {
         $this->context->assertSame($run->context);
+        // An unknown run has no view; a different object using a known ID must
+        // not inherit that run's synthetic evidence.
+        $known = $this->startedRuns[$run->id] ?? null;
+        if ($known === null) return [];
+        if ($known !== $run) MockError::fail('RUN_ID_CONFLICT');
         $runRef = self::traceReference($run->id);
         $projection = [];
         foreach ($this->events as $event) {
@@ -138,9 +154,29 @@ final class SupervisedCoordinator
 
     private function bind(Intent $intent): void
     {
-        $this->context->assertSame($intent->context);
+        $this->assertRunCompatible($intent->step->run);
+        // For a coordinator-started run, never accept a detached Step instance
+        // which happens to share the same textual identifier.
+        if (isset($this->startedRuns[$intent->step->run->id])
+            && ($this->startedSteps[$intent->step->run->id][$intent->step->id] ?? null) !== $intent->step) {
+            MockError::fail('STEP_NOT_OWNED');
+        }
         $signature = $this->submitted[$intent->key()] ?? null;
         if ($signature !== null && $signature !== $intent->signature()) MockError::fail('IDEMPOTENCY_CONFLICT');
+    }
+
+    /**
+     * These checks prevent accidental identity collisions in this mock.
+     * Legacy standalone fixtures remain accepted only while no run has been
+     * started through this coordinator; this is NOT caller authentication.
+     */
+    private function assertRunCompatible(Run $run): void
+    {
+        $this->context->assertSame($run->context);
+        if ($this->startedRuns !== []
+            && ($this->startedRuns[$run->id] ?? null) !== $run) {
+            MockError::fail('RUN_NOT_OWNED');
+        }
     }
 
     private function remember(Intent $intent, Effect $effect): Effect
