@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## FT01/SEC-01 — guarda de isolamento do núcleo sintético (09/11/2026)
+
+- Novo verificador PHP por tokens, aplicado ao diretório `src/` sem executar código-fonte. Identifica introdução direta de chamadas de rede, banco, processo, arquivos, carregamento dinâmico e superglobais.
+- Dez testes Python com fixtures fictícias cobrem bloqueios, comentários e strings inertes, parse inválido, links simbólicos e limites de tamanho. CI unificada da dev executa a nova guarda antes da regressão completa.
+- Limitação explícita: **não é sandbox nem análise estática exaustiva**; não fecha R01-G01..G11 ou CRM CORE/SEG/AUT. `NO-GO` para qualquer conexão real.
+
+---
+
 ## Estado vigente — EVID-07 integrado, integridade do contrato reforçada (09/11/2026)
 
 - [PR #130](https://github.com/rafhael100/imagine-ai-agents/pull/130) integrado **somente à dev**, squash `21300c5e518166e7ac51ad5020d645c17668edb0`. A [CI do PR #42630115145](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42630115145) passou no SHA revisado `0277abf91012bfc12f51a2625fce296abab1a689`; a [CI integrada #42630193545](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42630193545) passou no HEAD exato `21300c5e518166e7ac51ad5020d645c17668edb0`.

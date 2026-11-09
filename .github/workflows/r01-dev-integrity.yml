@@ -60,6 +60,12 @@ jobs:
           python3 -m unittest discover -s tests/Contracts -p test_op01_readiness_dashboard.py -v
           python3 -m unittest discover -s tests/Contracts -p test_op01_dashboard_generator.py -v
           php -l tools/op01_php_parser_probe.php
+      - name: Protect synthetic PHP core from unreviewed real-world effects
+        shell: bash
+        run: |
+          php -l tools/check_synthetic_php_isolation.php
+          php tools/check_synthetic_php_isolation.php
+          python3 -m unittest discover -s tests/Contracts -p test_synthetic_php_isolation.py -v
       - name: Full offline PHP baseline and exact commit guard
         shell: bash
         env:
