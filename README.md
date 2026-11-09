@@ -1,5 +1,22 @@
 # Imagine AI Agents
 
+## FT01/F1-11 — fronteira de confiança sintética em revisão
+
+O F1-11 avança a preparação de contratos de confiança serviço-serviço **somente com fixtures**. Inclui emissor, destinatário, contexto empresa/produto/usuário/recurso/finalidade, escopos de leitura, validade, revogação, evidência fictícia do produto dono e bloqueio de replay em memória. **Nenhum token, login, ACL, assinatura ou endpoint real é executado.** SHA-256 é apenas vínculo de conteúdo, não autenticação.
+
+**Validação efetiva:** PHP CLI 8.4.24, **127/127 testes PASS**, **57/57 lint PASS**, **57/57 Git blobs SHA-1 coincidentes** com a árvore do GitHub (fingerprint FNV32 `de8c8fdc`). A demonstração `examples/f111-trust-demo.php` retornou uma consulta `SYNTHETIC_READ_ONLY` seguida de `TRUST_REPLAY_DENIED`, `real_authorization=false`, `external_calls=0`.
+
+```sh
+php tests/Unit/run.php
+php examples/f111-trust-demo.php
+# Em checkout Git exato da branch:
+EXPECTED_SHA=<SHA_EXATO> bash tools/validate_ft01_offline.sh
+```
+
+Detalhes em `docs/AIA-FT01-F1-11-CONTRATOS-CONFIANCA-SINTETICOS.md`. A branch isolada é `dev/ft01-f1-11-synthetic-service-trust-2026-11-09`, com integração planejada apenas na dev após preflight. A `main`, produção, CRM/Portal/Performance reais, dados privados, VPS, gastos e gates R01-G01..G11/CORE/SEG/AUT permanecem preservados.
+
+
+
 ## ESTADO VIGENTE — F1-10 integrado exclusivamente à dev (09/11/2026)
 
 - **PR #102 MERGED na `dev/ft01-aia-core-mocks-2026-11-06`**, squash `70d81bf58d3e3e0b1e3ac87250538451a9c166e9`. `main` preservada em `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`. Sem deploy, infraestrutura alterada ou custos adicionais.
