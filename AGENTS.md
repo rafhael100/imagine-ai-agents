@@ -1,5 +1,13 @@
 # AGENTS.md — Imagine AI Agents
 
+## Checkpoint verificado mais recente — 09/11/2026
+
+- **Somente dev:** [PR #156](https://github.com/rafhael100/imagine-ai-agents/pull/156) (SEC-11) integrado em `785271386bed0734175dfe3a713926235f668685`; [CI de revisão #42731454833](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42731454833) `success` no SHA `1bbcbae739826426cf96a18c143e9a15f66b4d90`, meta **335 testes PHP / 79 lint**. Teto de nonce/revogação em memória sem eviction.
+- **Somente dev:** [PR #157](https://github.com/rafhael100/imagine-ai-agents/pull/157) (SEC-12) integrado em `e7435a5f51e71f3fa3ea9b27e5370f588f37d3cc`; [CI de revisão #42731788772](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42731788772) `success` no SHA `738f7c545e9067486510ac4f69ac650f171234cc`, meta atual **339 testes PHP / 79 lint**. Falha de gravação de revogação bloqueia novas autorizações sintéticas, inclusive após `setAvailable(true)`.
+- **Atenção:** essas CIs atestam os SHAs dos respectivos PRs; não se deve declará-las como runs pós-merge. Baselines antigos abaixo são históricos, não o gate vigente. Nenhum resultado atesta autenticação, autorização ou disponibilidade reais.
+- **Próximo limite crítico:** CRM [PR #57](https://github.com/rafhael100/imagine-crm/pull/57) DRAFT/sem aceite bilateral; R01-G01..G11 e CRM CORE/SEG/AUT **ABERTOS / NO-GO**. Não acessar CRM real, clientes, credenciais, VPS, fornecedores ou `main` sem aprovação específica e validação independente.
+
+
 ## Escopo
 
 Este repositório será a camada compartilhada de agentes de IA para CRM, Portal, Performance AI e Universidade Imagine. Está em **desenvolvimento controlado de protótipos sintéticos em branch dev**, sem integração ou homologação de produção. Os recortes FT01 F1-01 a F1-17 já foram integrados **exclusivamente à dev** (F1-12: PR #106, squash `562896763f900a8a264ea46aa35e2aeacd5e0903`, **144/144 testes PHP**, **60/60 lint e hashes Git blob**); a F1-13 foi integrada pelo PR #108, squash `92a2f0a5f01a0014051594f24d96988e111f85c7`, com **156/156 testes e 63/63 lint PHP em CI**; a `main` permanece sem essa implementação.

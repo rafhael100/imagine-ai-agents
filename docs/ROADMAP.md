@@ -1,3 +1,12 @@
+## Prioridade vigente — integração OP-01 depende de aprovação independente (09/11/2026)
+
+- **Baseline de revisão mais recente:** FT01/SEC-12, [PR #157](https://github.com/rafhael100/imagine-ai-agents/pull/157) (merge dev `e7435a5f51e71f3fa3ea9b27e5370f588f37d3cc`), [CI #42731788772](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42731788772) `success` no HEAD do PR `738f7c545e9067486510ac4f69ac650f171234cc`, **339 testes PHP / 79 lint**. O PR #156/SEC-11 foi integrado antes (merge `785271386bed0734175dfe3a713926235f668685`; CI de revisão #42731454833 success).
+- **Revisão técnica:** nonces e revogações sintéticos têm limites; uma revogação que não puder ser gravada bloqueia o estado de confiança, sem liberar replay ou restaurar o serviço pelo simples toggle.
+- **Não inventar outro mock para declarar homologação:** a próxima fase requer contrato bilateral CRM OP-01, IAM de serviço real, ACL/RLS, finalidade e minimização, revogação distribuída, observabilidade/rollback e autorização de piloto. [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) permanece proposta documental não homologada. R01-G01..G11 e CRM CORE/SEG/AUT **ABERTOS / NO-GO**.
+- Não alterar `main`, dados reais, VPS, produção, licenças ou despesas para aparentar progresso. Os baselines inferiores citados adiante são **históricos**.
+
+---
+
 ## R01/EVID-09 — reconciliação F1-23 e gate bilateral CRM (09/11/2026)
 
 - [PR Agents #151](https://github.com/rafhael100/imagine-ai-agents/pull/151) integrado **somente à dev** em `f50e15f906169d0c12a11c69ec79aab3cdc3e901`, após [CI #42678725023](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42678725023) `success` no HEAD do PR `b69f76bcc24f21d8255af5c06582c187c9ebb048`. Gate de revisão: **320 testes PHP / 79 lint**. Os eventos `STATUS_UNAVAILABLE` e `STATUS_REJECTED` fecham consultas sintéticas sem substituir provas anteriores.

@@ -1,5 +1,12 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## Estado consolidado — SEC-11/SEC-12 (09/11/2026)
+
+- [PR #156](https://github.com/rafhael100/imagine-ai-agents/pull/156) integrado em `785271386bed0734175dfe3a713926235f668685`: limite e falha fechada de nonces e revogações; [CI #42731454833](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42731454833) aprovada no HEAD do PR (335 PHP / 79 lint).
+- [PR #157](https://github.com/rafhael100/imagine-ai-agents/pull/157) integrado em `e7435a5f51e71f3fa3ea9b27e5370f588f37d3cc`: após tentativa de revogação recusada por capacidade, armazenamento sintético fica indisponível até recuperação externa; [CI #42731788772](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42731788772) aprovada no HEAD do PR (**339 PHP / 79 lint**).
+- **Estado operacional: NO-GO**, tudo em memória e offline. Os testes não representam IAM, API, base de dados, retenção, LGPD ou autorização de integração. CRM PR #57 ainda exige revisão CORE/SEG/AUT e os gates R01-G01..G11 continuam abertos. `main`, VPS, produção, custos e clientes sem alteração.
+
+
 ## FT01/F1-23 — falha de consulta de status auditável sem mudança de efeito (09/11/2026)
 
 - A reconciliação agora registra o evento fixo `STATUS_UNAVAILABLE` quando o gateway simulado falha. O erro original continua sendo comunicado, mas não é gravado na trilha, nem muda o último estado confirmado.
