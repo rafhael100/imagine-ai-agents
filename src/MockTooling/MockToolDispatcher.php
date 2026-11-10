@@ -12,6 +12,7 @@ use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence};
 /** Local, supervised dispatch over pre-existing fake services only. */
 final class MockToolDispatcher
 {
+    private const MAX_TRACE_EVENTS = 1024;
     private array $events = [];
 
     public function __construct(
@@ -35,6 +36,9 @@ final class MockToolDispatcher
         ?Intent $intent = null,
         ?Approval $approval = null,
     ): array {
+        // Reserve one local audit event before any tool, suggestion or
+        // synthetic effect executes. No event capacity means no operation.
+        $this->assertTraceRoom();
         try {
             $kind = $this->catalog->kind($toolId, $version);
             if ($grant === null) MockError::fail('CAPABILITY_DENIED');
@@ -89,6 +93,11 @@ final class MockToolDispatcher
         ?MockOwnerScopeEvidence $owner,
         int $now,
     ): array {
+        // If no trace can be written, refuse before consuming a nonce.
+        // This endpoint returns a generic denial by contract.
+        if (count($this->events) >= self::MAX_TRACE_EVENTS) {
+            return self::deniedRead();
+        }
         try {
             if ($this->catalog->kind($toolId, $version) !== 'READ') {
                 MockError::fail('TOOL_DENIED');
@@ -132,16 +141,29 @@ final class MockToolDispatcher
             // Never expose the existence of another tenant's lead, policy
             // reason, token, untrusted field or internal exception text.
             $this->trace($toolId, $context, 'DENIED');
-            return [
-                'kind' => 'READ', 'state' => 'DENIED_OR_NOT_FOUND',
-                'real_authorization' => false, 'external_calls' => 0,
-            ];
+            return self::deniedRead();
+        }
+    }
+
+    private static function deniedRead(): array
+    {
+        return [
+            'kind' => 'READ', 'state' => 'DENIED_OR_NOT_FOUND',
+            'real_authorization' => false, 'external_calls' => 0,
+        ];
+    }
+
+    private function assertTraceRoom(): void
+    {
+        if (count($this->events) >= self::MAX_TRACE_EVENTS) {
+            MockError::fail('TOOL_TRACE_CAPACITY_DENIED');
         }
     }
 
     /** Minimal synthetic event codes: never text/material, secrets or raw IDs. */
     private function trace(string $toolId, TenantContext $context, string $code): void
     {
+        $this->assertTraceRoom();
         $this->events[] = [
             'sequence' => count($this->events) + 1,
             'product' => self::traceReference($context->product),
