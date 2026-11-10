@@ -159,4 +159,50 @@ return [
         check($effect->isConfirmed() && $c->events() === $snapshot
             && $gateway->submitCount() === 1 && $gateway->statusCount() === 0);
     },
+
+    'U43-01 long synthetic run identifier is denied before any STARTED event' => function (): void {
+        $gateway = new MockSupervisedGateway();
+        $c = supervised($gateway);
+        $id = 'SYNTHETIC_' . str_repeat('A', 1024);
+        denied('INVALID_SYNTHETIC_REF', fn() => $c->start($id));
+        check($c->events() === [] && $gateway->submitCount() === 0);
+        check($c->start('SYNTHETIC_F143_RECOVERY') instanceof Run);
+        check(count($c->events()) === 1);
+    },
+    'U43-02 empty synthetic run suffix is denied before state allocation' => function (): void {
+        $c = supervised();
+        denied('INVALID_SYNTHETIC_REF', fn() => $c->start('SYNTHETIC_'));
+        check($c->events() === []);
+    },
+    'U43-03 exactly bounded run identifier is accepted but next byte is not' => function (): void {
+        $c = supervised();
+        $max = 'SYNTHETIC_' . str_repeat('A', 70);
+        check(strlen($max) === 80);
+        $run = $c->start($max);
+        check($run->id === $max && count($c->events()) === 1);
+        denied('INVALID_SYNTHETIC_REF', fn() => $c->start($max . 'A'));
+        check(count($c->events()) === 1
+            && array_column($c->events(), 'code') === ['SYNTHETIC_STARTED']);
+    },
+    'U43-04 long step identifier is denied without recording a STEP_CREATED' => function (): void {
+        [$c, $run, $gateway] = f22();
+        $prior = $c->events();
+        denied('INVALID_SYNTHETIC_REF', fn() => $c->step(
+            $run, 'SYNTHETIC_' . str_repeat('B', 87)));
+        check($c->events() === $prior && $gateway->submitCount() === 0);
+        $step = $c->step($run, 'SYNTHETIC_F143_STEP');
+        check($step->id === 'SYNTHETIC_F143_STEP'
+            && array_column($c->events(), 'code') === [
+                'SYNTHETIC_STARTED', 'SYNTHETIC_STEP_CREATED',
+            ]);
+    },
+    'U43-05 exactly bounded step identifier is accepted and remains unique' => function (): void {
+        [$c, $run] = f22();
+        $max = 'SYNTHETIC_' . str_repeat('B', 86);
+        check(strlen($max) === 96);
+        $step = $c->step($run, $max);
+        check($step->id === $max && count($c->events()) === 2);
+        denied('STEP_ID_CONFLICT', fn() => $c->step($run, $max));
+        check(count($c->events()) === 2);
+    },
 ];
