@@ -60,7 +60,7 @@ A [SEC-45](AIA-FT01-SEC-45-REVALIDACAO-POS-SUGESTAO.md) foi integrada à dev: re
 
 A [SEC-46](AIA-FT01-SEC-46-RECIBO-REVISAO-OWNER-ABA.md) foi integrada à dev, bloqueando revogação+reconcessão (ABA) e recheck sem recibo. 12 regressões; **597 testes PHP / 83 lint** aprovados na [CI pós-merge #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251), [EVID-31](AIA-R01-EVID-31-SEC46-CI-POSTMERGE.md). É memória local, não ACL/nonce distribuídos.
 
-A [SEC-47](AIA-FT01-SEC-47-RECHECK-TEMPO-MONOTONICO.md) nega retrocesso do relógio sintético por recibo e impede restauração de provas expiradas: oito regressões. **Gate em revisão: 605 PHP / 83 lint**. Sem relógio confiável entre processos nem CRM real.
+A [SEC-47](AIA-FT01-SEC-47-RECHECK-TEMPO-MONOTONICO.md) integrada à dev bloqueia retrocesso/expiração no recheck sintético, com oito regressões e **605 testes PHP / 83 lint**. [CI pós-merge #42923158871](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42923158871) e [EVID-32](AIA-R01-EVID-32-SEC47-CI-POSTMERGE.md) aprovadas; sem relógio real nem CRM.
 
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 
