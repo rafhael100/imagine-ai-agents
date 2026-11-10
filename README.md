@@ -11,6 +11,10 @@
 
 **SEC-21/22:** a ferramenta aceita somente Run/Step canônicos do coordenador, e IDs excessivos são recusados antes do registro de estado. [PR #186](https://github.com/rafhael100/imagine-ai-agents/pull/186) e [PR #187](https://github.com/rafhael100/imagine-ai-agents/pull/187) passaram também nas CIs pós-merge; consulte o [dossiê EVID-20](docs/AIA-R01-EVID-20-RUN-STEP-CANONICO-414.md). O dossiê EVID-18 é histórico.
 
+## Revisão de referências e aprovações — SEC-23/SEC-24
+
+As [SEC-23 / PR #189](https://github.com/rafhael100/imagine-ai-agents/pull/189) e [SEC-24 / PR #190](https://github.com/rafhael100/imagine-ai-agents/pull/190) limitam entradas de Intents, aprovações e identificadores Run/Step também no domínio direto. [EVID-21](docs/AIA-R01-EVID-21-LIMITES-DOMINIO-427.md) reúne as provas e os bloqueios reais. São verificações de laboratório, não autenticação.
+
 ## Executar e verificar, sem rede
 
 Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem instalar serviços ou baixar dependências.
@@ -18,10 +22,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=414 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=427 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**Baseline verificado na dev:** **414 testes PHP / lint de 82 arquivos PHP**, mais os verificadores Python de contrato e isolamento, [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) `success`. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**Baseline verificado na dev:** **427 testes PHP / lint de 82 arquivos PHP**, mais os verificadores Python de contrato e isolamento, [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) `success`. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
