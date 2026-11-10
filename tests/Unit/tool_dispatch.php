@@ -136,6 +136,39 @@ final class F142CountingProvider implements AiSuggestionProvider
     }
 }
 
+
+/**
+ * SEC-44: tool → edge → public facade → owner reader, entirely in one PHP
+ * process with fictional data; never a real CRM adapter or HTTP request.
+ */
+function f166ToolReadFixture(\Closure $duringRead): array
+{
+    [, $env, $owner, $ctx] = f112Fixture();
+    $policy = new MockCrmOwnerPolicy();
+    $policy->grantFixture($ctx, ['ref', 'stage']);
+    $shared = new \ImagineAI\MockTrust\MockSharedTrustState();
+    $audit = new MockCrmReadAuditTrail();
+    $counters = new \ImagineAI\MockTelemetry\MockCrmReadEdgeCounters();
+    $reader = new F165MutatingReader(function () use (
+        $duringRead, $policy, $env, $owner, $ctx, $shared
+    ): void {
+        $duringRead($policy, $env, $owner, $ctx, $shared);
+    });
+    $trust = new \ImagineAI\MockTrust\MockTrustGateway(
+        'SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API',
+        ['SYNTHETIC_LEAD_READ'], $shared);
+    $facade = new \ImagineAI\MockBridge\MockCrmReadPublicFacade(
+        $trust, $reader, $policy, $audit);
+    $edge = new \ImagineAI\MockTelemetry\MockCrmReadEdgeBoundary($facade, $counters);
+    $mutations = new MockSupervisedGateway();
+    $coordinator = new SupervisedCoordinator($ctx, $mutations, new MockAiSuggestionProvider());
+    $dispatcher = new MockToolDispatcher(new MockToolCatalog(), $coordinator, $edge);
+    $grant = new MockCapabilityGrant('SYNTHETIC_F166_GRANT',
+        MockToolCatalog::READ, $ctx, 10, 20);
+    return [$dispatcher, $grant, $env, $owner, $ctx, $policy, $audit,
+        $counters, $reader, $shared, $mutations];
+}
+
 return [
     'U04-01 legacy synthetic read requires CRM-owner OP-01 boundary' => function (): void {
         [$ctx, $gw, , $d, , , , $grant] = toolFixture();
@@ -821,5 +854,117 @@ return [
             MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
             $grant, ['text' => 'SYNTHETIC_TEST'], 15, $run));
         check($gateway->submitCount() === 0);
+    },
+
+    'U66-01 tool read uses same minimal projection and generates one complete audit' => function (): void {
+        [$tool, $grant, $env, $owner, $ctx, , $audit, $counts, $reader, $store, $mut] =
+            f166ToolReadFixture(function (): void {});
+        $result = f136Read($tool, $grant, $env, $owner, $ctx);
+        check($result === [
+            'kind' => 'READ', 'state' => 'SYNTHETIC_OK',
+            'data' => ['ref' => 'SYNTHETIC_A_LEAD'],
+            'real_authorization' => false, 'external_calls' => 0,
+        ]);
+        check($audit->count() === 1 && $store->countConsumed() === 1
+            && $reader->calls === 1 && $mut->submitCount() === 0);
+        check($counts->snapshot()['outcomes']['READ_SYNTHETIC_ONLY'] === 1);
+        check(array_column($tool->events(), 'code') === ['SYNTHETIC_READ']);
+    },
+    'U66-02 tool and edge preserve requested two-field order after post-read checks' => function (): void {
+        [$tool, $grant, $env, $owner, $ctx, , $audit, $counts, $reader, $store] =
+            f166ToolReadFixture(function (): void {});
+        $wire = f112Wire($ctx); $wire['fields'] = ['stage', 'ref'];
+        $result = f136Read($tool, $grant, $env, $owner, $ctx, $wire);
+        check($result['data'] === ['stage' => 'SYNTHETIC_NEW',
+            'ref' => 'SYNTHETIC_A_LEAD']);
+        check($audit->count() === 1 && $reader->calls === 1
+            && $store->countConsumed() === 1);
+        check($counts->snapshot()['outcomes']['READ_SYNTHETIC_ONLY'] === 1);
+    },
+    'U66-03 owner revoked in reader denies at tool surface without exposure' => function (): void {
+        [$tool, $grant, $env, $owner, $ctx, , $audit, $counts, $reader, $store] =
+            f166ToolReadFixture(function ($policy, $env, $owner, $ctx): void {
+                $policy->revokeFixture($ctx);
+            });
+        $result = f136Read($tool, $grant, $env, $owner, $ctx);
+        check($result === f136Denied());
+        check($audit->entries()[0]['reason'] === 'RESOURCE'
+            && $audit->entries()[0]['outcome'] === 'DENIED');
+        check($reader->calls === 1 && $store->countConsumed() === 1);
+        check($counts->snapshot()['outcomes']['DENIED_OR_NOT_FOUND'] === 1);
+        check(array_column($tool->events(), 'code') === ['SYNTHETIC_DENIED']);
+        check(!str_contains(json_encode($result, JSON_THROW_ON_ERROR), $ctx->resource));
+    },
+    'U66-04 suspended tenant during read is invisible at tool surface' => function (): void {
+        [$tool, $grant, $env, $owner, $ctx, , $audit, $counts, $reader] =
+            f166ToolReadFixture(function ($policy, $env, $owner, $ctx): void {
+                $policy->setTenantSuspended($ctx->tenant, true);
+            });
+        check(f136Read($tool, $grant, $env, $owner, $ctx) === f136Denied());
+        check($reader->calls === 1 && $audit->entries()[0]['reason'] === 'RESOURCE');
+        check($counts->snapshot()['outcomes']['DENIED_OR_NOT_FOUND'] === 1);
+    },
+    'U66-05 suspended member during read is invisible at tool surface' => function (): void {
+        [$tool, $grant, $env, $owner, $ctx, , $audit, , $reader] =
+            f166ToolReadFixture(function ($policy, $env, $owner, $ctx): void {
+                $policy->setMemberSuspended($ctx->tenant, $ctx->principal, true);
+            });
+        check(f136Read($tool, $grant, $env, $owner, $ctx) === f136Denied());
+        check($reader->calls === 1 && $audit->entries()[0]['reason'] === 'RESOURCE');
+        check($tool->events()[0]['code'] === 'SYNTHETIC_DENIED');
+    },
+    'U66-06 shared trust revocation during reader work denies without resubmission' => function (): void {
+        [$tool, $grant, $env, $owner, $ctx, , $audit, $counts, $reader, $store, $mut] =
+            f166ToolReadFixture(function ($policy, $env, $owner, $ctx, $state): void {
+                $state->revokeDigest($env->digest);
+            });
+        check(f136Read($tool, $grant, $env, $owner, $ctx) === f136Denied());
+        check($store->countRevoked() === 1 && $store->countConsumed() === 1);
+        check($audit->entries()[0]['reason'] === 'TRUST');
+        check($counts->snapshot()['outcomes']['DENIED_OR_NOT_FOUND'] === 1);
+        check($reader->calls === 1 && $mut->submitCount() === 0);
+    },
+    'U66-07 owner scope proof revoked after initial check denies at tool level' => function (): void {
+        [$tool, $grant, $env, $owner, $ctx, , $audit, , $reader] =
+            f166ToolReadFixture(function ($policy, $env, $owner): void {
+                $owner->revoke();
+            });
+        check(f136Read($tool, $grant, $env, $owner, $ctx) === f136Denied());
+        check($reader->calls === 1 && $audit->entries()[0]['reason'] === 'OWNER');
+    },
+    'U66-08 shared trust store outage during read denies before tool success event' => function (): void {
+        [$tool, $grant, $env, $owner, $ctx, , $audit, $counts, $reader, $store] =
+            f166ToolReadFixture(function ($policy, $env, $owner, $ctx, $state): void {
+                $state->setAvailable(false);
+            });
+        check(f136Read($tool, $grant, $env, $owner, $ctx) === f136Denied());
+        check($store->countConsumed() === 1 && $reader->calls === 1);
+        check($audit->entries()[0]['reason'] === 'TRUST');
+        check($counts->snapshot()['outcomes']['DENIED_OR_NOT_FOUND'] === 1);
+        check($tool->events()[0]['code'] === 'SYNTHETIC_DENIED');
+    },
+    'U66-09 replay after tool read cannot call the reader twice' => function (): void {
+        [$tool, $grant, $env, $owner, $ctx, , $audit, $counts, $reader, $store] =
+            f166ToolReadFixture(function (): void {});
+        check(f136Read($tool, $grant, $env, $owner, $ctx)['state'] === 'SYNTHETIC_OK');
+        check(f136Read($tool, $grant, $env, $owner, $ctx) === f136Denied());
+        check($reader->calls === 1 && $store->countConsumed() === 1);
+        check(array_column($audit->entries(), 'reason') === ['NONE', 'REPLAY']);
+        check($counts->snapshot()['outcomes']['READ_SYNTHETIC_ONLY'] === 1
+            && $counts->snapshot()['outcomes']['DENIED_OR_NOT_FOUND'] === 1);
+        check(array_column($tool->events(), 'code') ===
+            ['SYNTHETIC_READ', 'SYNTHETIC_DENIED']);
+    },
+    'U66-10 schema denial at tool preflight cannot consume fake nonce or edge audit' => function (): void {
+        [$tool, $grant, $env, $owner, $ctx, , $audit, $counts, $reader, $store] =
+            f166ToolReadFixture(function (): void {});
+        $bad = f112Wire($ctx); $bad['unexpected'] = 'SYNTHETIC_FORGED_AUTH';
+        check(f136Read($tool, $grant, $env, $owner, $ctx, $bad) === f136Denied());
+        check($reader->calls === 0 && $store->countConsumed() === 0
+            && $audit->count() === 0 && $counts->snapshot()['attempts'] === 0);
+        check($tool->events()[0]['code'] === 'SYNTHETIC_DENIED');
+        check(f136Read($tool, $grant, $env, $owner, $ctx)['state'] === 'SYNTHETIC_OK');
+        check($reader->calls === 1 && $store->countConsumed() === 1
+            && $audit->count() === 1);
     },
 ];
