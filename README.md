@@ -1,5 +1,20 @@
 # Imagine AI Agents
 
+## Estado atual — 10/11/2026
+
+O laboratório de ferramentas tem leitura mínima governada por borda OP-01, trilha limitada, respostas de sugestão com contrato fechado e, após as SEC-18/19, **encerra Run quando a sugestão é rejeitada e oculta erros arbitrários de gateway**. [PR #177](https://github.com/rafhael100/imagine-ai-agents/pull/177) / [PR #178](https://github.com/rafhael100/imagine-ai-agents/pull/178) integrados **somente na dev**, com CI pós-merge aprovada. O sistema **não possui integração operacional com o CRM**.
+
+**Gate vigente:** 397 testes PHP, 82 lint e verificadores Python. Em checkout Git revisado:
+
+```bash
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=397 bash tools/run_r01_offline_quality_gate.sh
+```
+
+Os comandos e baselines menores abaixo são registros históricos. [EVID-16](docs/AIA-R01-EVID-16-SEGURANCA-TOOL-397.md) documenta os limites: CRM [PR #57](https://github.com/rafhael100/imagine-crm/pull/57) em DRAFT e gates reais **NO-GO** para produção.
+
+---
+
+
 ## Marco de desenvolvimento mais recente — 10/11/2026
 
 A leitura de ferramentas pode usar `readThroughBoundary`, com borda OP-01 sintética e política do CRM dono; o atalho `dispatch(READ)` continua bloqueado. A trilha de ferramentas tem teto de 1.024 eventos e os resultados `SUGGEST` são validados antes de atravessar a interface. PRs [#173](https://github.com/rafhael100/imagine-ai-agents/pull/173), [#174](https://github.com/rafhael100/imagine-ai-agents/pull/174), [#175](https://github.com/rafhael100/imagine-ai-agents/pull/175) integrados **somente na dev**, com CI pós-merge aprovada.
@@ -7,7 +22,7 @@ A leitura de ferramentas pode usar `readThroughBoundary`, com borda OP-01 sinté
 **Gate vigente: 389 testes PHP, 82 lint e regressões Python.** Para executar em checkout Git revisado:
 
 ```bash
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=389 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=397 bash tools/run_r01_offline_quality_gate.sh
 ```
 
 **NO-GO para CRM real e produção:** [EVID-15](docs/AIA-R01-EVID-15-HANDOFF-READ-TOOL-389.md) apresenta os gates pendentes. Sem autenticação/IAM ou ACL real; CRM PR #57 permanece DRAFT.
