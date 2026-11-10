@@ -12,7 +12,7 @@
 
 **SEC-45 integrada à dev (PR #220):** revalida autorização sintética após a sugestão e antes de concluir o Run. Revogação no provedor termina como `FALHOU`, sem resumo, nova leitura ou segundo nonce; dez regressões U67-01..10. [SEC-45](docs/AIA-FT01-SEC-45-REVALIDACAO-POS-SUGESTAO.md). Homologação CRM: `NAO_EXECUTADO` / **NO-GO**.
 
-**SEC-44 integrada à dev (PR #218; [CI #42906719897](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42906719897)):** a ferramenta OP-01 também usa a mesma invariante de projeção das outras três camadas; 10 regressões U66-01..10 validam ferramenta → edge → fachada → leitor, revogações durante a leitura, replay e auditoria. [SEC-44](docs/AIA-FT01-SEC-44-FERRAMENTA-PROJECAO-COMUM.md). CRM real: `NAO_EXECUTADO` / **NO-GO**.
+**SEC-44 integrada à dev (PR #218; [CI #42906719897](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42906719897)):** a ferramenta OP-01 também usa a mesma invariante de projeção das outras três camadas; 10 regressões U66-01..10 validam ferramenta → edge → fachada → leitor, revogações durante a leitura, replay e auditoria. [SEC-44](docs/AIA-FT01-SEC-44-FERRAMENTA-PROJECAO-COMUM.md), [EVID-29](docs/AIA-R01-EVID-29-SEC44-CI-POSTMERGE.md). CRM real: `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-43 integrada à dev (PR #216):** revalida autorização sintética do proprietário, credenciais e revogação compartilhada **após** a leitura e antes da auditoria de sucesso, sem consumir segundo nonce. Dez regressões U65-01..10. [SEC-43](docs/AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md), [EVID-28](docs/AIA-R01-EVID-28-SEC43-CI-POSTMERGE.md). Homologação real: `NAO_EXECUTADO` / **NO-GO**.
 
