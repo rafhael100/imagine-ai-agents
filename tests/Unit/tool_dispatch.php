@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-use ImagineAI\Domain\{Approval, Intent, Run, TenantContext};
+use ImagineAI\Domain\{Approval, Intent, Run, TenantContext, MockError};
+use ImagineAI\Contracts\AiSuggestionProvider;
 use ImagineAI\MockOrchestration\SupervisedCoordinator;
 use ImagineAI\MockResilience\MockFaultGateway;
 use ImagineAI\Mocks\{MockAiSuggestionProvider, MockSupervisedGateway};
@@ -55,6 +56,44 @@ function f136Denied(): array
 {
     return ['kind' => 'READ', 'state' => 'DENIED_OR_NOT_FOUND',
         'real_authorization' => false, 'external_calls' => 0];
+}
+
+
+/** Untrusted fake suggestion source used only by failure-path regressions. */
+final class F138SuggestionProvider implements AiSuggestionProvider
+{
+    public function __construct(private readonly string $mode) {}
+
+    public function suggest(Run $run, array $fields): array
+    {
+        if ($this->mode === 'throw') {
+            throw new \RuntimeException('SYNTHETIC_PRIVATE_UNSAFE_PROVIDER_STACK');
+        }
+        if ($this->mode === 'mockerror') {
+            MockError::fail('SYNTHETIC_PRIVATE_UNSAFE_PROVIDER_ERROR');
+        }
+        $out = (new MockAiSuggestionProvider())->suggest($run, $fields);
+        if ($this->mode === 'forged_text') {
+            $out['text'] = 'SYNTHETIC_PRIVATE_CUSTOMER_PAYLOAD';
+        } elseif ($this->mode === 'extra_token') {
+            $out['secret'] = 'SYNTHETIC_PRIVATE_TOKEN_VALUE';
+        } elseif ($this->mode === 'forged_run') {
+            $out['run'] = 'SYNTHETIC_OTHER_RUN';
+        }
+        return $out;
+    }
+}
+
+function f138SuggestionFixture(string $mode): array
+{
+    $ctx = context();
+    $gateway = new MockSupervisedGateway();
+    $coordinator = new SupervisedCoordinator($ctx, $gateway, new F138SuggestionProvider($mode));
+    $dispatcher = new MockToolDispatcher(new MockToolCatalog(), $coordinator);
+    $run = $coordinator->start('SYNTHETIC_F138_RUN');
+    $grant = new MockCapabilityGrant('SYNTHETIC_F138_GRANT',
+        MockToolCatalog::SUGGEST, $ctx, 10, 20);
+    return [$dispatcher, $coordinator, $gateway, $grant, $ctx, $run];
 }
 
 return [
@@ -343,5 +382,57 @@ return [
             && $d->events()[1023]['code'] === 'SYNTHETIC_READ'
             && $counts->snapshot()['attempts'] === 1
             && $audit->count() === 1);
+    },
+
+    'U38-01 forged suggestion text cannot escape tool boundary or audit' => function (): void {
+        [$d, $c, $gw, $grant, $ctx, $run] = f138SuggestionFixture('forged_text');
+        denied('TOOL_SUGGESTION_DENIED', fn() => $d->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_INPUT'], 15, $run));
+        check($d->events()[0]['code'] === 'SYNTHETIC_DENIED'
+            && $gw->submitCount() === 0);
+        check(!str_contains(json_encode([$d->events(), $c->events()], JSON_THROW_ON_ERROR),
+            'SYNTHETIC_PRIVATE_CUSTOMER_PAYLOAD'));
+    },
+    'U38-02 extra provider token cannot be returned as trusted tool data' => function (): void {
+        [$d, $c, $gw, $grant, $ctx, $run] = f138SuggestionFixture('extra_token');
+        denied('TOOL_SUGGESTION_DENIED', fn() => $d->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_INPUT'], 15, $run));
+        check(array_column($d->events(), 'code') === ['SYNTHETIC_DENIED']);
+        check(!str_contains(json_encode([$d->events(), $c->events()], JSON_THROW_ON_ERROR),
+            'SYNTHETIC_PRIVATE_TOKEN_VALUE') && $gw->submitCount() === 0);
+    },
+    'U38-03 raw provider exception is normalized and audit denial recorded' => function (): void {
+        [$d, $c, $gw, $grant, $ctx, $run] = f138SuggestionFixture('throw');
+        denied('TOOL_SUGGESTION_DENIED', fn() => $d->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_INPUT'], 15, $run));
+        check(array_column($d->events(), 'code') === ['SYNTHETIC_DENIED']
+            && $gw->submitCount() === 0
+            && !str_contains(json_encode($d->events(), JSON_THROW_ON_ERROR),
+                'UNSAFE_PROVIDER_STACK'));
+    },
+    'U38-04 provider-specific MockError is also normalized before caller sees it' => function (): void {
+        [$d, $c, $gw, $grant, $ctx, $run] = f138SuggestionFixture('mockerror');
+        denied('TOOL_SUGGESTION_DENIED', fn() => $d->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_INPUT'], 15, $run));
+        check($d->events()[0]['code'] === 'SYNTHETIC_DENIED'
+            && $gw->submitCount() === 0);
+    },
+    'U38-05 valid fixed synthetic suggestion still passes strict output schema' => function (): void {
+        [$d, $c, $gw, $grant, $ctx, $run] = f138SuggestionFixture('valid');
+        $out = $d->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_INPUT'], 15, $run);
+        check($out === ['kind' => 'SUGGEST', 'state' => 'SYNTHETIC_OK',
+            'data' => [
+                'kind' => 'SYNTHETIC_SUGGESTION', 'version' => 'mock-v1',
+                'run' => $run->id, 'source' => $ctx->resource,
+                'text' => 'SYNTHETIC summary proposal only',
+            ]]);
+        check($d->events()[0]['code'] === 'SYNTHETIC_SUGGESTED'
+            && $gw->submitCount() === 0);
     },
 ];
