@@ -52,7 +52,7 @@ A [SEC-41](AIA-FT01-SEC-41-PROJECAO-OP01-UNIFICADA.md) unifica a regra de proje�
 
 A [SEC-42](AIA-FT01-SEC-42-PARIDADE-MUTACOES-OP01.md) ensaia centenas de variações de requests sintéticas no parser PHP, sem prova de aceitação pelo CRM.
 
-A [SEC-43](AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md) revalida permissões locais após o retorno do leitor e antes da auditoria, com dez regressões offline. Gate em revisão: **565 testes PHP / lint 83**. Isso não substitui transação de autorização real no CRM.
+A [SEC-43](AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md) foi integrada à dev com dez regressões offline e [CI pós-merge #42902464064](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42902464064) aprovada: **565 testes PHP / lint 83**. [EVID-28](AIA-R01-EVID-28-SEC43-CI-POSTMERGE.md) registra limites; não substitui transação de autorização real no CRM.
 
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 

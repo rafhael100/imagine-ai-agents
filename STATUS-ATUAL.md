@@ -6,11 +6,11 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **SEC-43 em revisão:** gate esperado de **565 testes PHP, lint de 83 arquivos PHP e verificadores Python**. Último gate pós-merge aprovado: SEC-42 com 555 testes ([CI #42899017010](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42899017010); [EVID-27](docs/AIA-R01-EVID-27-SEC41-42-POSTMERGE.md)). O número de testes não é percentual de conclusão do produto.
+**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **SEC-43 integrada à dev (PR #216):** **565 testes PHP, lint de 83 arquivos PHP e verificadores Python** aprovados na [CI pós-merge #42902464064](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42902464064), commit `de8d16b380ea72bb82bae6a353823c68cb357dc4`. [EVID-28](docs/AIA-R01-EVID-28-SEC43-CI-POSTMERGE.md). O número de testes não é percentual de conclusão do produto.
 
 ## Últimas entregas verificadas
 
-**SEC-43 em revisão:** revalida autorização sintética do proprietário, credenciais e revogação compartilhada **após** a leitura e antes da auditoria de sucesso, sem consumir segundo nonce. Dez regressões U65-01..10. [SEC-43](docs/AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md). Homologação real: `NAO_EXECUTADO` / **NO-GO**.
+**SEC-43 integrada à dev (PR #216):** revalida autorização sintética do proprietário, credenciais e revogação compartilhada **após** a leitura e antes da auditoria de sucesso, sem consumir segundo nonce. Dez regressões U65-01..10. [SEC-43](docs/AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md). Homologação real: `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-42 integrada à dev (PR #214):** matriz adversarial determinística de mais de 200 entradas para o parser OP-01, comparada à execução PHP em lotes limitados; contrato estrito e sem rede. [SEC-42](docs/AIA-FT01-SEC-42-PARIDADE-MUTACOES-OP01.md). Os 13 cenários reais permanecem `NAO_EXECUTADO` / **NO-GO**.
 
