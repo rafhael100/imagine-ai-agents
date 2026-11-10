@@ -78,6 +78,10 @@ def check(snapshot: Path, manifest_path: Path, schema_path: Path) -> None:
                "nenhum item aprovado", "397 casos PHP"]
     if any(marker not in content for marker in markers):
         raise ParityError("CRM_PROPOSAL_SCOPE_DRIFT")
+    # A stale draft lacking any of the seven unresolved reviewer decisions
+    # is not ready for a bilateral review. Their presence is not an approval.
+    if any(f"OP01-R0{index}" not in content for index in range(1, 8)):
+        raise ParityError("CRM_PROPOSAL_DECISION_MATRIX_DRIFT")
     props = schema.get("properties", {})
     if (set(schema) != ROOT_SCHEMA_KEYS
         or schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema"
