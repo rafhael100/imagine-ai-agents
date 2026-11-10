@@ -1,5 +1,13 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline vigente — SEC-21/SEC-22 (10/11/2026)
+
+- [PR #186](https://github.com/rafhael100/imagine-ai-agents/pull/186), merge `79fa9bb4cadae3a2ee82b334c9c40b32ab905032`, [CI pós-merge #42836105212](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42836105212) success: ferramentas exigem Run/Step registrados pelo coordenador.
+- [PR #187](https://github.com/rafhael100/imagine-ai-agents/pull/187), merge `581cdd9b382f4b5bd0493eca380cfee946dfe1dd`, [CI pós-merge #42836672922](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42836672922) success: IDs de Run <=80 bytes e Step <=96 bytes. 
+- **Gate atual 414 testes PHP / 82 lint + verificadores Python.** [EVID-20](docs/AIA-R01-EVID-20-RUN-STEP-CANONICO-414.md). Números 403 e anteriores abaixo são históricos, não uma nova meta.
+- **NÃO HOMOLOGADO:** CRM PR #57 DRAFT, R01-G01..G11 e CORE/SEG/AUT ABERTOS/NO-GO; sem `main`, VPS, produção, credenciais, clientes ou custos.
+
+
 ## Pacote bilateral de revisão OP-01 — 10/11/2026
 
 - [PR #184](https://github.com/rafhael100/imagine-ai-agents/pull/184), merge dev `65febcf1f271d40ab03534f1817f365bed68ba48`; [CI pós-merge #42770907072](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42770907072) `success`. Gerador e [pacote de revisão EVID-19](docs/AIA-R01-EVID-19-PACOTE-BILATERAL-OP01.md) mapeiam sete decisões, 14 gates e 13 cenários sem permitir aprovação automática.
