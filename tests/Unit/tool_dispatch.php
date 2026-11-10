@@ -286,4 +286,62 @@ return [
         check($counts->snapshot()['attempts'] === 0 && $audit->count() === 0);
         check(f136Read($d, $grant, $env, $owner, $ctx)['state'] === 'SYNTHETIC_OK');
     },
+
+    'U37-01 tool trace stops at 1024 records without evicting old denials' => function (): void {
+        [$ctx, $gw, , $d, , , , $grant] = toolFixture();
+        for ($i = 0; $i < 1024; ++$i) {
+            denied('READ_BOUNDARY_REQUIRED', fn() => $d->dispatch(
+                MockToolCatalog::READ, MockToolCatalog::VERSION, $ctx,
+                $grant(MockToolCatalog::READ), ['fields' => ['ref']], 15));
+        }
+        denied('TOOL_TRACE_CAPACITY_DENIED', fn() => $d->dispatch(
+            MockToolCatalog::READ, MockToolCatalog::VERSION, $ctx,
+            $grant(MockToolCatalog::READ), ['fields' => ['ref']], 15));
+        check(count($d->events()) === 1024 && $d->events()[0]['sequence'] === 1
+            && $d->events()[1023]['sequence'] === 1024);
+        check($gw->submitCount() === 0);
+    },
+    'U37-02 a full tool trace denies mutations before the fake gateway' => function (): void {
+        [$ctx, $gw, $c, $d, , $intent, $approval, $grant] = toolFixture();
+        for ($i = 0; $i < 1024; ++$i) {
+            denied('READ_BOUNDARY_REQUIRED', fn() => $d->dispatch(
+                MockToolCatalog::READ, MockToolCatalog::VERSION, $ctx,
+                $grant(MockToolCatalog::READ), ['fields' => ['ref']], 15));
+        }
+        $before = $c->events();
+        denied('TOOL_TRACE_CAPACITY_DENIED', fn() => $d->dispatch(
+            MockToolCatalog::MUTATE, MockToolCatalog::VERSION, $ctx,
+            $grant(MockToolCatalog::MUTATE), ['material' => 'SYNTHETIC_MATERIAL'],
+            15, null, $intent, $approval));
+        check($gw->submitCount() === 0 && $gw->statusCount() === 0
+            && $c->events() === $before && count($d->events()) === 1024);
+    },
+    'U37-03 a full trace denies a governed read before nonce and owner audit' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$d, $grant, $env, $owner, $ctx, $counts, $audit, $gw] = f136Fixture($p);
+        for ($i = 0; $i < 1024; ++$i) {
+            denied('READ_BOUNDARY_REQUIRED', fn() => $d->dispatch(
+                MockToolCatalog::READ, MockToolCatalog::VERSION, $ctx,
+                $grant, ['fields' => ['ref']], 15));
+        }
+        check(f136Read($d, $grant, $env, $owner, $ctx) === f136Denied());
+        check($counts->snapshot()['attempts'] === 0
+            && $audit->count() === 0
+            && $gw->submitCount() === 0 && count($d->events()) === 1024);
+    },
+    'U37-04 final audit slot permits one governed read but not another' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$d, $grant, $env, $owner, $ctx, $counts, $audit] = f136Fixture($p);
+        for ($i = 0; $i < 1023; ++$i) {
+            denied('READ_BOUNDARY_REQUIRED', fn() => $d->dispatch(
+                MockToolCatalog::READ, MockToolCatalog::VERSION, $ctx,
+                $grant, ['fields' => ['ref']], 15));
+        }
+        check(f136Read($d, $grant, $env, $owner, $ctx)['state'] === 'SYNTHETIC_OK');
+        check(f136Read($d, $grant, $env, $owner, $ctx) === f136Denied());
+        check(count($d->events()) === 1024
+            && $d->events()[1023]['code'] === 'SYNTHETIC_READ'
+            && $counts->snapshot()['attempts'] === 1
+            && $audit->count() === 1);
+    },
 ];
