@@ -15,8 +15,8 @@ SCHEMA = ROOT / "contracts/crm-aia-readonly.v1.synthetic.schema.json"
 FIELDS = ("contract", "request_ref", "operation", "tenant_ref", "principal_ref",
           "resource_ref", "purpose_ref", "fields")
 REFS = ("request_ref", "tenant_ref", "principal_ref", "resource_ref", "purpose_ref")
-PINNED_CRM_PR_HEAD = "a006bd427dbf34afbbbdec3098316c47a59fc608"
-PINNED_CRM_PROPOSAL_BLOB = "6a1b076d2dc50cc29ffc802d6b186c623c6b49ca"
+PINNED_CRM_PR_HEAD = "97bc1e8d6ce4cf4b52378472c31cb49de6a66d51"
+PINNED_CRM_PROPOSAL_BLOB = "cefb390ec41a76d486b137279d92627f097d1d47"
 ROOT_SCHEMA_KEYS = {
     "$schema", "$id", "title", "description", "type",
     "additionalProperties", "required", "properties", "$defs",
@@ -73,9 +73,16 @@ def check(snapshot: Path, manifest_path: Path, schema_path: Path) -> None:
         raise ParityError("CRM_PROPOSAL_FIELDS_DRIFT")
     markers = ["SYNTHETIC_CRM_AIA_READ_V1", "crm.lead.read_minimal",
                "não homologada", "DRAFT / NO MERGE / NO DEPLOY",
-               "G01", "ref", "stage"]
+               "G01", "ref", "stage",
+               "OP01-R01", "OP01-R07",
+               "contract/state/projection/real_authorization/external_calls",
+               "nenhum item aprovado", "397 casos PHP"]
     if any(marker not in content for marker in markers):
         raise ParityError("CRM_PROPOSAL_SCOPE_DRIFT")
+    # A stale draft lacking any of the seven unresolved reviewer decisions
+    # is not ready for a bilateral review. Their presence is not an approval.
+    if any(f"OP01-R0{index}" not in content for index in range(1, 8)):
+        raise ParityError("CRM_PROPOSAL_DECISION_MATRIX_DRIFT")
     props = schema.get("properties", {})
     if (set(schema) != ROOT_SCHEMA_KEYS
         or schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema"
