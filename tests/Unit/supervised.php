@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use ImagineAI\Domain\{Approval, Attempt, Intent, Run, TenantContext};
+use ImagineAI\Domain\{Approval, Attempt, Effect, Intent, MockError, Run, TenantContext};
 use ImagineAI\MockOrchestration\SupervisedCoordinator;
 use ImagineAI\Mocks\{MockAiSuggestionProvider, MockSupervisedGateway};
 
@@ -38,6 +38,53 @@ function f154GatewayFull(string $outcome = 'CONFIRMADO'): array
         if ($i === 255) $last = [$intent, $approval, $effect];
     }
     return [$gateway, $first, $last];
+}
+
+/** Deliberately inconsistent local status adapter to test coordinator defense in depth. */
+final class F157ScriptedStatusGateway implements \ImagineAI\Contracts\CrmEffectGateway
+{
+    private ?string $signature = null;
+    private int $queryIndex = 0;
+    public int $submits = 0;
+    public int $queries = 0;
+
+    /** @param list<string> $responses */
+    public function __construct(
+        private readonly string $initial,
+        private readonly array $responses,
+        private readonly bool $loseResponse = false,
+    ) {}
+
+    public function submit(Intent $intent, ?Approval $approval, int $now): Effect
+    {
+        $intent->step->run->assertActive();
+        if ($approval === null) MockError::fail('APPROVAL_REQUIRED');
+        $approval->assertValid($intent, $now);
+        ++$this->submits;
+        $this->signature = $intent->signature();
+        if ($this->loseResponse) MockError::fail('SYNTHETIC_TIMEOUT');
+        return self::effect($intent, $this->initial);
+    }
+
+    public function status(TenantContext $context, Intent $intent): Effect
+    {
+        $context->assertSame($intent->context);
+        if ($this->signature === null) MockError::fail('INTENT_NOT_SUBMITTED');
+        if ($this->signature !== $intent->signature()) MockError::fail('IDEMPOTENCY_CONFLICT');
+        ++$this->queries;
+        $state = $this->responses[$this->queryIndex] ?? $this->initial;
+        ++$this->queryIndex;
+        return self::effect($intent, $state);
+    }
+
+    private static function effect(Intent $intent, string $state): Effect
+    {
+        if ($state === 'CONFIRMADO') {
+            return new Effect($intent, $state, 'SYNTHETIC_EFFECT_' . hash('sha256', $intent->key()),
+                'SYNTHETIC_MOCK_CRM');
+        }
+        return new Effect($intent, $state);
+    }
 }
 
 return [
@@ -344,5 +391,98 @@ return [
         check($deniedEffect->state === 'NEGADO');
         denied('STATE_CONFLICT', fn () => $gateway->recordSyntheticEvidence($intent, 'CONFIRMADO'));
         check($gateway->status(context(), $intent) === $deniedEffect);
+    },
+
+    'U57-01 pending effect rejects stale unknown status without losing evidence' => function (): void {
+        [, $intent, $approval] = fixture();
+        $gateway = new F157ScriptedStatusGateway('PENDENTE',
+            ['INDETERMINADO', 'PENDENTE']);
+        $c = new SupervisedCoordinator(context(), $gateway, new MockAiSuggestionProvider());
+        $pending = $c->execute($intent, $approval, 15);
+        denied('STATE_CONFLICT', fn () => $c->reconcile($intent));
+        check($c->reconcile($intent) === $pending);
+        check($gateway->submits === 1 && $gateway->queries === 2);
+        check($c->events()[count($c->events())-3]['code'] === 'SYNTHETIC_STATUS_REJECTED');
+    },
+    'U57-02 absent or requested responses cannot demote a pending observation' => function (): void {
+        [, $intent, $approval] = fixture();
+        $gateway = new F157ScriptedStatusGateway('PENDENTE',
+            ['NAO_SOLICITADO', 'SOLICITADO', 'PENDENTE']);
+        $c = new SupervisedCoordinator(context(), $gateway, new MockAiSuggestionProvider());
+        $pending = $c->execute($intent, $approval, 15);
+        denied('STATE_CONFLICT', fn () => $c->reconcile($intent));
+        denied('STATE_CONFLICT', fn () => $c->reconcile($intent));
+        check($c->reconcile($intent) === $pending);
+        check($gateway->submits === 1);
+    },
+    'U57-03 exact pending status replay keeps identity and audit closure' => function (): void {
+        [, $intent, $approval] = fixture();
+        $gateway = new F157ScriptedStatusGateway('PENDENTE', ['PENDENTE', 'PENDENTE']);
+        $c = new SupervisedCoordinator(context(), $gateway, new MockAiSuggestionProvider());
+        $pending = $c->execute($intent, $approval, 15);
+        check($c->reconcile($intent) === $pending);
+        check($c->reconcile($intent) === $pending);
+        check($gateway->submits === 1 && $gateway->queries === 2);
+        $events = $c->events();
+        check(count(array_filter($events, fn (array $event): bool =>
+            $event['code'] === 'SYNTHETIC_STATUS_REQUESTED')) === 2);
+    },
+    'U57-04 exact indeterminate status replay keeps original evidence object' => function (): void {
+        [, $intent, $approval] = fixture();
+        $gateway = new F157ScriptedStatusGateway('INDETERMINADO',
+            ['INDETERMINADO', 'INDETERMINADO']);
+        $c = new SupervisedCoordinator(context(), $gateway, new MockAiSuggestionProvider());
+        $unknown = $c->execute($intent, $approval, 15);
+        check($c->reconcile($intent) === $unknown);
+        check($c->reconcile($intent) === $unknown);
+        check($gateway->submits === 1);
+    },
+    'U57-05 unknown pending confirmed progression is allowed but cannot regress' => function (): void {
+        [, $intent, $approval] = fixture();
+        $gateway = new F157ScriptedStatusGateway('INDETERMINADO',
+            ['PENDENTE', 'CONFIRMADO', 'PENDENTE', 'CONFIRMADO']);
+        $c = new SupervisedCoordinator(context(), $gateway, new MockAiSuggestionProvider());
+        check($c->execute($intent, $approval, 15)->state === 'INDETERMINADO');
+        check($c->reconcile($intent)->state === 'PENDENTE');
+        $confirmed = $c->reconcile($intent);
+        check($confirmed->isConfirmed());
+        denied('STATE_CONFLICT', fn () => $c->reconcile($intent));
+        check($c->reconcile($intent) === $confirmed);
+        check($gateway->submits === 1);
+    },
+    'U57-06 pending denied terminal is immutable after forged confirmation' => function (): void {
+        [, $intent, $approval] = fixture();
+        $gateway = new F157ScriptedStatusGateway('PENDENTE',
+            ['NEGADO', 'CONFIRMADO', 'NEGADO']);
+        $c = new SupervisedCoordinator(context(), $gateway, new MockAiSuggestionProvider());
+        check($c->execute($intent, $approval, 15)->state === 'PENDENTE');
+        $deniedEffect = $c->reconcile($intent);
+        check($deniedEffect->state === 'NEGADO');
+        denied('STATE_CONFLICT', fn () => $c->reconcile($intent));
+        check($c->reconcile($intent) === $deniedEffect);
+    },
+    'U57-07 timeout pending follow-up rejects stale status without re-submit' => function (): void {
+        [, $intent, $approval] = fixture();
+        $gateway = new F157ScriptedStatusGateway('PENDENTE',
+            ['PENDENTE', 'INDETERMINADO', 'PENDENTE'], true);
+        $c = new SupervisedCoordinator(context(), $gateway, new MockAiSuggestionProvider());
+        check($c->execute($intent, $approval, 15)->state === 'INDETERMINADO');
+        $pending = $c->afterTimeout($intent, new Attempt(
+            'SYNTHETIC_SEC35_TIMEOUT', $intent, 'TIMEOUT'));
+        check($pending->state === 'PENDENTE');
+        denied('STATE_CONFLICT', fn () => $c->reconcile($intent));
+        check($c->reconcile($intent) === $pending);
+        check($gateway->submits === 1 && $gateway->queries === 3);
+    },
+    'U57-08 absent status normalizes to unknown before any pending observation' => function (): void {
+        [, $intent, $approval] = fixture();
+        $gateway = new F157ScriptedStatusGateway('INDETERMINADO',
+            ['NAO_SOLICITADO', 'SOLICITADO', 'PENDENTE']);
+        $c = new SupervisedCoordinator(context(), $gateway, new MockAiSuggestionProvider());
+        $unknown = $c->execute($intent, $approval, 15);
+        check($c->reconcile($intent) === $unknown);
+        check($c->reconcile($intent) === $unknown);
+        check($c->reconcile($intent)->state === 'PENDENTE');
+        check($gateway->submits === 1);
     },
 ];
