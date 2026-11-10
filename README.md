@@ -55,7 +55,7 @@ php tests/Unit/run.php
 EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=565 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**Gate SEC-43 em revisão:** **565 testes PHP / lint de 83 arquivos PHP** e Python. [SEC-43](docs/AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md) revalida autorizações fictícias após o leitor; [SEC-42 anterior](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42899017010) passou. Exigir CI no SHA. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**Gate SEC-43 integrado:** **565 testes PHP / lint de 83 arquivos PHP** e Python, [CI pós-merge #42902464064](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42902464064) aprovada. Revalidação após leitor é sintética; [EVID-28](docs/AIA-R01-EVID-28-SEC43-CI-POSTMERGE.md) registra limites e NO-GO. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
