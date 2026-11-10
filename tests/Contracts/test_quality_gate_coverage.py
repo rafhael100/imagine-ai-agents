@@ -52,7 +52,7 @@ class QualityGateCoverage(unittest.TestCase):
     def test_ci_calls_same_local_entrypoint(self):
         self.assertIn("bash tools/run_r01_offline_quality_gate.sh", self.workflow)
         self.assertIn("EXPECTED_PHP: '82'", self.workflow)
-        self.assertIn("EXPECTED_CASES: '458'", self.workflow)
+        self.assertIn("EXPECTED_CASES: '465'", self.workflow)
 
     def test_no_installation_or_direct_external_integration(self):
         for command in ("pip install", "npm install", "apt-get install",
