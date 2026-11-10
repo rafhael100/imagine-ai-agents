@@ -161,4 +161,43 @@ return [
             'real_authorization', 'external_calls']);
         check(!array_key_exists('effect_ref', $out) && !array_key_exists('approved', $out));
     },
+
+    'U59-01 oversized top-level wire key list is denied before copying or sorting' => function (): void {
+        $wire = f112Wire();
+        for ($i = 0; $i < 5000; ++$i) $wire['synthetic_extra_' . $i] = 'SYNTHETIC_NOISE';
+        denied('BRIDGE_SCHEMA_DENIED', fn () => new MockCrmReadRequest($wire));
+        check((new MockCrmReadRequest(f112Wire()))->ref === 'SYNTHETIC_REQUEST_A');
+    },
+    'U59-02 one-megabyte synthetic references are rejected in each reference position' => function (): void {
+        $oversized = 'SYNTHETIC_' . str_repeat('A', 1024 * 1024);
+        foreach (['request_ref', 'tenant_ref', 'principal_ref', 'resource_ref', 'purpose_ref'] as $field) {
+            $wire = f112Wire();
+            $wire[$field] = $oversized;
+            denied('BRIDGE_SCHEMA_DENIED', fn () => new MockCrmReadRequest($wire));
+        }
+    },
+    'U59-03 exact 90-byte synthetic reference boundary remains accepted' => function (): void {
+        $wire = f112Wire();
+        $wire['request_ref'] = 'SYNTHETIC_' . str_repeat('A', 80);
+        check(strlen($wire['request_ref']) === 90);
+        $request = new MockCrmReadRequest($wire);
+        check($request->ref === $wire['request_ref']);
+        $wire['request_ref'] .= 'A';
+        denied('BRIDGE_SCHEMA_DENIED', fn () => new MockCrmReadRequest($wire));
+        $wire['request_ref'] = 'SYNTHETIC_';
+        denied('BRIDGE_SCHEMA_DENIED', fn () => new MockCrmReadRequest($wire));
+    },
+    'U59-04 oversized field list and contract strings cannot widen an OP-01 request' => function (): void {
+        $wire = f112Wire();
+        $wire['fields'] = array_fill(0, 5000, 'ref');
+        denied('BRIDGE_SCHEMA_DENIED', fn () => new MockCrmReadRequest($wire));
+        $wire = f112Wire();
+        $wire['contract'] = str_repeat('S', 1024 * 1024);
+        denied('BRIDGE_SCHEMA_DENIED', fn () => new MockCrmReadRequest($wire));
+        $wire = f112Wire();
+        $wire['operation'] = str_repeat('O', 1024 * 1024);
+        denied('BRIDGE_SCHEMA_DENIED', fn () => new MockCrmReadRequest($wire));
+        $reversed = array_reverse(f112Wire(), true);
+        check((new MockCrmReadRequest($reversed))->ref === 'SYNTHETIC_REQUEST_A');
+    },
 ];
