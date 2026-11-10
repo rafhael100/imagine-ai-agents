@@ -702,4 +702,68 @@ return [
             && array_column($tool->events(), 'code') ===
                 ['SYNTHETIC_DENIED', 'SYNTHETIC_CONFIRMED']);
     },
+
+    'U58-01 oversized tool identifier denied before hashing untrusted payload' => function (): void {
+        [$ctx, $gateway, $coordinator, $dispatcher, $run, , , $grant] = toolFixture();
+        $oversized = 'SYNTHETIC_' . str_repeat('X', 1048576);
+        $before = $coordinator->events();
+        denied('TOOL_DENIED', fn () => $dispatcher->dispatch(
+            $oversized, MockToolCatalog::VERSION, $ctx, $grant(MockToolCatalog::SUGGEST),
+            ['text' => 'SYNTHETIC_REQUEST'], 15, $run));
+        $event = $dispatcher->events()[0];
+        check($event['code'] === 'SYNTHETIC_DENIED'
+            && $event['tool'] === 'SYNTHETIC_' . hash('sha256', 'OVERSIZED_TOOL_ID'));
+        check($coordinator->events() === $before && $gateway->submitCount() === 0);
+    },
+    'U58-02 distinct oversized identifiers share one fixed private audit fingerprint' => function (): void {
+        [$ctx, $gateway, , $dispatcher] = toolFixture();
+        foreach (['A', 'B'] as $value) {
+            $oversized = 'SYNTHETIC_' . str_repeat($value, 2000);
+            denied('TOOL_DENIED', fn () => $dispatcher->dispatch(
+                $oversized, MockToolCatalog::VERSION, $ctx, null,
+                ['fields' => ['ref']], 15));
+        }
+        $events = $dispatcher->events();
+        check(count($events) === 2 && $events[0]['tool'] === $events[1]['tool']);
+        check($events[0]['code'] === 'SYNTHETIC_DENIED'
+            && $events[1]['code'] === 'SYNTHETIC_DENIED');
+        check($gateway->submitCount() === 0);
+    },
+    'U58-03 oversized read tool is denied before consuming nonce or audit slot' => function (): void {
+        [$dispatcher, $grant, $envelope, $owner, $ctx,
+            $counters, $audit, $gateway] = f136Fixture();
+        $oversized = 'SYNTHETIC_' . str_repeat('R', 4096);
+        check(f136Read($dispatcher, $grant, $envelope, $owner, $ctx,
+            null, 15, $oversized) === f136Denied());
+        check($counters->snapshot()['attempts'] === 0 && $audit->count() === 0);
+        check($gateway->submitCount() === 0 && count($dispatcher->events()) === 1);
+        check($dispatcher->events()[0]['tool'] ===
+            'SYNTHETIC_' . hash('sha256', 'OVERSIZED_TOOL_ID'));
+    },
+    'U58-04 boundary length preserves distinct short invalid tool fingerprints' => function (): void {
+        [$ctx, , , $dispatcher] = toolFixture();
+        $within = 'SYNTHETIC_' . str_repeat('Z', 118);
+        check(strlen($within) === 128);
+        denied('TOOL_DENIED', fn () => $dispatcher->dispatch(
+            $within, MockToolCatalog::VERSION, $ctx, null, [], 15));
+        check($dispatcher->events()[0]['tool'] === 'SYNTHETIC_' . hash('sha256', $within));
+        $tooLong = $within . 'Z';
+        denied('TOOL_DENIED', fn () => $dispatcher->dispatch(
+            $tooLong, MockToolCatalog::VERSION, $ctx, null, [], 15));
+        check($dispatcher->events()[1]['tool'] !== $dispatcher->events()[0]['tool']);
+    },
+    'U58-05 oversized denial does not block later valid suggestion and audit sequence' => function (): void {
+        [$ctx, $gateway, , $dispatcher, $run, , , $grant] = toolFixture();
+        denied('TOOL_DENIED', fn () => $dispatcher->dispatch(
+            str_repeat('X', 5000), MockToolCatalog::VERSION, $ctx,
+            $grant(MockToolCatalog::SUGGEST), ['text' => 'SYNTHETIC_REQUEST'], 15, $run));
+        $result = $dispatcher->dispatch(MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+            $ctx, $grant(MockToolCatalog::SUGGEST),
+            ['text' => 'SYNTHETIC_REQUEST'], 15, $run);
+        check($result['state'] === 'SYNTHETIC_OK' && $gateway->submitCount() === 0);
+        $events = $dispatcher->events();
+        check(count($events) === 2 && $events[0]['sequence'] === 1
+            && $events[1]['sequence'] === 2
+            && $events[1]['tool'] === 'SYNTHETIC_' . hash('sha256', MockToolCatalog::SUGGEST));
+    },
 ];
