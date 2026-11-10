@@ -75,10 +75,13 @@ class CanonicalProjectStatusTests(unittest.TestCase):
     def test_sec43_offline_recheck_preserves_no_go_and_reviewer_gate(self):
         current = STATUS.read_text(encoding="utf-8")
         rules = AGENT_RULES.read_text(encoding="utf-8")
-        self.assertIn("SEC-43 em revisão", current)
+        self.assertIn("SEC-43 integrada à dev (PR #216)", current)
         self.assertIn("565 testes PHP", current)
         self.assertIn("83 arquivos PHP", current)
         self.assertIn("AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md", rules)
+        self.assertIn("EVID-28", current)
+        self.assertIn("42902464064", current)
+        self.assertIn("42902464064", README.read_text(encoding="utf-8"))
         self.assertIn("NAO_EXECUTADO", current)
         self.assertIn("NO-GO", current)
 
