@@ -13,6 +13,7 @@ use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence};
 final class MockToolDispatcher
 {
     private const MAX_TRACE_EVENTS = 1024;
+    private const MAX_TOOL_ID_BYTES = 128;
     // Only fixed, reviewed API-level errors may cross the mock dispatcher.
     // A gateway can throw MockError with arbitrary text: never forward it.
     private const PUBLIC_DENIAL_CODES = [
@@ -50,6 +51,8 @@ final class MockToolDispatcher
         // synthetic effect executes. No event capacity means no operation.
         $this->assertTraceRoom();
         try {
+            // Reject oversized caller IDs before any catalog lookup or adapter.
+            if (strlen($toolId) > self::MAX_TOOL_ID_BYTES) MockError::fail('TOOL_DENIED');
             $kind = $this->catalog->kind($toolId, $version);
             if ($grant === null) MockError::fail('CAPABILITY_DENIED');
             $grant->assertPermits($toolId, $context, $now);
@@ -151,6 +154,7 @@ final class MockToolDispatcher
             return self::deniedRead();
         }
         try {
+            if (strlen($toolId) > self::MAX_TOOL_ID_BYTES) MockError::fail('TOOL_DENIED');
             if ($this->catalog->kind($toolId, $version) !== 'READ') {
                 MockError::fail('TOOL_DENIED');
             }
@@ -220,12 +224,22 @@ final class MockToolDispatcher
             'sequence' => count($this->events) + 1,
             'product' => self::traceReference($context->product),
             'tenant' => self::traceReference($context->tenant),
-            'tool' => self::traceReference($toolId),
+            'tool' => self::traceToolRef($toolId),
             'code' => 'SYNTHETIC_' . $code,
         ];
     }
 
     public function events(): array { return $this->events; }
+
+    private static function traceToolRef(string $toolId): string
+    {
+        // A hostile identifier is already denied. Never spend CPU hashing
+        // an arbitrarily large error input or retain a distinct fingerprint.
+        if (strlen($toolId) > self::MAX_TOOL_ID_BYTES) {
+            return self::traceReference('OVERSIZED_TOOL_ID');
+        }
+        return self::traceReference($toolId);
+    }
 
     private static function traceReference(string $value): string
     {
