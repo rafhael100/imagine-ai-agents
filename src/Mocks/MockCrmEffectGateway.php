@@ -8,6 +8,8 @@ use ImagineAI\Domain\{TenantContext, Intent, Approval, Effect, MockError};
 /** Volatile, single-process fake. No concurrency, transactions, or real authorization. */
 final class MockCrmEffectGateway implements CrmEffectGateway
 {
+    // Keep an immutable local proof per idempotency key; never evict old effects.
+    private const MAX_EFFECTS = 256;
     private array $effects = [];
     public function __construct(private readonly string $outcome = 'CONFIRMADO') {
         if (!in_array($outcome, ['CONFIRMADO', 'NEGADO', 'PENDENTE', 'INDETERMINADO'], true)) MockError::fail('STATE_CONFLICT');
@@ -20,6 +22,12 @@ final class MockCrmEffectGateway implements CrmEffectGateway
         (new MockCrmReader())->lead($intent->context, ['ref']);
         $prior = $this->status($intent->context, $intent);
         if (isset($this->effects[$intent->key()])) return $prior;
+        // A fresh synthetic submission must not evade bounded proof storage.
+        // Deny BEFORE creating a fake effect; old replays and status checks
+        // continue to work at capacity, with conflicts checked by status().
+        if (count($this->effects) >= self::MAX_EFFECTS) {
+            MockError::fail('EFFECT_CAPACITY_DENIED');
+        }
         $effect = new Effect($intent, $this->outcome,
             $this->outcome === 'CONFIRMADO' ? 'SYNTHETIC_EFFECT_' . hash('sha256', $intent->key()) : null,
             $this->outcome === 'CONFIRMADO' ? 'SYNTHETIC_MOCK_CRM' : null);
