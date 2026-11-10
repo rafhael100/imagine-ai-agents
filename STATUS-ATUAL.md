@@ -6,9 +6,11 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` inalterada. **SEC-47 integrada à dev (PR #224): 605 testes PHP, lint de 83 arquivos PHP e Python**; [CI pós-merge #42923158871](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42923158871) `success`, commit `502be4fedc685c4e7965d5e77d3905264acac25a`; [EVID-32](docs/AIA-R01-EVID-32-SEC47-CI-POSTMERGE.md). O número de testes não é percentual de conclusão do produto.
+**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` inalterada. **SEC-48 em revisão:** gate **613 testes PHP, lint de 83 arquivos PHP e Python**; última CI pós-merge: [SEC-47 #42923158871](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42923158871), [EVID-32](docs/AIA-R01-EVID-32-SEC47-CI-POSTMERGE.md). O número de testes não é percentual de conclusão do produto.
 
 ## Últimas entregas verificadas
+
+**SEC-48 em revisão:** leitura aninhada da mesma fachada é negada antes do leitor/nonce; o guard interno impede auditoria de sucesso na chamada externa. Oito U70-01..08, [SEC-48](docs/AIA-FT01-SEC-48-REENTRADA-LEITURA-OP01.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-47 integrada à dev (PR #224):** recheck monotônico por recibo bloqueia retrocesso e restauração artificial de provas expiradas. Oito regressões U69-01..08; [SEC-47](docs/AIA-FT01-SEC-47-RECHECK-TEMPO-MONOTONICO.md). Relógio ainda sintético; CRM real `NAO_EXECUTADO` / **NO-GO**.
 
