@@ -174,7 +174,7 @@ return [
             denied('OWNER_POLICY_SCHEMA_DENIED', fn () => $policy->grantFixture($ctx, ['ref']));
         }
     },
-    'U16-17 prior F1-12 mock remains backwards compatible without owner injection' => function (): void {
+    'U16-17 F1-12 fixture now has explicit owner policy injection' => function (): void {
         [$bridge, $env, $owner, $ctx] = f112Fixture();
         $out = $bridge->evaluate(new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15);
         check($out['mode'] === 'SYNTHETIC_ONLY' && $out['external_calls'] === 0);
@@ -195,5 +195,32 @@ return [
         $policy->grantFixture(context(), ['ref']);
         $policy->setTenantSuspended('SYNTHETIC_A', true);
         $attempt($policy); // suspended
+    },
+
+    'U33-01 bridge constructor refuses absent policy by signature' => function (): void {
+        $gate = new MockTrustGateway('SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API',
+            ['SYNTHETIC_LEAD_READ']);
+        try {
+            new MockCrmReadBoundary($gate, new MockCrmReader());
+            throw new \RuntimeException('POLICY_BYPASS_ALLOWED');
+        } catch (\ArgumentCountError) {
+            check(true);
+        }
+    },
+    'U33-02 explicit but ungranted owner policy denies valid trust proof' => function (): void {
+        [$bridge, $env, $owner, $ctx] = f116Fixture(new MockCrmOwnerPolicy());
+        denied('RESOURCE_DENIED_OR_MISSING', fn() => $bridge->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15));
+    },
+    'U33-03 revocation of required policy denies next fresh trust envelope' => function (): void {
+        $policy = new MockCrmOwnerPolicy();
+        $policy->grantFixture(context(), ['ref']);
+        [$first, $env, $owner, $ctx] = f116Fixture($policy);
+        check($first->evaluate(new MockCrmReadRequest(f112Wire($ctx)),
+            $env, $owner, $ctx, 15)['state'] === 'READ_SYNTHETIC_ONLY');
+        $policy->revokeFixture($ctx);
+        [$second, $newEnv, $newOwner] = f116Fixture($policy);
+        denied('RESOURCE_DENIED_OR_MISSING', fn() => $second->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $newEnv, $newOwner, $ctx, 15));
     },
 ];
