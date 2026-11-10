@@ -1,6 +1,12 @@
 # AGENTS.md — Imagine AI Agents
 
-## SEC-41 — contrato comum da projeção OP-01 (10/11/2026)
+## SEC-42 — paridade adversarial OP-01 (10/11/2026)
+
+- `tests/Contracts/test_op01_parser_mutation_parity.py` executa uma matriz determinística de entradas sintéticas contra `tools/op01_php_parser_probe.php`, em lotes de até 32, e compara com oráculo de aceitação estrita do consumidor PHP. Sem libs externas ou rede.
+- Novo teste deve constar em `tools/run_r01_offline_quality_gate.sh` e `tests/Contracts/test_quality_gate_coverage.py`. Baseline PHP **555 casos / lint 83** continua, adicionando regressões Python. [SEC-42](docs/AIA-FT01-SEC-42-PARIDADE-MUTACOES-OP01.md).
+- CRM PR #57 OPEN/DRAFT; 13 cenários reais `NAO_EXECUTADO`, R01-G01..G11 / CORE/SEG/AUT NO-GO. Não usar dados reais, VPS, `main`, produção ou custos.
+
+## SEC-41 — contrato comum da projeção OP-01 integrado à dev (10/11/2026)
 
 - `MockReadProjectionInvariant::canonicalize` valida somente campos `ref/stage` autorizados, string até 90 bytes, valor de `ref` ligado ao contexto e `stage` fixo. A borda valida antes da auditoria; fachada e telemetria usam `isCanonical`.
 - **Gate desta revisão: 555 testes PHP, lint 83 arquivos PHP + Python.** Novo arquivo `src/MockBridge/MockReadProjectionInvariant.php`; [SEC-41](docs/AIA-FT01-SEC-41-PROJECAO-OP01-UNIFICADA.md).

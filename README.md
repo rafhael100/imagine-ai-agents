@@ -55,7 +55,7 @@ php tests/Unit/run.php
 EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=555 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**Gate SEC-41 em revisão:** **555 testes PHP / lint de 83 arquivos PHP** e verificadores Python; o [gate F163 anterior (546)](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42894696737) foi aprovado. A nova CI exige o SHA revisado. [Projeção OP-01 compartilhada](docs/AIA-FT01-SEC-41-PROJECAO-OP01-UNIFICADA.md). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**Gate SEC-41 integrado:** **555 testes PHP / lint de 83 arquivos PHP**, mais Python. [CI pós-merge #42897813673](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42897813673) aprovada. A [SEC-42](docs/AIA-FT01-SEC-42-PARIDADE-MUTACOES-OP01.md) adiciona uma matriz Python adversarial, ainda em revisão. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
