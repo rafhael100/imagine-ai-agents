@@ -313,4 +313,100 @@ return [
         check(!$facade->recheck($wire, $env, $owner, $ctx, 15));
         check($audit->count() === 1);
     },
+
+    'U69-01 backward recheck time invalidates the current read receipt' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$facade, , $audit, $env, $owner, $ctx] = f117Fixture($p);
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 14));
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 15));
+        check($audit->count() === 1);
+    },
+    'U69-02 equal and forward check times keep one receipt and no extra audit' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$facade, , $audit, $env, $owner, $ctx] = f117Fixture($p);
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        foreach ([15, 16, 20, 39] as $now) {
+            check($facade->recheck($wire, $env, $owner, $ctx, $now));
+        }
+        check($audit->count() === 1 && $audit->entries()[0]['reason'] === 'NONE');
+    },
+    'U69-03 expiry at exact boundary cannot be undone by rewinding the clock' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$facade, , $audit, $env, $owner, $ctx] = f117Fixture($p);
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check($facade->recheck($wire, $env, $owner, $ctx, 39));
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 40));
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 39));
+        check($audit->count() === 1);
+    },
+    'U69-04 shorter owner-proof expiry is sticky even with envelope still live' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$facade, , $audit, $env, , $ctx] = f117Fixture($p);
+        $owner = new MockOwnerScopeEvidence('SYNTHETIC_SEC47_SHORT_OWNER',
+            $env->digest, $ctx, 'SYNTHETIC_LEAD_READ', 10, 20, true);
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check($facade->recheck($wire, $env, $owner, $ctx, 19));
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 20));
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 19));
+        check($audit->count() === 1);
+    },
+    'U69-05 invalid negative time cannot later reuse the same read receipt' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$facade, , $audit, $env, $owner, $ctx] = f117Fixture($p);
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check(!$facade->recheck($wire, $env, $owner, $ctx, -1));
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 15));
+        check($audit->count() === 1);
+    },
+    'U69-06 mismatched wire cannot advance a valid receipt clock' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref', 'stage']);
+        [$facade, , $audit, $env, $owner, $ctx] = f117Fixture($p);
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        $other = $wire; $other['fields'] = ['stage'];
+        check(!$facade->recheck($other, $env, $owner, $ctx, 39));
+        check($facade->recheck($wire, $env, $owner, $ctx, 16));
+        check($audit->count() === 1);
+    },
+    'U69-07 malformed recheck invalidates receipt without another read' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$facade, , $audit, $env, $owner, $ctx] = f117Fixture($p);
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        $bad = $wire; $bad['fields'] = [['ref']];
+        check(!$facade->recheck($bad, $env, $owner, $ctx, 16));
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 16));
+        check($audit->count() === 1);
+    },
+    'U69-08 shared proof receipt never consumes a second nonce after expiry' => function (): void {
+        $ctx = context();
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture($ctx, ['ref']);
+        [, $env, $owner] = f112Fixture();
+        $state = new MockSharedTrustState();
+        $audit = new MockCrmReadAuditTrail();
+        $facade = new MockCrmReadPublicFacade(
+            new MockTrustGateway('SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API',
+                ['SYNTHETIC_LEAD_READ'], $state),
+            new MockCrmReader(), $p, $audit);
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check($facade->recheck($wire, $env, $owner, $ctx, 20));
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 40));
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 15));
+        check($state->countConsumed() === 1 && $audit->count() === 1);
+    },
 ];
