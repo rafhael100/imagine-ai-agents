@@ -1,5 +1,12 @@
 # AGENTS.md — Imagine AI Agents
 
+## Checkpoint mais recente — SEC-14/15 (09/11/2026)
+
+- **Fonte canônica:** [EVID-14](docs/AIA-R01-EVID-14-CHECKPOINT-LEITURA-OP01.md). [PR #170](https://github.com/rafhael100/imagine-ai-agents/pull/170) corrigiu ordem política-owner → consumo de nonce, CI #42746265495 success, dev `31ca96adcb161a0aff3d7b3764703501215cc7ce`.
+- **PR #171** removeu a leitura direta `MockToolDispatcher → MockCrmReader` que contornava a borda OP-01. `READ` legado agora falha `READ_BOUNDARY_REQUIRED` e a leitura mínima permanece somente na borda controlada. [CI de revisão #42746731074](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42746731074) e [pós-merge #42746791090](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42746791090) success no commit dev `960b137ca19d2029df1bfe80ecd8d1b5f1e23669`.
+- **Gate vigente: 370 testes PHP, 82 lint e contratos Python.** Testes são exclusivamente offline/sintéticos; CRM PR #57 ainda OPEN/DRAFT, gates R01/CORE/SEG/AUT ABERTOS/NO-GO. Não alterar `main`, VPS, clientes, segredos, custos ou produção.
+
+
 ## Segurança e validação vigente — SEC-13 (09/11/2026)
 
 - **PR [#168](https://github.com/rafhael100/imagine-ai-agents/pull/168)** integrado somente à `dev`, squash `422bb277ecccf80f45b243a94903b63a305cd069`. O `MockCrmReadBoundary` **exige** `MockCrmOwnerPolicy` e chama `assertAllowed` em toda leitura: não existe mais caminho legado sem política do CRM dono do dado.
