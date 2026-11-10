@@ -54,7 +54,7 @@ A [SEC-42](AIA-FT01-SEC-42-PARIDADE-MUTACOES-OP01.md) ensaia centenas de variaç
 
 A [SEC-43](AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md) foi integrada à dev com dez regressões offline e [CI pós-merge #42902464064](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42902464064) aprovada: **565 testes PHP / lint 83**. [EVID-28](AIA-R01-EVID-28-SEC43-CI-POSTMERGE.md) registra limites; não substitui transação de autorização real no CRM.
 
-A [SEC-44](AIA-FT01-SEC-44-FERRAMENTA-PROJECAO-COMUM.md) unifica a checagem de saída da ferramenta de leitura com a invariante OP-01 e exercita 10 cenários offline de revogação, replay e auditoria via ferramenta. **Gate em revisão: 575 testes PHP / 83 lint**, sem CRM real.
+A [SEC-44](AIA-FT01-SEC-44-FERRAMENTA-PROJECAO-COMUM.md) foi integrada à dev com dez regressões offline para ferramenta de leitura, revogação, replay e auditoria. **575 testes PHP / 83 lint** aprovados na [CI pós-merge #42906719897](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42906719897); [EVID-29](AIA-R01-EVID-29-SEC44-CI-POSTMERGE.md). Sem CRM real.
 
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 
