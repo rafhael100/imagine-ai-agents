@@ -1,9 +1,9 @@
 # AGENTS.md — Imagine AI Agents
 
-## SEC-44 — leitura da ferramenta com invariante compartilhada (10/11/2026)
+## SEC-44 — leitura da ferramenta integrada à dev (10/11/2026)
 
 - `MockToolDispatcher::readThroughBoundary()` deve validar a resposta com `MockReadProjectionInvariant::isCanonical` e não manter regex própria; validar recurso, campos e ordem após edge/fachada.
-- **Gate esperado: 575 testes PHP / lint 83 + Python**, 10 regressões U66-01..10 via ferramenta, [SEC-44](docs/AIA-FT01-SEC-44-FERRAMENTA-PROJECAO-COMUM.md).
+- **Gate pós-merge aprovado: 575 testes PHP / lint 83 + Python**; dez U66-01..10. [CI #42906719897](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42906719897) / [SEC-44](docs/AIA-FT01-SEC-44-FERRAMENTA-PROJECAO-COMUM.md) / [EVID-29](docs/AIA-R01-EVID-29-SEC44-CI-POSTMERGE.md).
 - Apenas mock offline; 13 casos reais `NAO_EXECUTADO`, CRM PR #57 OPEN/DRAFT e R01-G01..G11/CORE/SEG/AUT NO-GO. Sem `main`, produção, VPS, clientes, segredos ou custos.
 
 ## SEC-43 — revalidação pós-leitura integrada à dev (10/11/2026)
