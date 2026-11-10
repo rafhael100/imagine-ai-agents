@@ -18,6 +18,14 @@ final class MockCrmReadPublicFacade
 {
     private readonly MockCrmReadAuditedBoundary $boundary;
     private readonly MockCrmReadBoundary $readBoundary;
+    /**
+     * Only the most recent successful synthetic read may be rechecked.
+     * Replacing the lease (rather than keeping a map) bounds memory to one
+     * local slot and fails closed for overlapping mock runs.
+     * @var ?array{envelope:MockTrustEnvelope,owner:MockOwnerScopeEvidence,
+     *   context:string,request_hash:string,revision:int}
+     */
+    private ?array $lastReadReceipt = null;
 
     public function __construct(
         MockTrustGateway $gateway,
@@ -43,9 +51,20 @@ final class MockCrmReadPublicFacade
         int $now,
     ): bool {
         try {
+            $receipt = $this->lastReadReceipt;
+            if ($receipt === null || $envelope === null || $owner === null
+                || $receipt['envelope'] !== $envelope
+                || $receipt['owner'] !== $owner
+                || $receipt['context'] !== $trustedContext->key()
+                || $receipt['request_hash'] !== self::wireFingerprint($wire)) {
+                return false;
+            }
             $request = new MockCrmReadRequest($wire);
             $this->readBoundary->recheck(
                 $request, $envelope, $owner, $trustedContext, $now);
+            // A temporarily revoked/resumed policy cannot reactivate a prior
+            // read, even if the current owner grant looks permitted again.
+            $this->readBoundary->assertPolicyRevision($receipt['revision']);
             return true;
         } catch (\Throwable) {
             return false;
@@ -60,6 +79,9 @@ final class MockCrmReadPublicFacade
         TenantContext $trustedContext,
         int $now,
     ): array {
+        // Do not preserve a previous positive receipt across any new attempt,
+        // including a malformed, denied, audited or replayed read.
+        $this->lastReadReceipt = null;
         try {
             $request = new MockCrmReadRequest($wire);
             $result = $this->boundary->evaluate($request, $envelope, $owner, $trustedContext, $now);
@@ -76,15 +98,34 @@ final class MockCrmReadPublicFacade
                 throw new \LogicException('UNSAFE_SYNTHETIC_PROJECTION');
             }
 
-            // Shared with the pre-audit boundary and edge response checker.
-            // Never let a future adapter bypass resource binding or 90-byte
-            // limits by changing only a downstream response validator.
+            // Keep only an in-memory witness of the successful read; no
+            // externally reusable token, request text or new authorization.
+            if ($envelope === null || $owner === null) {
+                throw new \LogicException('MISSING_SYNTHETIC_PROOF');
+            }
+            $this->lastReadReceipt = [
+                'envelope' => $envelope,
+                'owner' => $owner,
+                'context' => $trustedContext->key(),
+                'request_hash' => self::wireFingerprint($wire),
+                'revision' => $this->readBoundary->policyRevision(),
+            ];
             return self::response('READ_SYNTHETIC_ONLY', $projection);
         } catch (\Throwable) {
             // A real API would translate errors here and log operational detail
             // separately, using a reviewed privacy-conscious transport policy.
             return self::response('DENIED_OR_NOT_FOUND', null);
         }
+    }
+
+    /**
+     * Opaque in-process matching only; never exposed as a proof of identity.
+     * A malformed payload fails closed rather than being serialized into logs.
+     * @param array<string,mixed> $wire
+     */
+    private static function wireFingerprint(array $wire): string
+    {
+        return hash('sha256', json_encode($wire, JSON_THROW_ON_ERROR));
     }
 
     private static function response(string $state, ?array $projection): array
