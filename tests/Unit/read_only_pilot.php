@@ -487,4 +487,47 @@ return [
         check($coord->events()[7]['run_state'] === 'SYNTHETIC_CONCLUIDA');
         check($mut->submitCount() === 0);
     },
+
+    'U68-10 grant revoked and immediately restored by provider cannot finish draft' => function (): void {
+        [$pilot, $coordinator, $mut, $counts, $audit, $env, $owner, $ctx, $policy, $provider] =
+            f167Fixture(function ($policy, $env, $owner, $ctx): void {
+                $policy->revokeFixture($ctx);
+                $policy->grantFixture($ctx, ['ref', 'stage']);
+            });
+        $before = $policy->revision();
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC46_GRANT_ABA') === f130Denial());
+        check($policy->revision() === $before + 2);
+        check($coordinator->events()[3]['run_state'] === 'SYNTHETIC_FALHOU');
+        check($provider->calls === 1 && $mut->submitCount() === 0
+            && $audit->count() === 1 && $counts->snapshot()['attempts'] === 1);
+    },
+    'U68-11 member suspended and resumed during provider is still denied' => function (): void {
+        [$pilot, $coordinator, $mut, $counts, $audit, $env, $owner, $ctx, $policy] =
+            f167Fixture(function ($policy, $env, $owner, $ctx): void {
+                $policy->setMemberSuspended($ctx->tenant, $ctx->principal, true);
+                $policy->setMemberSuspended($ctx->tenant, $ctx->principal, false);
+            });
+        $before = $policy->revision();
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC46_MEMBER_ABA') === f130Denial());
+        check($policy->revision() === $before + 2);
+        check($coordinator->events()[3]['run_state'] === 'SYNTHETIC_FALHOU');
+        check($mut->submitCount() === 0 && $counts->snapshot()['attempts'] === 1
+            && $audit->count() === 1);
+    },
+    'U68-12 policy outage and recovery during provider invalidates former read' => function (): void {
+        [$pilot, $coordinator, $mut, $counts, $audit, $env, $owner, $ctx, $policy] =
+            f167Fixture(function ($policy): void {
+                $policy->setAvailable(false);
+                $policy->setAvailable(true);
+            });
+        $before = $policy->revision();
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC46_OUTAGE_ABA') === f130Denial());
+        check($policy->revision() === $before + 2);
+        check($coordinator->events()[3]['run_state'] === 'SYNTHETIC_FALHOU');
+        check($mut->submitCount() === 0 && $counts->snapshot()['attempts'] === 1
+            && $audit->count() === 1);
+    },
 ];
