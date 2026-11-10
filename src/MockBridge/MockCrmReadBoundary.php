@@ -33,6 +33,7 @@ final class MockCrmReadBoundary
             $envelope, $owner, $trustedContext, 'SYNTHETIC_LEAD_READ', $now);
     }
 
+    public function evaluate(
         MockCrmReadRequest $request,
         ?MockTrustEnvelope $envelope,
         ?MockOwnerScopeEvidence $owner,
