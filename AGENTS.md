@@ -1,10 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
-## F163 / EVID-25 — ensaio de cenários OP-01 (10/11/2026)
+## F163 / EVID-25/26 — ensaio de cenários OP-01 integrado à dev (10/11/2026)
 
 - Cobrir **U63-OP01-N01..N11 e P01..P02**, sem HTTP, rede, IAM ou CRM real; estado compartilhado de nonce é só objeto local, e espera não é fila real.
 - A matriz de homologação `docs/evidencias/op01-casos-homologacao.csv` fica integralmente em **NAO_EXECUTADO**, com 7 decisões OP01-R01..R07 não aprovadas. Ensaio não equivale a aceite.
-- **Gate esperado nesta revisão: 546 testes PHP / lint 82 + Python.** [EVID-25](docs/AIA-R01-EVID-25-ENSAIOS-OP01-13-CENARIOS.md). CRM PR #57 OPEN/DRAFT e R01-G01..G11 / CORE/SEG/AUT NO-GO.
+- **Gate pós-merge verificado: 546 testes PHP / lint 82 + Python.** [EVID-25](docs/AIA-R01-EVID-25-ENSAIOS-OP01-13-CENARIOS.md) / [EVID-26](docs/AIA-R01-EVID-26-F163-CI-POSTMERGE.md) e [CI #42894696737](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42894696737). CRM PR #57 OPEN/DRAFT e R01-G01..G11 / CORE/SEG/AUT NO-GO.
 - Sem `main`, VPS, produção, credenciais, clientes ou custos.
 
 ## Baseline integrado à dev — SEC-40 (10/11/2026)
