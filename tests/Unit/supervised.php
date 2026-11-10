@@ -11,6 +11,35 @@ function supervised(?MockSupervisedGateway $gateway = null, ?TenantContext $cont
     return new SupervisedCoordinator($context ?? context(), $gateway ?? new MockSupervisedGateway(), new MockAiSuggestionProvider());
 }
 
+/** Standalone valid fake intents used exclusively for SEC-32 capacity regressions. */
+function f154GatewayIntent(int $n, ?TenantContext $ctx = null, string $material = 'SYNTHETIC_TASK'): array
+{
+    $context = $ctx ?? context();
+    $run = new Run('SYNTHETIC_EFFECT_GATE_RUN_' . $n, $context);
+    $run->transition('EXECUTANDO');
+    $intent = new Intent('SYNTHETIC_EFFECT_GATE_INTENT_' . $n,
+        $run->step('SYNTHETIC_EFFECT_GATE_STEP_' . $n),
+        'SYNTHETIC_EFFECT_GATE_KEY_' . $n, 'mock.task.create', $material);
+    $approval = new Approval('SYNTHETIC_EFFECT_GATE_APPROVAL_' . $n,
+        $intent, 'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+    return [$intent, $approval];
+}
+
+/** @return array{0:\ImagineAI\Mocks\MockCrmEffectGateway,1:array,2:array} */
+function f154GatewayFull(string $outcome = 'CONFIRMADO'): array
+{
+    $gateway = new \ImagineAI\Mocks\MockCrmEffectGateway($outcome);
+    $first = [];
+    $last = [];
+    for ($i = 0; $i < 256; ++$i) {
+        [$intent, $approval] = f154GatewayIntent($i);
+        $effect = $gateway->submit($intent, $approval, 15);
+        if ($i === 0) $first = [$intent, $approval, $effect];
+        if ($i === 255) $last = [$intent, $approval, $effect];
+    }
+    return [$gateway, $first, $last];
+}
+
 return [
     'U02-01 exact approval permits only fake confirmed proof' => function (): void {
         $gateway = new MockSupervisedGateway('CONFIRMADO');
@@ -161,5 +190,87 @@ return [
             check($event['run_state'] === 'SYNTHETIC_EXECUTANDO');
         }
         check(!str_contains(json_encode($events, JSON_THROW_ON_ERROR), 'payload_marker'));
+    },
+
+    'U54-01 256 immutable synthetic effects fit and 257th denied' => function (): void {
+        [$gateway, , $last] = f154GatewayFull();
+        check($gateway->count() === 256 && $last[2]->isConfirmed());
+        [$next, $approval] = f154GatewayIntent(256);
+        denied('EFFECT_CAPACITY_DENIED', fn () => $gateway->submit($next, $approval, 15));
+        check($gateway->count() === 256);
+        check($gateway->status(context(), $next)->state === 'NAO_SOLICITADO');
+    },
+    'U54-02 exact replay and prior status are retained after capacity' => function (): void {
+        [$gateway, $first, $last] = f154GatewayFull('PENDENTE');
+        check($gateway->submit($first[0], $first[1], 15) === $first[2]);
+        check($gateway->submit($last[0], $last[1], 15) === $last[2]);
+        check($gateway->status(context(), $first[0]) === $first[2]);
+        check($gateway->status(context(), $last[0]) === $last[2]);
+        check($gateway->count() === 256);
+    },
+    'U54-03 collision on old key denies even when capacity is exhausted' => function (): void {
+        [$gateway, $first] = f154GatewayFull();
+        [$colliding, $approval] = f154GatewayIntent(0, null, 'SYNTHETIC_CHANGED');
+        denied('IDEMPOTENCY_CONFLICT', fn () => $gateway->submit($colliding, $approval, 15));
+        denied('IDEMPOTENCY_CONFLICT', fn () => $gateway->status(context(), $colliding));
+        check($gateway->status(context(), $first[0]) === $first[2]);
+        check($gateway->count() === 256);
+    },
+    'U54-04 denied approval and wrong resource do not burn the last capacity slot' => function (): void {
+        $gateway = new \ImagineAI\Mocks\MockCrmEffectGateway();
+        for ($i = 0; $i < 255; ++$i) {
+            [$intent, $approval] = f154GatewayIntent($i);
+            $gateway->submit($intent, $approval, 15);
+        }
+        [$last, $approval] = f154GatewayIntent(255);
+        denied('APPROVAL_REQUIRED', fn () => $gateway->submit($last, null, 15));
+        $wrong = new TenantContext('SYNTHETIC_CRM', 'SYNTHETIC_A', 'SYNTHETIC_PRINCIPAL',
+            'SYNTHETIC_SUMMARY', 'SYNTHETIC_UNKNOWN_LEAD');
+        [$bad, $badApproval] = f154GatewayIntent(255, $wrong);
+        denied('RESOURCE_DENIED_OR_MISSING', fn () => $gateway->submit($bad, $badApproval, 15));
+        check($gateway->count() === 255);
+        check($gateway->submit($last, $approval, 15)->isConfirmed());
+        check($gateway->count() === 256);
+    },
+    'U54-05 storage limit is shared across tenant contexts, with strict isolation' => function (): void {
+        $gateway = new \ImagineAI\Mocks\MockCrmEffectGateway();
+        for ($i = 0; $i < 255; ++$i) {
+            [$intent, $approval] = f154GatewayIntent($i);
+            $gateway->submit($intent, $approval, 15);
+        }
+        [$other, $otherApproval] = f154GatewayIntent(0, context('SYNTHETIC_B'));
+        $effect = $gateway->submit($other, $otherApproval, 15);
+        check($effect->isConfirmed() && $gateway->count() === 256);
+        [$first] = f154GatewayIntent(0);
+        denied('CONTEXT_DENIED', fn () => $gateway->status(context('SYNTHETIC_B'), $first));
+        check($gateway->status(context('SYNTHETIC_B'), $other) === $effect);
+        [$extra, $extraApproval] = f154GatewayIntent(1, context('SYNTHETIC_B'));
+        denied('EFFECT_CAPACITY_DENIED', fn () => $gateway->submit($extra, $extraApproval, 15));
+        check($gateway->count() === 256);
+    },
+    'U54-06 supervised timeout and synthetic evidence remain readable at full capacity' => function (): void {
+        $gateway = new MockSupervisedGateway('INDETERMINADO', true);
+        $saved = [];
+        for ($i = 0; $i < 256; ++$i) {
+            [$intent, $approval] = f154GatewayIntent($i);
+            denied('SYNTHETIC_TIMEOUT', fn () => $gateway->submit($intent, $approval, 15));
+            if ($i === 0) $saved = [$intent, $approval];
+        }
+        check($gateway->status(context(), $saved[0])->state === 'INDETERMINADO');
+        $gateway->recordSyntheticEvidence($saved[0], 'CONFIRMADO');
+        check($gateway->status(context(), $saved[0])->isConfirmed());
+        [$extra, $approval] = f154GatewayIntent(256);
+        denied('EFFECT_CAPACITY_DENIED', fn () => $gateway->submit($extra, $approval, 15));
+        check($gateway->status(context(), $extra)->state === 'NAO_SOLICITADO');
+        check($gateway->status(context(), $saved[0])->isConfirmed());
+    },
+    'U54-07 capacity denial does not fabricate or replace a terminal proof' => function (): void {
+        [$gateway, $first] = f154GatewayFull('NEGADO');
+        check($first[2]->state === 'NEGADO');
+        [$extra, $approval] = f154GatewayIntent(256);
+        denied('EFFECT_CAPACITY_DENIED', fn () => $gateway->submit($extra, $approval, 15));
+        check($gateway->status(context(), $extra)->state === 'NAO_SOLICITADO');
+        check($gateway->status(context(), $first[0]) === $first[2]);
+        check($gateway->count() === 256);
     },
 ];
