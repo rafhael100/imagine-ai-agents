@@ -145,4 +145,39 @@ return [
         check($counts['READ_SYNTHETIC_ONLY'] === 1
             && $counts['DENIED_OR_NOT_FOUND'] === 1 && $audit->count() === 2);
     },
+
+    'U59-05 huge key injection is counted as schema denial without consuming read nonce' => function (): void {
+        $policy = new MockCrmOwnerPolicy(); $policy->grantFixture(context(), ['ref']);
+        [$edge, $counters, , $audit, $env, $owner, $ctx] = f118Fixture($policy);
+        $wire = f112Wire($ctx);
+        for ($i = 0; $i < 4096; ++$i) $wire['unexpected_' . $i] = 'SYNTHETIC_NOISE';
+        check($edge->handle($wire, $env, $owner, $ctx, 15) === f117GenericDenial());
+        check($audit->count() === 0 && $counters->snapshot()['outcomes']['SCHEMA_DENIED'] === 1);
+        check($edge->handle(f112Wire($ctx), $env, $owner, $ctx, 15)['state'] === 'READ_SYNTHETIC_ONLY');
+        check($audit->count() === 1 && $counters->snapshot()['attempts'] === 2);
+    },
+    'U59-06 oversized reference is denied uniformly before policy and audit' => function (): void {
+        $policy = new MockCrmOwnerPolicy(); $policy->grantFixture(context(), ['ref']);
+        [$edge, $counters, , $audit, $env, $owner, $ctx] = f118Fixture($policy);
+        $wire = f112Wire($ctx);
+        $wire['resource_ref'] = 'SYNTHETIC_' . str_repeat('X', 1024 * 1024);
+        $reply = $edge->handle($wire, $env, $owner, $ctx, 15);
+        check($reply === f117GenericDenial() && $audit->count() === 0);
+        check($counters->snapshot()['outcomes']['SCHEMA_DENIED'] === 1);
+        check(!str_contains(json_encode([$reply, $counters->snapshot()], JSON_THROW_ON_ERROR), 'SYNTHETIC_X'));
+        check($edge->handle(f112Wire($ctx), $env, $owner, $ctx, 15)['state'] === 'READ_SYNTHETIC_ONLY');
+    },
+    'U59-07 oversized projection list rejects early but valid ordered read still succeeds' => function (): void {
+        $policy = new MockCrmOwnerPolicy(); $policy->grantFixture(context(), ['ref', 'stage']);
+        [$edge, $counters, , $audit, $env, $owner, $ctx] = f118Fixture($policy);
+        $wire = f112Wire($ctx); $wire['fields'] = array_fill(0, 1024, 'ref');
+        check($edge->handle($wire, $env, $owner, $ctx, 15) === f117GenericDenial());
+        check($audit->count() === 0);
+        $valid = f112Wire($ctx); $valid['fields'] = ['stage', 'ref'];
+        $out = $edge->handle($valid, $env, $owner, $ctx, 15);
+        check($out['projection'] === ['stage' => 'SYNTHETIC_NEW', 'ref' => 'SYNTHETIC_A_LEAD']);
+        check($counters->snapshot()['outcomes']['SCHEMA_DENIED'] === 1
+            && $counters->snapshot()['outcomes']['READ_SYNTHETIC_ONLY'] === 1
+            && $audit->count() === 1);
+    },
 ];
