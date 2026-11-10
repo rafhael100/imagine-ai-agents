@@ -23,8 +23,8 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("docs/historico/STATUS-ATUAL-ANTES-CONSOLIDACAO-2026-11-10.md", current)
         self.assertIn("R01-G01..G11", current)
         self.assertIn("CORE/SEG/AUT", current)
-        self.assertIn("546 testes PHP", current)
-        self.assertIn("82 arquivos PHP", current)
+        self.assertIn("555 testes PHP", current)
+        self.assertIn("83 arquivos PHP", current)
         self.assertIn("NO-GO", current)
         self.assertIn("CRM PR #57", current)
         self.assertIn("OPEN/DRAFT", current)
@@ -56,6 +56,18 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("CRM PR #57", roadmap)
         self.assertIn("NO-GO", status)
 
+    def test_sec41_shared_projection_invariant_is_reviewed_not_operational(self):
+        current = STATUS.read_text(encoding="utf-8")
+        rules = AGENT_RULES.read_text(encoding="utf-8")
+        readme = README.read_text(encoding="utf-8")
+        self.assertIn("SEC-41 em revisão", current)
+        self.assertIn("83 arquivos PHP", current)
+        self.assertIn("555 testes PHP", current)
+        self.assertIn("AIA-FT01-SEC-41-PROJECAO-OP01-UNIFICADA.md", rules)
+        self.assertIn("555 testes PHP", readme)
+        self.assertIn("NAO_EXECUTADO", current)
+        self.assertIn("NO-GO", current)
+
     def test_history_preserved_without_overwriting_evidence(self):
         previous = ARCHIVE.read_text(encoding="utf-8")
         prior_roadmap = ARCHIVED_ROADMAP.read_text(encoding="utf-8")
@@ -74,7 +86,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertLess(len(current), 8000)
         self.assertGreater(len(history), 80000)
         self.assertIn("docs/historico/README-ANTES-CONSOLIDACAO-2026-11-10.md", current)
-        self.assertIn("EXPECTED_CASES=546", current)
+        self.assertIn("EXPECTED_CASES=555", current)
         self.assertIn("NO-GO", current)
         self.assertIn("CRM PR #57", current)
         self.assertIn("EXPECTED_CASES=397", history)
