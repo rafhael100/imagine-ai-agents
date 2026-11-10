@@ -474,4 +474,33 @@ return [
         check($audit->entries()[0]['reason'] === 'RESOURCE');
         check(!str_contains(json_encode($reply, JSON_THROW_ON_ERROR), $ctx->resource));
     },
+
+    'U68-08 owner revoke and immediate regrant during reader is still denied' => function (): void {
+        [$boundary, $audit, $env, $owner, $ctx, $policy, $reader] =
+            f165Fixture(function ($policy, $envelope, $owner, $ctx): void {
+                $policy->revokeFixture($ctx);
+                $policy->grantFixture($ctx, ['ref', 'stage']);
+            });
+        denied('RESOURCE_DENIED_OR_MISSING', fn () => $boundary->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15));
+        check($reader->calls === 1 && $audit->count() === 1
+            && $audit->entries()[0]['reason'] === 'RESOURCE'
+            && $audit->entries()[0]['outcome'] === 'DENIED');
+        // A fresh proof may authorize a later read in a new gateway;
+        // the already consumed nonce must never be replayed.
+        denied('TRUST_REPLAY_DENIED', fn () => $boundary->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15));
+    },
+    'U68-09 tenant suspend and resume while reading never records success' => function (): void {
+        [$boundary, $audit, $env, $owner, $ctx, $policy, $reader] =
+            f165Fixture(function ($policy, $envelope, $owner, $ctx): void {
+                $policy->setTenantSuspended($ctx->tenant, true);
+                $policy->setTenantSuspended($ctx->tenant, false);
+            });
+        denied('RESOURCE_DENIED_OR_MISSING', fn () => $boundary->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15));
+        check($reader->calls === 1 && $audit->count() === 1
+            && $audit->entries()[0]['reason'] === 'RESOURCE'
+            && $audit->entries()[0]['outcome'] === 'DENIED');
+    },
 ];
