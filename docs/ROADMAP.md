@@ -54,6 +54,8 @@ A [SEC-42](AIA-FT01-SEC-42-PARIDADE-MUTACOES-OP01.md) ensaia centenas de variaç
 
 A [SEC-43](AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md) foi integrada à dev com dez regressões offline e [CI pós-merge #42902464064](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42902464064) aprovada: **565 testes PHP / lint 83**. [EVID-28](AIA-R01-EVID-28-SEC43-CI-POSTMERGE.md) registra limites; não substitui transação de autorização real no CRM.
 
+A [SEC-44](AIA-FT01-SEC-44-FERRAMENTA-PROJECAO-COMUM.md) unifica a checagem de saída da ferramenta de leitura com a invariante OP-01 e exercita 10 cenários offline de revogação, replay e auditoria via ferramenta. **Gate em revisão: 575 testes PHP / 83 lint**, sem CRM real.
+
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 
 **Pacote de revisão disponível, aguardando decisões independentes:** [OP-01 JSON](evidencias/op01-pacote-aceite-bilateral.json) e [EVID-19](AIA-R01-EVID-19-PACOTE-BILATERAL-OP01.md) relacionam sete responsáveis sugeridos a 14 gates e 13 cenários ainda não homologados. [CI pós-merge #42770907072](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42770907072) success no arquivo gerado. **Este é um checklist, não um GO.** Registrar pareceres de CRM CORE/SEG/AUT, Privacidade, Infra e Direção com evidências reais; não abrir API antes da liberação.

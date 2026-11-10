@@ -5,7 +5,7 @@ namespace ImagineAI\MockTooling;
 
 use ImagineAI\Domain\{Approval, Intent, MockError, Run, TenantContext};
 use ImagineAI\MockOrchestration\SupervisedCoordinator;
-use ImagineAI\MockBridge\MockCrmReadRequest;
+use ImagineAI\MockBridge\{MockCrmReadRequest, MockReadProjectionInvariant};
 use ImagineAI\MockTelemetry\MockCrmReadEdgeBoundary;
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence};
 
@@ -177,16 +177,13 @@ final class MockToolDispatcher
                 || $out['real_authorization'] !== false
                 || $out['external_calls'] !== 0
                 || !is_array($out['projection'])
-                || array_keys($out['projection']) !== $request->fields) {
+                || !MockReadProjectionInvariant::isCanonical(
+                    $out['projection'], $request->fields, $context)) {
                 MockError::fail('READ_DENIED');
             }
-            foreach ($out['projection'] as $field => $value) {
-                if (!in_array($field, ['ref', 'stage'], true)
-                    || !is_string($value)
-                    || preg_match('/^SYNTHETIC_[A-Z0-9_]{1,80}$/D', $value) !== 1) {
-                    MockError::fail('READ_DENIED');
-                }
-            }
+            // A fourth independent validator would risk policy drift.
+            // The tool checks the same exact resource-bound, two-field,
+            // 90-byte invariant as the reader, public facade and edge.
             $this->trace($toolId, $context, 'READ');
             return [
                 'kind' => 'READ', 'state' => 'SYNTHETIC_OK',
