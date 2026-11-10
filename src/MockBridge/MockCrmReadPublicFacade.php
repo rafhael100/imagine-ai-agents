@@ -26,6 +26,11 @@ final class MockCrmReadPublicFacade
      *   context:string,request_hash:string,revision:int,observed_at:int}
      */
     private ?array $lastReadReceipt = null;
+    // A second call to handle() on the same facade while a reader is active
+    // is not a separate authorized operation, even if a nested adapter
+    // swallows its generic denial and the outer reader returns normally.
+    private bool $handlingRead = false;
+    private bool $nestedReadObserved = false;
 
     public function __construct(
         MockTrustGateway $gateway,
@@ -33,7 +38,14 @@ final class MockCrmReadPublicFacade
         MockCrmOwnerPolicy $ownerPolicy,
         MockCrmReadAuditTrail $audit,
     ) {
-        $this->readBoundary = new MockCrmReadBoundary($gateway, $reader, $ownerPolicy);
+        $this->readBoundary = new MockCrmReadBoundary(
+            $gateway, $reader, $ownerPolicy,
+            function (): void {
+                if ($this->nestedReadObserved) {
+                    throw new \LogicException('REENTRANT_SYNTHETIC_READ_DENIED');
+                }
+            }
+        );
         $this->boundary = new MockCrmReadAuditedBoundary($this->readBoundary, $audit);
     }
 
@@ -96,6 +108,15 @@ final class MockCrmReadPublicFacade
         TenantContext $trustedContext,
         int $now,
     ): array {
+        if ($this->handlingRead) {
+            // No recursive parser/reader/audit/nonce consumption. Taint the
+            // enclosing read so its pre-success audited guard also denies.
+            $this->nestedReadObserved = true;
+            $this->lastReadReceipt = null;
+            return self::response('DENIED_OR_NOT_FOUND', null);
+        }
+        $this->handlingRead = true;
+        $this->nestedReadObserved = false;
         // Do not preserve a previous positive receipt across any new attempt,
         // including a malformed, denied, audited or replayed read.
         $this->lastReadReceipt = null;
@@ -132,7 +153,11 @@ final class MockCrmReadPublicFacade
         } catch (\Throwable) {
             // A real API would translate errors here and log operational detail
             // separately, using a reviewed privacy-conscious transport policy.
+            $this->lastReadReceipt = null;
             return self::response('DENIED_OR_NOT_FOUND', null);
+        } finally {
+            $this->handlingRead = false;
+            $this->nestedReadObserved = false;
         }
     }
 
