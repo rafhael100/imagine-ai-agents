@@ -5,6 +5,7 @@ use ImagineAI\Domain\TenantContext;
 use ImagineAI\MockAudit\{MockCrmReadAuditedBoundary, MockCrmReadAuditTrail};
 use ImagineAI\MockBridge\{MockCrmReadRequest, MockCrmReadBoundary, MockCrmReadPublicFacade, MockCrmOwnerPolicy};
 use ImagineAI\Contracts\CrmReader;
+use ImagineAI\MockBridge\MockReadProjectionInvariant;
 use ImagineAI\MockTrust\MockTrustGateway;
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence};
 
@@ -28,6 +29,8 @@ final class F141FaultyReader implements CrmReader
         if ($this->mode === 'private_ref') $row['ref'] = 'private@example.invalid';
         if ($this->mode === 'wrong_stage') $row['stage'] = 'SYNTHETIC_ADMIN';
         if ($this->mode === 'non_string') $row['ref'] = 123;
+        if ($this->mode === 'huge_ref') $row['ref'] = 'SYNTHETIC_' . str_repeat('X', 1024 * 1024);
+        if ($this->mode === 'huge_stage') $row['stage'] = 'SYNTHETIC_' . str_repeat('Y', 1024 * 1024);
         if ($this->mode === 'missing') return [];
         $out = array_intersect_key($row, array_flip($fields));
         if ($this->mode === 'extra') $out['secret'] = 'private@example.invalid';
@@ -200,5 +203,113 @@ return [
         check($trail->count() === 1
             && $trail->entries()[0]['outcome'] === 'READ_SYNTHETIC_ONLY'
             && $trail->entries()[0]['reason'] === 'NONE');
+    },
+
+    'U64-01 shared validator preserves the caller order for only authorized fields' => function (): void {
+        $ctx = context();
+        $readerOrder = ['ref' => 'SYNTHETIC_A_LEAD', 'stage' => 'SYNTHETIC_NEW'];
+        $ordered = MockReadProjectionInvariant::canonicalize(
+            $readerOrder, ['stage', 'ref'], $ctx);
+        check($ordered === ['stage' => 'SYNTHETIC_NEW', 'ref' => 'SYNTHETIC_A_LEAD']);
+        check(!MockReadProjectionInvariant::isCanonical(
+            $readerOrder, ['stage', 'ref'], $ctx));
+        check(MockReadProjectionInvariant::isCanonical(
+            $ordered, ['stage', 'ref'], $ctx));
+    },
+    'U64-02 shared validator refuses extra missing forged and duplicate projections' => function (): void {
+        $ctx = context();
+        foreach ([
+            ['ref' => 'SYNTHETIC_A_LEAD', 'email' => 'private@example.invalid'],
+            ['ref' => 'SYNTHETIC_A_LEAD', 'stage' => 'SYNTHETIC_NEW', 'private' => true],
+            ['stage' => 'SYNTHETIC_NEW'],
+            ['ref' => 'SYNTHETIC_A_LEAD', 0 => 'SYNTHETIC_NEW'],
+        ] as $candidate) {
+            check(MockReadProjectionInvariant::canonicalize(
+                $candidate, ['ref'], $ctx) === null);
+        }
+        check(MockReadProjectionInvariant::canonicalize(
+            [], [], $ctx) === null);
+        check(MockReadProjectionInvariant::canonicalize(
+            ['ref' => 'SYNTHETIC_A_LEAD'], ['ref', 'ref'], $ctx) === null);
+        check(MockReadProjectionInvariant::canonicalize(
+            ['email' => 'SYNTHETIC_FAKE'], ['email'], $ctx) === null);
+    },
+    'U64-03 a 1 MiB reader ref cannot enter a projection or trace' => function (): void {
+        $ctx = context();
+        $huge = 'SYNTHETIC_' . str_repeat('X', 1024 * 1024);
+        check(MockReadProjectionInvariant::canonicalize(
+            ['ref' => $huge], ['ref'], $ctx) === null);
+        check(!MockReadProjectionInvariant::isCanonical(
+            ['ref' => $huge], ['ref'], $ctx));
+    },
+    'U64-04 huge stage and raw personal values are denied before regex' => function (): void {
+        $ctx = context();
+        $huge = 'SYNTHETIC_' . str_repeat('Y', 1024 * 1024);
+        check(MockReadProjectionInvariant::canonicalize(
+            ['stage' => $huge], ['stage'], $ctx) === null);
+        foreach (['private@example.invalid', "SYNTHETIC_NEW\n", "SYNTHETIC_NEW\x00"] as $value) {
+            check(MockReadProjectionInvariant::canonicalize(
+                ['stage' => $value], ['stage'], $ctx) === null);
+        }
+    },
+    'U64-05 stage and resource bind strictly to trusted fictional context' => function (): void {
+        $ctx = context();
+        check(MockReadProjectionInvariant::canonicalize(
+            ['ref' => 'SYNTHETIC_B_LEAD'], ['ref'], $ctx) === null);
+        check(MockReadProjectionInvariant::canonicalize(
+            ['stage' => 'SYNTHETIC_ADMIN'], ['stage'], $ctx) === null);
+        check(MockReadProjectionInvariant::canonicalize(
+            ['ref' => 'SYNTHETIC_A_LEAD'], ['ref'], context('SYNTHETIC_B')) === null);
+        check(MockReadProjectionInvariant::canonicalize(
+            ['stage' => 'SYNTHETIC_NEW'], ['stage'], $ctx) ===
+                ['stage' => 'SYNTHETIC_NEW']);
+    },
+    'U64-06 nonstring reader values cannot be normalized into success' => function (): void {
+        $ctx = context();
+        foreach ([null, false, 1, ['SYNTHETIC_A_LEAD'], new \stdClass()] as $bad) {
+            check(MockReadProjectionInvariant::canonicalize(
+                ['ref' => $bad], ['ref'], $ctx) === null);
+        }
+        check(MockReadProjectionInvariant::canonicalize(
+            ['ref' => 'SYNTHETIC_A_LEAD'], ['ref'], $ctx) ===
+                ['ref' => 'SYNTHETIC_A_LEAD']);
+    },
+    'U64-07 oversized malicious reader ref is denied before success audit and replay stays blocked' => function (): void {
+        [$bridge, $trail, $env, $owner, $ctx] = f141Fixture('huge_ref');
+        $request = new MockCrmReadRequest(f112Wire($ctx));
+        denied('BRIDGE_PROJECTION_DENIED', fn () => $bridge->evaluate(
+            $request, $env, $owner, $ctx, 15));
+        check($trail->count() === 1 && $trail->entries()[0]['reason'] === 'PROJECTION'
+            && $trail->entries()[0]['outcome'] === 'DENIED');
+        denied('TRUST_REPLAY_DENIED', fn () => $bridge->evaluate(
+            $request, $env, $owner, $ctx, 15));
+        check(array_column($trail->entries(), 'reason') === ['PROJECTION', 'REPLAY']);
+        $encoded = json_encode($trail->entries(), JSON_THROW_ON_ERROR);
+        check(strlen($encoded) < 1100 && !str_contains($encoded, str_repeat('X', 100)));
+    },
+    'U64-08 oversized malicious stage receives only a redacted projection denial' => function (): void {
+        [$bridge, $trail, $env, $owner, $ctx] = f141Fixture('huge_stage');
+        $wire = f112Wire($ctx); $wire['fields'] = ['stage'];
+        denied('BRIDGE_PROJECTION_DENIED', fn () => $bridge->evaluate(
+            new MockCrmReadRequest($wire), $env, $owner, $ctx, 15));
+        check($trail->count() === 1 && $trail->entries()[0]['outcome'] === 'DENIED'
+            && $trail->entries()[0]['reason'] === 'PROJECTION');
+        check(strlen(json_encode($trail->entries(), JSON_THROW_ON_ERROR)) < 800);
+    },
+    'U64-09 valid alternate-order public and telemetry responses remain unchanged' => function (): void {
+        $policy = new MockCrmOwnerPolicy();
+        $policy->grantFixture(context(), ['ref', 'stage']);
+        $audit = new MockCrmReadAuditTrail();
+        [, $env, $owner, $ctx] = f112Fixture();
+        $facade = new MockCrmReadPublicFacade(
+            new MockTrustGateway('SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API',
+                ['SYNTHETIC_LEAD_READ']),
+            new \ImagineAI\Mocks\MockCrmReader(), $policy, $audit);
+        $wire = f112Wire($ctx); $wire['fields'] = ['stage', 'ref'];
+        $out = $facade->handle($wire, $env, $owner, $ctx, 15);
+        check($out['projection'] === ['stage' => 'SYNTHETIC_NEW',
+            'ref' => 'SYNTHETIC_A_LEAD']);
+        check($out['real_authorization'] === false && $out['external_calls'] === 0);
+        check($audit->count() === 1 && $audit->entries()[0]['reason'] === 'NONE');
     },
 ];
