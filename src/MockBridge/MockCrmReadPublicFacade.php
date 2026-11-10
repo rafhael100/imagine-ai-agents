@@ -49,18 +49,14 @@ final class MockCrmReadPublicFacade
                 || ($result['real_authorization'] ?? null) !== false
                 || ($result['external_calls'] ?? null) !== 0
                 || !is_array($projection)
-                || array_keys($projection) !== $request->fields) {
+                || !MockReadProjectionInvariant::isCanonical(
+                    $projection, $request->fields, $trustedContext)) {
                 throw new \LogicException('UNSAFE_SYNTHETIC_PROJECTION');
             }
 
-            // This laboratory can never return live customer content.
-            foreach ($projection as $field => $value) {
-                if (!in_array($field, ['ref', 'stage'], true)
-                    || !is_string($value)
-                    || preg_match('/^SYNTHETIC_[A-Z0-9_]{1,80}$/D', $value) !== 1) {
-                    throw new \LogicException('UNSAFE_SYNTHETIC_VALUE');
-                }
-            }
+            // Shared with the pre-audit boundary and edge response checker.
+            // Never let a future adapter bypass resource binding or 90-byte
+            // limits by changing only a downstream response validator.
             return self::response('READ_SYNTHETIC_ONLY', $projection);
         } catch (\Throwable) {
             // A real API would translate errors here and log operational detail
