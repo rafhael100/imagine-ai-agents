@@ -33,6 +33,13 @@ class WorkflowGuardrails(unittest.TestCase):
         for trigger in ("pull_request_target:", "workflow_run:", "workflow_dispatch:"):
             self.assertNotIn(trigger, self.workflow)
 
+    def test_demo_artifacts_trigger_both_push_and_pr_checks(self):
+        # An examples-only change must not evade the unified offline CI.
+        self.assertEqual(self.workflow.count("      - 'examples/**'"), 2)
+        self.assertNotIn("examples/r01-op01-readiness-offline*.html", self.workflow)
+        self.assertIn("  push:\n", self.workflow)
+        self.assertIn("  pull_request:\n", self.workflow)
+
     def test_public_repository_only(self):
         self.assertIn("github.event.repository.private == false", self.workflow)
 
