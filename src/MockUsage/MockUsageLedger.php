@@ -59,8 +59,8 @@ final class MockUsageLedger
             MockError::fail('USAGE_EVENT_INVALID');
         }
         $fingerprint = hash('sha256', json_encode([
-            $attempt->id, $attempt->intent->signature(), $attempt->context->key(),
-            $state, $units, $material,
+            $attempt->id, $attempt->state, $attempt->intent->signature(),
+            $attempt->context->key(), $state, $units, $material,
         ], JSON_THROW_ON_ERROR));
         if (isset($this->events[$eventId])) {
             if ($this->events[$eventId]['fingerprint'] !== $fingerprint) MockError::fail('USAGE_EVENT_CONFLICT');
@@ -110,6 +110,7 @@ final class MockUsageLedger
         if ($sample['conflict']) return ['state' => 'INDETERMINADO', 'reason' => 'PROOF_CONFLICT'];
         if ($proof === null) return ['state' => 'INDETERMINADO', 'reason' => 'PROOF_UNAVAILABLE'];
         $matching = $proof->attempt->id === $attempt->id
+            && $proof->attempt->state === $attempt->state
             && $proof->attempt->intent->signature() === $attempt->intent->signature()
             && $proof->attempt->context->key() === $attempt->context->key()
             && $sample['observed'] !== null
@@ -173,11 +174,17 @@ final class MockUsageLedger
         if (isset($this->samples[$key])) {
             $known = $this->samples[$key];
             if ($known['intent'] !== $attempt->intent->signature()
-                || $known['context'] !== $attempt->context->key()) MockError::fail('USAGE_ATTEMPT_CONFLICT');
+                || $known['context'] !== $attempt->context->key()
+                || $known['transport_state'] !== $attempt->state) {
+                MockError::fail('USAGE_ATTEMPT_CONFLICT');
+            }
             return $known;
         }
         return [
             'intent' => $attempt->intent->signature(), 'context' => $attempt->context->key(),
+            // Identity includes the immutable transport state: the same textual
+            // attempt ID cannot be reintroduced as TIMEOUT or ENVIADA later.
+            'transport_state' => $attempt->state,
             'estimated' => null, 'observed' => null, 'adjusted' => null,
             'proof' => null, 'unknown' => false, 'conflict' => false,
         ];
