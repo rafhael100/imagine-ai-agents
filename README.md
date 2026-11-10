@@ -55,7 +55,7 @@ php tests/Unit/run.php
 EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=585 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**SEC-45 em revisão:** **585 testes PHP / lint de 83 arquivos PHP** e Python. [SEC-45](docs/AIA-FT01-SEC-45-REVALIDACAO-POS-SUGESTAO.md) revalida a permissão após o provedor; SEC-44 teve [CI #42906719897](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42906719897) aprovada, SEC-43 [CI #42902464064](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42902464064). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**SEC-45 integrada:** **585 testes PHP / lint de 83 arquivos PHP** e Python; [CI pós-merge #42913437800](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42913437800) aprovada. [EVID-30](docs/AIA-R01-EVID-30-SEC45-CI-POSTMERGE.md) registra limites. Histórico: [SEC-44 #42906719897](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42906719897), [SEC-43 #42902464064](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42902464064). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 

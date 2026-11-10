@@ -90,7 +90,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
     def test_sec44_read_tool_uses_shared_invariant_and_no_go(self):
         current = STATUS.read_text(encoding="utf-8")
         rules = AGENT_RULES.read_text(encoding="utf-8")
-        self.assertIn("SEC-44 integrada à dev (PR #218)", current)
+        self.assertIn("SEC-44 integrada à dev (PR #218", current)
         self.assertIn("575 testes PHP", (ROOT / "docs/AIA-R01-EVID-29-SEC44-CI-POSTMERGE.md").read_text(encoding="utf-8"))
         self.assertIn("AIA-FT01-SEC-44-FERRAMENTA-PROJECAO-COMUM.md", rules)
         self.assertIn("EVID-29", current)
@@ -103,10 +103,13 @@ class CanonicalProjectStatusTests(unittest.TestCase):
     def test_sec45_final_draft_recheck_is_offline_no_go(self):
         current = STATUS.read_text(encoding="utf-8")
         rules = AGENT_RULES.read_text(encoding="utf-8")
-        self.assertIn("SEC-45 em revisão", current)
+        self.assertIn("SEC-45 integrada à dev (PR #220)", current)
         self.assertIn("585 testes PHP", current)
         self.assertIn("SEC-45", rules)
         self.assertIn("AIA-FT01-SEC-45-REVALIDACAO-POS-SUGESTAO.md", rules)
+        self.assertIn("EVID-30", current)
+        self.assertIn("42913437800", current)
+        self.assertIn("42913437800", README.read_text(encoding="utf-8"))
         self.assertIn("NAO_EXECUTADO", current)
         self.assertIn("NO-GO", current)
         self.assertIn("CRM PR #57", current)
