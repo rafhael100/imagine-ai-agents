@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline em revisão — SEC-32 (10/11/2026)
+
+- `MockCrmEffectGateway`: máximo 256 efeitos fictícios por instância; recusar novas submissões antes de registrar efeito, não expulsar histórico, replays e conflitos íntegros.
+- **Gate esperado: 479 testes PHP / 82 lint + Python**. [SEC-32](docs/AIA-FT01-SEC-32-EFEITOS-LIMITADOS.md). Baselines anteriores são históricos.
+- CRM PR #57 OPEN/DRAFT, R01-G01..G11 e CORE/SEG/AUT ABERTOS/NO-GO. Somente dev/offline; sem `main`, VPS, clientes, segredos, produção ou custos.
+
 ## Baseline em revisão — SEC-31 (10/11/2026)
 
 - `MockKnowledgeCatalog`: 256 fontes por instância; conflitos e repetição idempotente preservados mesmo ao atingir o limite. Desativação não libera ID.
