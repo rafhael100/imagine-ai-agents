@@ -5,7 +5,6 @@ namespace ImagineAI\MockTooling;
 
 use ImagineAI\Domain\{Approval, Intent, MockError, Run, TenantContext};
 use ImagineAI\MockOrchestration\SupervisedCoordinator;
-use ImagineAI\Mocks\MockCrmReader;
 
 /** Local, supervised dispatch over pre-existing fake services only. */
 final class MockToolDispatcher
@@ -39,10 +38,10 @@ final class MockToolDispatcher
             $this->catalog->validate($kind, $parameters);
 
             if ($kind === 'READ') {
-                // The existing fake reader performs its own resource/field check.
-                $value = (new MockCrmReader())->lead($context, $parameters['fields']);
-                $this->trace($toolId, $context, 'READ');
-                return ['kind' => 'READ', 'state' => 'SYNTHETIC_OK', 'data' => $value];
+                // This legacy tool has no owner policy, trust envelope, audit,
+                // or anti-replay inputs. Never call the reader directly.
+                // Use the authorized OP-01 public edge/read-only pilot instead.
+                MockError::fail('READ_BOUNDARY_REQUIRED');
             }
             if ($kind === 'SUGGEST') {
                 if ($run === null) MockError::fail('RUN_REQUIRED');
