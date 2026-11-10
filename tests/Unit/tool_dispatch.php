@@ -6,6 +6,8 @@ use ImagineAI\MockOrchestration\SupervisedCoordinator;
 use ImagineAI\MockResilience\MockFaultGateway;
 use ImagineAI\Mocks\{MockAiSuggestionProvider, MockSupervisedGateway};
 use ImagineAI\MockTooling\{MockCapabilityGrant, MockToolCatalog, MockToolDispatcher};
+use ImagineAI\MockBridge\MockCrmOwnerPolicy;
+use ImagineAI\MockAudit\MockCrmReadAuditTrail;
 
 /** Synthetic fixture; grants are injected independently of all model text. */
 function toolFixture(?object $gateway = null, ?MockToolCatalog $catalog = null): array
@@ -19,6 +21,40 @@ function toolFixture(?object $gateway = null, ?MockToolCatalog $catalog = null):
     $approval = new Approval('SYNTHETIC_TOOL_APPROVAL', $intent, 'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
     $grant = static fn (string $id) => new MockCapabilityGrant('SYNTHETIC_GRANT', $id, $ctx, 10, 20);
     return [$ctx, $gateway, $coordinator, $dispatcher, $run, $intent, $approval, $grant];
+}
+
+
+function f136Fixture(?MockCrmOwnerPolicy $ownerPolicy = null,
+    ?MockCrmReadAuditTrail $audit = null): array
+{
+    $ownerPolicy ??= new MockCrmOwnerPolicy();
+    [$edge, $counters, , $audit, $envelope, $owner, $ctx] =
+        f118Fixture($ownerPolicy, $audit);
+    $gateway = new MockSupervisedGateway();
+    $coordinator = new SupervisedCoordinator($ctx, $gateway, new MockAiSuggestionProvider());
+    $dispatcher = new MockToolDispatcher(new MockToolCatalog(), $coordinator, $edge);
+    $grant = new MockCapabilityGrant('SYNTHETIC_F136_READ_GRANT',
+        MockToolCatalog::READ, $ctx, 10, 20);
+    return [$dispatcher, $grant, $envelope, $owner, $ctx,
+        $counters, $audit, $gateway, $ownerPolicy];
+}
+
+function f136Read(MockToolDispatcher $dispatcher, ?MockCapabilityGrant $grant,
+    ?\ImagineAI\MockTrust\MockTrustEnvelope $envelope,
+    ?\ImagineAI\MockTrust\MockOwnerScopeEvidence $owner,
+    TenantContext $ctx, ?array $wire = null, int $now = 15,
+    string $toolId = MockToolCatalog::READ): array
+{
+    return $dispatcher->readThroughBoundary(
+        $toolId, MockToolCatalog::VERSION, $ctx, $grant,
+        $wire ?? f112Wire($ctx), $envelope, $owner, $now,
+    );
+}
+
+function f136Denied(): array
+{
+    return ['kind' => 'READ', 'state' => 'DENIED_OR_NOT_FOUND',
+        'real_authorization' => false, 'external_calls' => 0];
 }
 
 return [
@@ -163,5 +199,91 @@ return [
         check($result['kind'] === 'SUGGEST' && $result['state'] === 'SYNTHETIC_OK');
         check(array_column($d->events(), 'code') === ['SYNTHETIC_DENIED', 'SYNTHETIC_SUGGESTED']);
         check($gw->submitCount() === 0);
+    },
+
+    'U36-01 explicit governed READ returns only fields granted by the CRM owner' => function (): void {
+        $policy = new MockCrmOwnerPolicy();
+        $policy->grantFixture(context(), ['ref']);
+        [$d, $grant, $env, $owner, $ctx, $counts, $audit, $gw] = f136Fixture($policy);
+        $out = f136Read($d, $grant, $env, $owner, $ctx);
+        check($out === [
+            'kind' => 'READ', 'state' => 'SYNTHETIC_OK',
+            'data' => ['ref' => 'SYNTHETIC_A_LEAD'],
+            'real_authorization' => false, 'external_calls' => 0,
+        ]);
+        check($counts->snapshot()['attempts'] === 1
+            && $audit->count() === 1
+            && $d->events()[0]['code'] === 'SYNTHETIC_READ'
+            && $gw->submitCount() === 0 && $gw->statusCount() === 0);
+    },
+    'U36-02 nonce replay through a governed tool is uniformly denied' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$d, $grant, $env, $owner, $ctx, $counts, $audit] = f136Fixture($p);
+        check(f136Read($d, $grant, $env, $owner, $ctx)['state'] === 'SYNTHETIC_OK');
+        check(f136Read($d, $grant, $env, $owner, $ctx) === f136Denied());
+        check(array_column($d->events(), 'code') === ['SYNTHETIC_READ', 'SYNTHETIC_DENIED']);
+        check($counts->snapshot()['attempts'] === 2 && $audit->count() === 2);
+    },
+    'U36-03 an ungranted owner cannot be bypassed with a valid capability' => function (): void {
+        [$d, $grant, $env, $owner, $ctx, $counts, $audit, $gw] = f136Fixture();
+        check(f136Read($d, $grant, $env, $owner, $ctx) === f136Denied());
+        check($audit->count() === 1
+            && $audit->entries()[0]['reason'] === 'RESOURCE'
+            && $counts->snapshot()['attempts'] === 1
+            && $gw->submitCount() === 0);
+    },
+    'U36-04 cross-tenant request is rejected before even reaching the owner edge' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$d, $grant, $env, $owner, $ctx, $counts, $audit] = f136Fixture($p);
+        $wire = f112Wire($ctx); $wire['tenant_ref'] = 'SYNTHETIC_B';
+        check(f136Read($d, $grant, $env, $owner, $ctx, $wire) === f136Denied());
+        check($counts->snapshot()['attempts'] === 0 && $audit->count() === 0);
+    },
+    'U36-05 unknown personal field never reaches synthetic edge or audit' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$d, $grant, $env, $owner, $ctx, $counts, $audit] = f136Fixture($p);
+        $wire = f112Wire($ctx); $wire['fields'] = ['email'];
+        check(f136Read($d, $grant, $env, $owner, $ctx, $wire) === f136Denied());
+        check($counts->snapshot()['attempts'] === 0 && $audit->count() === 0);
+    },
+    'U36-06 revoked or missing tool capability is denied before CRM-owned edge' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$d, $grant, $env, $owner, $ctx, $counts, $audit] = f136Fixture($p);
+        check(f136Read($d, null, $env, $owner, $ctx) === f136Denied());
+        $grant->revoke();
+        check(f136Read($d, $grant, $env, $owner, $ctx) === f136Denied());
+        check($counts->snapshot()['attempts'] === 0 && $audit->count() === 0);
+    },
+    'U36-07 absent envelope or owner evidence never produces a read' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$d, $grant, $env, $owner, $ctx, $counts, $audit] = f136Fixture($p);
+        check(f136Read($d, $grant, null, $owner, $ctx) === f136Denied());
+        check(f136Read($d, $grant, $env, null, $ctx) === f136Denied());
+        check($counts->snapshot()['attempts'] === 2 && $audit->count() === 2);
+    },
+    'U36-08 non-read tool ID cannot enter the governed read route' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$d, $grant, $env, $owner, $ctx, $counts, $audit] = f136Fixture($p);
+        check(f136Read($d, $grant, $env, $owner, $ctx,
+            null, 15, MockToolCatalog::MUTATE) === f136Denied());
+        check($counts->snapshot()['attempts'] === 0 && $audit->count() === 0);
+    },
+    'U36-09 ordered two-field read uses only owner-provided projection' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['stage', 'ref']);
+        [$d, $grant, $env, $owner, $ctx, $counts, $audit] = f136Fixture($p);
+        $wire = f112Wire($ctx); $wire['fields'] = ['stage', 'ref'];
+        check(f136Read($d, $grant, $env, $owner, $ctx, $wire)['data'] === [
+            'stage' => 'SYNTHETIC_NEW', 'ref' => 'SYNTHETIC_A_LEAD',
+        ]);
+        check($counts->snapshot()['attempts'] === 1 && $audit->count() === 1);
+    },
+    'U36-10 legacy READ remains blocked even when an owner edge is injected' => function (): void {
+        $p = new MockCrmOwnerPolicy(); $p->grantFixture(context(), ['ref']);
+        [$d, $grant, $env, $owner, $ctx, $counts, $audit] = f136Fixture($p);
+        denied('READ_BOUNDARY_REQUIRED', fn() => $d->dispatch(
+            MockToolCatalog::READ, MockToolCatalog::VERSION, $ctx,
+            $grant, ['fields' => ['ref']], 15));
+        check($counts->snapshot()['attempts'] === 0 && $audit->count() === 0);
+        check(f136Read($d, $grant, $env, $owner, $ctx)['state'] === 'SYNTHETIC_OK');
     },
 ];
