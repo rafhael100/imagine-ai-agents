@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline em revisão — SEC-37 (10/11/2026)
+
+- `MockCrmReadRequest` valida exatamente oito chaves antes de `array_keys()`/`sort()` e limita referências a 90 bytes antes do regex. Não consumir nonce nem auditoria OP-01 quando o parsing falhar.
+- **Gate esperado: 512 testes PHP / 82 lint + Python.** [SEC-37](docs/AIA-FT01-SEC-37-PARSER-OP01-LIMITADO.md).
+- CRM PR #57 OPEN/DRAFT; R01-G01..G11 / CORE/SEG/AUT ABERTOS/NO-GO. Somente dev offline, sem `main`, VPS, produção, clientes, segredos ou custos.
+
 ## Baseline em revisão — SEC-36 (10/11/2026)
 
 - `MockToolDispatcher` recusa IDs de ferramentas acima de 128 bytes antes de consultar catálogo, provider ou borda CRM fictícia. Auditoria desses erros usa um hash de marcador fixo; nunca hashear entrada arbitrariamente longa.
