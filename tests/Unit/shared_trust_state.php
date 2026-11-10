@@ -136,4 +136,87 @@ return [
         check($journal->entries()[0]['real_authorization'] === false
             && $journal->entries()[0]['external_calls'] === 0);
     },
+
+    'U28-01 shared nonce capacity refuses new identities without evicting replay history' => function (): void {
+        $store = new MockSharedTrustState(2);
+        [$g1, $e1, $o1, $ctx] = f114Fixture($store, null, 'SYNTHETIC_NONCE_1');
+        [$g2, $e2, $o2] = f114Fixture($store, $ctx, 'SYNTHETIC_NONCE_2');
+        [$g3, $e3, $o3] = f114Fixture($store, $ctx, 'SYNTHETIC_NONCE_3');
+        $g1->authorize($e1, $o1, $ctx, 'SYNTHETIC_LEAD_READ', 15);
+        $g2->authorize($e2, $o2, $ctx, 'SYNTHETIC_LEAD_READ', 15);
+        denied('TRUST_STATE_CAPACITY_DENIED', fn() => $g3->authorize(
+            $e3, $o3, $ctx, 'SYNTHETIC_LEAD_READ', 15));
+        denied('TRUST_REPLAY_DENIED', fn() => $g1->authorize(
+            $e1, $o1, $ctx, 'SYNTHETIC_LEAD_READ', 15));
+        check($store->countConsumed() === 2);
+    },
+    'U28-02 revocation store capacity is fail closed and duplicate revocation remains safe' => function (): void {
+        $store = new MockSharedTrustState(1);
+        $first = hash('sha256', 'SYNTHETIC_REVOCATION_A');
+        $second = hash('sha256', 'SYNTHETIC_REVOCATION_B');
+        $store->revokeDigest($first);
+        $store->revokeDigest($first);
+        denied('TRUST_STATE_CAPACITY_DENIED', fn() => $store->revokeDigest($second));
+        check($store->countRevoked() === 1);
+    },
+    'U28-03 invalid synthetic memory budgets fail before allocating state' => function (): void {
+        foreach ([0, -1, 4097] as $capacity) {
+            denied('TRUST_STATE_SCHEMA_DENIED', fn() => new MockSharedTrustState($capacity));
+        }
+        check((new MockSharedTrustState(4096))->countConsumed() === 0);
+    },
+    'U28-04 trust outage and recovery cannot reset a full nonce registry' => function (): void {
+        $store = new MockSharedTrustState(1);
+        [$g1, $e1, $o1, $ctx] = f114Fixture($store, null, 'SYNTHETIC_NONCE_RECOVERY_A');
+        [$g2, $e2, $o2] = f114Fixture($store, $ctx, 'SYNTHETIC_NONCE_RECOVERY_B');
+        $g1->authorize($e1, $o1, $ctx, 'SYNTHETIC_LEAD_READ', 15);
+        $store->setAvailable(false);
+        denied('TRUST_STATE_UNAVAILABLE', fn() => $g2->authorize(
+            $e2, $o2, $ctx, 'SYNTHETIC_LEAD_READ', 15));
+        $store->setAvailable(true);
+        denied('TRUST_STATE_CAPACITY_DENIED', fn() => $g2->authorize(
+            $e2, $o2, $ctx, 'SYNTHETIC_LEAD_READ', 15));
+        denied('TRUST_REPLAY_DENIED', fn() => $g1->authorize(
+            $e1, $o1, $ctx, 'SYNTHETIC_LEAD_READ', 15));
+        check($store->countConsumed() === 1);
+    },
+    'U28-05 local gateway nonce cache also denies capacity without a replay bypass' => function (): void {
+        $ctx = context();
+        $gateway = new MockTrustGateway('SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API',
+            ['SYNTHETIC_LEAD_READ']);
+        $firstEnvelope = null;
+        $firstOwner = null;
+        for ($i = 0; $i <= 1024; ++$i) {
+            $env = new MockTrustEnvelope('SYNTHETIC_ENV_CAP_' . $i,
+                'SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API', $ctx,
+                'SYNTHETIC_NONCE_CAP_' . $i, ['SYNTHETIC_LEAD_READ'], 10, 40);
+            $owner = new MockOwnerScopeEvidence('SYNTHETIC_OWNER_CAP_' . $i,
+                $env->digest, $ctx, 'SYNTHETIC_LEAD_READ', 10, 40, true);
+            if ($i === 0) { $firstEnvelope = $env; $firstOwner = $owner; }
+            if ($i < 1024) $gateway->authorize($env, $owner, $ctx, 'SYNTHETIC_LEAD_READ', 15);
+            else denied('TRUST_STATE_CAPACITY_DENIED', fn() => $gateway->authorize(
+                $env, $owner, $ctx, 'SYNTHETIC_LEAD_READ', 15));
+        }
+        denied('TRUST_REPLAY_DENIED', fn() => $gateway->authorize(
+            $firstEnvelope, $firstOwner, $ctx, 'SYNTHETIC_LEAD_READ', 15));
+    },
+    'U28-06 audit categorizes capacity denial as trust without leaking store internals' => function (): void {
+        $store = new MockSharedTrustState(1);
+        [$gateway, $first, $firstOwner, $ctx] = f114Fixture(
+            $store, null, 'SYNTHETIC_NONCE_AUDIT_A');
+        [, $second, $secondOwner] = f114Fixture(
+            $store, $ctx, 'SYNTHETIC_NONCE_AUDIT_B');
+        $trail = new MockCrmReadAuditTrail();
+        $boundary = new MockCrmReadAuditedBoundary(
+            new MockCrmReadBoundary($gateway, new MockCrmReader()), $trail);
+        $request = new MockCrmReadRequest(f112Wire($ctx));
+        check($boundary->evaluate($request, $first, $firstOwner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        denied('TRUST_STATE_CAPACITY_DENIED', fn() => $boundary->evaluate(
+            $request, $second, $secondOwner, $ctx, 15));
+        check($trail->count() === 2
+            && $trail->entries()[1]['reason'] === 'TRUST');
+        check(!str_contains(json_encode($trail->entries(), JSON_THROW_ON_ERROR),
+            'TRUST_STATE_CAPACITY_DENIED'));
+    },
 ];
