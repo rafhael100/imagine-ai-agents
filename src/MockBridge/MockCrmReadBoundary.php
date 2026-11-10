@@ -33,6 +33,17 @@ final class MockCrmReadBoundary
             $envelope, $owner, $trustedContext, 'SYNTHETIC_LEAD_READ', $now);
     }
 
+    /** Monotonic, local-only policy revision, not a CRM authorization token. */
+    public function policyRevision(): int
+    {
+        return $this->ownerPolicy->revision();
+    }
+
+    public function assertPolicyRevision(int $expected): void
+    {
+        $this->ownerPolicy->assertRevision($expected);
+    }
+
     public function evaluate(
         MockCrmReadRequest $request,
         ?MockTrustEnvelope $envelope,
@@ -46,6 +57,7 @@ final class MockCrmReadBoundary
         // The CRM-owned policy remains mandatory and is never inferred from
         // caller-supplied claims or a previously valid trust envelope.
         $this->ownerPolicy->assertAllowed($trustedContext, $request->fields);
+        $policyRevision = $this->ownerPolicy->revision();
         $trusted = $this->gateway->authorize(
             $envelope, $owner, $trustedContext, 'SYNTHETIC_LEAD_READ', $now
         );
@@ -62,6 +74,9 @@ final class MockCrmReadBoundary
         // before calling the projection safe or recording a success.
         // The already-consumed nonce is NOT consumed a second time.
         $this->recheck($request, $envelope, $owner, $trustedContext, $now);
+        // Even a revoke/regrant or suspend/resume inside the reader must NOT
+        // turn old authorization into a valid success (ABA safety).
+        $this->ownerPolicy->assertRevision($policyRevision);
         $orderedProjection = MockReadProjectionInvariant::canonicalize(
             $projection, $request->fields, $trustedContext);
         if ($orderedProjection === null) MockError::fail('BRIDGE_PROJECTION_DENIED');

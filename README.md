@@ -52,10 +52,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=585 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=597 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**SEC-45 integrada:** **585 testes PHP / lint de 83 arquivos PHP** e Python; [CI pós-merge #42913437800](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42913437800) aprovada. [EVID-30](docs/AIA-R01-EVID-30-SEC45-CI-POSTMERGE.md) registra limites. Histórico: [SEC-44 #42906719897](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42906719897), [SEC-43 #42902464064](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42902464064). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**SEC-46 em revisão:** **597 testes PHP / lint 83 arquivos PHP** e Python; [SEC-46](docs/AIA-FT01-SEC-46-RECIBO-REVISAO-OWNER-ABA.md) bloqueia revogação/reconcessão ABA e recheck sem leitura. Última CI pós-merge: [SEC-45 #42913437800](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42913437800); histórico [SEC-44 #42906719897](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42906719897), [SEC-43 #42902464064](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42902464064). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
