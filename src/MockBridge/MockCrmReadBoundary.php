@@ -5,14 +5,14 @@ namespace ImagineAI\MockBridge;
 
 use ImagineAI\Domain\{MockError, TenantContext};
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence, MockTrustGateway};
-use ImagineAI\Mocks\MockCrmReader;
+use ImagineAI\Contracts\CrmReader;
 
 /** Offline mock; CRM resource-owner ACL and service authentication are NOT implemented. */
 final class MockCrmReadBoundary
 {
     public function __construct(
         private readonly MockTrustGateway $gateway,
-        private readonly MockCrmReader $reader,
+        private readonly CrmReader $reader,
         private readonly MockCrmOwnerPolicy $ownerPolicy,
     ) {}
 
@@ -45,7 +45,18 @@ final class MockCrmReadBoundary
             if (!array_key_exists($field, $projection)) {
                 MockError::fail('BRIDGE_PROJECTION_DENIED');
             }
-            $orderedProjection[$field] = $projection[$field];
+            $value = $projection[$field];
+            // This is the LAST boundary before a successful audit event.
+            // Reject a corrupt or cross-resource mock reader, even when the
+            // payload happens to look synthetically formatted. Do not leave
+            // projection validation to a later public facade.
+            if (!is_string($value)
+                || preg_match('/^SYNTHETIC_[A-Z0-9_]{1,80}$/D', $value) !== 1
+                || ($field === 'ref' && $value !== $trustedContext->resource)
+                || ($field === 'stage' && $value !== 'SYNTHETIC_NEW')) {
+                MockError::fail('BRIDGE_PROJECTION_DENIED');
+            }
+            $orderedProjection[$field] = $value;
         }
         return [
             'mode' => 'SYNTHETIC_ONLY',
