@@ -15,6 +15,11 @@ final class MockSharedTrustState
     private array $revokedDigests = [];
     private bool $available = true;
 
+    public function __construct(private readonly int $capacity = 1024)
+    {
+        if ($capacity < 1 || $capacity > 4096) MockError::fail('TRUST_STATE_SCHEMA_DENIED');
+    }
+
     public function setAvailable(bool $available): void { $this->available = $available; }
 
     public function revokeDigest(string $digest): void
@@ -23,6 +28,10 @@ final class MockSharedTrustState
             MockError::fail('TRUST_STATE_SCHEMA_DENIED');
         }
         $this->assertAvailable();
+        // Repeat revocation remains idempotent even after capacity is reached.
+        if (!isset($this->revokedDigests[$digest]) && count($this->revokedDigests) >= $this->capacity) {
+            MockError::fail('TRUST_STATE_CAPACITY_DENIED');
+        }
         $this->revokedDigests[$digest] = true;
     }
 
@@ -39,10 +48,13 @@ final class MockSharedTrustState
         if (isset($this->nonces[$nonceKey])) {
             MockError::fail('TRUST_REPLAY_DENIED');
         }
+        // Never evict an earlier nonce: eviction could make replay possible.
+        if (count($this->nonces) >= $this->capacity) MockError::fail('TRUST_STATE_CAPACITY_DENIED');
         $this->nonces[$nonceKey] = true;
     }
 
     public function countConsumed(): int { return count($this->nonces); }
+    public function countRevoked(): int { return count($this->revokedDigests); }
 
     private function assertAvailable(): void
     {
