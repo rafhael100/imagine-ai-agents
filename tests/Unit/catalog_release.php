@@ -61,6 +61,19 @@ function f151FillPromotionGate(MockPromotionGate $gate, MockAgentVersionSnapshot
     }
 }
 
+/** Fill a purely local catalog; no registry, deployment or real agent. */
+function f152CatalogSnapshots(int $count = 256): array
+{
+    $ctx = context();
+    $catalog = new MockAgentTemplateCatalog();
+    $catalog->addTemplate('SYNTHETIC_AGENT', $ctx, ['SYNTHETIC_TOOL_READ']);
+    for ($i = 0; $i < $count; ++$i) {
+        $catalog->addSnapshot(f106Snapshot($ctx,
+            'SYNTHETIC_SNAPSHOT_BOUND_' . $i, 'SYNTHETIC_VERSION_BOUND_' . $i));
+    }
+    return [$ctx, $catalog];
+}
+
 return [
     'U06-01 known template snapshot is immutable and safe view contains no privilege' => function (): void {
         [$ctx, $catalog, $snapshot, , $gate] = f106Fixture();
@@ -320,5 +333,86 @@ return [
         check($gate->events() === $before);
         denied('RELEASE_DENIED', fn() => $gate->rollback(
             'SYNTHETIC_SEC29_ILLEGAL_ROLLBACK', $snapshot, $review, $ctx, 15));
+    },
+
+    'U52-01 catalog accepts 64 templates, then denies 65th before insertion' => function (): void {
+        $ctx = context();
+        $catalog = new MockAgentTemplateCatalog();
+        for ($i = 0; $i < 64; ++$i) {
+            $catalog->addTemplate('SYNTHETIC_TEMPLATE_CAP_' . $i,
+                $ctx, ['SYNTHETIC_TOOL_READ']);
+        }
+        denied('CATALOG_CAPACITY_DENIED', fn() => $catalog->addTemplate(
+            'SYNTHETIC_TEMPLATE_CAP_64', $ctx, ['SYNTHETIC_TOOL_READ']));
+        denied('TEMPLATE_CONFLICT', fn() => $catalog->addTemplate(
+            'SYNTHETIC_TEMPLATE_CAP_0', $ctx, ['SYNTHETIC_TOOL_READ']));
+    },
+    'U52-02 rejected schema does not consume the last template slot' => function (): void {
+        $ctx = context();
+        $catalog = new MockAgentTemplateCatalog();
+        for ($i = 0; $i < 63; ++$i) {
+            $catalog->addTemplate('SYNTHETIC_TEMPLATE_CAP_' . $i,
+                $ctx, ['SYNTHETIC_TOOL_READ']);
+        }
+        denied('CATALOG_SCHEMA_DENIED', fn() => $catalog->addTemplate(
+            'SYNTHETIC_TEMPLATE_INVALID', $ctx,
+            ['SYNTHETIC_TOOL_READ', 'SYNTHETIC_TOOL_READ']));
+        $catalog->addTemplate('SYNTHETIC_TEMPLATE_CAP_63', $ctx,
+            ['SYNTHETIC_TOOL_READ']);
+        denied('CATALOG_CAPACITY_DENIED', fn() => $catalog->addTemplate(
+            'SYNTHETIC_TEMPLATE_AFTER_CAP', $ctx, []));
+    },
+    'U52-03 256 snapshots fit, but 257th cannot enter the catalog' => function (): void {
+        [$ctx, $catalog] = f152CatalogSnapshots();
+        $last = f106Snapshot($ctx, 'SYNTHETIC_SNAPSHOT_BOUND_255',
+            'SYNTHETIC_VERSION_BOUND_255');
+        check($catalog->get($last->ref, $ctx)->digest === $last->digest);
+        $next = f106Snapshot($ctx, 'SYNTHETIC_SNAPSHOT_BOUND_256',
+            'SYNTHETIC_VERSION_BOUND_256');
+        denied('CATALOG_CAPACITY_DENIED', fn() => $catalog->addSnapshot($next));
+        denied('SNAPSHOT_DENIED', fn() => $catalog->get($next->ref, $ctx));
+        check($catalog->get($last->ref, $ctx)->digest === $last->digest);
+    },
+    'U52-04 exact duplicate snapshot remains idempotent at full capacity' => function (): void {
+        [$ctx, $catalog] = f152CatalogSnapshots();
+        $same = f106Snapshot($ctx, 'SYNTHETIC_SNAPSHOT_BOUND_0',
+            'SYNTHETIC_VERSION_BOUND_0');
+        $catalog->addSnapshot($same);
+        $catalog->addSnapshot($same);
+        check($catalog->get($same->ref, $ctx)->digest === $same->digest);
+        $extra = f106Snapshot($ctx, 'SYNTHETIC_SNAPSHOT_BOUND_EXTRA',
+            'SYNTHETIC_VERSION_BOUND_EXTRA');
+        denied('CATALOG_CAPACITY_DENIED', fn() => $catalog->addSnapshot($extra));
+    },
+    'U52-05 same ref with modified digest remains conflict after capacity' => function (): void {
+        [$ctx, $catalog] = f152CatalogSnapshots();
+        $old = f106Snapshot($ctx, 'SYNTHETIC_SNAPSHOT_BOUND_0',
+            'SYNTHETIC_VERSION_BOUND_0');
+        $changed = f106Snapshot($ctx, $old->ref, $old->version,
+            ['instruction_ref' => 'SYNTHETIC_INSTRUCTIONS_CHANGED']);
+        denied('SNAPSHOT_CONFLICT', fn() => $catalog->addSnapshot($changed));
+        check($catalog->get($old->ref, $ctx)->digest === $old->digest);
+    },
+    'U52-06 same template version with another ref remains conflict at capacity' => function (): void {
+        [$ctx, $catalog] = f152CatalogSnapshots();
+        $duplicateVersion = f106Snapshot($ctx,
+            'SYNTHETIC_SNAPSHOT_ALT_REF', 'SYNTHETIC_VERSION_BOUND_0');
+        denied('SNAPSHOT_CONFLICT', fn() => $catalog->addSnapshot($duplicateVersion));
+        denied('SNAPSHOT_DENIED', fn() => $catalog->get($duplicateVersion->ref, $ctx));
+    },
+    'U52-07 capacity cannot block revocation or existing reviewed selection' => function (): void {
+        [$ctx, $catalog] = f152CatalogSnapshots();
+        $selected = $catalog->get('SYNTHETIC_SNAPSHOT_BOUND_255', $ctx);
+        $review = f106Review($selected);
+        $gate = new MockPromotionGate($catalog, $ctx, ['SYNTHETIC_TOOL_READ'],
+            'SYNTHETIC_DATASET_V1', 'SYNTHETIC_RULE_V1');
+        check($gate->promote('SYNTHETIC_SEC30_SELECT',
+            $selected, $review, $ctx, 15) === 'ATIVO_SIMULADO');
+        check($gate->current() === $selected->ref);
+        $catalog->disable($selected->ref, $ctx);
+        denied('SNAPSHOT_DENIED', fn() => $catalog->get($selected->ref, $ctx));
+        check($gate->current() === null);
+        check($gate->suspend('SYNTHETIC_SEC30_STOP', $ctx) === 'SUSPENSO');
+        check($gate->current() === null && count($gate->events()) === 2);
     },
 ];
