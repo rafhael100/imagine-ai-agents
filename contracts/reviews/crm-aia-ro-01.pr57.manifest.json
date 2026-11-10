@@ -1,9 +1,9 @@
 {
   "source_repo": "rafhael100/imagine-crm",
   "source_pr": 57,
-  "source_pr_head": "a006bd427dbf34afbbbdec3098316c47a59fc608",
+  "source_pr_head": "97bc1e8d6ce4cf4b52378472c31cb49de6a66d51",
   "source_path": "docs/desenvolvimento/CRM-AIA-RO-01-proposta-contrato-bilateral-offline-2026-11-09.md",
-  "source_blob_sha": "6a1b076d2dc50cc29ffc802d6b186c623c6b49ca",
+  "source_blob_sha": "cefb390ec41a76d486b137279d92627f097d1d47",
   "proposal_status": "DRAFT_NOT_APPROVED",
   "operation": "crm.lead.read_minimal",
   "contract": "SYNTHETIC_CRM_AIA_READ_V1",
