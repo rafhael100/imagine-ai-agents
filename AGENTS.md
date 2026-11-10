@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline em revisão — SEC-34 (10/11/2026)
+
+- `MockPromotionGate` revalida revisão ativa: revogação oculta seleção; `current($now)` verifica validade temporal apenas com tempo sintético explícito. A leitura não registra eventos e suspensão explícita permanece disponível, inclusive no limite.
+- **Gate esperado: 492 testes PHP / 82 lint + Python.** [SEC-34](docs/AIA-FT01-SEC-34-REVALIDACAO-REVISAO-ATIVA.md). Histórico anterior continua válido como evidência histórica.
+- CRM PR #57 OPEN/DRAFT; R01-G01..G11 e CORE/SEG/AUT ABERTOS/NO-GO. Somente dev sintética offline, sem `main`, VPS, produção, segredos, clientes ou custos.
+
 ## Baseline em revisão — SEC-33 (10/11/2026)
 
 - `MockSupervisedGateway`: proibir `PENDENTE → INDETERMINADO`, preservar replays idempotentes não terminais e estados terminais imutáveis.
