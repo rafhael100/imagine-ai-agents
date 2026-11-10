@@ -45,6 +45,7 @@ for required in \
   examples/f111-trust-demo.php \
   src/MockBridge/MockCrmReadRequest.php \
   src/MockBridge/MockCrmReadBoundary.php \
+  src/MockBridge/MockReadProjectionInvariant.php \
   tests/Unit/crm_read_contract.php \
   src/MockAudit/MockCrmReadAuditTrail.php \
   src/MockAudit/MockCrmReadAuditedBoundary.php \
@@ -78,8 +79,8 @@ for required in \
   fi
 done
 
-expected_php="${EXPECTED_PHP:-82}"
-expected_cases="${EXPECTED_CASES:-546}"
+expected_php="${EXPECTED_PHP:-83}"
+expected_cases="${EXPECTED_CASES:-555}"
 [[ "$expected_php" =~ ^[0-9]+$ && "$expected_cases" =~ ^[0-9]+$ ]] || {
   echo 'BLOCKED: expected counts must be integers' >&2
   exit 2

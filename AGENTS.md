@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## SEC-41 — contrato comum da projeção OP-01 (10/11/2026)
+
+- `MockReadProjectionInvariant::canonicalize` valida somente campos `ref/stage` autorizados, string até 90 bytes, valor de `ref` ligado ao contexto e `stage` fixo. A borda valida antes da auditoria; fachada e telemetria usam `isCanonical`.
+- **Gate desta revisão: 555 testes PHP, lint 83 arquivos PHP + Python.** Novo arquivo `src/MockBridge/MockReadProjectionInvariant.php`; [SEC-41](docs/AIA-FT01-SEC-41-PROJECAO-OP01-UNIFICADA.md).
+- Os 13 cenários de aceite real continuam `NAO_EXECUTADO`, CRM PR #57 OPEN/DRAFT e R01-G01..G11/CORE/SEG/AUT NO-GO. Sem `main`, VPS, produção, clientes, segredos ou gastos.
+
 ## F163 / EVID-25/26 — ensaio de cenários OP-01 integrado à dev (10/11/2026)
 
 - Cobrir **U63-OP01-N01..N11 e P01..P02**, sem HTTP, rede, IAM ou CRM real; estado compartilhado de nonce é só objeto local, e espera não é fila real.

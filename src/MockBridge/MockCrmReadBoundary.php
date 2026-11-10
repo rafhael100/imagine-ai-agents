@@ -35,29 +35,14 @@ final class MockCrmReadBoundary
         if ($trusted['real_authorization'] !== false || $trusted['external_calls'] !== 0) {
             MockError::fail('BRIDGE_TRUST_DENIED');
         }
-        // The reader has a hard-coded fictional dataset and denies unknown fields/resources.
+        // The reader is replaceable behind the CrmReader contract. Inspect its
+        // entire (at most two-field) result BEFORE a success audit is written.
+        // The common invariant also reorders an otherwise valid reader output
+        // according to the request, without accepting extra or foreign data.
         $projection = $this->reader->lead($trustedContext, $request->fields);
-        if (count($projection) !== count($request->fields)) {
-            MockError::fail('BRIDGE_PROJECTION_DENIED');
-        }
-        $orderedProjection = [];
-        foreach ($request->fields as $field) {
-            if (!array_key_exists($field, $projection)) {
-                MockError::fail('BRIDGE_PROJECTION_DENIED');
-            }
-            $value = $projection[$field];
-            // This is the LAST boundary before a successful audit event.
-            // Reject a corrupt or cross-resource mock reader, even when the
-            // payload happens to look synthetically formatted. Do not leave
-            // projection validation to a later public facade.
-            if (!is_string($value)
-                || preg_match('/^SYNTHETIC_[A-Z0-9_]{1,80}$/D', $value) !== 1
-                || ($field === 'ref' && $value !== $trustedContext->resource)
-                || ($field === 'stage' && $value !== 'SYNTHETIC_NEW')) {
-                MockError::fail('BRIDGE_PROJECTION_DENIED');
-            }
-            $orderedProjection[$field] = $value;
-        }
+        $orderedProjection = MockReadProjectionInvariant::canonicalize(
+            $projection, $request->fields, $trustedContext);
+        if ($orderedProjection === null) MockError::fail('BRIDGE_PROJECTION_DENIED');
         return [
             'mode' => 'SYNTHETIC_ONLY',
             'contract' => 'SYNTHETIC_CRM_AIA_READ_V1',
