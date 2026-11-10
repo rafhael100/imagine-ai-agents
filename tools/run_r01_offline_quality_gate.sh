@@ -16,6 +16,7 @@ fi
 echo 'R01_OFFLINE_GATE_START operational_decision=NO_GO'
 python3 tools/check_r01_readiness.py
 python3 tools/check_op01_contract_parity.py
+python3 tools/check_op01_public_response_parity.py
 python3 tools/generate_op01_dashboard.py --check
 python3 tools/check_op01_readiness_dashboard.py
 
@@ -23,6 +24,7 @@ for name in \
   test_r01_readiness.py \
   test_op01_contract_parity.py \
   test_op01_contract_matrix.py \
+  test_op01_public_response_parity.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
@@ -33,6 +35,7 @@ do
 done
 
 php -l tools/op01_php_parser_probe.php
+php -l tools/op01_php_public_response_probe.php
 php -l tools/check_synthetic_php_isolation.php
 php tools/check_synthetic_php_isolation.php
 bash tools/validate_ft01_offline.sh

@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:imagine:synthetic:crm-aia:public-response:v1",
+  "title": "SYNTHETIC ONLY — offline response contract, not a CRM API",
+  "description": "An illustrative closed response envelope for the PHP offline facade. No service authentication or real data access is authorized.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "state",
+    "projection",
+    "real_authorization",
+    "external_calls"
+  ],
+  "properties": {
+    "contract": {
+      "const": "SYNTHETIC_CRM_AIA_PUBLIC_V1"
+    },
+    "state": {
+      "enum": [
+        "READ_SYNTHETIC_ONLY",
+        "DENIED_OR_NOT_FOUND"
+      ]
+    },
+    "projection": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/minimalProjection"
+        }
+      ]
+    },
+    "real_authorization": {
+      "const": false
+    },
+    "external_calls": {
+      "const": 0
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "DENIED_OR_NOT_FOUND"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "projection": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "READ_SYNTHETIC_ONLY"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "projection": {
+            "$ref": "#/$defs/minimalProjection"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "minimalProjection": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 2,
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string",
+          "pattern": "^SYNTHETIC_[A-Z0-9_]{1,80}$"
+        },
+        "stage": {
+          "type": "string",
+          "pattern": "^SYNTHETIC_[A-Z0-9_]{1,80}$"
+        }
+      }
+    }
+  }
+}

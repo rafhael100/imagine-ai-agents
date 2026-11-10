@@ -16,7 +16,8 @@ class QualityGateCoverage(unittest.TestCase):
     def test_all_offline_contract_regressions_still_run(self):
         for name in (
             "test_r01_readiness.py", "test_op01_contract_parity.py",
-            "test_op01_contract_matrix.py", "test_ci_guardrails.py",
+            "test_op01_contract_matrix.py", "test_op01_public_response_parity.py",
+            "test_ci_guardrails.py",
             "test_op01_readiness_dashboard.py", "test_op01_dashboard_generator.py",
             "test_synthetic_php_isolation.py", "test_quality_gate_coverage.py",
         ):
@@ -27,6 +28,7 @@ class QualityGateCoverage(unittest.TestCase):
         for command in (
             "tools/check_r01_readiness.py",
             "tools/check_op01_contract_parity.py",
+            "tools/check_op01_public_response_parity.py",
             "tools/generate_op01_dashboard.py --check",
             "tools/check_op01_readiness_dashboard.py",
         ):
@@ -35,6 +37,7 @@ class QualityGateCoverage(unittest.TestCase):
 
     def test_php_probe_isolation_and_official_regression_are_required(self):
         self.assertIn("php -l tools/op01_php_parser_probe.php", self.script)
+        self.assertIn("php -l tools/op01_php_public_response_probe.php", self.script)
         self.assertIn("php tools/check_synthetic_php_isolation.php", self.script)
         self.assertIn("bash tools/validate_ft01_offline.sh", self.script)
 
