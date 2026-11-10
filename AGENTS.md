@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline em revisão — SEC-35 (10/11/2026)
+
+- `SupervisedCoordinator::remember` normaliza ausência/solicitação para incerteza antes de comparar, bloqueia `PENDENTE → INDETERMINADO`, preserva objetos de respostas não terminais idênticas e mantém o fechamento de auditoria. Sem reenvio de operações.
+- **Gate esperado: 500 testes PHP / 82 lint + Python.** [SEC-35](docs/AIA-FT01-SEC-35-COORDENADOR-MONOTONICO.md).
+- CRM PR #57 OPEN/DRAFT; R01-G01..G11 / CORE/SEG/AUT ABERTOS/NO-GO. Somente dev sintética offline, sem `main`, VPS, produção, clientes, segredos ou custos.
+
 ## Baseline em revisão — SEC-34 (10/11/2026)
 
 - `MockPromotionGate` revalida revisão ativa: revogação oculta seleção; `current($now)` verifica validade temporal apenas com tempo sintético explícito. A leitura não registra eventos e suspensão explícita permanece disponível, inclusive no limite.
