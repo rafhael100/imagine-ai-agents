@@ -23,7 +23,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("docs/historico/STATUS-ATUAL-ANTES-CONSOLIDACAO-2026-11-10.md", current)
         self.assertIn("R01-G01..G11", current)
         self.assertIn("CORE/SEG/AUT", current)
-        self.assertIn("533 testes PHP", current)
+        self.assertIn("546 testes PHP", current)
         self.assertIn("82 arquivos PHP", current)
         self.assertIn("NO-GO", current)
         self.assertIn("CRM PR #57", current)
@@ -43,6 +43,15 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("Gate verificado: 533 testes PHP", rules)
         self.assertIn("NO-GO", current)
         self.assertIn("CRM PR #57", current)
+
+    def test_synthetic_rehearsal_does_not_claim_crm_acceptance(self):
+        status = STATUS.read_text(encoding="utf-8")
+        roadmap = ROADMAP.read_text(encoding="utf-8")
+        self.assertIn("EVID-25", status)
+        self.assertIn("13 cenários", status)
+        self.assertIn("NAO_EXECUTADO", status)
+        self.assertIn("CRM PR #57", roadmap)
+        self.assertIn("NO-GO", status)
 
     def test_history_preserved_without_overwriting_evidence(self):
         previous = ARCHIVE.read_text(encoding="utf-8")
