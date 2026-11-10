@@ -6,11 +6,13 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **Baseline verificável do laboratório: 479 testes PHP, lint de 82 arquivos PHP, testes Python de contrato, isolamento e demonstração.** O número de testes não é percentual de conclusão do produto.
+**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **Baseline verificável do laboratório: 485 testes PHP, lint de 82 arquivos PHP, testes Python de contrato, isolamento e demonstração.** O número de testes não é percentual de conclusão do produto.
 
 ## Últimas entregas verificadas
 
-**SEC-32 em revisão:** limite de 256 efeitos fictícios por instância do gateway, sem expulsão de histórico e com falha fechada para novas submissões; sete regressões U54-01..07. [Documento SEC-32](docs/AIA-FT01-SEC-32-EFEITOS-LIMITADOS.md). Sem vínculo com CRM real ou autorização de piloto.
+**SEC-33 em revisão:** impede regressão de evidências sintéticas de `PENDENTE` para `INDETERMINADO`, preserva replays não terminais sem alocar novo efeito e mantém resultados terminais imutáveis. Seis regressões U55-01..06. [SEC-33](docs/AIA-FT01-SEC-33-EVIDENCIAS-MONOTONICAS.md). Sem CRM ou IAM real.
+
+**SEC-32 integrada à dev:** limite de 256 efeitos fictícios por instância do gateway, sem expulsão de histórico e com falha fechada para novas submissões; sete regressões U54-01..07. [Documento SEC-32](docs/AIA-FT01-SEC-32-EFEITOS-LIMITADOS.md). Sem vínculo com CRM real ou autorização de piloto.
 
 **SEC-31 integrada à dev:** limites de 256 fontes sintéticas e 1.024 registros de seleção/entrega, sem apagar histórico, com negação quando a trilha não puder registrar o resultado. Sete regressões U53-01..07. [Documento SEC-31](docs/AIA-FT01-SEC-31-LIMITES-CONHECIMENTO.md). Nenhum serviço externo de conhecimento é utilizado.
 
