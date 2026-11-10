@@ -82,7 +82,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertTrue((ROOT / "docs/AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md").is_file())
         self.assertIn("EVID-28", rules)
         self.assertIn("EVID-28", current)
-        self.assertIn("42902464064", current)
+        self.assertIn("42902464064", (ROOT / "docs/AIA-R01-EVID-28-SEC43-CI-POSTMERGE.md").read_text(encoding="utf-8"))
         self.assertIn("42902464064", README.read_text(encoding="utf-8"))
         self.assertIn("NAO_EXECUTADO", current)
         self.assertIn("NO-GO", current)
