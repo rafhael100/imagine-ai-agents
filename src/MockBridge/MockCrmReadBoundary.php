@@ -39,6 +39,11 @@ final class MockCrmReadBoundary
         return $this->ownerPolicy->revision();
     }
 
+    public function assertPolicyRevision(int $expected): void
+    {
+        $this->ownerPolicy->assertRevision($expected);
+    }
+
     public function evaluate(
         MockCrmReadRequest $request,
         ?MockTrustEnvelope $envelope,
