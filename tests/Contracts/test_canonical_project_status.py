@@ -90,9 +90,12 @@ class CanonicalProjectStatusTests(unittest.TestCase):
     def test_sec44_read_tool_uses_shared_invariant_and_no_go(self):
         current = STATUS.read_text(encoding="utf-8")
         rules = AGENT_RULES.read_text(encoding="utf-8")
-        self.assertIn("SEC-44 em revisão", current)
+        self.assertIn("SEC-44 integrada à dev (PR #218)", current)
         self.assertIn("575 testes PHP", current)
         self.assertIn("AIA-FT01-SEC-44-FERRAMENTA-PROJECAO-COMUM.md", rules)
+        self.assertIn("EVID-29", current)
+        self.assertIn("42906719897", current)
+        self.assertIn("42906719897", README.read_text(encoding="utf-8"))
         self.assertIn("NAO_EXECUTADO", current)
         self.assertIn("NO-GO", current)
         self.assertIn("CRM PR #57", current)
