@@ -6,7 +6,7 @@ namespace ImagineAI\MockBridge;
 use ImagineAI\Domain\TenantContext;
 use ImagineAI\MockAudit\{MockCrmReadAuditTrail, MockCrmReadAuditedBoundary};
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence, MockTrustGateway};
-use ImagineAI\Mocks\MockCrmReader;
+use ImagineAI\Contracts\CrmReader;
 
 /**
  * Offline public-facing VALUE ENVELOPE only. Not HTTP, API, IAM or a CRM endpoint.
@@ -20,7 +20,7 @@ final class MockCrmReadPublicFacade
 
     public function __construct(
         MockTrustGateway $gateway,
-        MockCrmReader $reader,
+        CrmReader $reader,
         MockCrmOwnerPolicy $ownerPolicy,
         MockCrmReadAuditTrail $audit,
     ) {
