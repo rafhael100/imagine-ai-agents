@@ -1,5 +1,12 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline de revisão vigente — SEC-20 / 10/11/2026
+
+- [PR #182](https://github.com/rafhael100/imagine-ai-agents/pull/182) integrado somente à dev (`c064a640fea07f6f353e9fe4329380c5a0354242`), [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) success. Projeção fictícia validada **antes** do registro de sucesso da auditoria.
+- **Gate vigente: 403 testes PHP / 82 lint e testes Python.** [EVID-18](docs/AIA-R01-EVID-18-SEGURANCA-PROJECAO-403.md), [status atual](STATUS-ATUAL.md), [README atual](README.md). Os números 397 e menores abaixo são históricos.
+- CRM [PR #57](https://github.com/rafhael100/imagine-crm/pull/57) permanece DRAFT; R01-G01..G11 / CORE-SEG-AUT **ABERTOS / NO-GO**. Sem integração real, main, VPS, credenciais, clientes ou custos.
+
+
 ## Baseline atual — 10/11/2026, SEC-18/SEC-19
 
 - [SEC-18 / PR #177](https://github.com/rafhael100/imagine-ai-agents/pull/177) corrigiu Runs que permaneciam ativas após sugestão rejeitada; merge dev `feb9fd8e004c2908a754f8dd535ca5286094454c`, [CI pós-merge #42753075500](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42753075500) `success`.
