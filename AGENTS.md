@@ -1,5 +1,13 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline vigente — SEC-23/SEC-24 (10/11/2026)
+
+- [PR #189](https://github.com/rafhael100/imagine-ai-agents/pull/189) integrado dev `f72ebaccadec579083d9d091c9d7b2048402f91e`, [CI pós-merge #42847828963](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42847828963) success: limites de Intent e Approval.
+- [PR #190](https://github.com/rafhael100/imagine-ai-agents/pull/190) integrado dev `b8128f1619ebdceecb24a22cba958cc8e88a6f01`, [CI pós-merge #42848621884](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42848621884) success: limites de Run/Step em construtores diretos.
+- **Gate vigente 427 testes PHP / 82 lint e testes Python**. [EVID-21](docs/AIA-R01-EVID-21-LIMITES-DOMINIO-427.md). Contagens antigas neste arquivo são históricas.
+- CRM PR #57 permanece DRAFT; R01-G01..G11 / CORE-SEG-AUT **NO-GO**. Não alterar `main`, VPS, dados de clientes, segredos, custos ou produção.
+
+
 ## Baseline vigente — SEC-21/SEC-22 (10/11/2026)
 
 - [PR #186](https://github.com/rafhael100/imagine-ai-agents/pull/186), merge `79fa9bb4cadae3a2ee82b334c9c40b32ab905032`, [CI pós-merge #42836105212](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42836105212) success: ferramentas exigem Run/Step registrados pelo coordenador.
