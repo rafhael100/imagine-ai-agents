@@ -16,6 +16,7 @@ class QualityGateCoverage(unittest.TestCase):
     def test_all_offline_contract_regressions_still_run(self):
         for name in (
             "test_r01_readiness.py", "test_op01_contract_parity.py",
+            "test_op01_parser_mutation_parity.py",
             "test_op01_bilateral_packet.py", "test_op01_contract_matrix.py", "test_op01_public_response_parity.py", "test_f127_offline_pilot_demo.py",
             "test_ci_guardrails.py",
             "test_op01_readiness_dashboard.py", "test_op01_dashboard_generator.py",
