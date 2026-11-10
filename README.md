@@ -27,6 +27,10 @@ Os [PRs #194](https://github.com/rafhael100/imagine-ai-agents/pull/194) e [#195]
 
 O quadro de revisão sintético agora guarda até **128 pacotes com votos**, sem apagar decisões ou rejeições. Pacotes já iniciados ainda podem receber a segunda revisão independente. Veja [SEC-28](docs/AIA-FT01-SEC-28-REVISOES-BOUNDED.md). Isso não autentica revisores reais nem libera versões para clientes.
 
+## Publicação e rollback sintéticos — SEC-29
+
+O controle local de versões limita as decisões e os registros de auditoria e reserva espaço para suspensão segura. [SEC-29](docs/AIA-FT01-SEC-29-RESERVA-AUDITORIA-VERSOES.md) acrescenta seis regressões. **Nenhuma versão é publicada em produção**, e esses votos/decisões não substituem autorização operacional.
+
 ## Executar e verificar, sem rede
 
 Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem instalar serviços ou baixar dependências.
@@ -34,10 +38,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=452 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=458 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**Baseline verificado na dev:** **452 testes PHP / lint de 82 arquivos PHP**, mais os verificadores Python de contrato e isolamento, [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) `success`. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**Baseline verificado na dev:** **458 testes PHP / lint de 82 arquivos PHP**, mais os verificadores Python de contrato e isolamento, [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) `success`. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
