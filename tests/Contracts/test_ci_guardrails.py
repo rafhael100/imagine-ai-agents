@@ -40,6 +40,19 @@ class WorkflowGuardrails(unittest.TestCase):
         self.assertIn("  push:\n", self.workflow)
         self.assertIn("  pull_request:\n", self.workflow)
 
+    def test_legacy_read_tool_cannot_bypass_owner_policy(self):
+        dispatcher = (ROOT / "src/MockTooling/MockToolDispatcher.php").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("MockError::fail('READ_BOUNDARY_REQUIRED')", dispatcher)
+        self.assertNotIn("MockCrmReader", dispatcher)
+        self.assertNotIn("->lead(", dispatcher)
+        # The separate, explicitly owned OP-01 path remains available.
+        pilot = (ROOT / "src/MockPilot/MockReadOnlyPilot.php").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("$this->edge->handle(", pilot)
+
     def test_public_repository_only(self):
         self.assertIn("github.event.repository.private == false", self.workflow)
 
