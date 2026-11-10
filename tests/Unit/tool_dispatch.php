@@ -766,4 +766,60 @@ return [
             && $events[1]['sequence'] === 2
             && $events[1]['tool'] === 'SYNTHETIC_' . hash('sha256', MockToolCatalog::SUGGEST));
     },
+
+    'U60-01 one-megabyte grant reference is rejected before use or audit' => function (): void {
+        [$ctx, $gateway, $coordinator] = toolFixture();
+        $old = $coordinator->events();
+        denied('VALIDATION_FAILED', fn () => new MockCapabilityGrant(
+            'SYNTHETIC_' . str_repeat('A', 1024 * 1024),
+            MockToolCatalog::SUGGEST, $ctx, 10, 20));
+        check($gateway->submitCount() === 0 && $coordinator->events() === $old);
+    },
+    'U60-02 one-megabyte tool target is rejected before grant persists' => function (): void {
+        [$ctx, $gateway] = toolFixture();
+        denied('VALIDATION_FAILED', fn () => new MockCapabilityGrant(
+            'SYNTHETIC_SEC38_GRANT', 'SYNTHETIC_' . str_repeat('B', 1024 * 1024),
+            $ctx, 10, 20));
+        check($gateway->submitCount() === 0);
+    },
+    'U60-03 maximal 90-byte well formed grant and target references remain usable' => function (): void {
+        $ctx = context();
+        $id = 'SYNTHETIC_' . str_repeat('C', 80);
+        $target = 'SYNTHETIC_' . str_repeat('T', 80);
+        check(strlen($id) === 90 && strlen($target) === 90);
+        $grant = new MockCapabilityGrant($id, $target, $ctx, 10, 20);
+        $grant->assertPermits($target, $ctx, 15);
+        denied('CAPABILITY_DENIED', fn () => $grant->assertPermits($target, $ctx, 20));
+    },
+    'U60-04 91-byte grant or target identifier fails exact boundary' => function (): void {
+        $ctx = context();
+        $long = 'SYNTHETIC_' . str_repeat('A', 81);
+        denied('VALIDATION_FAILED', fn () => new MockCapabilityGrant(
+            $long, MockToolCatalog::SUGGEST, $ctx, 10, 20));
+        denied('VALIDATION_FAILED', fn () => new MockCapabilityGrant(
+            'SYNTHETIC_SEC38_ID', $long, $ctx, 10, 20));
+    },
+    'U60-05 malformed syntax is denied in both grant identity and tool target' => function (): void {
+        $ctx = context();
+        foreach (['SYNTHETIC_', 'SYNTHETIC_lowercase', 'SYNTHETIC_WITH SPACE',
+            'SYNTHETIC_WITH-DASH', 'SYNTHETIC_WITH@TOKEN'] as $bad) {
+            denied('VALIDATION_FAILED', fn () => new MockCapabilityGrant(
+                $bad, MockToolCatalog::READ, $ctx, 10, 20));
+            denied('VALIDATION_FAILED', fn () => new MockCapabilityGrant(
+                'SYNTHETIC_SEC38_GRANT', $bad, $ctx, 10, 20));
+        }
+    },
+    'U60-06 bounded capability preserves real offline suggestion grant lifecycle' => function (): void {
+        [$ctx, $gateway, , $dispatcher, $run, , , $mkGrant] = toolFixture();
+        $grant = $mkGrant(MockToolCatalog::SUGGEST);
+        $result = $dispatcher->dispatch(MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+            $ctx, $grant, ['text' => 'SYNTHETIC_TEST'], 15, $run);
+        check($result['kind'] === 'SUGGEST' && $result['state'] === 'SYNTHETIC_OK'
+            && $gateway->submitCount() === 0);
+        $grant->revoke();
+        denied('CAPABILITY_DENIED', fn () => $dispatcher->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $grant, ['text' => 'SYNTHETIC_TEST'], 15, $run));
+        check($gateway->submitCount() === 0);
+    },
 ];
