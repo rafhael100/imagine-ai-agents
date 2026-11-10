@@ -12,6 +12,11 @@ final class SupervisedCoordinator
     // Must match the maximum accepted by ReadOnlyTraceReview::inspect().
     // This is a process-local safety limit, not production retention.
     private const MAX_TRACE_EVENTS = 1024;
+    // Prevent unbounded IDs from filling the in-process run/step maps or
+    // overwhelming trace hashing. Legacy lowercase fixture suffixes remain
+    // valid here; strict external contracts are checked elsewhere.
+    private const MAX_RUN_REF_BYTES = 80;
+    private const MAX_STEP_REF_BYTES = 96;
     private array $submitted = [];
     private array $effects = [];
     private array $events = [];
@@ -82,6 +87,7 @@ final class SupervisedCoordinator
 
     public function start(string $id): Run
     {
+        self::assertBoundedCoordinatorRef($id, self::MAX_RUN_REF_BYTES);
         if (isset($this->startedRuns[$id])) MockError::fail('RUN_ID_CONFLICT');
         $this->assertTraceCapacity(1);
         $run = new Run($id, $this->context);
@@ -95,6 +101,7 @@ final class SupervisedCoordinator
     public function step(Run $run, string $id): Step
     {
         $this->assertRunCompatible($run);
+        self::assertBoundedCoordinatorRef($id, self::MAX_STEP_REF_BYTES);
         if (isset($this->startedSteps[$run->id][$id])) MockError::fail('STEP_ID_CONFLICT');
         $this->assertTraceCapacity(1);
         $step = $run->step($id);
@@ -304,6 +311,16 @@ final class SupervisedCoordinator
             $event['intent_signature'] = self::traceReference($intent->signature());
         }
         $this->events[] = $event;
+    }
+
+    /** Preserve legacy identifiers but refuse empty or oversized references. */
+    private static function assertBoundedCoordinatorRef(string $value, int $maxBytes): void
+    {
+        if (!str_starts_with($value, 'SYNTHETIC_')
+            || strlen($value) <= strlen('SYNTHETIC_')
+            || strlen($value) > $maxBytes) {
+            MockError::fail('INVALID_SYNTHETIC_REF');
+        }
     }
 
     private function assertTraceCapacity(int $needed): void
