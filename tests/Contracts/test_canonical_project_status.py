@@ -91,7 +91,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         current = STATUS.read_text(encoding="utf-8")
         rules = AGENT_RULES.read_text(encoding="utf-8")
         self.assertIn("SEC-44 integrada à dev (PR #218)", current)
-        self.assertIn("575 testes PHP", current)
+        self.assertIn("575 testes PHP", (ROOT / "docs/AIA-R01-EVID-29-SEC44-CI-POSTMERGE.md").read_text(encoding="utf-8"))
         self.assertIn("AIA-FT01-SEC-44-FERRAMENTA-PROJECAO-COMUM.md", rules)
         self.assertIn("EVID-29", current)
         self.assertIn("42906719897", current)
