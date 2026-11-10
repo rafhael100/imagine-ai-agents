@@ -20,6 +20,9 @@ final class MockAgentVersionSnapshot
         array $manifest,
     ) {
         foreach ([$ref, $templateRef, $version] as $value) self::syntheticRef($value);
+        // A malformed manifest may contain arbitrarily many top-level
+        // entries. Deny before allocating and sorting that key list.
+        if (count($manifest) !== 5) MockError::fail('CATALOG_SCHEMA_DENIED');
         $keys = array_keys($manifest);
         sort($keys);
         if ($keys !== ['instruction_ref', 'policy_ref', 'risk', 'schema_version', 'tools']) {
@@ -59,7 +62,10 @@ final class MockAgentVersionSnapshot
 
     public static function syntheticRef(string $value): void
     {
-        if (!preg_match('/^SYNTHETIC_[A-Z0-9_]{1,100}$/D', $value)) {
+        // The shared validator is used by snapshots, reviews, trust,
+        // knowledge and tools. Do not run regex over a huge untrusted input.
+        if (strlen($value) > 110
+            || preg_match('/^SYNTHETIC_[A-Z0-9_]{1,100}$/D', $value) !== 1) {
             MockError::fail('CATALOG_SCHEMA_DENIED');
         }
     }
