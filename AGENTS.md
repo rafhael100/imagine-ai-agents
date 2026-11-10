@@ -1,9 +1,9 @@
 # AGENTS.md — Imagine AI Agents
 
-## SEC-43 — revogação entre autorização e leitura (10/11/2026)
+## SEC-43 — revalidação pós-leitura integrada à dev (10/11/2026)
 
 - `MockCrmReadBoundary` revalida o owner e `MockTrustGateway::recheck` **após** `CrmReader::lead` e **antes** de qualquer sucesso de auditoria. `MockSharedTrustState::assertLive` permite checar revogação/indisponibilidade sem consumir segundo nonce.
-- **Gate esperado: 565 testes PHP, lint de 83 arquivos + Python.** Dez U65-01..10, [SEC-43](docs/AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md). Testes apenas reentrantes em memória, não transação real.
+- **Gate pós-merge verificado: 565 testes PHP, lint 83 arquivos + Python.** [CI #42902464064](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42902464064); dez U65-01..10. [EVID-28](docs/AIA-R01-EVID-28-SEC43-CI-POSTMERGE.md). Testes reentrantes em memória, não transação real.
 - CRM PR #57 OPEN/DRAFT, 13 cenários reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO. Sem `main`, VPS, deploy, cliente, segredos ou custos.
 
 ## SEC-42 — paridade adversarial OP-01 integrada à dev (10/11/2026)
