@@ -1,5 +1,12 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## Estado vigente: fronteira OP-01 protegida em laboratório (09/11/2026)
+
+- [EVID-14](docs/AIA-R01-EVID-14-CHECKPOINT-LEITURA-OP01.md) consolida SEC-13/14/15. [PR #170](https://github.com/rafhael100/imagine-ai-agents/pull/170) e [PR #171](https://github.com/rafhael100/imagine-ai-agents/pull/171) integrados à `dev`; a owner policy obrigatória é verificada antes do nonce e o caminho `MockToolDispatcher` sem borda foi desativado.
+- [CI de revisão #42746265495](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42746265495) e [CI pós-merge #42746791090](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42746791090) `success`. **370 testes PHP, 82 lint e regressões Python** como baseline atual.
+- Integração real **NÃO CONCLUÍDA / NO-GO**: [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) OPEN/DRAFT, R01-G01..G11 e CRM CORE/SEG/AUT ABERTOS. Falta autenticação real, ACL backend, privacidade, testes de integração, ambiente de homologação e aceite executivo. `main` e produção sem alterações.
+
+
 ## Estado atual verificado — SEC-13, 362 casos PHP (09/11/2026)
 
 - [PR #168](https://github.com/rafhael100/imagine-ai-agents/pull/168) **MERGED na dev**, SHA `422bb277ecccf80f45b243a94903b63a305cd069`. A política de owner passou a ser dependência **obrigatória**, inclusive em chamadas internas à leitura mínima. Não há variante `null` que permita omitir ACL de recurso/campo fictícia.
