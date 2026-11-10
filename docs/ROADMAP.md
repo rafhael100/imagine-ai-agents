@@ -1,3 +1,13 @@
+## Etapa offline consolidada — próximo marco requer CRM homologado (09/11/2026)
+
+- [F1-28 / PR #165](https://github.com/rafhael100/imagine-ai-agents/pull/165): CI [#42741450740](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42741450740) `success`; evita consumir nonce e leitura quando a Run não pode começar. Merge dev `cba280c1b5106d1861d75d78bc8ad1185a9787b1`.
+- [F1-29 / PR #166](https://github.com/rafhael100/imagine-ai-agents/pull/166): CI [#42741942944](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42741942944) `success`; finaliza Run com falha local quando sugestão falha ou viola contrato, com resposta uniforme e sem escrita. Merge dev `6683e398614a49626cb446955938a398f98d7955`.
+- Gate offline vigente **359 PHP / 82 lint**, mais testes Python. Os resultados não representam autenticação, ACL, disponibilidade, persistência, transação distribuída nem autorização de deploy.
+- **Próximo marco técnico (dependência externa):** homologar identidade de serviço, ACL no backend CRM por empresa/recurso/campo, contrato OP-01, política LGPD, ambiente de desenvolvimento, revisão independente de segurança, rollback e autorização formal do piloto. [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) `OPEN/DRAFT`; R01-G01..G11 e CORE/SEG/AUT `ABERTOS / NO-GO`.
+- Não avançar para produção, API real, `main`, VPS ou dados de clientes antes da autorização específica. Documentar provas, não transformar mais mocks isolados em porcentagem fictícia de produto completo.
+
+---
+
 ## Status atual — demonstração offline validada; próximo marco é contrato CRM real (09/11/2026)
 
 - [F1-27 / PR #162](https://github.com/rafhael100/imagine-ai-agents/pull/162), [CI #42739875000](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42739875000) `success`: demo CLI sem parâmetros, sem rede, com cinco cenários e relatórios minimizados. Merge apenas na dev `e669f11dbc7a2adc052f4461c4e820a74aae52bc`.
