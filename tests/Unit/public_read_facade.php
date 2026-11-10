@@ -6,6 +6,7 @@ use ImagineAI\MockBridge\{MockCrmOwnerPolicy, MockCrmReadPublicFacade};
 use ImagineAI\MockTrust\{MockTrustGateway, MockSharedTrustState, MockTrustEnvelope, MockOwnerScopeEvidence};
 use ImagineAI\MockAudit\MockCrmReadAuditTrail;
 use ImagineAI\Mocks\MockCrmReader;
+use ImagineAI\Contracts\CrmReader;
 
 function f117Fixture(
     ?MockCrmOwnerPolicy $policy = null,
@@ -30,6 +31,50 @@ function f117GenericDenial(): array
         'real_authorization' => false,
         'external_calls' => 0,
     ];
+}
+
+
+/**
+ * An intentionally reentrant fictional adapter, not a CRM service.
+ * Callback receives the same public facade that is still in its handle().
+ */
+final class F170ReentrantReader implements CrmReader
+{
+    public int $calls = 0;
+    public function __construct(private readonly \Closure $duringRead) {}
+    public function lead(TenantContext $context, array $fields): array
+    {
+        ++$this->calls;
+        ($this->duringRead)();
+        return array_intersect_key(
+            ['ref' => $context->resource, 'stage' => 'SYNTHETIC_NEW'],
+            array_flip($fields));
+    }
+    public function attendance(TenantContext $context, array $fields): array
+    {
+        return [];
+    }
+}
+
+/** @return array{0:MockCrmReadPublicFacade,1:MockCrmOwnerPolicy,
+ *  2:MockCrmReadAuditTrail,3:MockTrustEnvelope,4:MockOwnerScopeEvidence,
+ *  5:TenantContext,6:F170ReentrantReader,7:?MockSharedTrustState} */
+function f170Fixture(\Closure $onReader, ?MockSharedTrustState $state = null): array
+{
+    [, $env, $owner, $ctx] = f112Fixture();
+    $policy = new MockCrmOwnerPolicy();
+    $policy->grantFixture($ctx, ['ref', 'stage']);
+    $audit = new MockCrmReadAuditTrail();
+    $facade = null;
+    $reader = new F170ReentrantReader(
+        function () use (&$facade, $onReader, $env, $owner, $ctx): void {
+            $onReader($facade, $env, $owner, $ctx);
+        });
+    $facade = new MockCrmReadPublicFacade(
+        new MockTrustGateway('SYNTHETIC_AGENT_SERVICE',
+            'SYNTHETIC_CRM_API', ['SYNTHETIC_LEAD_READ'], $state),
+        $reader, $policy, $audit);
+    return [$facade, $policy, $audit, $env, $owner, $ctx, $reader, $state];
 }
 
 return [
@@ -408,5 +453,140 @@ return [
         check(!$facade->recheck($wire, $env, $owner, $ctx, 40));
         check(!$facade->recheck($wire, $env, $owner, $ctx, 15));
         check($state->countConsumed() === 1 && $audit->count() === 1);
+    },
+
+    'U70-01 nested same-proof read is denied before any success audit' => function (): void {
+        $nested = [];
+        [$facade, , $audit, $env, $owner, $ctx, $reader] =
+            f170Fixture(function ($facade, $env, $owner, $ctx) use (&$nested): void {
+                $nested[] = $facade->handle(f112Wire($ctx), $env, $owner, $ctx, 15);
+            });
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15) === f117GenericDenial());
+        check($nested === [f117GenericDenial()]);
+        check($reader->calls === 1 && $audit->count() === 1);
+        check($audit->entries()[0]['outcome'] === 'DENIED'
+            && $audit->entries()[0]['reason'] === 'OTHER');
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 15));
+    },
+    'U70-02 foreign-tenant recursive request cannot expose either resource' => function (): void {
+        $nested = [];
+        [$facade, , $audit, $env, $owner, $ctx, $reader] =
+            f170Fixture(function ($facade, $env, $owner, $ctx) use (&$nested): void {
+                $other = f112Wire($ctx);
+                $other['tenant_ref'] = 'SYNTHETIC_B';
+                $other['resource_ref'] = 'SYNTHETIC_B_LEAD';
+                $nested[] = $facade->handle($other, $env, $owner, $ctx, 15);
+            });
+        $out = $facade->handle(f112Wire($ctx), $env, $owner, $ctx, 15);
+        check($out === f117GenericDenial() && $nested === [f117GenericDenial()]);
+        check($reader->calls === 1 && $audit->count() === 1);
+        check($audit->entries()[0]['outcome'] === 'DENIED');
+        check(!str_contains(json_encode([$out, $nested], JSON_THROW_ON_ERROR),
+            'SYNTHETIC_B_LEAD'));
+    },
+    'U70-03 several nested attempts consume no additional nonce or audit slots' => function (): void {
+        $nested = [];
+        $state = new MockSharedTrustState();
+        [$facade, , $audit, $env, $owner, $ctx, $reader] = f170Fixture(
+            function ($facade, $env, $owner, $ctx) use (&$nested): void {
+                for ($i = 0; $i < 3; ++$i) {
+                    $nested[] = $facade->handle(
+                        f112Wire($ctx), $env, $owner, $ctx, 15);
+                }
+            }, $state);
+        check($facade->handle(f112Wire($ctx), $env, $owner, $ctx, 15)
+            === f117GenericDenial());
+        check($nested === [f117GenericDenial(), f117GenericDenial(), f117GenericDenial()]);
+        check($state->countConsumed() === 1 && $audit->count() === 1
+            && $reader->calls === 1);
+        check($audit->entries()[0]['outcome'] === 'DENIED');
+    },
+    'U70-04 a nested recheck without receipt does not taint a normal read' => function (): void {
+        $checks = [];
+        [$facade, , $audit, $env, $owner, $ctx, $reader] =
+            f170Fixture(function ($facade, $env, $owner, $ctx) use (&$checks): void {
+                $checks[] = $facade->recheck(f112Wire($ctx), $env, $owner, $ctx, 15);
+            });
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check($checks === [false] && $reader->calls === 1);
+        check($facade->recheck($wire, $env, $owner, $ctx, 15));
+        check($audit->count() === 1 && $audit->entries()[0]['reason'] === 'NONE');
+    },
+    'U70-05 swallowed recursive denial still taints outer read and records denial' => function (): void {
+        [$facade, , $audit, $env, $owner, $ctx, $reader] =
+            f170Fixture(function ($facade, $env, $owner, $ctx): void {
+                // Reader intentionally ignores the generic nested denial.
+                $facade->handle(f112Wire($ctx), $env, $owner, $ctx, 15);
+            });
+        check($facade->handle(f112Wire($ctx), $env, $owner, $ctx, 15)
+            === f117GenericDenial());
+        check($reader->calls === 1 && $audit->count() === 1);
+        check($audit->entries()[0]['reason'] === 'OTHER'
+            && $audit->entries()[0]['outcome'] === 'DENIED');
+    },
+    'U70-06 clean new proof can recover after a reentrant denial' => function (): void {
+        $nestedOnce = true;
+        [$facade, , $audit, $env, $owner, $ctx, $reader] =
+            f170Fixture(function ($facade, $env, $owner, $ctx) use (&$nestedOnce): void {
+                if ($nestedOnce) {
+                    $nestedOnce = false;
+                    $facade->handle(f112Wire($ctx), $env, $owner, $ctx, 15);
+                }
+            });
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15) === f117GenericDenial());
+        $fresh = new MockTrustEnvelope('SYNTHETIC_SEC48_FRESH_ENV',
+            'SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API', $ctx,
+            'SYNTHETIC_SEC48_FRESH_NONCE', ['SYNTHETIC_LEAD_READ'], 10, 40);
+        $newOwner = new MockOwnerScopeEvidence('SYNTHETIC_SEC48_FRESH_OWNER',
+            $fresh->digest, $ctx, 'SYNTHETIC_LEAD_READ', 10, 40, true);
+        check($facade->handle($wire, $fresh, $newOwner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check($facade->recheck($wire, $fresh, $newOwner, $ctx, 15));
+        check(array_column($audit->entries(), 'outcome') ===
+            ['DENIED', 'READ_SYNTHETIC_ONLY']);
+        check($reader->calls === 2);
+    },
+    'U70-07 failed reentrant attempt replaces the preceding positive receipt' => function (): void {
+        $reentrant = false;
+        [$facade, , $audit, $env, $owner, $ctx, $reader] =
+            f170Fixture(function ($facade, $env, $owner, $ctx) use (&$reentrant): void {
+                if ($reentrant) {
+                    $facade->handle(f112Wire($ctx), $env, $owner, $ctx, 15);
+                }
+            });
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check($facade->recheck($wire, $env, $owner, $ctx, 15));
+        $reentrant = true;
+        $fresh = new MockTrustEnvelope('SYNTHETIC_SEC48_NEXT_ENV',
+            'SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API', $ctx,
+            'SYNTHETIC_SEC48_NEXT_NONCE', ['SYNTHETIC_LEAD_READ'], 10, 40);
+        $newOwner = new MockOwnerScopeEvidence('SYNTHETIC_SEC48_NEXT_OWNER',
+            $fresh->digest, $ctx, 'SYNTHETIC_LEAD_READ', 10, 40, true);
+        check($facade->handle($wire, $fresh, $newOwner, $ctx, 15)
+            === f117GenericDenial());
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 15));
+        check(!$facade->recheck($wire, $fresh, $newOwner, $ctx, 15));
+        check(array_column($audit->entries(), 'outcome') ===
+            ['READ_SYNTHETIC_ONLY', 'DENIED']);
+        check($reader->calls === 2);
+    },
+    'U70-08 accepted nonrecursive read still preserves time and proof checks' => function (): void {
+        $state = new MockSharedTrustState();
+        [$facade, , $audit, $env, $owner, $ctx, $reader] =
+            f170Fixture(function (): void {}, $state);
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check($facade->recheck($wire, $env, $owner, $ctx, 20));
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 19));
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 20));
+        check($state->countConsumed() === 1 && $audit->count() === 1
+            && $reader->calls === 1);
     },
 ];
