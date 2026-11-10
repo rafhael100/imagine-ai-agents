@@ -101,6 +101,10 @@ final class MockToolDispatcher
             if ($intent->operation !== 'mock.task.create' || $intent->material !== $parameters['material']) {
                 MockError::fail('INTENT_CONFLICT');
             }
+            // The generic coordinator intentionally retains support for
+            // historical standalone fixtures. The tool boundary must NOT:
+            // require a Run and Step that this coordinator actually created.
+            $this->coordinator->assertToolIntentReady($intent);
             // The existing coordinator owns approval, reserve-before-submit,
             // idempotency, status-only reconciliation and conservative effects.
             $effect = $this->coordinator->execute($intent, $approval, $now);
