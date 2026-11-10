@@ -39,19 +39,11 @@ O catálogo técnico local limita **64 modelos e 256 snapshots**, sem eliminar r
 
 O catálogo de fontes sintéticas agora aceita até **256 fontes** e a trilha de seleção/entrega até **1.024 eventos**, negando novos registros quando cheia, sem apagar decisões antigas e sem expor conteúdo fictício. A entrega de passagens falha de forma segura sem espaço de auditoria. Veja [SEC-31](docs/AIA-FT01-SEC-31-LIMITES-CONHECIMENTO.md). **Não é RAG real nem autorização de acesso a clientes.**
 
-## Controles recentes — SEC-32 a SEC-40
+## Evolução recente e ensaios OP-01
 
-- [SEC-32](docs/AIA-FT01-SEC-32-EFEITOS-LIMITADOS.md): efeitos limitados.
-- [SEC-33](docs/AIA-FT01-SEC-33-EVIDENCIAS-MONOTONICAS.md): gateway monotônico.
-- [SEC-34](docs/AIA-FT01-SEC-34-REVALIDACAO-REVISAO-ATIVA.md): revisão ativa revalidada.
-- [SEC-35](docs/AIA-FT01-SEC-35-COORDENADOR-MONOTONICO.md): status monotônico.
-- [SEC-36](docs/AIA-FT01-SEC-36-IDS-FERRAMENTA-LIMITADOS.md): IDs de ferramentas limitados.
-- [SEC-37](docs/AIA-FT01-SEC-37-PARSER-OP01-LIMITADO.md): entrada OP-01 limitada.
-- [SEC-38](docs/AIA-FT01-SEC-38-CONCESSOES-LIMITADAS.md): concessões sintéticas limitadas.
-- [SEC-39](docs/AIA-FT01-SEC-39-LIMITES-SUGESTOES.md): entrada de sugestões limitada.
-- [SEC-40](docs/AIA-FT01-SEC-40-MANIFESTO-LIMITADO.md): manifestos e referências comuns limitados.
+As correções [SEC-32](docs/AIA-FT01-SEC-32-EFEITOS-LIMITADOS.md) a [SEC-40](docs/AIA-FT01-SEC-40-MANIFESTO-LIMITADO.md) limitam memória, entradas e estados de mocks. Consulte [STATUS-ATUAL](STATUS-ATUAL.md) para suas evidências individuais.
 
-Tudo offline; não existe autorização ou publicação de produto real.
+O [ensaio F163 / EVID-25](docs/AIA-R01-EVID-25-ENSAIOS-OP01-13-CENARIOS.md) cobre no laboratório os **13 cenários OP-01** sem alterar o aceite real: 13 `NAO_EXECUTADO` no CRM, gates em **NO-GO**. Sem API, token ou integração bilateral.
 
 ## Executar e verificar, sem rede
 
@@ -60,10 +52,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=533 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=546 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**Baseline verificado na dev:** **533 testes PHP / lint de 82 arquivos PHP**, mais os verificadores Python de contrato e isolamento, [CI pós-merge #42889307984](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42889307984) `success`. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**Gate F163 desta revisão:** **546 testes PHP / lint de 82 arquivos PHP**, mais verificações Python. O [gate anterior de 533](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42889307984) foi aprovado; a rodada F163 exige aprovação da sua própria CI por SHA. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
