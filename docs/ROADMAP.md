@@ -1,3 +1,12 @@
+## Próximo marco: homologar piloto CRM OP-01 real (09/11/2026)
+
+- **EVID-10:** [PR Agents #159](https://github.com/rafhael100/imagine-ai-agents/pull/159), [CI de revisão #42737036742](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42737036742) `success`: contrato fechado de resposta OP-01 e verificação cruzada PHP↔Python sem rede.
+- **F1-26:** [PR Agents #160](https://github.com/rafhael100/imagine-ai-agents/pull/160), [CI de revisão #42738080284](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42738080284) `success`: orquestração sintética somente leitura até a sugestão sem nenhuma operação mutável. Baseline offline atual **351 testes PHP / 81 lint** e regressões de contrato Python.
+- **Caminho crítico:** concluir aceites G01/G02/G05/G08/G10/G11 e CRM CORE/SEG/AUT, revisar [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) (OPEN/DRAFT), homologar o contrato real e só então autorizar endpoint OP-01 com identidade, ACL por tenant/campo, revogação, auditoria e testes em ambiente isolado. Consulte [EVID-11](AIA-R01-EVID-11-ENTREGA-FT01-HANDOFF-CRM-OP01.md).
+- Sem custos, tokens, acesso a clientes, VPS, `main` ou produção; todos os gates seguem **ABERTOS / NO-GO**. CIs do HEAD de PR não são prova de aceite em runtime.
+
+---
+
 ## Prioridade vigente — integração OP-01 depende de aprovação independente (09/11/2026)
 
 - **Baseline de revisão mais recente:** FT01/SEC-12, [PR #157](https://github.com/rafhael100/imagine-ai-agents/pull/157) (merge dev `e7435a5f51e71f3fa3ea9b27e5370f588f37d3cc`), [CI #42731788772](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42731788772) `success` no HEAD do PR `738f7c545e9067486510ac4f69ac650f171234cc`, **339 testes PHP / 79 lint**. O PR #156/SEC-11 foi integrado antes (merge `785271386bed0734175dfe3a713926235f668685`; CI de revisão #42731454833 success).

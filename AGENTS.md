@@ -1,5 +1,13 @@
 # AGENTS.md — Imagine AI Agents
 
+## Checkpoint técnico mais recente — OP-01/EVID-10 e F1-26 (09/11/2026)
+
+- **Integração somente dev:** [PR #159](https://github.com/rafhael100/imagine-ai-agents/pull/159), merge `4a03adf5f91e760950adaa3239fb2c8dba05da6d`; [CI #42737036742](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42737036742) `success` no HEAD `ead3d791c7c512bd39a81a14b48afea14fb27c48`. A CI agora exige schema e paridade offline de respostas públicas OP-01 geradas pelo PHP.
+- **Integração somente dev:** [PR #160](https://github.com/rafhael100/imagine-ai-agents/pull/160), merge `f46dd7191b59100f26c12251c05fc2101fb2b47d`; [CI #42738080284](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42738080284) `success` no HEAD `416e51d820331ab496b71db0d66ea49b62cbee17`. Implementado fluxo sintético de leitura mínima autorizada → sugestão → fim de Run sem escrita no CRM. Baseline vigente **351 testes PHP / 81 lint**, além dos testes Python de contrato.
+- **Não confundir:** CIs citadas são do HEAD do PR, não prova de homologação nem CI pós-merge. Contratos e dados são apenas fictícios.
+- **Handoff verificável:** [R01/EVID-11](docs/AIA-R01-EVID-11-ENTREGA-FT01-HANDOFF-CRM-OP01.md). O CRM PR #57 permanece OPEN/DRAFT; gates R01-G01..G11 e CORE/SEG/AUT abertos, **NO-GO**. Sem IAM, API, segredos, VPS, cliente ou deploy real; não alterar `main`.
+
+
 ## Checkpoint verificado mais recente — 09/11/2026
 
 - **Somente dev:** [PR #156](https://github.com/rafhael100/imagine-ai-agents/pull/156) (SEC-11) integrado em `785271386bed0734175dfe3a713926235f668685`; [CI de revisão #42731454833](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42731454833) `success` no SHA `1bbcbae739826426cf96a18c143e9a15f66b4d90`, meta **335 testes PHP / 79 lint**. Teto de nonce/revogação em memória sem eviction.

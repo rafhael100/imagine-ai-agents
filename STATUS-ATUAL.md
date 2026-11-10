@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## Resultado de revisão EVID-10 + FT01/F1-26 (09/11/2026)
+
+- [PR #159](https://github.com/rafhael100/imagine-ai-agents/pull/159) integrado à dev em `4a03adf5f91e760950adaa3239fb2c8dba05da6d` após [CI #42737036742](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42737036742) `success` no HEAD da revisão. Resposta OP-01 fictícia agora tem schema fechado e validação de paridade PHP↔Python.
+- [PR #160](https://github.com/rafhael100/imagine-ai-agents/pull/160) integrado à dev em `f46dd7191b59100f26c12251c05fc2101fb2b47d` após [CI #42738080284](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42738080284) `success`. Fluxo integrado offline somente leitura: política de owner fictícia, leitura de lead, sugestão validada e conclusão de Run. Nenhuma operação de escrita, API CRM real ou modelo externo.
+- **Gate de laboratório vigente:** 351 testes PHP, 81 lint, mais regressões de contrato em Python. CIs de PR não comprovam produção nem execução pós-merge.
+- **Bloqueio para concluir produto operacional:** CRM PR #57 ainda DRAFT/sem merge e aceites CORE/SEG/AUT pendentes; R01-G01..G11 ABERTOS. Consulte [EVID-11](docs/AIA-R01-EVID-11-ENTREGA-FT01-HANDOFF-CRM-OP01.md). **NO-GO**, sem `main`, VPS, segredos, custos ou produção.
+
+
 ## Estado consolidado — SEC-11/SEC-12 (09/11/2026)
 
 - [PR #156](https://github.com/rafhael100/imagine-ai-agents/pull/156) integrado em `785271386bed0734175dfe3a713926235f668685`: limite e falha fechada de nonces e revogações; [CI #42731454833](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42731454833) aprovada no HEAD do PR (335 PHP / 79 lint).
