@@ -8,6 +8,11 @@ use ImagineAI\Domain\{MockError, TenantContext};
 /** Closed in-memory catalog; neither identity, publication nor permission service. */
 final class MockAgentTemplateCatalog
 {
+    // A volatile mock catalog must have a deterministic memory ceiling.
+    // Never evict old snapshots: existing reviews and version conflicts
+    // depend on retaining their original identities and digests.
+    private const MAX_TEMPLATES = 64;
+    private const MAX_SNAPSHOTS = 256;
     private array $templates = [];
     private array $snapshots = [];
     private array $versions = [];
@@ -26,6 +31,9 @@ final class MockAgentTemplateCatalog
             MockAgentVersionSnapshot::syntheticRef($tool);
         }
         if (count(array_unique($eligibleTools)) !== count($eligibleTools)) MockError::fail('CATALOG_SCHEMA_DENIED');
+        if (count($this->templates) >= self::MAX_TEMPLATES) {
+            MockError::fail('CATALOG_CAPACITY_DENIED');
+        }
         $this->templates[$ref] = ['context' => $context->key(), 'tools' => $eligibleTools];
     }
 
@@ -46,6 +54,11 @@ final class MockAgentTemplateCatalog
         }
         $versionKey = json_encode([$snapshot->templateRef, $snapshot->version], JSON_THROW_ON_ERROR);
         if (isset($this->versions[$versionKey])) MockError::fail('SNAPSHOT_CONFLICT');
+        // Check both indexes BEFORE altering either of them. A failed new
+        // version must not create a partial reference or lose its history.
+        if (count($this->snapshots) >= self::MAX_SNAPSHOTS) {
+            MockError::fail('CATALOG_CAPACITY_DENIED');
+        }
         $this->snapshots[$snapshot->ref] = $snapshot;
         $this->versions[$versionKey] = $snapshot->ref;
     }

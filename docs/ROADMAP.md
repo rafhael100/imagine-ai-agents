@@ -4,11 +4,11 @@
 
 ## Fase A — base de demonstração offline
 
-**Entregue na branch de desenvolvimento para avaliação técnica, não para clientes.** F1-12 a F1-30, SEC-11 a SEC-29 e os demais incrementos documentados criaram contratos sintéticos, borda OP-01, política fake de owner, prevenção de replay local, leitura de ferramenta governada, sugestões fixas e trilha limitada.
+**Entregue na branch de desenvolvimento para avaliação técnica, não para clientes.** F1-12 a F1-30, SEC-11 a SEC-30 e os demais incrementos documentados criaram contratos sintéticos, borda OP-01, política fake de owner, prevenção de replay local, leitura de ferramenta governada, sugestões fixas e trilha limitada.
 
 A [SEC-20 / PR #182](https://github.com/rafhael100/imagine-ai-agents/pull/182) valida projeções antes da auditoria de sucesso, com [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) aprovada; veja [EVID-18](AIA-R01-EVID-18-SEGURANCA-PROJECAO-403.md).
 
-**Evidências mais recentes:** [PR #173](https://github.com/rafhael100/imagine-ai-agents/pull/173), [PR #174](https://github.com/rafhael100/imagine-ai-agents/pull/174), [PR #175](https://github.com/rafhael100/imagine-ai-agents/pull/175), [PR #177](https://github.com/rafhael100/imagine-ai-agents/pull/177), [PR #178](https://github.com/rafhael100/imagine-ai-agents/pull/178) e [EVID-16](AIA-R01-EVID-16-SEGURANCA-TOOL-397.md). Último gate validado no código: **458 testes PHP / 82 lint**, mais contratos Python e demonstração offline.
+**Evidências mais recentes:** [PR #173](https://github.com/rafhael100/imagine-ai-agents/pull/173), [PR #174](https://github.com/rafhael100/imagine-ai-agents/pull/174), [PR #175](https://github.com/rafhael100/imagine-ai-agents/pull/175), [PR #177](https://github.com/rafhael100/imagine-ai-agents/pull/177), [PR #178](https://github.com/rafhael100/imagine-ai-agents/pull/178) e [EVID-16](AIA-R01-EVID-16-SEGURANCA-TOOL-397.md). Último gate validado no código: **465 testes PHP / 82 lint**, mais contratos Python e demonstração offline.
 
 **Conclusão permitida:** laboratório executável para revisão. **Não** concluir que o agente SaaS, o IAM ou a integração CRM estejam operacionais.
 
@@ -23,6 +23,8 @@ As [SEC-23 / PR #189](https://github.com/rafhael100/imagine-ai-agents/pull/189) 
 A [SEC-28](AIA-FT01-SEC-28-REVISOES-BOUNDED.md) restringe a 128 pacotes o quadro de revisão em memória e conserva votos idempotentes e rejeições. É um limite local de laboratório, não substitui a autenticação e o registro durável de revisores.
 
 A [SEC-29](AIA-FT01-SEC-29-RESERVA-AUDITORIA-VERSOES.md) limita o histórico local de decisões e reserva espaço de auditoria para suspensões, sem conceder poderes reais de deploy ou publicação.
+
+A [SEC-30](AIA-FT01-SEC-30-CATALOGO-LIMITADO.md) delimita a capacidade de modelos/snapshots fictícios sem apagar o histórico, sem criar um registry ou publicação operacional.
 
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 
