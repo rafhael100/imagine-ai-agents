@@ -52,10 +52,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=555 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=565 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**Gate SEC-42 integrado:** **555 testes PHP / lint de 83 arquivos PHP**, mais Python. [CI pós-merge #42899017010](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42899017010) aprovada; [EVID-27](docs/AIA-R01-EVID-27-SEC41-42-POSTMERGE.md) registra SEC-41/42. A matriz Python adversarial é somente sintética. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**Gate SEC-43 em revisão:** **565 testes PHP / lint de 83 arquivos PHP** e Python. [SEC-43](docs/AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md) revalida autorizações fictícias após o leitor; [SEC-42 anterior](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42899017010) passou. Exigir CI no SHA. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
