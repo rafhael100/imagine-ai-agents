@@ -6,7 +6,7 @@
 
 - **Correção SEC-25:** [PR #192](https://github.com/rafhael100/imagine-ai-agents/pull/192) integrado somente na branch `dev/ft01-aia-core-mocks-2026-11-06`, commit `b19a769cdbf10e33491bc05231d389c621204526`.
 - **CI de revisão:** [#42859060377](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42859060377) **success**.
-- **CI pós-merge:** [#42859143202](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42859143202) — conferir a conclusão no próprio GitHub; evidência adicional, não liberar operação por esse resultado.
+- **CI pós-merge:** [#42859143202](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42859143202) **success**; é evidência adicional do gate offline, não autorização operacional.
 - **Baseline de código:** **433 testes PHP**, lint de **82 arquivos PHP**, verificadores Python de contrato, isolamento, prontidão e pacote bilateral.
 - **Arquivo alterado:** `src/MockUsage/MockUsageLedger.php`. **Testes:** U47-01..06 em `tests/Unit/usage_quota.php`.
 
