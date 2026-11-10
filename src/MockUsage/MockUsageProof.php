@@ -14,7 +14,9 @@ final class MockUsageProof
         public readonly int $units,
         public readonly string $source = 'SYNTHETIC_MOCK_PROVIDER',
     ) {
-        if (!str_starts_with($id, 'SYNTHETIC_PROOF_') || strlen($id) > 128
+        if (!str_starts_with($id, 'SYNTHETIC_PROOF_')
+            || strlen($id) <= strlen('SYNTHETIC_PROOF_')
+            || strlen($id) > 128
             || $units < 0 || $units > 1_000_000
             || $source !== 'SYNTHETIC_MOCK_PROVIDER') MockError::fail('USAGE_PROOF_INVALID');
     }

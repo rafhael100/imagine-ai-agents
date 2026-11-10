@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use ImagineAI\Domain\{Attempt, MockError, TenantContext};
+use ImagineAI\Domain\{Attempt, MockError, TenantContext, Usage};
 use ImagineAI\MockUsage\{MockUsageLedger, MockUsagePolicy, MockUsageProof};
 use ImagineAI\Mocks\MockCrmEffectGateway;
 
@@ -309,5 +309,63 @@ return [
         $ledger->record('SYNTHETIC_U48_SAME_STATE_LATE', $attempt,
             'OBSERVADO', 4, 'SYNTHETIC_MATERIAL', 15);
         check($ledger->used() === 4);
+    },
+
+    'U49-01 direct Attempt rejects oversized identifiers before use' => function (): void {
+        [$ctx, $attempt, , $ledger] = usageFixture();
+        denied('INVALID_SYNTHETIC_REF', fn() => new Attempt(
+            'SYNTHETIC_' . str_repeat('A', 119), $attempt->intent, 'TIMEOUT'));
+        check($ledger->events() === [] && $ledger->used() === 0);
+    },
+    'U49-02 direct Attempt cannot carry prefix without an identifier suffix' => function (): void {
+        [, $attempt] = usageFixture();
+        denied('INVALID_SYNTHETIC_REF', fn() => new Attempt(
+            'SYNTHETIC_', $attempt->intent, 'ENVIADA'));
+    },
+    'U49-03 exactly 128-byte Attempt remains usable and auditable' => function (): void {
+        [, $original, , $ledger] = usageFixture();
+        $id = 'SYNTHETIC_' . str_repeat('A', 118);
+        check(strlen($id) === 128);
+        $attempt = new Attempt($id, $original->intent, 'TIMEOUT');
+        $usage = $ledger->record('SYNTHETIC_U49_BOUNDED_ATTEMPT',
+            $attempt, 'OBSERVADO', 3, 'SYNTHETIC_MATERIAL', 15);
+        check($usage->attempt === $attempt && $ledger->used() === 3
+            && count($ledger->events()) === 1);
+    },
+    'U49-04 direct Usage rejects empty and excessive synthetic event IDs' => function (): void {
+        [, $attempt, , $ledger] = usageFixture();
+        foreach (['SYNTHETIC_', 'SYNTHETIC_' . str_repeat('U', 119)] as $id) {
+            denied('VALIDATION_FAILED', fn() => new Usage(
+                $id, $attempt, 1, 'OBSERVADO'));
+        }
+        check($ledger->events() === [] && $ledger->used() === 0);
+    },
+    'U49-05 direct Usage obeys unit ceiling and preserves boundary values' => function (): void {
+        [, $attempt] = usageFixture();
+        $id = 'SYNTHETIC_' . str_repeat('U', 118);
+        check(strlen($id) === 128);
+        check((new Usage($id, $attempt, 0, 'ESTIMADO'))->units === 0);
+        check((new Usage($id, $attempt, 1_000_000, 'OBSERVADO'))->units === 1_000_000);
+        foreach ([-1, 1_000_001, PHP_INT_MAX] as $bad) {
+            denied('VALIDATION_FAILED', fn() => new Usage(
+                'SYNTHETIC_U49_BAD', $attempt, $bad, 'OBSERVADO'));
+        }
+    },
+    'U49-06 proof IDs require suffix and at most 128 bytes' => function (): void {
+        [, $attempt] = usageFixture();
+        denied('USAGE_PROOF_INVALID', fn() => new MockUsageProof(
+            'SYNTHETIC_PROOF_', $attempt, 1));
+        denied('USAGE_PROOF_INVALID', fn() => new MockUsageProof(
+            'SYNTHETIC_PROOF_' . str_repeat('P', 113), $attempt, 1));
+    },
+    'U49-07 exactly bounded proof still reconciles a consistent measurement' => function (): void {
+        [, $attempt, , $ledger] = usageFixture();
+        $ledger->record('SYNTHETIC_U49_OBS', $attempt, 'OBSERVADO',
+            4, 'SYNTHETIC_MATERIAL', 15);
+        $id = 'SYNTHETIC_PROOF_' . str_repeat('P', 112);
+        check(strlen($id) === 128);
+        $proof = new MockUsageProof($id, $attempt, 4);
+        check($ledger->reconcile($attempt, $proof, 15)['state'] === 'CONCILIADO'
+            && $ledger->used() === 4);
     },
 ];
