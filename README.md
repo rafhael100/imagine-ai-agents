@@ -55,7 +55,7 @@ php tests/Unit/run.php
 EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=605 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**SEC-47 em revisão:** **605 testes PHP / lint 83 + Python**; [SEC-47](docs/AIA-FT01-SEC-47-RECHECK-TEMPO-MONOTONICO.md) nega retrocesso/expiração de recibo. Última CI pós-merge aprovada: [SEC-46 #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251), [EVID-31](docs/AIA-R01-EVID-31-SEC46-CI-POSTMERGE.md). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**SEC-47 integrada:** **605 testes PHP / lint 83 + Python**, [CI pós-merge #42923158871](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42923158871) aprovada. [EVID-32](docs/AIA-R01-EVID-32-SEC47-CI-POSTMERGE.md) documenta limites; [SEC-46 #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251) foi aprovada. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
