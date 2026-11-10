@@ -6,9 +6,11 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **SEC-45 integrada à dev (PR #220): 585 testes PHP, lint de 83 arquivos PHP e verificadores Python**, [CI pós-merge #42913437800](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42913437800) `success`, commit `75c2c00dbcfad16b27f5bcef28f16c4fbcc8ec4f`. [EVID-30](docs/AIA-R01-EVID-30-SEC45-CI-POSTMERGE.md). O número de testes não é percentual de conclusão do produto.
+**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` fora da entrega. **SEC-46 em revisão:** gate **597 testes PHP, lint de 83 arquivos PHP e Python**. Último gate pós-merge aprovado: SEC-45 (585 testes), [CI #42913437800](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42913437800) e [EVID-30](docs/AIA-R01-EVID-30-SEC45-CI-POSTMERGE.md). O número de testes não é percentual de conclusão do produto.
 
 ## Últimas entregas verificadas
+
+**SEC-46 em revisão:** revisão monotônica da política e recibo local de leitura impedem revogação+reconcessão e recheck sem leitura prévia. 12 regressões U68-01..12; [SEC-46](docs/AIA-FT01-SEC-46-RECIBO-REVISAO-OWNER-ABA.md). CRM real: `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-45 integrada à dev (PR #220):** revalida autorização sintética após a sugestão e antes de concluir o Run. Revogação no provedor termina como `FALHOU`, sem resumo, nova leitura ou segundo nonce; dez regressões U67-01..10. [SEC-45](docs/AIA-FT01-SEC-45-REVALIDACAO-POS-SUGESTAO.md). Homologação CRM: `NAO_EXECUTADO` / **NO-GO**.
 
@@ -60,14 +62,7 @@ As SEC-21 e SEC-22 foram integradas somente à `dev`: [PR #186](https://github.c
 
 A [SEC-20 / PR #182](https://github.com/rafhael100/imagine-ai-agents/pull/182) corrigiu a auditoria de projeções inconsistentes antes de registrar sucesso; [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) aprovada. Consulte [EVID-18](docs/AIA-R01-EVID-18-SEGURANCA-PROJECAO-403.md). O [README](README.md) atual foi consolidado e a versão completa anterior permanece arquivada.
 
-| Marco | Mudança | Evidência |
-| --- | --- | --- |
-| [F1-30 — PR #173](https://github.com/rafhael100/imagine-ai-agents/pull/173) | Leitura de ferramenta somente pela borda OP-01; leitor direto legado bloqueado | [CI pós-merge #42748908649](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42748908649) |
-| [SEC-16 — PR #174](https://github.com/rafhael100/imagine-ai-agents/pull/174) | Trilha de ferramentas limitada e validação de capacidade antes dos efeitos | [CI pós-merge #42749287014](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42749287014) |
-| [SEC-17 — PR #175](https://github.com/rafhael100/imagine-ai-agents/pull/175) | Validação de saída da sugestão e rejeição de texto/campos não confiáveis | [CI pós-merge #42749779477](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42749779477) |
-| [SEC-18 — PR #177](https://github.com/rafhael100/imagine-ai-agents/pull/177) | Run sintética encerrada após falha de sugestão, impedindo efeito posterior | [CI pós-merge #42753075500](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42753075500) |
-| [SEC-19 — PR #178](https://github.com/rafhael100/imagine-ai-agents/pull/178) | Códigos públicos fechados; erros arbitrários do gateway neutralizados | [CI pós-merge #42753536675](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42753536675) |
-| [EVID-16 — PR #179](https://github.com/rafhael100/imagine-ai-agents/pull/179) | Documenta riscos, CIs verificadas e dependências reais | Integrado em `ec9425fb21c4fee2eecd2f15efb353b3744687fe` |
+**Marcos históricos:** F1-30 / SEC-16 a SEC-19 (PRs #173, #174, #175, #177, #178) e EVID-16 (PR #179) estão documentados no [arquivo integral](docs/historico/STATUS-ATUAL-ANTES-CONSOLIDACAO-2026-11-10.md); CIs e decisões históricas permanecem preservadas.
 
 **Reproduzir em checkout revisado:**
 
