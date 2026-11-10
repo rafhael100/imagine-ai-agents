@@ -4,11 +4,11 @@
 
 ## Fase A — base de demonstração offline
 
-**Entregue na branch de desenvolvimento para avaliação técnica, não para clientes.** F1-12 a F1-30, SEC-11 a SEC-25 e os demais incrementos documentados criaram contratos sintéticos, borda OP-01, política fake de owner, prevenção de replay local, leitura de ferramenta governada, sugestões fixas e trilha limitada.
+**Entregue na branch de desenvolvimento para avaliação técnica, não para clientes.** F1-12 a F1-30, SEC-11 a SEC-27 e os demais incrementos documentados criaram contratos sintéticos, borda OP-01, política fake de owner, prevenção de replay local, leitura de ferramenta governada, sugestões fixas e trilha limitada.
 
 A [SEC-20 / PR #182](https://github.com/rafhael100/imagine-ai-agents/pull/182) valida projeções antes da auditoria de sucesso, com [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) aprovada; veja [EVID-18](AIA-R01-EVID-18-SEGURANCA-PROJECAO-403.md).
 
-**Evidências mais recentes:** [PR #173](https://github.com/rafhael100/imagine-ai-agents/pull/173), [PR #174](https://github.com/rafhael100/imagine-ai-agents/pull/174), [PR #175](https://github.com/rafhael100/imagine-ai-agents/pull/175), [PR #177](https://github.com/rafhael100/imagine-ai-agents/pull/177), [PR #178](https://github.com/rafhael100/imagine-ai-agents/pull/178) e [EVID-16](AIA-R01-EVID-16-SEGURANCA-TOOL-397.md). Último gate validado no código: **433 testes PHP / 82 lint**, mais contratos Python e demonstração offline.
+**Evidências mais recentes:** [PR #173](https://github.com/rafhael100/imagine-ai-agents/pull/173), [PR #174](https://github.com/rafhael100/imagine-ai-agents/pull/174), [PR #175](https://github.com/rafhael100/imagine-ai-agents/pull/175), [PR #177](https://github.com/rafhael100/imagine-ai-agents/pull/177), [PR #178](https://github.com/rafhael100/imagine-ai-agents/pull/178) e [EVID-16](AIA-R01-EVID-16-SEGURANCA-TOOL-397.md). Último gate validado no código: **446 testes PHP / 82 lint**, mais contratos Python e demonstração offline.
 
 **Conclusão permitida:** laboratório executável para revisão. **Não** concluir que o agente SaaS, o IAM ou a integração CRM estejam operacionais.
 
@@ -17,6 +17,8 @@ A [SEC-21 / PR #186](https://github.com/rafhael100/imagine-ai-agents/pull/186) e
 As [SEC-23 / PR #189](https://github.com/rafhael100/imagine-ai-agents/pull/189) e [SEC-24 / PR #190](https://github.com/rafhael100/imagine-ai-agents/pull/190) agora limitam referências e material também antes das assinaturas e da criação de objetos do domínio. [EVID-21](AIA-R01-EVID-21-LIMITES-DOMINIO-427.md) documenta CIs pós-merge aprovadas. Continua sendo laboratório offline.
 
 [SEC-25 / PR #192](https://github.com/rafhael100/imagine-ai-agents/pull/192): medição de uso em memória com limite e falha fechada, [CI pós-merge #42859143202](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42859143202) success. [EVID-22](AIA-R01-EVID-22-MEDIDOR-USO-433.md) documenta os controles e as restrições. Os gates de integração real permanecem abertos.
+
+[SEC-26 / PR #194](https://github.com/rafhael100/imagine-ai-agents/pull/194) e [SEC-27 / PR #195](https://github.com/rafhael100/imagine-ai-agents/pull/195) fecharam colisões de estado de transporte e referências de uso excessivas no laboratório, [EVID-23](AIA-R01-EVID-23-IDENTIDADE-USO-446.md). As duas CIs pós-merge estão aprovadas. Autenticação e ACL reais seguem dependentes do contrato CRM.
 
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 
