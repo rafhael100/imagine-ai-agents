@@ -16,6 +16,7 @@ fi
 echo 'R01_OFFLINE_GATE_START operational_decision=NO_GO'
 python3 tools/check_r01_readiness.py
 python3 tools/check_op01_contract_parity.py
+python3 tools/generate_op01_bilateral_packet.py --check
 python3 tools/check_op01_public_response_parity.py
 python3 tools/generate_op01_dashboard.py --check
 python3 tools/check_op01_readiness_dashboard.py
@@ -23,6 +24,7 @@ python3 tools/check_op01_readiness_dashboard.py
 for name in \
   test_r01_readiness.py \
   test_op01_contract_parity.py \
+  test_op01_bilateral_packet.py \
   test_op01_contract_matrix.py \
   test_op01_public_response_parity.py \
   test_f127_offline_pilot_demo.py \
