@@ -10,7 +10,7 @@
 
 ## Últimas entregas verificadas
 
-**CI canônica da SEC-40:** [execução pós-merge #42889307984](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42889307984) aprovada no commit de desenvolvimento `c2ad914c7d24a43bc9cbc9ede3b688d882cd64ee`, com 533 testes PHP, lint de 82 arquivos e verificações Python. **SEC-39:** [PR #208](https://github.com/rafhael100/imagine-ai-agents/pull/208) e [CI #42888473719](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42888473719) aprovadas. Não representa liberação do CRM ou autorização operacional.
+[**Evidência consolidada EVID-24**](docs/AIA-R01-EVID-24-CONSOLIDACAO-SEC39-40.md) registra o merge e a CI de SEC-39/40. **CI canônica da SEC-40:** [execução pós-merge #42889307984](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42889307984) aprovada no commit de desenvolvimento `c2ad914c7d24a43bc9cbc9ede3b688d882cd64ee`, com 533 testes PHP, lint de 82 arquivos e verificações Python. **SEC-39:** [PR #208](https://github.com/rafhael100/imagine-ai-agents/pull/208) e [CI #42888473719](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42888473719) aprovadas. Não representa liberação do CRM ou autorização operacional.
 
 **SEC-40 integrada à dev (PR #209):** manifesta versões fictícias apenas com 5 chaves e limita referências sintéticas comuns a 110 bytes antes de regex; preserva ordem indiferente e checks anteriores. Sete regressões U62-01..07. [SEC-40](docs/AIA-FT01-SEC-40-MANIFESTO-LIMITADO.md). Sem registro real de agentes.
 
