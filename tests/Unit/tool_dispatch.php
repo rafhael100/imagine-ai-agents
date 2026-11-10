@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 use ImagineAI\Domain\{Approval, Intent, Run, TenantContext, MockError};
-use ImagineAI\Contracts\AiSuggestionProvider;
+use ImagineAI\Contracts\{AiSuggestionProvider, CrmEffectGateway};
 use ImagineAI\MockOrchestration\SupervisedCoordinator;
 use ImagineAI\MockResilience\MockFaultGateway;
 use ImagineAI\Mocks\{MockAiSuggestionProvider, MockSupervisedGateway};
@@ -94,6 +94,34 @@ function f138SuggestionFixture(string $mode): array
     $grant = new MockCapabilityGrant('SYNTHETIC_F138_GRANT',
         MockToolCatalog::SUGGEST, $ctx, 10, 20);
     return [$dispatcher, $coordinator, $gateway, $grant, $ctx, $run];
+}
+
+
+/** Fake status gateway whose MockError text is intentionally untrusted. */
+final class F140UntrustedStatusGateway implements CrmEffectGateway
+{
+    private MockSupervisedGateway $inner;
+    private int $statuses = 0;
+
+    public function __construct(private readonly string $statusError)
+    {
+        $this->inner = new MockSupervisedGateway('INDETERMINADO');
+    }
+
+    public function submit(Intent $intent, ?Approval $approval, int $now): \ImagineAI\Domain\Effect
+    {
+        return $this->inner->submit($intent, $approval, $now);
+    }
+
+    public function status(TenantContext $context, Intent $intent): \ImagineAI\Domain\Effect
+    {
+        $context->assertSame($intent->context);
+        ++$this->statuses;
+        MockError::fail($this->statusError);
+    }
+
+    public function submitCount(): int { return $this->inner->submitCount(); }
+    public function statusCount(): int { return $this->statuses; }
 }
 
 return [
@@ -513,5 +541,41 @@ return [
             ] && $gw->submitCount() === 0);
         check(!str_contains(json_encode([$c->events(), $d->events()], JSON_THROW_ON_ERROR),
             'SYNTHETIC_PRIVATE_UNSAFE_PROVIDER_ERROR'));
+    },
+
+    'U40-01 gateway status secret cannot escape tool error code or traces' => function (): void {
+        $gw = new F140UntrustedStatusGateway('SYNTHETIC_PRIVATE_BEARER_CUSTOMER_KEY');
+        [$ctx, , $c, $d, , $intent, $approval, $grant] = toolFixture($gw);
+        $args = [MockToolCatalog::MUTATE, MockToolCatalog::VERSION,
+            $ctx, $grant(MockToolCatalog::MUTATE),
+            ['material' => 'SYNTHETIC_MATERIAL'], 15, null, $intent, $approval];
+        check($d->dispatch(...$args)['state'] === 'INDETERMINADO');
+        denied('TOOL_EXECUTION_DENIED', fn() => $d->dispatch(...$args));
+        check($gw->submitCount() === 1 && $gw->statusCount() === 1);
+        check(array_column($d->events(), 'code') === ['SYNTHETIC_UNKNOWN', 'SYNTHETIC_DENIED']);
+        check(!str_contains(json_encode([$d->events(), $c->events()], JSON_THROW_ON_ERROR),
+            'PRIVATE_BEARER'));
+    },
+    'U40-02 a safe-code prefix with appended secret cannot bypass exact allowlist' => function (): void {
+        $gw = new F140UntrustedStatusGateway("SYNTHETIC_STATUS_UNAVAILABLE\nSYNTHETIC_PRIVATE_TOKEN");
+        [$ctx, , $c, $d, , $intent, $approval, $grant] = toolFixture($gw);
+        $args = [MockToolCatalog::MUTATE, MockToolCatalog::VERSION,
+            $ctx, $grant(MockToolCatalog::MUTATE),
+            ['material' => 'SYNTHETIC_MATERIAL'], 15, null, $intent, $approval];
+        check($d->dispatch(...$args)['state'] === 'INDETERMINADO');
+        denied('TOOL_EXECUTION_DENIED', fn() => $d->dispatch(...$args));
+        check($gw->submitCount() === 1 && $gw->statusCount() === 1
+            && count($d->events()) === 2);
+    },
+    'U40-03 exact fixed status unavailable remains an allowed public error' => function (): void {
+        $gw = new F140UntrustedStatusGateway('SYNTHETIC_STATUS_UNAVAILABLE');
+        [$ctx, , $c, $d, , $intent, $approval, $grant] = toolFixture($gw);
+        $args = [MockToolCatalog::MUTATE, MockToolCatalog::VERSION,
+            $ctx, $grant(MockToolCatalog::MUTATE),
+            ['material' => 'SYNTHETIC_MATERIAL'], 15, null, $intent, $approval];
+        check($d->dispatch(...$args)['state'] === 'INDETERMINADO');
+        denied('SYNTHETIC_STATUS_UNAVAILABLE', fn() => $d->dispatch(...$args));
+        check($gw->submitCount() === 1 && $gw->statusCount() === 1
+            && array_column($d->events(), 'code') === ['SYNTHETIC_UNKNOWN', 'SYNTHETIC_DENIED']);
     },
 ];
