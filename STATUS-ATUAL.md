@@ -6,9 +6,11 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **Baseline verificável do laboratório: 533 testes PHP, lint de 82 arquivos PHP, testes Python de contrato, isolamento e demonstração.** O número de testes não é percentual de conclusão do produto.
+**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **Gate esperado nesta revisão F163: 546 testes PHP, lint de 82 arquivos PHP e verificadores Python.** O último gate pós-merge anterior aprovado foi o de 533 testes (SEC-40/EVID-24). O número de testes não é percentual de conclusão do produto.
 
 ## Últimas entregas verificadas
+
+**F163 / EVID-25 em revisão:** os **13 cenários OP-01** ganharam testes de ensaio sintético 1:1 (U63-OP01-N01..N11, P01..P02), com cobertura Python para conferir a matriz. Os 13 casos **continuam `NAO_EXECUTADO` para homologação real**, e todos os gates continuam **NO-GO**. [EVID-25](docs/AIA-R01-EVID-25-ENSAIOS-OP01-13-CENARIOS.md).
 
 [**Evidência consolidada EVID-24**](docs/AIA-R01-EVID-24-CONSOLIDACAO-SEC39-40.md) registra o merge e a CI de SEC-39/40. **CI canônica da SEC-40:** [execução pós-merge #42889307984](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42889307984) aprovada no commit de desenvolvimento `c2ad914c7d24a43bc9cbc9ede3b688d882cd64ee`, com 533 testes PHP, lint de 82 arquivos e verificações Python. **SEC-39:** [PR #208](https://github.com/rafhael100/imagine-ai-agents/pull/208) e [CI #42888473719](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42888473719) aprovadas. Não representa liberação do CRM ou autorização operacional.
 
