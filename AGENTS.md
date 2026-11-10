@@ -1,5 +1,13 @@
 # AGENTS.md — Imagine AI Agents
 
+## Checkpoint atual — F1-28/F1-29 integrado apenas à dev (09/11/2026)
+
+- [PR #165 / F1-28](https://github.com/rafhael100/imagine-ai-agents/pull/165) foi integrado à dev em `cba280c1b5106d1861d75d78bc8ad1185a9787b1`, após [CI #42741450740](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42741450740) `success` no HEAD `0eb559e3a642120f81fa28d34f87eb77060fdf32`. O piloto verifica contexto, Run e espaço para quatro eventos **antes** de consumir leitura, nonce ou auditoria sintética.
+- [PR #166 / F1-29](https://github.com/rafhael100/imagine-ai-agents/pull/166) foi integrado à dev em `6683e398614a49626cb446955938a398f98d7955`, após [CI #42741942944](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42741942944) `success` no HEAD `ed1f73d4253142a7c68b505394fa291b32366f9d`. Falhas da sugestão fecham a Run local como `FALHOU` quando possível e não vazam texto/erro do provider.
+- **Gate de desenvolvimento atual: 359 testes PHP, lint de 82 arquivos PHP e verificações Python de contratos/demo.** Não confundir as CIs de revisão com runs pós-merge. Esta base ainda é inteiramente fictícia e em memória.
+- **Ponto crítico não atendido:** CRM [PR #57](https://github.com/rafhael100/imagine-crm/pull/57) `OPEN/DRAFT` e gates R01-G01..G11 e CRM CORE/SEG/AUT **ABERTOS / NO-GO**. O contrato e IAM/ACL reais precisam de aceite bilateral e homologação. Sem `main`, VPS, dados de clientes, segredos, despesas ou deploy.
+
+
 ## Checkpoint de entrega offline F1-27 e CI-SEC-02 (09/11/2026)
 
 - **F1-27:** [PR #162](https://github.com/rafhael100/imagine-ai-agents/pull/162), merge `e669f11dbc7a2adc052f4461c4e820a74aae52bc`; [CI #42739875000](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42739875000) `success` no SHA `c401bafac4b521d72c548a9c72a5acb980443658`. O comando `php examples/f127-read-only-pilot-demo.php` demonstra cinco cenários exclusivamente fictícios e reporta `NO_GO`.

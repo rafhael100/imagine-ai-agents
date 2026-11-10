@@ -1,5 +1,14 @@
 # Imagine AI Agents
 
+## Última validação — F1-28/F1-29 (09/11/2026)
+
+O fluxo de demonstração offline foi reforçado para rejeitar Runs repetidas ou sem capacidade **antes** da leitura e para registrar `FALHOU` ao ocorrer erro sintético na geração de sugestão. [PR #165](https://github.com/rafhael100/imagine-ai-agents/pull/165) ([CI #42741450740](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42741450740)) e [PR #166](https://github.com/rafhael100/imagine-ai-agents/pull/166) ([CI #42741942944](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42741942944)) integrados **somente à dev**. Meta atual **359 testes PHP, lint de 82 arquivos PHP**, mais contratos Python.
+
+Para apresentar o fluxo, sem rede e sem dados reais: `php examples/f127-read-only-pilot-demo.php`. Para executar a suíte, usar checkout revisado com `EXPECTED_SHA` exato e `EXPECTED_CASES=359`. Tudo é mock: **NO-GO** para CRM real, produção ou credenciais, com CRM PR #57 e gates R01/CORE/SEG/AUT ainda abertos.
+
+---
+
+
 ## Demonstração executável F1-27 — somente leitura, sem CRM real
 
 O laboratório FT01 pode ser apresentado por um comando local (PHP 8.1+ já instalado), sem rede, credenciais, banco, fornecedores nem dados de clientes:
@@ -13,7 +22,7 @@ O comando imprime **JSON estável** com cinco cenários: leitura mínima autoriz
 Para executar o gate offline completo em um checkout Git com o SHA correto:
 
 ```bash
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=351 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=359 bash tools/run_r01_offline_quality_gate.sh
 ```
 
 **Atenção:** o comando acima verifica o checkout local selecionado, mas não constitui revisão independente de um SHA autorizado; CI no PR com checkout SHA-fixado permanece necessária. Esta demonstração não é endpoint, não autentica serviço nem concede acesso CRM. Consulte `docs/AIA-FT01-F1-27-DEMO-CLI-LEITURA-MINIMA.md`. O CRM [PR #57](https://github.com/rafhael100/imagine-crm/pull/57) e gates R01/CORE/SEG/AUT permanecem abertos; nenhuma alteração em `main`, VPS ou produção.
