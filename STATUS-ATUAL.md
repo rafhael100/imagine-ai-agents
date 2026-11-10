@@ -10,7 +10,9 @@
 
 ## Últimas entregas verificadas
 
-**SEC-40 em revisão:** manifesta versões fictícias apenas com 5 chaves e limita referências sintéticas comuns a 110 bytes antes de regex; preserva ordem indiferente e checks anteriores. Sete regressões U62-01..07. [SEC-40](docs/AIA-FT01-SEC-40-MANIFESTO-LIMITADO.md). Sem registro real de agentes.
+[**Evidência consolidada EVID-24**](docs/AIA-R01-EVID-24-CONSOLIDACAO-SEC39-40.md) registra o merge e a CI de SEC-39/40. **CI canônica da SEC-40:** [execução pós-merge #42889307984](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42889307984) aprovada no commit de desenvolvimento `c2ad914c7d24a43bc9cbc9ede3b688d882cd64ee`, com 533 testes PHP, lint de 82 arquivos e verificações Python. **SEC-39:** [PR #208](https://github.com/rafhael100/imagine-ai-agents/pull/208) e [CI #42888473719](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42888473719) aprovadas. Não representa liberação do CRM ou autorização operacional.
+
+**SEC-40 integrada à dev (PR #209):** manifesta versões fictícias apenas com 5 chaves e limita referências sintéticas comuns a 110 bytes antes de regex; preserva ordem indiferente e checks anteriores. Sete regressões U62-01..07. [SEC-40](docs/AIA-FT01-SEC-40-MANIFESTO-LIMITADO.md). Sem registro real de agentes.
 
 **SEC-39 integrada à dev:** coordenador e provedor simulado recusam projeções de sugestões com mais de 3 campos, valores acima de 256 bytes, chaves ou tipos inválidos antes de chamar IA. Oito regressões U61-01..08. [SEC-39](docs/AIA-FT01-SEC-39-LIMITES-SUGESTOES.md). Sem IA externa ou CRM real.
 
@@ -32,7 +34,7 @@
 
 **SEC-30 integrada em desenvolvimento:** o catálogo de modelos e snapshots sintéticos possui limites definidos, sem evicção de versões e com preservação de conflitos, replays e desativação. [Documento técnico](docs/AIA-FT01-SEC-30-CATALOGO-LIMITADO.md). **Não é uma publicação de agentes para clientes.**
 
-**SEC-29 em revisão:** limite de decisões e eventos do controle de versões simulado, com reserva de espaço para suspensão e seis regressões. [Evidência técnica SEC-29](docs/AIA-FT01-SEC-29-RESERVA-AUDITORIA-VERSOES.md). A execução segue offline e o CRM real continua **NO-GO**.
+**SEC-29 integrada à dev (PR #198):** limite de decisões e eventos do controle de versões simulado, com reserva de espaço para suspensão e seis regressões. [Evidência técnica SEC-29](docs/AIA-FT01-SEC-29-RESERVA-AUDITORIA-VERSOES.md). A execução segue offline e o CRM real continua **NO-GO**.
 
 **SEC-28:** o quadro de revisão local limita registros de votação a 128 pacotes sem descartar decisões anteriores. O segundo parecer de pacotes já iniciados continua possível. [Detalhes e regressões](docs/AIA-FT01-SEC-28-REVISOES-BOUNDED.md). **Isto não é homologação real.**
 

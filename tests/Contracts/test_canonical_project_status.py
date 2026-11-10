@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 STATUS = ROOT / "STATUS-ATUAL.md"
 ROADMAP = ROOT / "docs/ROADMAP.md"
 README = ROOT / "README.md"
+AGENT_RULES = ROOT / "AGENTS.md"
 ARCHIVED_README = ROOT / "docs/historico/README-ANTES-CONSOLIDACAO-2026-11-10.md"
 ARCHIVE = ROOT / "docs/historico/STATUS-ATUAL-ANTES-CONSOLIDACAO-2026-11-10.md"
 ARCHIVED_ROADMAP = ROOT / "docs/historico/ROADMAP-ANTES-CONSOLIDACAO-2026-11-10.md"
@@ -27,6 +28,21 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("NO-GO", current)
         self.assertIn("CRM PR #57", current)
         self.assertIn("OPEN/DRAFT", current)
+
+    def test_recent_sec39_sec40_are_integrated_with_post_merge_evidence(self):
+        current = STATUS.read_text(encoding="utf-8")
+        readme = README.read_text(encoding="utf-8")
+        rules = AGENT_RULES.read_text(encoding="utf-8")
+        self.assertIn("SEC-40 integrada à dev (PR #209)", current)
+        self.assertIn("SEC-39 integrada à dev", current)
+        self.assertNotIn("SEC-40 em revisão", current)
+        self.assertIn("42889307984", current)
+        self.assertIn("42889307984", readme)
+        self.assertIn("## Baseline integrado à dev — SEC-40", rules)
+        self.assertIn("## Baseline integrado à dev — SEC-39", rules)
+        self.assertIn("Gate verificado: 533 testes PHP", rules)
+        self.assertIn("NO-GO", current)
+        self.assertIn("CRM PR #57", current)
 
     def test_history_preserved_without_overwriting_evidence(self):
         previous = ARCHIVE.read_text(encoding="utf-8")

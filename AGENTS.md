@@ -1,12 +1,13 @@
 # AGENTS.md — Imagine AI Agents
 
-## Baseline em revisão — SEC-40 (10/11/2026)
+## Baseline integrado à dev — SEC-40 (10/11/2026)
 
+- CI pós-merge SEC-40: https://github.com/rafhael100/imagine-ai-agents/actions/runs/42889307984 — aprovado no commit c2ad914c7d24a43bc9cbc9ede3b688d882cd64ee; não é autorização para produção.
 - `MockAgentVersionSnapshot`: exatamente 5 chaves de manifesto antes de ordenar; `syntheticRef` recusa acima de 110 bytes antes do regex e mantém `SYNTHETIC_[A-Z0-9_]{1,100}`.
-- **Gate esperado: 533 testes PHP / 82 lint + Python.** [SEC-40](docs/AIA-FT01-SEC-40-MANIFESTO-LIMITADO.md).
+- **Gate verificado: 533 testes PHP / 82 lint + Python.** [SEC-40](docs/AIA-FT01-SEC-40-MANIFESTO-LIMITADO.md).
 - CRM PR #57 OPEN/DRAFT; R01-G01..G11 / CORE/SEG/AUT ABERTOS/NO-GO. Só dev offline, sem `main`, VPS, produção, clientes, segredos ou custos.
 
-## Baseline em revisão — SEC-39 (10/11/2026)
+## Baseline integrado à dev — SEC-39 (10/11/2026)
 
 - `SupervisedCoordinator::suggest` e `MockAiSuggestionProvider::suggest`: máximo 3 campos permitidos `ref/stage/text`, string sintética com até 256 bytes, recusa antes de chamar adaptador e trace. Manter fixture legada vazia e sucesso OP-01.
 - **Gate esperado: 526 testes PHP / 82 lint + Python.** [SEC-39](docs/AIA-FT01-SEC-39-LIMITES-SUGESTOES.md).
