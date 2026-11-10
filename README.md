@@ -52,10 +52,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=605 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=613 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**SEC-47 integrada:** **605 testes PHP / lint 83 + Python**, [CI pós-merge #42923158871](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42923158871) aprovada. [EVID-32](docs/AIA-R01-EVID-32-SEC47-CI-POSTMERGE.md) documenta limites; [SEC-46 #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251) foi aprovada. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**SEC-48 em revisão:** **613 testes PHP / lint 83 + Python**; [SEC-48](docs/AIA-FT01-SEC-48-REENTRADA-LEITURA-OP01.md) bloqueia leitura aninhada. Última CI pós-merge: [SEC-47 #42923158871](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42923158871); [SEC-46 #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251) preservada. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 

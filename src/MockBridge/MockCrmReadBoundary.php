@@ -14,6 +14,7 @@ final class MockCrmReadBoundary
         private readonly MockTrustGateway $gateway,
         private readonly CrmReader $reader,
         private readonly MockCrmOwnerPolicy $ownerPolicy,
+        private readonly ?\Closure $beforeSuccess = null,
     ) {}
 
     /**
@@ -80,6 +81,9 @@ final class MockCrmReadBoundary
         $orderedProjection = MockReadProjectionInvariant::canonicalize(
             $projection, $request->fields, $trustedContext);
         if ($orderedProjection === null) MockError::fail('BRIDGE_PROJECTION_DENIED');
+        // Facade-only optional guard must run within the audited evaluate()
+        // call: a reentrant attempted read is a DENIED event, not a success.
+        if ($this->beforeSuccess !== null) ($this->beforeSuccess)();
         return [
             'mode' => 'SYNTHETIC_ONLY',
             'contract' => 'SYNTHETIC_CRM_AIA_READ_V1',

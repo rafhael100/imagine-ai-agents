@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## SEC-48 — negar reentrada de leitura na fachada OP-01 (10/11/2026)
+
+- `MockCrmReadPublicFacade` recusa chamada `handle()` aninhada na mesma instância, contaminando a leitura externa; o guard opcional do `MockCrmReadBoundary` garante `DENIED/OTHER` **antes** da auditoria de sucesso. Sem parser/nonce/audit adicional para a tentativa interna. `finally` restaura a fachada.
+- **Gate esperado: 613 testes PHP / lint 83 + Python**, U70-01..08. [SEC-48](docs/AIA-FT01-SEC-48-REENTRADA-LEITURA-OP01.md).
+- Somente um processo PHP, sem lock real; CRM PR #57 OPEN/DRAFT, 13 casos reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO. Nenhum `main`, VPS, deploy, cliente, segredo ou gasto.
+
 ## SEC-47 — relógio monotônico por recibo OP-01 integrado à dev (10/11/2026)
 
 - `MockCrmReadPublicFacade::recheck` registra `observed_at` por recibo e exige horário sintético não retrocedente. A falha na prova, expiração, exceção ou retrocesso invalida o recibo; recheck nunca relê nem consome outro nonce.
