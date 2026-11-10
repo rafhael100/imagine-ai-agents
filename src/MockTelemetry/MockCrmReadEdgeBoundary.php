@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace ImagineAI\MockTelemetry;
 
 use ImagineAI\Domain\TenantContext;
-use ImagineAI\MockBridge\{MockCrmReadPublicFacade, MockCrmReadRequest};
+use ImagineAI\MockBridge\{MockCrmReadPublicFacade, MockCrmReadRequest, MockReadProjectionInvariant};
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence};
 
 /**
@@ -42,7 +42,7 @@ final class MockCrmReadEdgeBoundary
 
         try {
             $result = $this->facade->handle($wire, $envelope, $owner, $trustedContext, $now);
-            if (!self::isSafeResponse($result, $request)) {
+            if (!self::isSafeResponse($result, $request, $trustedContext)) {
                 throw new \LogicException('UNSAFE_SYNTHETIC_EDGE_RESULT');
             }
             $outcome = $result['state'] === 'READ_SYNTHETIC_ONLY'
@@ -56,7 +56,8 @@ final class MockCrmReadEdgeBoundary
         }
     }
 
-    private static function isSafeResponse(array $result, MockCrmReadRequest $request): bool
+    private static function isSafeResponse(array $result, MockCrmReadRequest $request,
+        TenantContext $trustedContext): bool
     {
         if (array_keys($result) !== ['contract', 'state', 'projection',
                 'real_authorization', 'external_calls']
@@ -70,16 +71,12 @@ final class MockCrmReadEdgeBoundary
         }
         if (($result['state'] ?? null) !== 'READ_SYNTHETIC_ONLY'
             || !is_array($result['projection'])
-            || array_keys($result['projection']) !== $request->fields) {
+            || !MockReadProjectionInvariant::isCanonical(
+                $result['projection'], $request->fields, $trustedContext)) {
             return false;
         }
-        foreach ($result['projection'] as $field => $value) {
-            if (!in_array($field, ['ref', 'stage'], true)
-                || !is_string($value)
-                || preg_match('/^SYNTHETIC_[A-Z0-9_]{1,80}$/D', $value) !== 1) {
-                return false;
-            }
-        }
+        // Even if the public facade changes, the edge requires the same
+        // resource-bound, ordered, bounded, synthetic-only projection.
         return true;
     }
 
