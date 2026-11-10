@@ -205,4 +205,46 @@ return [
         denied('STEP_ID_CONFLICT', fn() => $c->step($run, $max));
         check(count($c->events()) === 2);
     },
+
+    'U46-01 direct Run construction rejects oversized synthetic ID' => function (): void {
+        denied('INVALID_SYNTHETIC_REF', fn() => new Run(
+            'SYNTHETIC_' . str_repeat('R', 71), context()));
+    },
+    'U46-02 direct Run construction rejects empty synthetic suffix' => function (): void {
+        denied('INVALID_SYNTHETIC_REF', fn() => new Run('SYNTHETIC_', context()));
+    },
+    'U46-03 direct Run at exactly 80 bytes preserves active lifecycle' => function (): void {
+        $id = 'SYNTHETIC_' . str_repeat('R', 70);
+        check(strlen($id) === 80);
+        $run = new Run($id, context());
+        $run->transition('EXECUTANDO');
+        check($run->state() === 'EXECUTANDO' && $run->id === $id);
+    },
+    'U46-04 direct Step and Run::step reject oversized ID without effects' => function (): void {
+        $run = new Run('SYNTHETIC_F146_RUN', context());
+        $run->transition('EXECUTANDO');
+        $tooLong = 'SYNTHETIC_' . str_repeat('S', 87);
+        denied('INVALID_SYNTHETIC_REF', fn() => new Step($tooLong, $run));
+        denied('INVALID_SYNTHETIC_REF', fn() => $run->step($tooLong));
+        check($run->state() === 'EXECUTANDO');
+    },
+    'U46-05 direct Step construction rejects empty suffix' => function (): void {
+        $run = new Run('SYNTHETIC_F146_RUN', context());
+        $run->transition('EXECUTANDO');
+        denied('INVALID_SYNTHETIC_REF', fn() => new Step('SYNTHETIC_', $run));
+    },
+    'U46-06 exactly 96-byte direct Step supports explicit synthetic approval' => function (): void {
+        $run = new Run('SYNTHETIC_F146_RUN', context());
+        $run->transition('EXECUTANDO');
+        $stepId = 'SYNTHETIC_' . str_repeat('S', 86);
+        check(strlen($stepId) === 96);
+        $step = new Step($stepId, $run);
+        $intent = new Intent('SYNTHETIC_F146_INTENT', $step,
+            'SYNTHETIC_F146_KEY', 'mock.task.create', 'SYNTHETIC_TASK');
+        $approval = new Approval('SYNTHETIC_F146_APPROVAL', $intent,
+            'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+        $gateway = new MockSupervisedGateway('CONFIRMADO');
+        check($gateway->submit($intent, $approval, 15)->isConfirmed()
+            && $gateway->submitCount() === 1);
+    },
 ];
