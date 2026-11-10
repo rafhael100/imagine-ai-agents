@@ -271,6 +271,25 @@ final class SupervisedCoordinator
             MockError::fail('EFFECT_CONFLICT');
         }
         $prior = $this->effects[$intent->key()] ?? null;
+        // An absent or merely requested effect is not outcome evidence.
+        // Normalize it before comparing against a known pending observation.
+        if (in_array($effect->state, ['NAO_SOLICITADO', 'SOLICITADO'], true)) {
+            $effect = new Effect($intent, 'INDETERMINADO');
+        }
+        // Fail closed if a stale/unreliable status would demote a known
+        // pending effect. Preserve the prior object; the caller records a
+        // STATUS_REJECTED event rather than silently losing evidence.
+        if ($prior !== null && $prior->state === 'PENDENTE'
+            && $effect->state === 'INDETERMINADO') {
+            MockError::fail('STATE_CONFLICT');
+        }
+        if ($prior !== null && in_array($prior->state, ['PENDENTE', 'INDETERMINADO'], true)
+            && $prior->state === $effect->state) {
+            // Exact nonterminal rechecks remain evidence of the original
+            // observation; still close STATUS_REQUESTED in the trace.
+            $this->trace($intent->step->run, $prior->state, $intent);
+            return $prior;
+        }
         if ($prior !== null && in_array($prior->state, ['CONFIRMADO', 'NEGADO'], true)) {
             if ($effect->state !== $prior->state || $effect->id !== $prior->id || $effect->source !== $prior->source) {
                 MockError::fail('STATE_CONFLICT');
@@ -280,12 +299,6 @@ final class SupervisedCoordinator
             // It does not resubmit, mutate or replace the original Effect.
             $this->trace($intent->step->run, $prior->state, $intent);
             return $prior;
-        }
-        // A missing record after dispatch cannot prove that nothing happened.
-        // Neither submission acknowledgement nor absence is evidence of an effect.
-        // The trace reviewer only accepts explicit outcome/uncertainty states.
-        if (in_array($effect->state, ['NAO_SOLICITADO', 'SOLICITADO'], true)) {
-            $effect = new Effect($intent, 'INDETERMINADO');
         }
         $this->effects[$intent->key()] = $effect;
         $this->trace($intent->step->run, $effect->state, $intent);

@@ -4,11 +4,11 @@
 
 ## Fase A — base de demonstração offline
 
-**Entregue na branch de desenvolvimento para avaliação técnica, não para clientes.** F1-12 a F1-30, SEC-11 a SEC-34 e os demais incrementos documentados criaram contratos sintéticos, borda OP-01, política fake de owner, prevenção de replay local, leitura de ferramenta governada, sugestões fixas e trilha limitada.
+**Entregue na branch de desenvolvimento para avaliação técnica, não para clientes.** F1-12 a F1-30, SEC-11 a SEC-35 e os demais incrementos documentados criaram contratos sintéticos, borda OP-01, política fake de owner, prevenção de replay local, leitura de ferramenta governada, sugestões fixas e trilha limitada.
 
 A [SEC-20 / PR #182](https://github.com/rafhael100/imagine-ai-agents/pull/182) valida projeções antes da auditoria de sucesso, com [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) aprovada; veja [EVID-18](AIA-R01-EVID-18-SEGURANCA-PROJECAO-403.md).
 
-**Evidências mais recentes:** [PR #173](https://github.com/rafhael100/imagine-ai-agents/pull/173), [PR #174](https://github.com/rafhael100/imagine-ai-agents/pull/174), [PR #175](https://github.com/rafhael100/imagine-ai-agents/pull/175), [PR #177](https://github.com/rafhael100/imagine-ai-agents/pull/177), [PR #178](https://github.com/rafhael100/imagine-ai-agents/pull/178) e [EVID-16](AIA-R01-EVID-16-SEGURANCA-TOOL-397.md). Último gate validado no código: **492 testes PHP / 82 lint**, mais contratos Python e demonstração offline.
+**Evidências mais recentes:** [PR #173](https://github.com/rafhael100/imagine-ai-agents/pull/173), [PR #174](https://github.com/rafhael100/imagine-ai-agents/pull/174), [PR #175](https://github.com/rafhael100/imagine-ai-agents/pull/175), [PR #177](https://github.com/rafhael100/imagine-ai-agents/pull/177), [PR #178](https://github.com/rafhael100/imagine-ai-agents/pull/178) e [EVID-16](AIA-R01-EVID-16-SEGURANCA-TOOL-397.md). Último gate validado no código: **500 testes PHP / 82 lint**, mais contratos Python e demonstração offline.
 
 **Conclusão permitida:** laboratório executável para revisão. **Não** concluir que o agente SaaS, o IAM ou a integração CRM estejam operacionais.
 
@@ -33,6 +33,8 @@ A [SEC-32](AIA-FT01-SEC-32-EFEITOS-LIMITADOS.md) limita a 256 efeitos sintético
 A [SEC-33](AIA-FT01-SEC-33-EVIDENCIAS-MONOTONICAS.md) reforça o estado monotônico e a idempotência de evidências supervisionadas, sem CRM real. Seis testes extras offline.
 
 A [SEC-34](AIA-FT01-SEC-34-REVALIDACAO-REVISAO-ATIVA.md) revalida a revisão selecionada, bloqueando visualização de versões com revisão revogada e permitindo checagem temporal sintética explícita. Sete regressões offline, sem liberar produção.
+
+A [SEC-35](AIA-FT01-SEC-35-COORDENADOR-MONOTONICO.md) protege também o coordenador contra status não terminais regressivos, sem reenvio e com oito regressões offline. Ainda não é reconciliação operacional do CRM.
 
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 
