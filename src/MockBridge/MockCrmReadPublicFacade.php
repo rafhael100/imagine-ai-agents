@@ -23,7 +23,7 @@ final class MockCrmReadPublicFacade
      * Replacing the lease (rather than keeping a map) bounds memory to one
      * local slot and fails closed for overlapping mock runs.
      * @var ?array{envelope:MockTrustEnvelope,owner:MockOwnerScopeEvidence,
-     *   context:string,request_hash:string,revision:int}
+     *   context:string,request_hash:string,revision:int,observed_at:int}
      */
     private ?array $lastReadReceipt = null;
 
@@ -64,6 +64,15 @@ final class MockCrmReadPublicFacade
             if ($receipt['request_hash'] !== self::wireFingerprint($wire)) {
                 return false;
             }
+            // The supplied clock is NOT trusted real time. Within this one
+            // mock receipt we can still fail closed on backward timestamps.
+            // A forward observation persists even if the proof has expired:
+            // rolling time back must never revive an earlier read.
+            if ($now < $receipt['observed_at']) {
+                $this->lastReadReceipt = null;
+                return false;
+            }
+            $this->lastReadReceipt['observed_at'] = $now;
             $this->readBoundary->recheck(
                 $request, $envelope, $owner, $trustedContext, $now);
             // A temporarily revoked/resumed policy cannot reactivate a prior
@@ -71,6 +80,10 @@ final class MockCrmReadPublicFacade
             $this->readBoundary->assertPolicyRevision($receipt['revision']);
             return true;
         } catch (\Throwable) {
+            // Fail closed after any exception in the authenticated recheck,
+            // including proof expiry, owner outage, invalid time or revocation.
+            // Never let a formerly denied receipt become live again.
+            $this->lastReadReceipt = null;
             return false;
         }
     }
@@ -113,6 +126,7 @@ final class MockCrmReadPublicFacade
                 'context' => $trustedContext->key(),
                 'request_hash' => self::wireFingerprint($wire),
                 'revision' => $this->readBoundary->policyRevision(),
+                'observed_at' => $now,
             ];
             return self::response('READ_SYNTHETIC_ONLY', $projection);
         } catch (\Throwable) {

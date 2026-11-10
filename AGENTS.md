@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## SEC-47 — relógio monotônico por recibo OP-01 (10/11/2026)
+
+- `MockCrmReadPublicFacade::recheck` registra `observed_at` por recibo e exige horário sintético não retrocedente. A falha na prova, expiração, exceção ou retrocesso invalida o recibo; recheck nunca relê nem consome outro nonce.
+- **Gate esperado: 605 testes PHP / lint 83 + Python**, oito regressões U69-01..08. [SEC-47](docs/AIA-FT01-SEC-47-RECHECK-TEMPO-MONOTONICO.md).
+- Somente relógio de laboratório por recibo; CRM PR #57 OPEN/DRAFT, 13 cenários reais `NAO_EXECUTADO` e gates R01-G01..G11/CORE/SEG/AUT NO-GO. Não alterar `main`, VPS, produção, clientes ou despesas.
+
 ## SEC-46 — recibo de leitura e revisão monotônica integrado à dev (10/11/2026)
 
 - `MockCrmOwnerPolicy` avança revisão a cada concessão/revogação, suspensão/reativação e indisponibilidade/retorno. `MockCrmReadBoundary` impede sucesso se houver ABA no leitor. `MockCrmReadPublicFacade::recheck` exige recibo **da última leitura bem-sucedida**, objetos originais da prova, mesmo contexto, requisição e revisão. Uma nova tentativa invalida o recibo anterior; não há endpoint nem token real.

@@ -52,10 +52,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=597 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=605 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**SEC-46 integrada:** **597 testes PHP / lint 83 + Python**, [CI #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251) aprovada; [EVID-31](docs/AIA-R01-EVID-31-SEC46-CI-POSTMERGE.md). Histórico: [SEC-45 #42913437800](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42913437800), [SEC-44 #42906719897](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42906719897), [SEC-43 #42902464064](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42902464064). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**SEC-47 em revisão:** **605 testes PHP / lint 83 + Python**; [SEC-47](docs/AIA-FT01-SEC-47-RECHECK-TEMPO-MONOTONICO.md) nega retrocesso/expiração de recibo. Última CI pós-merge aprovada: [SEC-46 #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251), [EVID-31](docs/AIA-R01-EVID-31-SEC46-CI-POSTMERGE.md). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
