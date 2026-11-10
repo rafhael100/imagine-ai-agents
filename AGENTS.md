@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline em revisão — SEC-38 (10/11/2026)
+
+- `MockCapabilityGrant`: rejeitar referências `id` e `toolId` acima de 90 bytes, sem suffix e fora de `SYNTHETIC_[A-Z0-9_]{1,80}` ainda no construtor. Preservar revogação e tenant-bound check.
+- **Gate esperado: 518 testes PHP / 82 lint + Python.** [SEC-38](docs/AIA-FT01-SEC-38-CONCESSOES-LIMITADAS.md).
+- CRM PR #57 OPEN/DRAFT; R01-G01..G11 / CORE/SEG/AUT ABERTOS/NO-GO. Somente dev offline, sem `main`, VPS, produção, clientes, segredos ou custos.
+
 ## Baseline em revisão — SEC-37 (10/11/2026)
 
 - `MockCrmReadRequest` valida exatamente oito chaves antes de `array_keys()`/`sort()` e limita referências a 90 bytes antes do regex. Não consumir nonce nem auditoria OP-01 quando o parsing falhar.
