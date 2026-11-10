@@ -17,6 +17,7 @@ use ImagineAI\Contracts\CrmReader;
 final class MockCrmReadPublicFacade
 {
     private readonly MockCrmReadAuditedBoundary $boundary;
+    private readonly MockCrmReadBoundary $readBoundary;
 
     public function __construct(
         MockTrustGateway $gateway,
@@ -24,13 +25,34 @@ final class MockCrmReadPublicFacade
         MockCrmOwnerPolicy $ownerPolicy,
         MockCrmReadAuditTrail $audit,
     ) {
-        $this->boundary = new MockCrmReadAuditedBoundary(
-            new MockCrmReadBoundary($gateway, $reader, $ownerPolicy),
-            $audit,
-        );
+        $this->readBoundary = new MockCrmReadBoundary($gateway, $reader, $ownerPolicy);
+        $this->boundary = new MockCrmReadAuditedBoundary($this->readBoundary, $audit);
     }
 
-    /** @param array<string,mixed> $wire A synthetic array, never a raw HTTP request. */
+    /**
+     * Same in-memory owner/trust authority used by the audited read. Returns
+     * a single denial bit, not policy detail. No new read, audit or nonce.
+     * Not an operational CRM permission-check endpoint.
+     * @param array<string,mixed> $wire
+     */
+    public function recheck(
+        array $wire,
+        ?MockTrustEnvelope $envelope,
+        ?MockOwnerScopeEvidence $owner,
+        TenantContext $trustedContext,
+        int $now,
+    ): bool {
+        try {
+            $request = new MockCrmReadRequest($wire);
+            $this->readBoundary->recheck(
+                $request, $envelope, $owner, $trustedContext, $now);
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+
     public function handle(
         array $wire,
         ?MockTrustEnvelope $envelope,

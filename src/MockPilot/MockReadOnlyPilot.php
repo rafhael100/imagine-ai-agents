@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ImagineAI\MockPilot;
 
 use ImagineAI\Domain\TenantContext;
+use ImagineAI\MockBridge\{MockCrmReadRequest, MockReadProjectionInvariant};
 use ImagineAI\MockOrchestration\SupervisedCoordinator;
 use ImagineAI\MockTelemetry\MockCrmReadEdgeBoundary;
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence};
@@ -60,6 +61,16 @@ final class MockReadOnlyPilot
                 return self::denial();
             }
 
+            // Revalidate the returned projection at the final pilot boundary.
+            // Even if a future edge adapter drifts, never send unauthorized
+            // data to a suggestion provider.
+            $request = new MockCrmReadRequest($wire);
+            $request->assertMatches($trustedContext);
+            if (!MockReadProjectionInvariant::isCanonical(
+                $read['projection'], $request->fields, $trustedContext)) {
+                return self::denial();
+            }
+
             // Only the explicitly approved fake fields from the CRM-owned edge
             // are forwarded. The coordinator never executes a mutation here.
             $run = $this->coordinator->start($runId);
@@ -72,6 +83,13 @@ final class MockReadOnlyPilot
                 || $suggestion['source'] !== $trustedContext->resource
                 || $suggestion['text'] !== 'SYNTHETIC summary proposal only') {
                 throw new \LogicException('UNSAFE_SYNTHETIC_SUGGESTION');
+            }
+            // Permission can be withdrawn while the suggestion provider runs.
+            // Recheck the SAME used proof without a new read, counter, audit
+            // slot or nonce. On revocation the Run closes as FALHOU.
+            if (!$this->edge->recheck(
+                $wire, $envelope, $owner, $trustedContext, $now)) {
+                throw new \LogicException('SYNTHETIC_AUTHORIZATION_CHANGED');
             }
             $this->coordinator->transition($run, 'CONCLUIDA');
             return [

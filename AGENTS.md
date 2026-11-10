@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## SEC-45 — revalidação após sugestão fictícia (10/11/2026)
+
+- O `MockReadOnlyPilot` confere projeção OP-01 com `MockReadProjectionInvariant` e executa `edge->recheck` após o provedor e antes de concluir o Run. A cadeia boundary → fachada → edge reutiliza owner/trust sem nova leitura, nonce, contador ou auditoria.
+- **Gate esperado: 585 testes PHP / lint 83 + Python**, regressões U67-01..10. [SEC-45](docs/AIA-FT01-SEC-45-REVALIDACAO-POS-SUGESTAO.md).
+- Apenas laboratório PHP; CRM PR #57 OPEN/DRAFT, 13 cenários reais `NAO_EXECUTADO` e R01-G01..G11/CORE/SEG/AUT NO-GO. Nenhum `main`, VPS, produção, credencial ou gasto.
+
 ## SEC-44 — leitura da ferramenta integrada à dev (10/11/2026)
 
 - `MockToolDispatcher::readThroughBoundary()` deve validar a resposta com `MockReadProjectionInvariant::isCanonical` e não manter regex própria; validar recurso, campos e ordem após edge/fachada.

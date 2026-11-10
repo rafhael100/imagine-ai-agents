@@ -111,6 +111,49 @@ function f129Fixture(F129FaultProvider $provider, bool $allowed = true): array
 }
 
 
+
+/** Provider that changes the fictional owner's permission during a draft. */
+final class F167MutatingSuggestionProvider implements AiSuggestionProvider
+{
+    public int $calls = 0;
+
+    public function __construct(private readonly \Closure $onSuggest) {}
+
+    public function suggest(Run $run, array $fields): array
+    {
+        ++$this->calls;
+        ($this->onSuggest)();
+        return (new MockAiSuggestionProvider())->suggest($run, $fields);
+    }
+}
+
+/** Return [pilot, coordinator, mutations, edge counters, audit, proofs, ctx, policy, provider, state]. */
+function f167Fixture(\Closure $onSuggest, bool $useShared = false): array
+{
+    $ctx = context();
+    $policy = f130Grant();
+    [$env, $owner] = f130Proof($ctx, 'F167');
+    $shared = $useShared ? new \ImagineAI\MockTrust\MockSharedTrustState() : null;
+    $trust = new \ImagineAI\MockTrust\MockTrustGateway(
+        'SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API',
+        ['SYNTHETIC_LEAD_READ'], $shared);
+    $audit = new MockCrmReadAuditTrail();
+    $counts = new MockCrmReadEdgeCounters();
+    $facade = new \ImagineAI\MockBridge\MockCrmReadPublicFacade(
+        $trust, new \ImagineAI\Mocks\MockCrmReader(), $policy, $audit);
+    $edge = new \ImagineAI\MockTelemetry\MockCrmReadEdgeBoundary($facade, $counts);
+    $mutations = new MockSupervisedGateway();
+    $provider = new F167MutatingSuggestionProvider(function () use (
+        $onSuggest, $policy, $env, $owner, $ctx, $shared
+    ): void {
+        $onSuggest($policy, $env, $owner, $ctx, $shared);
+    });
+    $coordinator = new SupervisedCoordinator($ctx, $mutations, $provider);
+    return [new MockReadOnlyPilot($ctx, $edge, $coordinator),
+        $coordinator, $mutations, $counts, $audit, $env, $owner,
+        $ctx, $policy, $provider, $shared, $edge];
+}
+
 return [
     'U30-01 minimal read can create a fictional draft without CRM mutation' => function (): void {
         [$pilot, $mut, $c, $counters, , $audit, $env, $owner, $ctx] =
@@ -331,5 +374,117 @@ return [
             && $c->events()[6]['run_state'] === 'SYNTHETIC_CONCLUIDA');
         check($provider->calls === 2 && $gateway->submitCount() === 0
             && $counts->snapshot()['attempts'] === 2 && $audit->count() === 2);
+    },
+
+    'U67-01 revoked owner grant during suggestion fails final delivery' => function (): void {
+        [$pilot, $coord, $mut, $counts, $audit, $env, $owner, $ctx, , $provider] =
+            f167Fixture(function ($policy, $env, $owner, $ctx): void {
+                $policy->revokeFixture($ctx);
+            });
+        $result = $pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC45_OWNER_REVOKED');
+        check($result === f130Denial() && $provider->calls === 1);
+        check(array_column($coord->events(), 'code') === [
+            'SYNTHETIC_STARTED', 'SYNTHETIC_STEP_CREATED',
+            'SYNTHETIC_SUGGESTED', 'SYNTHETIC_RUN_CHANGED']);
+        check($coord->events()[3]['run_state'] === 'SYNTHETIC_FALHOU');
+        check($mut->submitCount() === 0 && $audit->count() === 1
+            && $counts->snapshot()['attempts'] === 1);
+    },
+    'U67-02 suspended tenant during suggestion returns no summary' => function (): void {
+        [$pilot, $coord, , , , $env, $owner, $ctx] = f167Fixture(
+            function ($policy, $env, $owner, $ctx): void {
+                $policy->setTenantSuspended($ctx->tenant, true);
+            });
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC45_TENANT') === f130Denial());
+        check($coord->events()[3]['run_state'] === 'SYNTHETIC_FALHOU');
+    },
+    'U67-03 member suspension during suggestion fails closed' => function (): void {
+        [$pilot, $coord, , , , $env, $owner, $ctx] = f167Fixture(
+            function ($policy, $env, $owner, $ctx): void {
+                $policy->setMemberSuspended($ctx->tenant, $ctx->principal, true);
+            });
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC45_MEMBER') === f130Denial());
+        check($coord->events()[3]['run_state'] === 'SYNTHETIC_FALHOU');
+    },
+    'U67-04 owner policy outage while preparing text denies final output' => function (): void {
+        [$pilot, $coord, , , , $env, $owner, $ctx] = f167Fixture(
+            function ($policy): void { $policy->setAvailable(false); });
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC45_OWNER_OUTAGE') === f130Denial());
+        check($coord->events()[3]['run_state'] === 'SYNTHETIC_FALHOU');
+    },
+    'U67-05 trust envelope revoked by provider suppresses synthetic draft' => function (): void {
+        [$pilot, $coord, , , , $env, $owner, $ctx] = f167Fixture(
+            function ($policy, $envelope): void { $envelope->revoke(); });
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC45_ENVELOPE') === f130Denial());
+        check($coord->events()[3]['run_state'] === 'SYNTHETIC_FALHOU');
+    },
+    'U67-06 revoked owner scope proof after read suppresses draft' => function (): void {
+        [$pilot, $coord, , , , $env, $owner, $ctx] = f167Fixture(
+            function ($policy, $envelope, $owner): void { $owner->revoke(); });
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC45_SCOPE_REVOKED') === f130Denial());
+        check($coord->events()[3]['run_state'] === 'SYNTHETIC_FALHOU');
+    },
+    'U67-07 shared digest revocation during suggestion is denied without retry' => function (): void {
+        [$pilot, $coord, $mut, $counts, $audit, $env, $owner, $ctx, , , $state] =
+            f167Fixture(function ($policy, $envelope, $owner, $ctx, $state): void {
+                $state->revokeDigest($envelope->digest);
+            }, true);
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC45_DIGEST_REVOKED') === f130Denial());
+        check($state->countConsumed() === 1 && $state->countRevoked() === 1);
+        check($coord->events()[3]['run_state'] === 'SYNTHETIC_FALHOU');
+        check($mut->submitCount() === 0 && $audit->count() === 1
+            && $counts->snapshot()['attempts'] === 1);
+    },
+    'U67-08 shared trust store unavailable after read denies final output' => function (): void {
+        [$pilot, $coord, , , , $env, $owner, $ctx, , , $state] =
+            f167Fixture(function ($policy, $envelope, $owner, $ctx, $state): void {
+                $state->setAvailable(false);
+            }, true);
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC45_TRUST_OUTAGE') === f130Denial());
+        check($state->countConsumed() === 1
+            && $coord->events()[3]['run_state'] === 'SYNTHETIC_FALHOU');
+    },
+    'U67-09 approved unchanged owner passes without duplicate nonce or edge audit' => function (): void {
+        [$pilot, $coord, $mut, $counts, $audit, $env, $owner, $ctx, , $provider, $state, $edge] =
+            f167Fixture(function (): void {}, true);
+        $wire = f112Wire($ctx); $wire['fields'] = ['stage', 'ref'];
+        check($pilot->suggest($wire, $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC45_VALID') === f130Success());
+        check($provider->calls === 1 && $state->countConsumed() === 1
+            && $counts->snapshot()['attempts'] === 1 && $audit->count() === 1);
+        check(array_column($coord->events(), 'code') === [
+            'SYNTHETIC_STARTED', 'SYNTHETIC_STEP_CREATED',
+            'SYNTHETIC_SUGGESTED', 'SYNTHETIC_RUN_CHANGED']);
+        check($coord->events()[3]['run_state'] === 'SYNTHETIC_CONCLUIDA');
+        check($edge->recheck($wire, $env, $owner, $ctx, 15) === true);
+        check($state->countConsumed() === 1 && $audit->count() === 1);
+        check($mut->submitCount() === 0 && $mut->statusCount() === 0);
+    },
+    'U67-10 failed draft authorization does not prevent fresh authorized run' => function (): void {
+        $calls = 0;
+        [$pilot, $coord, $mut, $counts, $audit, $env, $owner, $ctx, $policy, $provider] =
+            f167Fixture(function ($policy, $envelope, $owner, $ctx) use (&$calls): void {
+                ++$calls;
+                if ($calls === 1) $policy->revokeFixture($ctx);
+            });
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC45_FIRST') === f130Denial());
+        $policy->grantFixture($ctx, ['ref', 'stage']);
+        [$freshEnv, $freshOwner] = f130Proof($ctx, 'F167_RECOVERY');
+        check($pilot->suggest(f112Wire($ctx), $freshEnv, $freshOwner, $ctx,
+            15, 'SYNTHETIC_SEC45_RECOVERY') === f130Success());
+        check($calls === 2 && $provider->calls === 2
+            && $counts->snapshot()['attempts'] === 2 && $audit->count() === 2);
+        check(array_column($coord->events(), 'run_state')[3] === 'SYNTHETIC_FALHOU');
+        check($coord->events()[7]['run_state'] === 'SYNTHETIC_CONCLUIDA');
+        check($mut->submitCount() === 0);
     },
 ];
