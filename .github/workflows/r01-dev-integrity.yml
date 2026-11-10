@@ -11,7 +11,7 @@ on:
       - 'tools/**'
       - 'contracts/**'
       - 'docs/evidencias/**'
-      - 'examples/r01-op01-readiness-offline*.html'
+      - 'examples/**'
       - '.github/workflows/r01-dev-integrity.yml'
   pull_request:
     branches:
@@ -22,7 +22,7 @@ on:
       - 'tools/**'
       - 'contracts/**'
       - 'docs/evidencias/**'
-      - 'examples/r01-op01-readiness-offline*.html'
+      - 'examples/**'
       - '.github/workflows/r01-dev-integrity.yml'
 
 permissions:
