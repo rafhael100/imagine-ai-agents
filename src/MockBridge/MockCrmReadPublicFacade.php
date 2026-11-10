@@ -55,11 +55,15 @@ final class MockCrmReadPublicFacade
             if ($receipt === null || $envelope === null || $owner === null
                 || $receipt['envelope'] !== $envelope
                 || $receipt['owner'] !== $owner
-                || $receipt['context'] !== $trustedContext->key()
-                || $receipt['request_hash'] !== self::wireFingerprint($wire)) {
+                || $receipt['context'] !== $trustedContext->key()) {
                 return false;
             }
+            // Reject an unbounded/malformed body with the closed parser
+            // BEFORE hashing or otherwise traversing its raw contents.
             $request = new MockCrmReadRequest($wire);
+            if ($receipt['request_hash'] !== self::wireFingerprint($wire)) {
+                return false;
+            }
             $this->readBoundary->recheck(
                 $request, $envelope, $owner, $trustedContext, $now);
             // A temporarily revoked/resumed policy cannot reactivate a prior
