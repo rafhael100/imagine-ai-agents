@@ -210,4 +210,103 @@ return [
             check($out['real_authorization'] === false && $out['external_calls'] === 0);
         }
     },
+
+    'U68-01 a fabricated recheck without a completed read is denied' => function (): void {
+        $policy = new MockCrmOwnerPolicy();
+        $policy->grantFixture(context(), ['ref']);
+        [$facade, , $audit, $env, $owner, $ctx] = f117Fixture($policy);
+        $wire = f112Wire($ctx);
+        check($facade->recheck($wire, $env, $owner, $ctx, 15) === false);
+        check($audit->count() === 0);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check($facade->recheck($wire, $env, $owner, $ctx, 15) === true);
+        check($audit->count() === 1);
+    },
+    'U68-02 a denied read creates no recheck receipt, even after policy recovery' => function (): void {
+        [$facade, $policy, $audit, $env, $owner, $ctx] = f117Fixture();
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15) === f117GenericDenial());
+        $policy->grantFixture($ctx, ['ref']);
+        check($facade->recheck($wire, $env, $owner, $ctx, 15) === false);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check($facade->recheck($wire, $env, $owner, $ctx, 15) === true);
+        check($audit->count() === 2);
+    },
+    'U68-03 replayed or malformed read replaces positive receipt with denial' => function (): void {
+        $policy = new MockCrmOwnerPolicy(); $policy->grantFixture(context(), ['ref']);
+        [$facade, , $audit, $env, $owner, $ctx] = f117Fixture($policy);
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check($facade->recheck($wire, $env, $owner, $ctx, 15));
+        check($facade->handle($wire, $env, $owner, $ctx, 15) === f117GenericDenial());
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 15));
+        $wire['authorization'] = 'Bearer SYNTHETIC_PRIVATE';
+        check($facade->handle($wire, $env, $owner, $ctx, 15) === f117GenericDenial());
+        check($audit->count() === 2);
+    },
+    'U68-04 changed request or different owner proof cannot borrow a read receipt' => function (): void {
+        $policy = new MockCrmOwnerPolicy(); $policy->grantFixture(context(), ['ref', 'stage']);
+        [$facade, , $audit, $env, $owner, $ctx] = f117Fixture($policy);
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        $changed = $wire; $changed['request_ref'] = 'SYNTHETIC_NEW_REQUEST';
+        check(!$facade->recheck($changed, $env, $owner, $ctx, 15));
+        $changed = $wire; $changed['fields'] = ['stage'];
+        check(!$facade->recheck($changed, $env, $owner, $ctx, 15));
+        $copy = new MockOwnerScopeEvidence('SYNTHETIC_COPY_OWNER',
+            $env->digest, $ctx, 'SYNTHETIC_LEAD_READ', 10, 40, true);
+        check(!$facade->recheck($wire, $env, $copy, $ctx, 15));
+        check($facade->recheck($wire, $env, $owner, $ctx, 15));
+        check($audit->count() === 1);
+    },
+    'U68-05 owner revoke then regrant cannot resurrect the old authorization' => function (): void {
+        $policy = new MockCrmOwnerPolicy(); $policy->grantFixture(context(), ['ref']);
+        [$facade, , $audit, $env, $owner, $ctx] = f117Fixture($policy);
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        $revision = $policy->revision();
+        $policy->revokeFixture($ctx);
+        $policy->grantFixture($ctx, ['ref']);
+        check($policy->revision() === $revision + 2);
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 15));
+        [$fresh, $freshOwner] = f130Proof($ctx, 'SEC46_FRESH');
+        check($facade->handle($wire, $fresh, $freshOwner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check($facade->recheck($wire, $fresh, $freshOwner, $ctx, 15));
+        check($audit->count() === 2);
+    },
+    'U68-06 suspended and resumed tenant or member invalidates old receipt' => function (): void {
+        foreach (['TENANT', 'MEMBER'] as $kind) {
+            $policy = new MockCrmOwnerPolicy(); $policy->grantFixture(context(), ['ref']);
+            [$facade, , $audit, $env, $owner, $ctx] = f117Fixture($policy);
+            $wire = f112Wire($ctx);
+            check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+                === 'READ_SYNTHETIC_ONLY');
+            if ($kind === 'TENANT') {
+                $policy->setTenantSuspended($ctx->tenant, true);
+                $policy->setTenantSuspended($ctx->tenant, false);
+            } else {
+                $policy->setMemberSuspended($ctx->tenant, $ctx->principal, true);
+                $policy->setMemberSuspended($ctx->tenant, $ctx->principal, false);
+            }
+            check(!$facade->recheck($wire, $env, $owner, $ctx, 15));
+            check($audit->count() === 1);
+        }
+    },
+    'U68-07 owner outage and recovery does not restore a stale read receipt' => function (): void {
+        $policy = new MockCrmOwnerPolicy(); $policy->grantFixture(context(), ['ref']);
+        [$facade, , $audit, $env, $owner, $ctx] = f117Fixture($policy);
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        $policy->setAvailable(false);
+        $policy->setAvailable(true);
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 15));
+        check($audit->count() === 1);
+    },
 ];
