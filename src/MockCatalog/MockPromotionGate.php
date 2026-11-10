@@ -8,6 +8,10 @@ use ImagineAI\Domain\{MockError, TenantContext};
 /** Local selection state only. Never changes deployed versions or CRM grants. */
 final class MockPromotionGate
 {
+    // Leave one decision and trace slot for an emergency explicit suspension.
+    // No historic decision is evicted: replay/conflict evidence must survive.
+    private const MAX_DECISIONS = 128;
+    private const MAX_TRACE_EVENTS = 256;
     private ?string $active = null;
     /** Last selected snapshot is kept so suspension remains possible after catalog disable. */
     private ?MockAgentVersionSnapshot $activeSnapshot = null;
@@ -78,6 +82,14 @@ final class MockPromotionGate
     {
         MockAgentVersionSnapshot::syntheticRef($decisionRef);
         if (!isset($this->decisions[$decisionRef])) {
+            // PROMOTE/ROLLBACK reserve one additional slot for SUSPEND;
+            // SUSPEND may consume the final slot to safely deactivate a
+            // selected snapshot. Reserve before recording a decision.
+            $reserve = $verb === 'SUSPEND' ? 1 : 2;
+            if (count($this->decisions) > self::MAX_DECISIONS - $reserve
+                || count($this->events) > self::MAX_TRACE_EVENTS - $reserve) {
+                MockError::fail('PROMOTION_CAPACITY_DENIED');
+            }
             $this->decisions[$decisionRef] = [$verb, $ref, $digest];
             return true;
         }
@@ -87,6 +99,12 @@ final class MockPromotionGate
 
     private function trace(string $eventCode, MockAgentVersionSnapshot $snapshot): void
     {
+        // Defense in depth for capability revocation (which is not recorded
+        // as a decision). If audit is exhausted, prior revocation already
+        // cleared the active selection and must fail visibly.
+        if (count($this->events) >= self::MAX_TRACE_EVENTS) {
+            MockError::fail('PROMOTION_CAPACITY_DENIED');
+        }
         $this->events[] = ['sequence' => count($this->events) + 1,
             'template_hash' => hash('sha256', $snapshot->templateRef),
             'snapshot_hash' => hash('sha256', $snapshot->ref),
