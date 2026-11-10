@@ -62,3 +62,38 @@ Antes de qualquer endpoint operacional, requer revisão explícita:
 Atribuir responsável técnico CRM, SEG, Produto e Privacidade para validar o *contrato conceitual* OP-01; decidir campos reais, erro indistinguível, origem autenticada, tratamento de revogação, política de versão e suíte de homologação. Registrar parecer e gates por escrito. **Somente depois** abrir tarefa executiva de implementação em branch nova, com aceite explícito, CI e ambientes isolados.
 
 **Status desta proposta:** `DRAFT / NO MERGE / NO DEPLOY`; a diretoria autorizou estudo e desenvolvimento controlado com dados sintéticos, não há aprovação deste contrato específico pelo CRM.
+
+
+---
+
+## 7. Atualização bilateral de revisão — 10/11/2026 (PROPOSTA, NÃO RATIFICADA)
+
+**Atenção:** as evidências da seção 4 (144 casos PHP / 60 lint) registram a **F1-12 histórica** e não são o baseline atual do Agents. O repositório Agents incorporou subsequentemente [EVID-16](https://github.com/rafhael100/imagine-ai-agents/blob/dev/ft01-aia-core-mocks-2026-11-06/docs/AIA-R01-EVID-16-SEGURANCA-TOOL-397.md): **397 casos PHP, lint em 82 arquivos e verificadores Python** no laboratório, com [CI de revisão #42753478173](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42753478173) e [CI pós-merge #42753536675](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42753536675) aprovadas para a última alteração funcional. Isso não prova que o CRM possua API, identidade de serviço ou permissões reais.
+
+### 7.1 Requisição e resposta: fronteira conceitual
+
+O contrato sintético de **pedido** F1-12 descreve os campos `contract/request_ref/operation/tenant_ref/principal_ref/resource_ref/purpose_ref/fields`. Ele não define quem autenticou o solicitante. Em Agents, o contrato sintético de **resposta pública** (EVID-10, [PR #159](https://github.com/rafhael100/imagine-ai-agents/pull/159)) usa `contract/state/projection/real_authorization/external_calls`, somente com os estados ilustrativos `READ_SYNTHETIC_ONLY` ou `DENIED_OR_NOT_FOUND`. A projeção, quando presente, só admite os campos fictícios `ref` e/ou `stage`; resposta negada devolve `projection=null`. Os marcadores `real_authorization=false` e `external_calls=0` confirmam **ausência** de API real; **jamais** devem virar atributos de autorização num contrato operacional.
+
+O [PR Agents #173](https://github.com/rafhael100/imagine-ai-agents/pull/173) criou caminho de ferramenta read-only através da borda OP-01 sintética, preservando a recusa do leitor direto. [SEC-13/14/15](https://github.com/rafhael100/imagine-ai-agents/blob/dev/ft01-aia-core-mocks-2026-11-06/docs/AIA-R01-EVID-14-CHECKPOINT-LEITURA-OP01.md) exige owner policy no laboratório, antes do nonce, e não permite ler diretamente do despachante. Essas verificações são **simulações locais**, sem confiança distribuída, HTTP, JWT, RLS real ou autorização de recursos.
+
+**Decisão G08 que falta ao CRM:** definir o contrato de resposta real, tipos, campos físicos permitidos, condição de ausência ou recusa, versão, transporte autenticado e responsabilidade pela correlação. Não presumir que o JSON sintético nem `ref/stage` sejam aprovados como API.
+
+### 7.2 Matriz de decisões pendentes — nenhum item aprovado por este documento
+
+| ID de revisão | Pergunta que o dono competente precisa resolver | Evidência mínima para fechar |
+| --- | --- | --- |
+| OP01-R01 / G01 / AUT | Qual identidade de serviço assinada/autenticada, emissor, audiência, tenant e principal delegados? Como expira e é revogada? | Desenho IAM, rotação e testes negativos por emissor/audience/tenant, com SEG |
+| OP01-R02 / G02 / CORE/SEG | Qual autorizador do backend CRM governa lead, membership, recurso, finalidade e **campo**, independentemente de claims enviados pelo Agents? | Matriz deny-by-default, testes entre empresas, recurso inexistente/estrangeiro indistinguíveis |
+| OP01-R03 / G03 / AUT/Infra | Como garantir rejeição de replay entre instâncias, conflito de nonce e rechecagem após revogação? | Protocolo de concorrência/TTL/armazenamento durável e testes multiworker |
+| OP01-R04 / G05 / Privacidade | Quais dados e finalidades são realmente necessários, base legal, política de logs, retenção, IA e subprocessadores? | Classificação e avaliação de privacidade assinada; minimização aferível |
+| OP01-R05 / G08 / Arquitetura | Qual é o contrato de saída HTTP/erros/versionamento e a regra de evolução/depreciação? | Schema revisado, testes positivos/negativos, owner explícito e rollback |
+| OP01-R06 / G07/G10 / Segurança/Operações | Como executar homologação isolada, auditoria, incidentes e rollback sem credencial ou cliente real? | Relatório de testes em ambiente autorizado, revisão independente e restauração documentada |
+| OP01-R07 / G11 / Direção | Qual o recorte do piloto, responsável, limites financeiros e gatilhos de suspensão? | Aprovação específica, sem confundir piloto com produção |
+
+**Critério único:** nenhuma resposta de revisão, CI offline ou comentário neste PR transforma item ABERTO em GO. Cada dono competente precisa registrar decisão e evidência separadamente.
+
+### 7.3 Estado do PR e risco de defasagem
+
+Esta branch documental nasceu de uma DEV CRM anterior. **Antes de eventual integração documental**, reconciliar a DEV atual, revisar diff completo e checks e obter aceite independente. Manter o PR #57 **DRAFT / SEM MERGE**, como instruído pelo `AGENTS.md` CRM. A documentação não substitui o desenvolvimento funcional autorizado em tarefa futura. `DenyByDefaultAuthorizer` continua negando; sem endpoints, rotas, migrations, `ALLOW`, dados reais, segredos, VPS, custos ou produção.
+
+**Próximo ato verificável:** parecer bilateral itemizado sobre OP01-R01..R07 e, só depois da autorização específica, proposta de implementação da OP-01 real em branch isolada com CI e plano de rollback.
