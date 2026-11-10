@@ -121,4 +121,79 @@ return [
         denied('APPROVAL_REQUIRED', fn() => $c->execute($b, $approval, 15));
         check($gateway->submitCount() === 1);
     },
+
+    'U45-01 oversized intent reference is rejected before any approval or submit' => function (): void {
+        [, $intent] = fixture();
+        $gateway = new MockCrmEffectGateway('CONFIRMADO');
+        denied('INVALID_SYNTHETIC_REF', fn() => new Intent(
+            'SYNTHETIC_' . str_repeat('I', 119), $intent->step,
+            'SYNTHETIC_KEY', 'mock.task.create', 'SYNTHETIC_TASK'));
+        check($gateway->count() === 0);
+    },
+    'U45-02 oversized idempotency key never creates a usable intent' => function (): void {
+        [, $intent] = fixture();
+        denied('INVALID_SYNTHETIC_REF', fn() => new Intent(
+            'SYNTHETIC_F145_INTENT', $intent->step,
+            'SYNTHETIC_' . str_repeat('K', 119),
+            'mock.task.create', 'SYNTHETIC_TASK'));
+    },
+    'U45-03 oversized material is rejected before signature allocation' => function (): void {
+        [, $intent] = fixture();
+        denied('INVALID_SYNTHETIC_REF', fn() => new Intent(
+            'SYNTHETIC_F145_INTENT', $intent->step,
+            'SYNTHETIC_F145_KEY', 'mock.task.create',
+            'SYNTHETIC_' . str_repeat('M', 4087)));
+    },
+    'U45-04 empty suffix in intent identity key or material is never accepted' => function (): void {
+        [, $intent] = fixture();
+        foreach ([0, 1, 2] as $index) {
+            $parts = [
+                'SYNTHETIC_F145_INTENT', 'SYNTHETIC_F145_KEY', 'SYNTHETIC_TASK',
+            ];
+            $parts[$index] = 'SYNTHETIC_';
+            denied('INVALID_SYNTHETIC_REF', fn() => new Intent(
+                $parts[0], $intent->step, $parts[1], 'mock.task.create', $parts[2]));
+        }
+    },
+    'U45-05 approval identifiers and reviewers must be nonempty and bounded' => function (): void {
+        [, $intent] = fixture();
+        foreach ([
+            ['SYNTHETIC_', 'SYNTHETIC_REVIEWER'],
+            ['SYNTHETIC_' . str_repeat('A', 119), 'SYNTHETIC_REVIEWER'],
+            ['SYNTHETIC_APPROVAL', 'SYNTHETIC_'],
+            ['SYNTHETIC_APPROVAL', 'SYNTHETIC_' . str_repeat('R', 119)],
+        ] as [$id, $approver]) {
+            denied('INVALID_SYNTHETIC_REF', fn() => new Approval(
+                $id, $intent, $approver, 10, 20, 'APROVADA'));
+        }
+    },
+    'U45-06 exact upper bounds still yield deterministic signatures and approval' => function (): void {
+        [, $intent] = fixture();
+        $id = 'SYNTHETIC_' . str_repeat('I', 118);
+        $key = 'SYNTHETIC_' . str_repeat('K', 118);
+        $material = 'SYNTHETIC_' . str_repeat('M', 4086);
+        check(strlen($id) === 128 && strlen($key) === 128
+            && strlen($material) === 4096);
+        $first = new Intent($id, $intent->step, $key, 'mock.task.create', $material);
+        $second = new Intent($id, $intent->step, $key, 'mock.task.create', $material);
+        $approval = new Approval('SYNTHETIC_' . str_repeat('A', 118),
+            $first, 'SYNTHETIC_' . str_repeat('R', 118), 10, 20, 'APROVADA');
+        $approval->assertValid($first, 15);
+        check($first->signature() === $second->signature()
+            && $first->key() === $second->key());
+    },
+    'U45-07 rejecting large intent has no effect on valid independent submission' => function (): void {
+        [$run, $intent] = fixture();
+        $gateway = new MockCrmEffectGateway('CONFIRMADO');
+        denied('INVALID_SYNTHETIC_REF', fn() => new Intent(
+            'SYNTHETIC_' . str_repeat('I', 119), $intent->step,
+            'SYNTHETIC_F145_KEY', 'mock.task.create', 'SYNTHETIC_TASK'));
+        check($gateway->count() === 0);
+        $valid = new Intent('SYNTHETIC_F145_VALID', $intent->step,
+            'SYNTHETIC_F145_GOOD_KEY', 'mock.task.create', 'SYNTHETIC_TASK');
+        $approval = new Approval('SYNTHETIC_F145_APPROVAL', $valid,
+            'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+        check($gateway->submit($valid, $approval, 15)->isConfirmed()
+            && $gateway->count() === 1);
+    },
 ];

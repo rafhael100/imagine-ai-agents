@@ -6,6 +6,7 @@ namespace ImagineAI\Domain;
 /** Explicit clock and exact immutable intent binding; synthetic authority only. */
 final class Approval
 {
+    private const MAX_REF_BYTES = 128;
     private string $state;
     private readonly string $signature;
     public function __construct(
@@ -17,7 +18,11 @@ final class Approval
         string $state = 'PENDENTE',
     ) {
         foreach ([$id, $approver] as $ref) {
-            if (!str_starts_with($ref, 'SYNTHETIC_')) MockError::fail('INVALID_SYNTHETIC_REF');
+            if (!str_starts_with($ref, 'SYNTHETIC_')
+                || strlen($ref) <= strlen('SYNTHETIC_')
+                || strlen($ref) > self::MAX_REF_BYTES) {
+                MockError::fail('INVALID_SYNTHETIC_REF');
+            }
         }
         if (!in_array($state, ['PENDENTE', 'APROVADA', 'RECUSADA', 'EXPIRADA', 'REVOGADA'], true)
             || $expiresAt <= $issuedAt) MockError::fail('VALIDATION_FAILED');
