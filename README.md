@@ -55,7 +55,7 @@ php tests/Unit/run.php
 EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=546 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**Gate F163 desta revisão:** **546 testes PHP / lint de 82 arquivos PHP**, mais verificações Python. O [gate anterior de 533](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42889307984) foi aprovado; a rodada F163 exige aprovação da sua própria CI por SHA. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**Gate F163 verificado após merge:** **546 testes PHP / lint de 82 arquivos PHP**, mais verificações Python; [CI #42894696737](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42894696737) `success` e [EVID-26](docs/AIA-R01-EVID-26-F163-CI-POSTMERGE.md). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
