@@ -8,6 +8,12 @@ use ImagineAI\Domain\{Attempt, MockError, TenantContext, Usage};
 /** Single-process, volatile, fail-closed technical-usage lab (not transactional quota). */
 final class MockUsageLedger
 {
+    // Process-local caps: never evict usage or audit records, because eviction
+    // could turn a duplicate into fresh usage or erase measurement uncertainty.
+    private const MAX_USAGE_EVENTS = 512;
+    private const MAX_USAGE_ATTEMPTS = 256;
+    private const MAX_USAGE_TRACE = 1024;
+
     /** @var array<string, array{fingerprint:string,usage:Usage}> */
     private array $events = [];
     /** @var array<string, array<string,mixed>> */
@@ -31,6 +37,11 @@ final class MockUsageLedger
         $policy = $this->policy($context, $operation, $now);
         self::units($units);
         if ($this->hasUnknown()) return ['state' => 'INDETERMINADO', 'reason' => 'MEASUREMENT_UNCERTAIN'];
+        if (count($this->events) >= self::MAX_USAGE_EVENTS
+            || count($this->samples) >= self::MAX_USAGE_ATTEMPTS
+            || count($this->trace) >= self::MAX_USAGE_TRACE) {
+            return ['state' => 'INDETERMINADO', 'reason' => 'MEASUREMENT_CAPACITY_EXCEEDED'];
+        }
         if ($units > $policy->limit || $this->used() > $policy->limit - $units) {
             return ['state' => 'NEGADO', 'reason' => 'SYNTHETIC_QUOTA_EXCEEDED'];
         }
@@ -62,6 +73,9 @@ final class MockUsageLedger
             || ($state === 'AJUSTADO' && ($sample['observed'] === null || $sample['adjusted'] !== null))) {
             MockError::fail('USAGE_STATE_CONFLICT');
         }
+        // No mutable measurement is committed unless both its material record
+        // and its trace entry fit. This preserves late-measurement accounting.
+        $this->assertRoom($attempt->id, true);
         $usage = new Usage($eventId, $attempt, $units, $state);
         $property = match ($state) {
             'ESTIMADO' => 'estimated', 'OBSERVADO' => 'observed', 'AJUSTADO' => 'adjusted',
@@ -81,6 +95,7 @@ final class MockUsageLedger
         if ($attempt->state !== 'TIMEOUT' && $attempt->state !== 'ERRO') MockError::fail('USAGE_STATE_CONFLICT');
         $sample = $this->sample($attempt);
         if (!$sample['unknown']) {
+            $this->assertRoom($attempt->id, false);
             $sample['unknown'] = true;
             $this->samples[$attempt->id] = $sample;
             $this->log('UNCERTAIN', $attempt->id, $attempt);
@@ -100,6 +115,7 @@ final class MockUsageLedger
             && $sample['observed'] !== null
             && $proof->units === ($sample['adjusted'] ?? $sample['observed']);
         if (!$matching || ($sample['proof'] !== null && $sample['proof'] !== $proof->id)) {
+            $this->assertRoom($attempt->id, false);
             $sample['unknown'] = true;
             $sample['conflict'] = true; // A contradictory proof cannot be silently cleared by a later call.
             $this->samples[$attempt->id] = $sample;
@@ -109,7 +125,10 @@ final class MockUsageLedger
         if ($sample['unknown'] && $sample['proof'] !== null && $sample['proof'] !== $proof->id) {
             return ['state' => 'INDETERMINADO', 'reason' => 'PROOF_CONFLICT'];
         }
-        if ($sample['proof'] === null) $this->log('RECONCILED_FAKE', $proof->id, $attempt);
+        if ($sample['proof'] === null) {
+            $this->assertRoom($attempt->id, false);
+            $this->log('RECONCILED_FAKE', $proof->id, $attempt);
+        }
         $sample['proof'] = $proof->id;
         $sample['unknown'] = false;
         $this->samples[$attempt->id] = $sample;
@@ -131,6 +150,17 @@ final class MockUsageLedger
     /** No message, email, webhook or price is ever emitted. */
     public function alerts(): array { return $this->alerts; }
     public function events(): array { return $this->trace; }
+
+    /** Reserve a new event/attempt and one trace slot BEFORE touching state. */
+    private function assertRoom(string $attemptId, bool $newEvent): void
+    {
+        if (($newEvent && count($this->events) >= self::MAX_USAGE_EVENTS)
+            || (!isset($this->samples[$attemptId])
+                && count($this->samples) >= self::MAX_USAGE_ATTEMPTS)
+            || count($this->trace) >= self::MAX_USAGE_TRACE) {
+            MockError::fail('USAGE_CAPACITY_DENIED');
+        }
+    }
 
     private static function units(int $units): void
     {
@@ -179,6 +209,10 @@ final class MockUsageLedger
 
     private function log(string $code, string $ref, Attempt $attempt): void
     {
+        // Defense in depth: callers preflight before state mutation.
+        if (count($this->trace) >= self::MAX_USAGE_TRACE) {
+            MockError::fail('USAGE_CAPACITY_DENIED');
+        }
         $this->trace[] = [
             'sequence' => count($this->trace) + 1,
             'code' => 'SYNTHETIC_' . $code,
