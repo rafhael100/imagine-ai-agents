@@ -1,9 +1,9 @@
 # AGENTS.md — Imagine AI Agents
 
-## SEC-46 — recibo de leitura e revisão monotônica (10/11/2026)
+## SEC-46 — recibo de leitura e revisão monotônica integrado à dev (10/11/2026)
 
 - `MockCrmOwnerPolicy` avança revisão a cada concessão/revogação, suspensão/reativação e indisponibilidade/retorno. `MockCrmReadBoundary` impede sucesso se houver ABA no leitor. `MockCrmReadPublicFacade::recheck` exige recibo **da última leitura bem-sucedida**, objetos originais da prova, mesmo contexto, requisição e revisão. Uma nova tentativa invalida o recibo anterior; não há endpoint nem token real.
-- **Gate esperado: 597 testes PHP / lint 83 + Python**, U68-01..12. [SEC-46](docs/AIA-FT01-SEC-46-RECIBO-REVISAO-OWNER-ABA.md).
+- **Gate pós-merge aprovado: 597 testes PHP / lint 83 + Python**, U68-01..12; [CI #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251), [SEC-46](docs/AIA-FT01-SEC-46-RECIBO-REVISAO-OWNER-ABA.md), [EVID-31](docs/AIA-R01-EVID-31-SEC46-CI-POSTMERGE.md).
 - CRM PR #57 OPEN/DRAFT; 13 casos reais `NAO_EXECUTADO`; R01-G01..G11/CORE/SEG/AUT NO-GO. Nenhuma `main`, VPS, produção, dados reais ou gastos.
 
 ## SEC-45 — revalidação após sugestão fictícia integrada à dev (10/11/2026)
