@@ -15,6 +15,8 @@ final class MockPromotionGate
     private ?string $active = null;
     /** Last selected snapshot is kept so suspension remains possible after catalog disable. */
     private ?MockAgentVersionSnapshot $activeSnapshot = null;
+    /** Selected review is retained to recheck revocation without re-promoting. */
+    private ?MockVersionReview $activeReview = null;
     private array $decisions = [];
     private array $history = [];
     private array $events = [];
@@ -55,6 +57,7 @@ final class MockPromotionGate
             $snapshot = $this->activeSnapshot;
             $this->active = null;
             $this->activeSnapshot = null;
+            $this->activeReview = null;
             $this->trace('SUSPENDED_TOOL_REVOKED', $snapshot);
         }
     }
@@ -120,6 +123,7 @@ final class MockPromotionGate
         }
         $this->active = $snapshot->ref;
         $this->activeSnapshot = $snapshot;
+        $this->activeReview = $review;
         $this->history[$snapshot->ref] = $snapshot->digest;
         $this->trace('PROMOTED', $snapshot);
         return 'ATIVO_SIMULADO';
@@ -142,6 +146,7 @@ final class MockPromotionGate
         $this->record($decisionRef, 'SUSPEND', $snapshot->ref, $snapshot->digest);
         $this->active = null;
         $this->activeSnapshot = null;
+        $this->activeReview = null;
         $this->trace('SUSPENDED', $snapshot);
         return 'SUSPENSO';
     }
@@ -158,14 +163,31 @@ final class MockPromotionGate
         }
         $this->active = $snapshot->ref;
         $this->activeSnapshot = $snapshot;
+        $this->activeReview = $review;
         $this->trace('ROLLED_BACK', $snapshot);
         return 'ATIVO_SIMULADO';
     }
 
-    /** The visible selection fails closed when its catalog entry or tool eligibility is revoked. */
-    public function current(): ?string
+    /**
+     * A local read never changes state or writes an audit record.
+     * Recheck review revocation even without a clock; callers wanting
+     * expiration checks must explicitly pass their synthetic $now.
+     */
+    public function current(?int $now = null): ?string
     {
-        if ($this->active === null || $this->activeSnapshot === null) return null;
+        if ($this->active === null || $this->activeSnapshot === null
+            || $this->activeReview === null) return null;
+        try {
+            // A review that was valid at selection cannot be re-used after
+            // revocation. When no clock is supplied, only original issuedAt
+            // is tested; never claim a real-time expiration guarantee.
+            $this->activeReview->assertValid($this->activeSnapshot, $this->context,
+                $this->datasetVersion, $this->ruleVersion,
+                $now ?? $this->activeReview->issuedAt);
+        } catch (MockError $error) {
+            if ($error->getMessage() === 'REVIEW_DENIED') return null;
+            throw $error;
+        }
         try {
             $known = $this->catalog->get($this->active, $this->context);
         } catch (MockError $error) {
