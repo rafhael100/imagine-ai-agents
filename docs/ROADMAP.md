@@ -58,7 +58,7 @@ A [SEC-44](AIA-FT01-SEC-44-FERRAMENTA-PROJECAO-COMUM.md) foi integrada à dev co
 
 A [SEC-45](AIA-FT01-SEC-45-REVALIDACAO-POS-SUGESTAO.md) foi integrada à dev: revalidação após sugestão fictícia, dez U67-01..10, **585 testes PHP / lint 83** na [CI pós-merge #42913437800](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42913437800), [EVID-30](AIA-R01-EVID-30-SEC45-CI-POSTMERGE.md). Não equivale à transação de ACL do CRM real.
 
-A [SEC-46](AIA-FT01-SEC-46-RECIBO-REVISAO-OWNER-ABA.md) impede que revogação seguida de nova concessão restaure uma permissão antiga. Recheck exige recibo da última leitura bem-sucedida e revisão estável; 12 regressões. Gate em revisão **597 PHP / 83 lint**. É memória local, não ACL/nonce distribuídos.
+A [SEC-46](AIA-FT01-SEC-46-RECIBO-REVISAO-OWNER-ABA.md) foi integrada à dev, bloqueando revogação+reconcessão (ABA) e recheck sem recibo. 12 regressões; **597 testes PHP / 83 lint** aprovados na [CI pós-merge #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251), [EVID-31](AIA-R01-EVID-31-SEC46-CI-POSTMERGE.md). É memória local, não ACL/nonce distribuídos.
 
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 
