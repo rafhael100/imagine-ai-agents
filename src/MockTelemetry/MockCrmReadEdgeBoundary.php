@@ -18,6 +18,23 @@ final class MockCrmReadEdgeBoundary
         private readonly MockCrmReadEdgeCounters $counters,
     ) {}
 
+    /**
+     * Recheck current synthetic permission without consuming a second nonce
+     * or a new edge/audit slot; never re-read or reveal policy detail.
+     * Only valid for the proof that the caller already used in a read.
+     * @param array<string,mixed> $wire
+     */
+    public function recheck(
+        array $wire,
+        ?MockTrustEnvelope $envelope,
+        ?MockOwnerScopeEvidence $owner,
+        TenantContext $trustedContext,
+        int $now,
+    ): bool {
+        return $this->facade->recheck(
+            $wire, $envelope, $owner, $trustedContext, $now);
+    }
+
     /** @param array<string,mixed> $wire Fake local values only. */
     public function handle(
         array $wire,
