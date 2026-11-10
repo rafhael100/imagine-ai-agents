@@ -21,6 +21,9 @@ final class MockCrmReadRequest
     {
         $keys = ['contract', 'request_ref', 'operation', 'tenant_ref', 'principal_ref',
             'resource_ref', 'purpose_ref', 'fields'];
+        // A hostile PHP array may contain arbitrarily many extra keys.
+        // Do not allocate/sort an unbounded key list just to deny the body.
+        if (count($wire) !== count($keys)) MockError::fail('BRIDGE_SCHEMA_DENIED');
         $actualKeys = array_keys($wire);
         sort($actualKeys, SORT_STRING);
         sort($keys, SORT_STRING);
@@ -30,7 +33,8 @@ final class MockCrmReadRequest
             MockError::fail('BRIDGE_SCHEMA_DENIED');
         }
         foreach (['request_ref', 'tenant_ref', 'principal_ref', 'resource_ref', 'purpose_ref'] as $key) {
-            if (!is_string($wire[$key]) || !preg_match('/^SYNTHETIC_[A-Z0-9_]{1,80}$/D', $wire[$key])) {
+            if (!is_string($wire[$key]) || strlen($wire[$key]) > 90
+                || !preg_match('/^SYNTHETIC_[A-Z0-9_]{1,80}$/D', $wire[$key])) {
                 MockError::fail('BRIDGE_SCHEMA_DENIED');
             }
         }
