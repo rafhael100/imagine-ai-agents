@@ -1,5 +1,13 @@
 # AGENTS.md — Imagine AI Agents
 
+## Segurança e validação vigente — SEC-13 (09/11/2026)
+
+- **PR [#168](https://github.com/rafhael100/imagine-ai-agents/pull/168)** integrado somente à `dev`, squash `422bb277ecccf80f45b243a94903b63a305cd069`. O `MockCrmReadBoundary` **exige** `MockCrmOwnerPolicy` e chama `assertAllowed` em toda leitura: não existe mais caminho legado sem política do CRM dono do dado.
+- [CI de revisão #42743896039](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42743896039) `success` no HEAD do PR e [CI pós-merge #42743951923](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42743951923) `success` no commit `422bb277ecccf80f45b243a94903b63a305cd069`. **Gate atual: 362 testes PHP, lint dos 82 arquivos PHP, testes Python de contratos e demo.**
+- Fixtures antigas F1-12/F1-13/F1-14 agora configuram concessão fictícia explícita. Testes U33-01..03 exigem política presente, negação sem grant e bloqueio após revogação.
+- Isto **não valida o CRM real**: [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) segue OPEN/DRAFT, R01-G01..G11 e CORE/SEG/AUT **ABERTOS / NO-GO**. `main`, VPS, credenciais, clientes, produção e custos sem alteração. Seguir somente com operações offline até revisão bilateral e homologação.
+
+
 ## Checkpoint atual — F1-28/F1-29 integrado apenas à dev (09/11/2026)
 
 - [PR #165 / F1-28](https://github.com/rafhael100/imagine-ai-agents/pull/165) foi integrado à dev em `cba280c1b5106d1861d75d78bc8ad1185a9787b1`, após [CI #42741450740](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42741450740) `success` no HEAD `0eb559e3a642120f81fa28d34f87eb77060fdf32`. O piloto verifica contexto, Run e espaço para quatro eventos **antes** de consumir leitura, nonce ou auditoria sintética.

@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## Estado atual verificado — SEC-13, 362 casos PHP (09/11/2026)
+
+- [PR #168](https://github.com/rafhael100/imagine-ai-agents/pull/168) **MERGED na dev**, SHA `422bb277ecccf80f45b243a94903b63a305cd069`. A política de owner passou a ser dependência **obrigatória**, inclusive em chamadas internas à leitura mínima. Não há variante `null` que permita omitir ACL de recurso/campo fictícia.
+- [CI #42743896039](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42743896039) de revisão e [CI pós-merge #42743951923](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42743951923) **success**. Baseline: **362 testes PHP / 82 lint** mais testes Python; provas somente sintéticas.
+- **Próximo marco real:** decisão conjunta e homologação OP-01 com [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57), que permanece OPEN/DRAFT. Sem aprovação IAM, ACL real multiempresa, contrato, privacidade e Infra não existe API autorizada.
+- **Estado de integração operacional: NO-GO**. `main`, VPS, segredos, clientes e produção não alterados.
+
+
 ## Estado revisado — F1-28/F1-29, 359 casos PHP (09/11/2026)
 
 - **PR #165 / F1-28** integrado à dev, commit `cba280c1b5106d1861d75d78bc8ad1185a9787b1`; [CI de revisão #42741450740](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42741450740) `success`. Negação antes de consumir nonce e leitura fictícia quando Run é repetida, contexto do coordenador difere ou auditoria não comporta todos os eventos.
