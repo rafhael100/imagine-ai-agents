@@ -1,5 +1,13 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline vigente — SEC-26/SEC-27 (10/11/2026)
+
+- [PR #194](https://github.com/rafhael100/imagine-ai-agents/pull/194), merge dev `dbb9a034744d0b6d1a725008eae7b548e367f513`, [CI pós-merge #42863662530](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42863662530) success: estado do transporte vinculado à identidade dos registros de uso.
+- [PR #195](https://github.com/rafhael100/imagine-ai-agents/pull/195), merge dev `3957bb3fe1ac22afc0c16820caee11c79ff5f480`, [CI pós-merge #42864322239](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42864322239) success: limites de ID e unidades em Attempt, Usage e MockUsageProof.
+- **Gate atual: 446 testes PHP / 82 lint + verificadores Python.** [EVID-23](docs/AIA-R01-EVID-23-IDENTIDADE-USO-446.md). Baselines menores abaixo são históricos.
+- CRM PR #57 permanece OPEN/DRAFT; R01-G01..G11 e CORE/SEG/AUT **ABERTOS/NO-GO**; sem main, VPS, dados reais, segredos, produção ou custos.
+
+
 ## Baseline vigente — SEC-25 (10/11/2026)
 
 - [PR #192](https://github.com/rafhael100/imagine-ai-agents/pull/192), merge dev `b19a769cdbf10e33491bc05231d389c621204526`, [CI pós-merge #42859143202](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42859143202) success: medidor local limita registros e nega novas medições quando não pode auditá-las.
