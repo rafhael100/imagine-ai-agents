@@ -14,6 +14,9 @@ A [SEC-20 / PR #182](https://github.com/rafhael100/imagine-ai-agents/pull/182) v
 
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 
+**Pacote de revisão disponível, aguardando decisões independentes:** [OP-01 JSON](evidencias/op01-pacote-aceite-bilateral.json) e [EVID-19](AIA-R01-EVID-19-PACOTE-BILATERAL-OP01.md) relacionam sete responsáveis sugeridos a 14 gates e 13 cenários ainda não homologados. [CI pós-merge #42770907072](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42770907072) success no arquivo gerado. **Este é um checklist, não um GO.** Registrar pareceres de CRM CORE/SEG/AUT, Privacidade, Infra e Direção com evidências reais; não abrir API antes da liberação.
+
+
 **Estado: ABERTO / NO-GO.** O [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) é uma proposta documental OPEN/DRAFT, não um endpoint implementado. Antes de código de integração operacional, registrar em decisão rastreável:
 
 1. **G01/G03 + CRM AUT/SEG:** fonte de autenticação, credencial protegida, emissor/audience, identidade delegada, tenant resolvido de maneira confiável, revogação, replay durável e concorrência;
