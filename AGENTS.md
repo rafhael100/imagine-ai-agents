@@ -1,5 +1,12 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline em revisão — SEC-31 (10/11/2026)
+
+- `MockKnowledgeCatalog`: 256 fontes por instância; conflitos e repetição idempotente preservados mesmo ao atingir o limite. Desativação não libera ID.
+- `MockKnowledgeTrace`: 1.024 eventos; recusar entrega sem trilha e nunca descartar histórico. Encerramento saturado sinaliza erro mas deixa envelope fechado.
+- **Gate esperado: 472 testes PHP / 82 lint + Python**. [SEC-31](docs/AIA-FT01-SEC-31-LIMITES-CONHECIMENTO.md). Baselines anteriores abaixo são históricos.
+- CRM PR #57 OPEN/DRAFT, R01-G01..G11 e CORE/SEG/AUT ABERTOS/NO-GO. Somente dev/offline; sem `main`, VPS, produção, clientes, segredos ou custos.
+
 ## Baseline em revisão — SEC-30 (10/11/2026)
 
 - `MockAgentTemplateCatalog`: máximo 64 modelos e 256 snapshots sem evicção, preservando duplicatas idempotentes, conflitos e revogação de versões já registradas.

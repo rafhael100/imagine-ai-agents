@@ -9,6 +9,8 @@ use ImagineAI\MockCatalog\MockAgentVersionSnapshot;
 /** Closed in-memory source registry; uniform denial for missing or forbidden entries. */
 final class MockKnowledgeCatalog
 {
+    // Preserve registered source identities and revocations; never evict old keys.
+    private const MAX_SOURCES = 256;
     private array $sources = [];
     private array $disabled = [];
 
@@ -18,6 +20,11 @@ final class MockKnowledgeCatalog
         if (isset($this->sources[$key])) {
             if ($this->sources[$key]->digest !== $source->digest) MockError::fail('KNOWLEDGE_CONFLICT');
             return;
+        }
+        // Admit only new entries while capacity remains. Existing exact
+        // replays and digest conflicts were handled above, even at capacity.
+        if (count($this->sources) >= self::MAX_SOURCES) {
+            MockError::fail('KNOWLEDGE_CAPACITY_DENIED');
         }
         $this->sources[$key] = $source;
     }

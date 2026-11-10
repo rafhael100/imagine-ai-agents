@@ -35,6 +35,10 @@ O controle local de versões limita as decisões e os registros de auditoria e r
 
 O catálogo técnico local limita **64 modelos e 256 snapshots**, sem eliminar registros anteriores; replays idempotentes e suspensão continuam possíveis. [SEC-30](docs/AIA-FT01-SEC-30-CATALOGO-LIMITADO.md) traz os testes. Não há registry nem publicação real.
 
+## SEC-31 — fontes de conhecimento e trilha com limites
+
+O catálogo de fontes sintéticas agora aceita até **256 fontes** e a trilha de seleção/entrega até **1.024 eventos**, negando novos registros quando cheia, sem apagar decisões antigas e sem expor conteúdo fictício. A entrega de passagens falha de forma segura sem espaço de auditoria. Veja [SEC-31](docs/AIA-FT01-SEC-31-LIMITES-CONHECIMENTO.md). **Não é RAG real nem autorização de acesso a clientes.**
+
 ## Executar e verificar, sem rede
 
 Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem instalar serviços ou baixar dependências.
@@ -42,10 +46,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=465 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=472 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**Baseline verificado na dev:** **465 testes PHP / lint de 82 arquivos PHP**, mais os verificadores Python de contrato e isolamento, [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) `success`. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**Baseline verificado na dev:** **472 testes PHP / lint de 82 arquivos PHP**, mais os verificadores Python de contrato e isolamento, [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) `success`. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 

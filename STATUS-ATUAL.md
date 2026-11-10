@@ -6,11 +6,13 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **Baseline verificável do laboratório: 465 testes PHP, lint de 82 arquivos PHP, testes Python de contrato, isolamento e demonstração.** O número de testes não é percentual de conclusão do produto.
+**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **Baseline verificável do laboratório: 472 testes PHP, lint de 82 arquivos PHP, testes Python de contrato, isolamento e demonstração.** O número de testes não é percentual de conclusão do produto.
 
 ## Últimas entregas verificadas
 
-**SEC-30 em revisão:** o catálogo de modelos e snapshots sintéticos possui limites definidos, sem evicção de versões e com preservação de conflitos, replays e desativação. [Documento técnico](docs/AIA-FT01-SEC-30-CATALOGO-LIMITADO.md). **Não é uma publicação de agentes para clientes.**
+**SEC-31 em revisão:** limites de 256 fontes sintéticas e 1.024 registros de seleção/entrega, sem apagar histórico, com negação quando a trilha não puder registrar o resultado. Sete regressões U53-01..07. [Documento SEC-31](docs/AIA-FT01-SEC-31-LIMITES-CONHECIMENTO.md). Nenhum serviço externo de conhecimento é utilizado.
+
+**SEC-30 integrada em desenvolvimento:** o catálogo de modelos e snapshots sintéticos possui limites definidos, sem evicção de versões e com preservação de conflitos, replays e desativação. [Documento técnico](docs/AIA-FT01-SEC-30-CATALOGO-LIMITADO.md). **Não é uma publicação de agentes para clientes.**
 
 **SEC-29 em revisão:** limite de decisões e eventos do controle de versões simulado, com reserva de espaço para suspensão e seis regressões. [Evidência técnica SEC-29](docs/AIA-FT01-SEC-29-RESERVA-AUDITORIA-VERSOES.md). A execução segue offline e o CRM real continua **NO-GO**.
 
