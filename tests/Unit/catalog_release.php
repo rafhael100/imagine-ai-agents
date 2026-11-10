@@ -51,6 +51,16 @@ function f106Fixture(): array
     return [$ctx, $catalog, $snapshot, $review, $gate];
 }
 
+/** Fill 127 reviewed local decisions; slot 128 is reserved for suspension. */
+function f151FillPromotionGate(MockPromotionGate $gate, MockAgentVersionSnapshot $snapshot,
+    MockVersionReview $review, TenantContext $ctx, int $n = 127): void
+{
+    for ($i = 0; $i < $n; ++$i) {
+        check($gate->promote('SYNTHETIC_SEC29_PROMOTE_' . $i,
+            $snapshot, $review, $ctx, 15) === 'ATIVO_SIMULADO');
+    }
+}
+
 return [
     'U06-01 known template snapshot is immutable and safe view contains no privilege' => function (): void {
         [$ctx, $catalog, $snapshot, , $gate] = f106Fixture();
@@ -242,5 +252,73 @@ return [
             'SYNTHETIC_C03_ROLLBACK', $v1, $r1, $ctx, 15));
         $trace = json_encode($gate->events(), JSON_THROW_ON_ERROR);
         check(!str_contains($trace, 'SYNTHETIC_TOOL_READ'));
+    },
+
+    'U51-01 127 promotions reserve final decision for safe suspension' => function (): void {
+        [$ctx, , $snapshot, $review, $gate] = f106Fixture();
+        f151FillPromotionGate($gate, $snapshot, $review, $ctx);
+        $events = $gate->events();
+        check(count($events) === 127 && $gate->current() === $snapshot->ref);
+        denied('PROMOTION_CAPACITY_DENIED', fn() => $gate->promote(
+            'SYNTHETIC_SEC29_OVERFLOW', $snapshot, $review, $ctx, 15));
+        check($gate->events() === $events && $gate->current() === $snapshot->ref);
+    },
+    'U51-02 final reserved decision permits suspension and records outcome once' => function (): void {
+        [$ctx, , $snapshot, $review, $gate] = f106Fixture();
+        f151FillPromotionGate($gate, $snapshot, $review, $ctx);
+        check($gate->suspend('SYNTHETIC_SEC29_EMERGENCY', $ctx) === 'SUSPENSO');
+        check($gate->current() === null && count($gate->events()) === 128
+            && $gate->events()[127]['code'] === 'SYNTHETIC_SUSPENDED');
+        check($gate->suspend('SYNTHETIC_SEC29_EMERGENCY', $ctx) === 'SUSPENSO');
+        check(count($gate->events()) === 128);
+    },
+    'U51-03 exact repeated decision remains idempotent after full decision cap' => function (): void {
+        [$ctx, , $snapshot, $review, $gate] = f106Fixture();
+        f151FillPromotionGate($gate, $snapshot, $review, $ctx);
+        $gate->suspend('SYNTHETIC_SEC29_EMERGENCY', $ctx);
+        $events = $gate->events();
+        // Historical API may repeat its original response, but never reactivates.
+        check($gate->promote('SYNTHETIC_SEC29_PROMOTE_0',
+            $snapshot, $review, $ctx, 15) === 'ATIVO_SIMULADO');
+        check($gate->current() === null && $gate->events() === $events);
+        denied('PROMOTION_CAPACITY_DENIED', fn() => $gate->promote(
+            'SYNTHETIC_SEC29_NEW', $snapshot, $review, $ctx, 15));
+    },
+    'U51-04 new rollback cannot bypass a saturated decision register' => function (): void {
+        [$ctx, , $snapshot, $review, $gate] = f106Fixture();
+        f151FillPromotionGate($gate, $snapshot, $review, $ctx);
+        $events = $gate->events();
+        denied('PROMOTION_CAPACITY_DENIED', fn() => $gate->rollback(
+            'SYNTHETIC_SEC29_ROLLBACK', $snapshot, $review, $ctx, 15));
+        check($gate->current() === $snapshot->ref && $gate->events() === $events);
+        check($gate->suspend('SYNTHETIC_SEC29_SUSPEND', $ctx) === 'SUSPENSO');
+        check($gate->current() === null);
+    },
+    'U51-05 rejected eligibility check leaves final available slot untouched' => function (): void {
+        [$ctx, $catalog, $snapshot, $review, $gate] = f106Fixture();
+        f151FillPromotionGate($gate, $snapshot, $review, $ctx, 126);
+        $bad = f106Snapshot($ctx, 'SYNTHETIC_SEC29_BAD_REF',
+            'SYNTHETIC_SEC29_BAD_VERSION', ['risk' => 'HIGH']);
+        $catalog->addSnapshot($bad);
+        $badReview = f106Review($bad);
+        denied('RELEASE_DENIED', fn() => $gate->promote(
+            'SYNTHETIC_SEC29_INVALID', $bad, $badReview, $ctx, 15));
+        check(count($gate->events()) === 126);
+        check($gate->promote('SYNTHETIC_SEC29_LAST_ALLOWED',
+            $snapshot, $review, $ctx, 15) === 'ATIVO_SIMULADO');
+        check($gate->suspend('SYNTHETIC_SEC29_LAST_STOP', $ctx) === 'SUSPENSO');
+        check(count($gate->events()) === 128);
+    },
+    'U51-06 capability revocation is still audited and disables a selected version' => function (): void {
+        [$ctx, , $snapshot, $review, $gate] = f106Fixture();
+        f151FillPromotionGate($gate, $snapshot, $review, $ctx);
+        $gate->revokeTool('SYNTHETIC_TOOL_READ');
+        check($gate->current() === null && count($gate->events()) === 128);
+        check($gate->events()[127]['code'] === 'SYNTHETIC_SUSPENDED_TOOL_REVOKED');
+        $before = $gate->events();
+        $gate->revokeTool('SYNTHETIC_TOOL_READ');
+        check($gate->events() === $before);
+        denied('RELEASE_DENIED', fn() => $gate->rollback(
+            'SYNTHETIC_SEC29_ILLEGAL_ROLLBACK', $snapshot, $review, $ctx, 15));
     },
 ];
