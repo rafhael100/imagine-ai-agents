@@ -75,7 +75,7 @@ def check(snapshot: Path, manifest_path: Path, schema_path: Path) -> None:
                "não homologada", "DRAFT / NO MERGE / NO DEPLOY",
                "G01", "ref", "stage",
                "OP01-R01", "OP01-R07", "SYNTHETIC_CRM_AIA_PUBLIC_V1",
-               "não aprovados", "397 casos PHP"]
+               "nenhum item aprovado", "397 casos PHP"]
     if any(marker not in content for marker in markers):
         raise ParityError("CRM_PROPOSAL_SCOPE_DRIFT")
     props = schema.get("properties", {})
