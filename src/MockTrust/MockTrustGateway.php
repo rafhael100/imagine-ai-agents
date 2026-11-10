@@ -37,8 +37,12 @@ final class MockTrustGateway
         $this->allowedScopes = $allowedScopes;
     }
 
-    public function authorize(?MockTrustEnvelope $envelope, ?MockOwnerScopeEvidence $owner,
-        TenantContext $context, string $scope, int $now): array
+    /**
+     * Read-only, non-consuming recheck after an untrusted reader returns.
+     * This deliberately does not inspect the already-used local nonce.
+     */
+    public function recheck(?MockTrustEnvelope $envelope, ?MockOwnerScopeEvidence $owner,
+        TenantContext $context, string $scope, int $now): void
     {
         if ($envelope === null || $owner === null) MockError::fail('TRUST_DENIED');
         $envelope->assertValid($context, $now);
@@ -48,6 +52,14 @@ final class MockTrustGateway
             MockError::fail('TRUST_DENIED');
         }
         $owner->assertValid($envelope, $context, $scope, $now);
+        if ($this->sharedState !== null) $this->sharedState->assertLive($envelope);
+    }
+
+    public function authorize(?MockTrustEnvelope $envelope, ?MockOwnerScopeEvidence $owner,
+        TenantContext $context, string $scope, int $now): array
+    {
+        $this->recheck($envelope, $owner, $context, $scope, $now);
+        if ($envelope === null) MockError::fail('TRUST_DENIED');
         if ($this->sharedState !== null) {
             $this->sharedState->consume($envelope);
         } else {

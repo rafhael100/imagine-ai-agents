@@ -40,12 +40,21 @@ final class MockSharedTrustState
         $this->revokedDigests[$digest] = true;
     }
 
-    public function consume(MockTrustEnvelope $envelope): void
+    /**
+     * Recheck revocation and store health without consuming a second nonce.
+     * Only an in-process fixture; never a distributed authorization check.
+     */
+    public function assertLive(MockTrustEnvelope $envelope): void
     {
         $this->assertAvailable();
         if (isset($this->revokedDigests[$envelope->digest])) {
             MockError::fail('TRUST_DENIED');
         }
+    }
+
+    public function consume(MockTrustEnvelope $envelope): void
+    {
+        $this->assertLive($envelope);
         // Scoped to service pair; nonce reuse with changed content is rejected.
         $nonceKey = hash('sha256', json_encode([
             $envelope->issuerRef, $envelope->audienceRef, $envelope->nonceRef,

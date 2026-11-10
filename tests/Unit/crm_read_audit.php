@@ -7,7 +7,7 @@ use ImagineAI\MockBridge\{MockCrmReadRequest, MockCrmReadBoundary, MockCrmReadPu
 use ImagineAI\Contracts\CrmReader;
 use ImagineAI\MockBridge\MockReadProjectionInvariant;
 use ImagineAI\MockTrust\MockTrustGateway;
-use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence};
+use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence, MockSharedTrustState};
 
 function f113Fixture(?TenantContext $ctx = null, ?MockCrmReadAuditTrail $trail = null): array
 {
@@ -55,6 +55,51 @@ function f141Fixture(string $mode): array
     $boundary = new MockCrmReadAuditedBoundary(
         new MockCrmReadBoundary($gateway, $reader, $policy), $trail);
     return [$boundary, $trail, $env, $owner, $ctx];
+}
+
+/**
+ * Malicious or re-entrant local adapter: mutate a trust/owner fixture after
+ * observing a lead but before its result reaches the success-audit boundary.
+ * No real concurrent service, network or CRM database is represented.
+ */
+final class F165MutatingReader implements CrmReader
+{
+    public int $calls = 0;
+
+    public function __construct(private readonly \Closure $duringRead) {}
+
+    public function lead(TenantContext $context, array $fields): array
+    {
+        ++$this->calls;
+        $row = ['ref' => $context->resource, 'stage' => 'SYNTHETIC_NEW'];
+        $result = array_intersect_key($row, array_flip($fields));
+        ($this->duringRead)();
+        return $result;
+    }
+
+    public function attendance(TenantContext $context, array $fields): array
+    {
+        return [];
+    }
+}
+
+/** @return array{0:MockCrmReadAuditedBoundary,1:MockCrmReadAuditTrail,2:MockTrustEnvelope,3:MockOwnerScopeEvidence,4:TenantContext,5:MockCrmOwnerPolicy,6:F165MutatingReader,7:MockTrustGateway} */
+function f165Fixture(\Closure $duringRead, ?MockSharedTrustState $state = null): array
+{
+    [, $envelope, $owner, $ctx] = f112Fixture();
+    $policy = new MockCrmOwnerPolicy();
+    $policy->grantFixture($ctx, ['ref', 'stage']);
+    $reader = new F165MutatingReader(function () use (
+        $duringRead, $policy, $envelope, $owner, $ctx, $state
+    ): void {
+        $duringRead($policy, $envelope, $owner, $ctx, $state);
+    });
+    $gateway = new MockTrustGateway('SYNTHETIC_AGENT_SERVICE',
+        'SYNTHETIC_CRM_API', ['SYNTHETIC_LEAD_READ'], $state);
+    $trail = new MockCrmReadAuditTrail();
+    $boundary = new MockCrmReadAuditedBoundary(
+        new MockCrmReadBoundary($gateway, $reader, $policy), $trail);
+    return [$boundary, $trail, $envelope, $owner, $ctx, $policy, $reader, $gateway];
 }
 
 return [
@@ -311,5 +356,122 @@ return [
             'ref' => 'SYNTHETIC_A_LEAD']);
         check($out['real_authorization'] === false && $out['external_calls'] === 0);
         check($audit->count() === 1 && $audit->entries()[0]['reason'] === 'NONE');
+    },
+
+    'U65-01 owner grant revoked during read cannot create a success audit' => function (): void {
+        [$boundary, $audit, $env, $owner, $ctx, , $reader] = f165Fixture(
+            function ($policy, $envelope, $owner, $ctx): void {
+                $policy->revokeFixture($ctx);
+            });
+        denied('RESOURCE_DENIED_OR_MISSING', fn () => $boundary->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15));
+        check($reader->calls === 1 && $audit->count() === 1);
+        check($audit->entries()[0]['outcome'] === 'DENIED'
+            && $audit->entries()[0]['reason'] === 'RESOURCE');
+    },
+    'U65-02 tenant suspended while reading is denied before success audit' => function (): void {
+        [$boundary, $audit, $env, $owner, $ctx] = f165Fixture(
+            function ($policy, $envelope, $owner, $ctx): void {
+                $policy->setTenantSuspended($ctx->tenant, true);
+            });
+        denied('RESOURCE_DENIED_OR_MISSING', fn () => $boundary->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15));
+        check(array_column($audit->entries(), 'reason') === ['RESOURCE']);
+    },
+    'U65-03 member suspended while reading cannot retain earlier permission' => function (): void {
+        [$boundary, $audit, $env, $owner, $ctx] = f165Fixture(
+            function ($policy, $envelope, $owner, $ctx): void {
+                $policy->setMemberSuspended($ctx->tenant, $ctx->principal, true);
+            });
+        denied('RESOURCE_DENIED_OR_MISSING', fn () => $boundary->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15));
+        check($audit->entries()[0]['outcome'] === 'DENIED'
+            && $audit->entries()[0]['reason'] === 'RESOURCE');
+    },
+    'U65-04 owner policy outage during reader work is fail closed' => function (): void {
+        [$boundary, $audit, $env, $owner, $ctx] = f165Fixture(
+            function ($policy): void { $policy->setAvailable(false); });
+        denied('OWNER_POLICY_UNAVAILABLE', fn () => $boundary->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15));
+        check($audit->entries()[0]['reason'] === 'OWNER');
+        check($audit->entries()[0]['outcome'] === 'DENIED');
+    },
+    'U65-05 revoked service envelope during reader work is fail closed' => function (): void {
+        [$boundary, $audit, $env, $owner, $ctx] = f165Fixture(
+            function ($policy, $envelope): void { $envelope->revoke(); });
+        denied('TRUST_DENIED', fn () => $boundary->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15));
+        check($audit->entries()[0]['reason'] === 'TRUST'
+            && $audit->entries()[0]['outcome'] === 'DENIED');
+    },
+    'U65-06 revoked owner scope during reader work is fail closed' => function (): void {
+        [$boundary, $audit, $env, $owner, $ctx] = f165Fixture(
+            function ($policy, $envelope, $owner): void { $owner->revoke(); });
+        denied('OWNER_DENIED', fn () => $boundary->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15));
+        check($audit->entries()[0]['reason'] === 'OWNER'
+            && $audit->entries()[0]['outcome'] === 'DENIED');
+    },
+    'U65-07 shared revocation arriving during read is detected without second nonce' => function (): void {
+        $state = new MockSharedTrustState();
+        [$boundary, $audit, $env, $owner, $ctx, , $reader] = f165Fixture(
+            function ($policy, $envelope, $owner, $ctx, $state): void {
+                $state->revokeDigest($envelope->digest);
+            }, $state);
+        denied('TRUST_DENIED', fn () => $boundary->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15));
+        check($state->countConsumed() === 1 && $state->countRevoked() === 1);
+        check($reader->calls === 1 && $audit->entries()[0]['reason'] === 'TRUST');
+    },
+    'U65-08 shared revocation store outage during reader work fails closed' => function (): void {
+        $state = new MockSharedTrustState();
+        [$boundary, $audit, $env, $owner, $ctx] = f165Fixture(
+            function ($policy, $envelope, $owner, $ctx, $state): void {
+                $state->setAvailable(false);
+            }, $state);
+        denied('TRUST_STATE_UNAVAILABLE', fn () => $boundary->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15));
+        check($state->countConsumed() === 1);
+        check($audit->entries()[0]['reason'] === 'TRUST'
+            && $audit->entries()[0]['outcome'] === 'DENIED');
+    },
+    'U65-09 normal post-read recheck is read-only with single nonce and ordered result' => function (): void {
+        $state = new MockSharedTrustState();
+        [$boundary, $audit, $env, $owner, $ctx, , $reader, $gateway] = f165Fixture(
+            function (): void {}, $state);
+        $wire = f112Wire($ctx); $wire['fields'] = ['stage', 'ref'];
+        $request = new MockCrmReadRequest($wire);
+        $result = $boundary->evaluate($request, $env, $owner, $ctx, 15);
+        check($result['projection'] === ['stage' => 'SYNTHETIC_NEW',
+            'ref' => 'SYNTHETIC_A_LEAD']);
+        check($state->countConsumed() === 1 && $reader->calls === 1);
+        $gateway->recheck($env, $owner, $ctx, 'SYNTHETIC_LEAD_READ', 15);
+        check($state->countConsumed() === 1);
+        denied('TRUST_REPLAY_DENIED', fn () => $boundary->evaluate(
+            $request, $env, $owner, $ctx, 15));
+        check(array_column($audit->entries(), 'outcome') ===
+            ['READ_SYNTHETIC_ONLY', 'DENIED']);
+        check(array_column($audit->entries(), 'reason') === ['NONE', 'REPLAY']);
+    },
+    'U65-10 public facade masks mid-read revocation without returning a projection' => function (): void {
+        [, $env, $owner, $ctx] = f112Fixture();
+        $policy = new MockCrmOwnerPolicy();
+        $policy->grantFixture($ctx, ['ref']);
+        $reader = new F165MutatingReader(function () use ($policy, $ctx): void {
+            $policy->revokeFixture($ctx);
+        });
+        $audit = new MockCrmReadAuditTrail();
+        $facade = new MockCrmReadPublicFacade(new MockTrustGateway(
+            'SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API',
+            ['SYNTHETIC_LEAD_READ']), $reader, $policy, $audit);
+        $reply = $facade->handle(f112Wire($ctx), $env, $owner, $ctx, 15);
+        check($reply === [
+            'contract' => 'SYNTHETIC_CRM_AIA_PUBLIC_V1',
+            'state' => 'DENIED_OR_NOT_FOUND', 'projection' => null,
+            'real_authorization' => false, 'external_calls' => 0,
+        ]);
+        check($reader->calls === 1 && $audit->count() === 1);
+        check($audit->entries()[0]['reason'] === 'RESOURCE');
+        check(!str_contains(json_encode($reply, JSON_THROW_ON_ERROR), $ctx->resource));
     },
 ];

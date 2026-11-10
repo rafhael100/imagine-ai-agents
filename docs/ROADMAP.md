@@ -52,6 +52,8 @@ A [SEC-41](AIA-FT01-SEC-41-PROJECAO-OP01-UNIFICADA.md) unifica a regra de proje�
 
 A [SEC-42](AIA-FT01-SEC-42-PARIDADE-MUTACOES-OP01.md) ensaia centenas de variações de requests sintéticas no parser PHP, sem prova de aceitação pelo CRM.
 
+A [SEC-43](AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md) revalida permissões locais após o retorno do leitor e antes da auditoria, com dez regressões offline. Gate em revisão: **565 testes PHP / lint 83**. Isso não substitui transação de autorização real no CRM.
+
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 
 **Pacote de revisão disponível, aguardando decisões independentes:** [OP-01 JSON](evidencias/op01-pacote-aceite-bilateral.json) e [EVID-19](AIA-R01-EVID-19-PACOTE-BILATERAL-OP01.md) relacionam sete responsáveis sugeridos a 14 gates e 13 cenários ainda não homologados. [CI pós-merge #42770907072](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42770907072) success no arquivo gerado. **Este é um checklist, não um GO.** Registrar pareceres de CRM CORE/SEG/AUT, Privacidade, Infra e Direção com evidências reais; não abrir API antes da liberação.
