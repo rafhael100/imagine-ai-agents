@@ -1,3 +1,11 @@
+## Marco vigente — fechar contrato real OP-01, não ampliar mocks (09/11/2026)
+
+- [SEC-14 / Agents PR #170](https://github.com/rafhael100/imagine-ai-agents/pull/170) impede consumo desnecessário de nonce quando owner policy nega. [SEC-15 / Agents PR #171](https://github.com/rafhael100/imagine-ai-agents/pull/171) retira leitor direto do despachante: somente borda OP-01 poderá produzir projeção fictícia. CIs [#42746265495](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42746265495) e [pós-merge #42746791090](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42746791090) success. **Gate: 370 PHP/82 lint + Python**.
+- Detalhes e critérios de saída em [EVID-14](AIA-R01-EVID-14-CHECKPOINT-LEITURA-OP01.md). O próximo marco depende de revisão bilateral do [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57), identity/IAM, ACL do CRM por tenant/lead/campo, LGPD, testes integrados e autorização de piloto.
+- R01-G01..G11 e CRM CORE/SEG/AUT **ABERTOS/NO-GO**; proibição de `main`, CRM real, VPS, dados pessoais reais, despesas ou produção sem validações independentes.
+
+---
+
 ## Gate técnico SEC-13 — política CRM-owner obrigatória; integração real continua pendente (09/11/2026)
 
 - [PR Agents #168](https://github.com/rafhael100/imagine-ai-agents/pull/168) (merge dev `422bb277ecccf80f45b243a94903b63a305cd069`) removeu a possibilidade de `MockCrmReadBoundary` operar sem política explícita do produto dono. [CI de revisão #42743896039](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42743896039) e [CI pós-merge #42743951923](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42743951923) `success`.

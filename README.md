@@ -1,5 +1,19 @@
 # Imagine AI Agents
 
+## Estado atual — leitura OP-01 sem bypass no laboratório (09/11/2026)
+
+O caminho de leitura direta em `MockToolDispatcher` foi desativado: a ferramenta `READ` sem a borda autorizadora retorna `READ_BOUNDARY_REQUIRED`. O fluxo de demonstração de somente leitura continua disponível em `php examples/f127-read-only-pilot-demo.php`. [PR #170](https://github.com/rafhael100/imagine-ai-agents/pull/170) e [PR #171](https://github.com/rafhael100/imagine-ai-agents/pull/171) estão integrados **somente à dev**; [CI pós-merge #42746791090](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42746791090) aprovada.
+
+**Gate vigente:** 370 testes PHP, 82 arquivos PHP com lint, mais testes Python. Para checar um checkout revisado:
+```bash
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=370 bash tools/run_r01_offline_quality_gate.sh
+```
+
+Este é apenas um laboratório offline, não há autorização para CRM real, dados de clientes ou produção. Consulte [EVID-14](docs/AIA-R01-EVID-14-CHECKPOINT-LEITURA-OP01.md). O CRM PR #57 e gates R01/CORE/SEG/AUT continuam **NO-GO**.
+
+---
+
+
 ## Última validação — F1-28/F1-29 (09/11/2026)
 
 O fluxo de demonstração offline foi reforçado para rejeitar Runs repetidas ou sem capacidade **antes** da leitura e para registrar `FALHOU` ao ocorrer erro sintético na geração de sugestão. [PR #165](https://github.com/rafhael100/imagine-ai-agents/pull/165) ([CI #42741450740](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42741450740)) e [PR #166](https://github.com/rafhael100/imagine-ai-agents/pull/166) ([CI #42741942944](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42741942944)) integrados **somente à dev**. Meta atual **359 testes PHP, lint de 82 arquivos PHP**, mais contratos Python.
@@ -22,7 +36,7 @@ O comando imprime **JSON estável** com cinco cenários: leitura mínima autoriz
 Para executar o gate offline completo em um checkout Git com o SHA correto:
 
 ```bash
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=359 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=370 bash tools/run_r01_offline_quality_gate.sh
 ```
 
 **Atenção:** o comando acima verifica o checkout local selecionado, mas não constitui revisão independente de um SHA autorizado; CI no PR com checkout SHA-fixado permanece necessária. Esta demonstração não é endpoint, não autentica serviço nem concede acesso CRM. Consulte `docs/AIA-FT01-F1-27-DEMO-CLI-LEITURA-MINIMA.md`. O CRM [PR #57](https://github.com/rafhael100/imagine-crm/pull/57) e gates R01/CORE/SEG/AUT permanecem abertos; nenhuma alteração em `main`, VPS ou produção.
