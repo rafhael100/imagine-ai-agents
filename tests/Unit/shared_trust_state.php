@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 use ImagineAI\Domain\TenantContext;
 use ImagineAI\MockTrust\{MockSharedTrustState, MockTrustEnvelope, MockOwnerScopeEvidence, MockTrustGateway};
-use ImagineAI\MockBridge\{MockCrmReadBoundary, MockCrmReadRequest};
+use ImagineAI\MockBridge\{MockCrmReadBoundary, MockCrmReadRequest, MockCrmOwnerPolicy};
 use ImagineAI\MockAudit\{MockCrmReadAuditTrail, MockCrmReadAuditedBoundary};
 use ImagineAI\Mocks\MockCrmReader;
 
@@ -19,6 +19,13 @@ function f114Fixture(MockSharedTrustState $state, ?TenantContext $ctx = null,
         ['SYNTHETIC_LEAD_READ'], $state);
     return [$gateway, $envelope, $owner, $ctx];
 }
+function f114ReadBoundary(MockTrustGateway $gateway, TenantContext $ctx): MockCrmReadBoundary
+{
+    $policy = new MockCrmOwnerPolicy();
+    $policy->grantFixture($ctx, ['ref', 'stage']);
+    return new MockCrmReadBoundary($gateway, new MockCrmReader(), $policy);
+}
+
 return [
     'U14-01 first synthetic read consumes one shared nonce' => function (): void {
         $store = new MockSharedTrustState();
@@ -128,7 +135,7 @@ return [
         [$gateway, $envelope, $owner, $ctx] = f114Fixture($store);
         $journal = new MockCrmReadAuditTrail();
         $bridge = new MockCrmReadAuditedBoundary(
-            new MockCrmReadBoundary($gateway, new MockCrmReader()), $journal);
+            f114ReadBoundary($gateway, $ctx), $journal);
         $store->setAvailable(false);
         denied('TRUST_STATE_UNAVAILABLE', fn () => $bridge->evaluate(
             new MockCrmReadRequest(f112Wire($ctx)), $envelope, $owner, $ctx, 15));
@@ -208,7 +215,7 @@ return [
             $store, $ctx, 'SYNTHETIC_NONCE_AUDIT_B');
         $trail = new MockCrmReadAuditTrail();
         $boundary = new MockCrmReadAuditedBoundary(
-            new MockCrmReadBoundary($gateway, new MockCrmReader()), $trail);
+            f114ReadBoundary($gateway, $ctx), $trail);
         $request = new MockCrmReadRequest(f112Wire($ctx));
         check($boundary->evaluate($request, $first, $firstOwner, $ctx, 15)['state']
             === 'READ_SYNTHETIC_ONLY');

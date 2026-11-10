@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 use ImagineAI\Domain\TenantContext;
 use ImagineAI\Mocks\MockCrmReader;
-use ImagineAI\MockBridge\{MockCrmReadBoundary, MockCrmReadRequest};
+use ImagineAI\MockBridge\{MockCrmReadBoundary, MockCrmReadRequest, MockCrmOwnerPolicy};
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence, MockTrustGateway};
 
 function f112Wire(?TenantContext $ctx = null): array {
@@ -27,7 +27,16 @@ function f112Fixture(?TenantContext $ctx = null): array {
         $ctx, 'SYNTHETIC_LEAD_READ', 10, 40, true);
     $gateway = new MockTrustGateway('SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API',
         ['SYNTHETIC_LEAD_READ']);
-    return [new MockCrmReadBoundary($gateway, new MockCrmReader()), $env, $owner, $ctx];
+    $policy = new MockCrmOwnerPolicy();
+    // Earlier fixture contexts may deliberately be invalid or foreign:
+    // those contexts must not acquire a grant as a side effect of setup.
+    try {
+        $policy->grantFixture($ctx, ['ref', 'stage']);
+    } catch (\ImagineAI\Domain\MockError) {
+        // Leave deny-by-default for intentionally invalid fixtures.
+    }
+    return [new MockCrmReadBoundary($gateway, new MockCrmReader(), $policy),
+        $env, $owner, $ctx];
 }
 return [
     'U12-01 strict request grants only local fictitious minimal lead projection' => function (): void {
