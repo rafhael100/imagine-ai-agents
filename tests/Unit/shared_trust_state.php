@@ -219,4 +219,49 @@ return [
         check(!str_contains(json_encode($trail->entries(), JSON_THROW_ON_ERROR),
             'TRUST_STATE_CAPACITY_DENIED'));
     },
+
+    'U29-01 failed revocation disables subsequent authorization instead of failing open' => function (): void {
+        $store = new MockSharedTrustState(1);
+        $store->revokeDigest(hash('sha256', 'SYNTHETIC_REVOCATION_FIRST'));
+        denied('TRUST_STATE_CAPACITY_DENIED', fn() => $store->revokeDigest(
+            hash('sha256', 'SYNTHETIC_REVOCATION_SECOND')));
+        [$gateway, $envelope, $owner, $ctx] = f114Fixture($store);
+        denied('TRUST_STATE_UNAVAILABLE', fn() => $gateway->authorize(
+            $envelope, $owner, $ctx, 'SYNTHETIC_LEAD_READ', 15));
+        check($store->countConsumed() === 0 && $store->countRevoked() === 1);
+    },
+    'U29-02 toggling availability cannot clear sticky revocation overflow' => function (): void {
+        $store = new MockSharedTrustState(1);
+        $store->revokeDigest(hash('sha256', 'SYNTHETIC_REVOCATION_FIRST'));
+        denied('TRUST_STATE_CAPACITY_DENIED', fn() => $store->revokeDigest(
+            hash('sha256', 'SYNTHETIC_REVOCATION_SECOND')));
+        $store->setAvailable(false);
+        $store->setAvailable(true);
+        [$gateway, $envelope, $owner, $ctx] = f114Fixture($store);
+        denied('TRUST_STATE_UNAVAILABLE', fn() => $gateway->authorize(
+            $envelope, $owner, $ctx, 'SYNTHETIC_LEAD_READ', 15));
+        denied('TRUST_STATE_UNAVAILABLE', fn() => $store->revokeDigest(
+            hash('sha256', 'SYNTHETIC_REVOCATION_THIRD')));
+    },
+    'U29-03 a full revocation registry alone does not deny unrelated valid reads' => function (): void {
+        $store = new MockSharedTrustState(1);
+        $store->revokeDigest(hash('sha256', 'SYNTHETIC_REVOCATION_UNRELATED'));
+        $store->revokeDigest(hash('sha256', 'SYNTHETIC_REVOCATION_UNRELATED'));
+        [$gateway, $envelope, $owner, $ctx] = f114Fixture($store);
+        check($gateway->authorize($envelope, $owner, $ctx,
+            'SYNTHETIC_LEAD_READ', 15)['state'] === 'SYNTHETIC_READ_ONLY');
+        check($store->countConsumed() === 1);
+    },
+    'U29-04 nonce capacity alone does not masquerade as lost revocation integrity' => function (): void {
+        $store = new MockSharedTrustState(1);
+        [$ga, $ea, $oa, $ctx] = f114Fixture($store, null, 'SYNTHETIC_NONCE_LOCK_A');
+        [$gb, $eb, $ob] = f114Fixture($store, $ctx, 'SYNTHETIC_NONCE_LOCK_B');
+        $ga->authorize($ea, $oa, $ctx, 'SYNTHETIC_LEAD_READ', 15);
+        denied('TRUST_STATE_CAPACITY_DENIED', fn() => $gb->authorize(
+            $eb, $ob, $ctx, 'SYNTHETIC_LEAD_READ', 15));
+        $store->setAvailable(true);
+        denied('TRUST_REPLAY_DENIED', fn() => $ga->authorize(
+            $ea, $oa, $ctx, 'SYNTHETIC_LEAD_READ', 15));
+        check($store->countConsumed() === 1 && $store->countRevoked() === 0);
+    },
 ];

@@ -14,6 +14,8 @@ final class MockSharedTrustState
     private array $nonces = [];
     private array $revokedDigests = [];
     private bool $available = true;
+    // A failed revocation cannot be quietly forgotten by restoring availability.
+    private bool $revocationOverflowed = false;
 
     public function __construct(private readonly int $capacity = 1024)
     {
@@ -30,6 +32,9 @@ final class MockSharedTrustState
         $this->assertAvailable();
         // Repeat revocation remains idempotent even after capacity is reached.
         if (!isset($this->revokedDigests[$digest]) && count($this->revokedDigests) >= $this->capacity) {
+            // Refusing a revocation yet continuing to authorize would fail open.
+            // Permanently disable this volatile fixture for this process.
+            $this->revocationOverflowed = true;
             MockError::fail('TRUST_STATE_CAPACITY_DENIED');
         }
         $this->revokedDigests[$digest] = true;
@@ -58,6 +63,6 @@ final class MockSharedTrustState
 
     private function assertAvailable(): void
     {
-        if (!$this->available) MockError::fail('TRUST_STATE_UNAVAILABLE');
+        if (!$this->available || $this->revocationOverflowed) MockError::fail('TRUST_STATE_UNAVAILABLE');
     }
 }
