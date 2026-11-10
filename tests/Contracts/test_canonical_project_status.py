@@ -69,7 +69,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("AIA-FT01-SEC-41-PROJECAO-OP01-UNIFICADA.md", rules)
         self.assertIn("EVID-28", current)
         self.assertIn("42899017010", historic)
-        self.assertIn("565 testes PHP", readme)
+        self.assertIn("575 testes PHP", readme)
         self.assertIn("NAO_EXECUTADO", current)
         self.assertIn("NO-GO", current)
 
@@ -77,7 +77,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         current = STATUS.read_text(encoding="utf-8")
         rules = AGENT_RULES.read_text(encoding="utf-8")
         self.assertIn("SEC-43 integrada à dev (PR #216)", current)
-        self.assertIn("565 testes PHP", current)
+        self.assertIn("565 testes PHP", (ROOT / "docs/AIA-R01-EVID-28-SEC43-CI-POSTMERGE.md").read_text(encoding="utf-8"))
         self.assertIn("83 arquivos PHP", current)
         self.assertTrue((ROOT / "docs/AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md").is_file())
         self.assertIn("EVID-28", rules)
