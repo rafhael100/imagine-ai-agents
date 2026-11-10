@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline em revisão — SEC-39 (10/11/2026)
+
+- `SupervisedCoordinator::suggest` e `MockAiSuggestionProvider::suggest`: máximo 3 campos permitidos `ref/stage/text`, string sintética com até 256 bytes, recusa antes de chamar adaptador e trace. Manter fixture legada vazia e sucesso OP-01.
+- **Gate esperado: 526 testes PHP / 82 lint + Python.** [SEC-39](docs/AIA-FT01-SEC-39-LIMITES-SUGESTOES.md).
+- CRM PR #57 OPEN/DRAFT; R01-G01..G11 / CORE/SEG/AUT ABERTOS/NO-GO. Somente dev offline, sem `main`, VPS, produção, clientes, segredos ou custos.
+
 ## Baseline em revisão — SEC-38 (10/11/2026)
 
 - `MockCapabilityGrant`: rejeitar referências `id` e `toolId` acima de 90 bytes, sem suffix e fora de `SYNTHETIC_[A-Z0-9_]{1,80}` ainda no construtor. Preservar revogação e tenant-bound check.
