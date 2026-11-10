@@ -1,5 +1,12 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline em revisão — SEC-28 (10/11/2026)
+
+- Quadro de revisão sintético limitado a 128 digests sem expulsar histórico. Mesmo no limite, permitem-se o segundo papel independente e repetições idempotentes; nenhuma promoção real.
+- **Gate esperado: 452 testes PHP / 82 lint + Python.** [SEC-28](docs/AIA-FT01-SEC-28-REVISOES-BOUNDED.md). Resultados anteriores abaixo são históricos.
+- CRM PR #57 OPEN/DRAFT; R01-G01..G11 e CORE/SEG/AUT ABERTOS/NO-GO; sem `main`, VPS, clientes, segredos, custos ou produção.
+
+
 ## Baseline vigente — SEC-26/SEC-27 (10/11/2026)
 
 - [PR #194](https://github.com/rafhael100/imagine-ai-agents/pull/194), merge dev `dbb9a034744d0b6d1a725008eae7b548e367f513`, [CI pós-merge #42863662530](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42863662530) success: estado do transporte vinculado à identidade dos registros de uso.
