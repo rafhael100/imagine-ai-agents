@@ -54,20 +54,33 @@ final class MockToolDispatcher
             if ($kind === 'SUGGEST') {
                 if ($run === null) MockError::fail('RUN_REQUIRED');
                 $context->assertSame($run->context);
+                // An accepted response uses one trace event. A rejected
+                // response may need one additional event to close this Run
+                // as FALHOU; reject before invocation if neither fits.
+                $this->coordinator->assertToolSuggestionReady($run);
                 try {
                     $value = $this->coordinator->suggest($run, ['text' => $parameters['text']]);
+                    // A coordinator SUGGESTED event only means a provider
+                    // answered. It is not proof of trusted output content.
+                    if (array_keys($value) !== ['kind', 'version', 'run', 'source', 'text']
+                        || $value['kind'] !== 'SYNTHETIC_SUGGESTION'
+                        || $value['version'] !== 'mock-v1'
+                        || $value['run'] !== $run->id
+                        || $value['source'] !== $context->resource
+                        || $value['text'] !== 'SYNTHETIC summary proposal only') {
+                        MockError::fail('TOOL_SUGGESTION_DENIED');
+                    }
                 } catch (\Throwable) {
-                    // Untrusted provider errors never cross the tool boundary.
-                    MockError::fail('TOOL_SUGGESTION_DENIED');
-                }
-                // The coordinator's synthetic trace is not proof that the
-                // provider returned a usable or safe suggestion.
-                if (array_keys($value) !== ['kind', 'version', 'run', 'source', 'text']
-                    || $value['kind'] !== 'SYNTHETIC_SUGGESTION'
-                    || $value['version'] !== 'mock-v1'
-                    || $value['run'] !== $run->id
-                    || $value['source'] !== $context->resource
-                    || $value['text'] !== 'SYNTHETIC summary proposal only') {
+                    // A rejected/failed provider MUST NOT leave this
+                    // synthetic Run active for a subsequent approved action.
+                    // Preflight reserved space for the terminal event.
+                    try {
+                        if ($run->state() === 'EXECUTANDO') {
+                            $this->coordinator->transition($run, 'FALHOU');
+                        }
+                    } catch (\Throwable) {
+                        // Never leak secondary diagnostic failures.
+                    }
                     MockError::fail('TOOL_SUGGESTION_DENIED');
                 }
                 $this->trace($toolId, $context, 'SUGGESTED');

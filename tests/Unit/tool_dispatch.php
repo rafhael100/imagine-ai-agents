@@ -435,4 +435,83 @@ return [
         check($d->events()[0]['code'] === 'SYNTHETIC_SUGGESTED'
             && $gw->submitCount() === 0);
     },
+
+    'U39-01 failed provider ends its synthetic Run and blocks future suggestions' => function (): void {
+        [$d, $c, $gw, $grant, $ctx, $run] = f138SuggestionFixture('throw');
+        denied('TOOL_SUGGESTION_DENIED', fn() => $d->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_INPUT'], 15, $run));
+        check($run->state() === 'FALHOU');
+        check(array_column($c->events(), 'code') === [
+            'SYNTHETIC_STARTED', 'SYNTHETIC_RUN_CHANGED',
+        ]);
+        denied('RUN_NOT_ACTIVE', fn() => $d->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_INPUT'], 15, $run));
+        check(array_column($d->events(), 'code') === [
+            'SYNTHETIC_DENIED', 'SYNTHETIC_DENIED',
+        ]);
+        check($gw->submitCount() === 0);
+    },
+    'U39-02 forged output terminates Run and cannot authorize later fake mutation' => function (): void {
+        [$d, $c, $gw, $grant, $ctx, $run] = f138SuggestionFixture('forged_text');
+        $step = $c->step($run, 'SYNTHETIC_F139_STEP');
+        $intent = new Intent('SYNTHETIC_F139_INTENT', $step,
+            'SYNTHETIC_F139_KEY', 'mock.task.create', 'SYNTHETIC_MATERIAL');
+        $approval = new Approval('SYNTHETIC_F139_APPROVAL', $intent,
+            'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+        denied('TOOL_SUGGESTION_DENIED', fn() => $d->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_INPUT'], 15, $run));
+        check($run->state() === 'FALHOU');
+        check(array_column($c->events(), 'code') === [
+            'SYNTHETIC_STARTED', 'SYNTHETIC_STEP_CREATED',
+            'SYNTHETIC_SUGGESTED', 'SYNTHETIC_RUN_CHANGED',
+        ]);
+        $mutGrant = new MockCapabilityGrant('SYNTHETIC_F139_MUTATE',
+            MockToolCatalog::MUTATE, $ctx, 10, 20);
+        denied('RUN_NOT_ACTIVE', fn() => $d->dispatch(
+            MockToolCatalog::MUTATE, MockToolCatalog::VERSION, $ctx, $mutGrant,
+            ['material' => 'SYNTHETIC_MATERIAL'], 15, null, $intent, $approval));
+        check($gw->submitCount() === 0 && $gw->statusCount() === 0);
+        check(!str_contains(json_encode([$c->events(), $d->events()], JSON_THROW_ON_ERROR),
+            'SYNTHETIC_PRIVATE_CUSTOMER_PAYLOAD'));
+    },
+    'U39-03 lacking failure-trace room denies before invoking suggestion provider' => function (): void {
+        [$d, $c, $gw, $grant, $ctx, $run] = f138SuggestionFixture('valid');
+        for ($i = 0; $i < 1022; ++$i) {
+            $c->start('SYNTHETIC_F139_FILL_' . $i);
+        }
+        check(count($c->events()) === 1023);
+        denied('TRACE_CAPACITY_EXCEEDED', fn() => $d->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_INPUT'], 15, $run));
+        check($run->state() === 'EXECUTANDO');
+        check(count($c->events()) === 1023
+            && array_column($d->events(), 'code') === ['SYNTHETIC_DENIED']
+            && $gw->submitCount() === 0);
+    },
+    'U39-04 accepted suggestion preserves active Run for separate supervised approval' => function (): void {
+        [$d, $c, $gw, $grant, $ctx, $run] = f138SuggestionFixture('valid');
+        check($d->dispatch(MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+            $ctx, $grant, ['text' => 'SYNTHETIC_INPUT'], 15, $run)['state']
+            === 'SYNTHETIC_OK');
+        check($run->state() === 'EXECUTANDO'
+            && array_column($c->events(), 'code') === [
+                'SYNTHETIC_STARTED', 'SYNTHETIC_SUGGESTED',
+            ]);
+        check($gw->submitCount() === 0 && count($d->events()) === 1);
+    },
+    'U39-05 provider MockError also closes Run without revealing internal reason' => function (): void {
+        [$d, $c, $gw, $grant, $ctx, $run] = f138SuggestionFixture('mockerror');
+        denied('TOOL_SUGGESTION_DENIED', fn() => $d->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_INPUT'], 15, $run));
+        check($run->state() === 'FALHOU'
+            && array_column($c->events(), 'code') === [
+                'SYNTHETIC_STARTED', 'SYNTHETIC_RUN_CHANGED',
+            ] && $gw->submitCount() === 0);
+        check(!str_contains(json_encode([$c->events(), $d->events()], JSON_THROW_ON_ERROR),
+            'SYNTHETIC_PRIVATE_UNSAFE_PROVIDER_ERROR'));
+    },
 ];

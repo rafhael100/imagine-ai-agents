@@ -42,6 +42,18 @@ final class SupervisedCoordinator
         $this->assertTraceCapacity(4);
     }
 
+    /**
+     * Tool-level suggestion handling must allow a SUGGESTED trace and one
+     * possible terminal RUN_CHANGED in the same coordinator. This preflight
+     * has no side effects and is not a distributed audit reservation.
+     */
+    public function assertToolSuggestionReady(Run $run): void
+    {
+        $this->assertRunCompatible($run);
+        $run->assertActive();
+        $this->assertTraceCapacity(2);
+    }
+
     public function start(string $id): Run
     {
         if (isset($this->startedRuns[$id])) MockError::fail('RUN_ID_CONFLICT');
