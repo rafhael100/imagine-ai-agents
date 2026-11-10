@@ -1,5 +1,12 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline vigente — SEC-25 (10/11/2026)
+
+- [PR #192](https://github.com/rafhael100/imagine-ai-agents/pull/192), merge dev `b19a769cdbf10e33491bc05231d389c621204526`, [CI pós-merge #42859143202](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42859143202) success: medidor local limita registros e nega novas medições quando não pode auditá-las.
+- **Gate atual: 433 testes PHP / 82 lint e verificadores Python.** [EVID-22](docs/AIA-R01-EVID-22-MEDIDOR-USO-433.md). Números anteriores no histórico abaixo não são baseline atual.
+- **NO-GO:** CRM PR #57 OPEN/DRAFT; R01-G01..G11 e CORE/SEG/AUT ABERTOS. Sem `main`, VPS, clientes, credenciais, produção ou novos custos.
+
+
 ## Baseline vigente — SEC-23/SEC-24 (10/11/2026)
 
 - [PR #189](https://github.com/rafhael100/imagine-ai-agents/pull/189) integrado dev `f72ebaccadec579083d9d091c9d7b2048402f91e`, [CI pós-merge #42847828963](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42847828963) success: limites de Intent e Approval.

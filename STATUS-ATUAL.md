@@ -6,9 +6,11 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **Baseline verificável do laboratório: 427 testes PHP, lint de 82 arquivos PHP, testes Python de contrato, isolamento e demonstração.** O número de testes não é percentual de conclusão do produto.
+**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **Baseline verificável do laboratório: 433 testes PHP, lint de 82 arquivos PHP, testes Python de contrato, isolamento e demonstração.** O número de testes não é percentual de conclusão do produto.
 
 ## Últimas entregas verificadas
+
+A [SEC-25 / PR #192](https://github.com/rafhael100/imagine-ai-agents/pull/192) limitou o medidor de uso em memória e garantiu falha segura sem perda de idempotência; [CI pós-merge #42859143202](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42859143202) success. Ver [EVID-22](docs/AIA-R01-EVID-22-MEDIDOR-USO-433.md). Entregas anteriores abaixo são históricas.
 
 [SEC-23 / PR #189](https://github.com/rafhael100/imagine-ai-agents/pull/189) aplicou limites a Intent/Approval ([CI pós-merge #42847828963](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42847828963) success). [SEC-24 / PR #190](https://github.com/rafhael100/imagine-ai-agents/pull/190) estendeu os limites aos objetos básicos Run/Step ([CI pós-merge #42848621884](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42848621884) success). Ver [EVID-21](docs/AIA-R01-EVID-21-LIMITES-DOMINIO-427.md). Marcos anteriores abaixo são históricos.
 
@@ -29,7 +31,7 @@ A [SEC-20 / PR #182](https://github.com/rafhael100/imagine-ai-agents/pull/182) c
 
 ```bash
 php examples/f127-read-only-pilot-demo.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=427 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=433 bash tools/run_r01_offline_quality_gate.sh
 ```
 
 O comando acima exige PHP e Python já instalados, não emite credenciais e não acessa CRM real. O sucesso não abre gates operacionais.
