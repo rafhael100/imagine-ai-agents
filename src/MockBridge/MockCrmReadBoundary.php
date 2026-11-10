@@ -40,6 +40,14 @@ final class MockCrmReadBoundary
         // The common invariant also reorders an otherwise valid reader output
         // according to the request, without accepting extra or foreign data.
         $projection = $this->reader->lead($trustedContext, $request->fields);
+        // A replaceable reader can re-enter a volatile owner/trust fixture
+        // while a read is in progress. Check revocation/suspension again
+        // before calling the projection safe or recording a success.
+        // The already-consumed nonce is NOT consumed a second time.
+        $this->ownerPolicy->assertAllowed($trustedContext, $request->fields);
+        if ($envelope === null || $owner === null) MockError::fail('TRUST_DENIED');
+        $envelope->assertValid($trustedContext, $now);
+        $owner->assertValid($envelope, $trustedContext, 'SYNTHETIC_LEAD_READ', $now);
         $orderedProjection = MockReadProjectionInvariant::canonicalize(
             $projection, $request->fields, $trustedContext);
         if ($orderedProjection === null) MockError::fail('BRIDGE_PROJECTION_DENIED');
