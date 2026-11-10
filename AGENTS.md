@@ -1,5 +1,13 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline atual — 10/11/2026, SEC-18/SEC-19
+
+- [SEC-18 / PR #177](https://github.com/rafhael100/imagine-ai-agents/pull/177) corrigiu Runs que permaneciam ativas após sugestão rejeitada; merge dev `feb9fd8e004c2908a754f8dd535ca5286094454c`, [CI pós-merge #42753075500](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42753075500) `success`.
+- [SEC-19 / PR #178](https://github.com/rafhael100/imagine-ai-agents/pull/178) impede que mensagens arbitrárias de gateway de status saiam pela ferramenta; merge dev `138a97df72ff93e7105e12ef73bae8a07eccdc65`, [CI pós-merge #42753536675](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42753536675) `success`.
+- Gate de laboratório vigente **397 testes PHP / 82 lint e testes Python de contrato**; [EVID-16](docs/AIA-R01-EVID-16-SEGURANCA-TOOL-397.md). Resultados anteriores abaixo são históricos.
+- **Integração real bloqueada:** [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) OPEN/DRAFT e R01-G01..G11 + CRM CORE/SEG/AUT ABERTOS/NO-GO. Nenhum IAM, banco, CRM, cliente, VPS ou produção autorizado por estes testes; `main` intocada.
+
+
 ## Checkpoint 10/11/2026 — governança de ferramenta, 389 testes
 
 - [F1-30 / PR #173](https://github.com/rafhael100/imagine-ai-agents/pull/173) integrado na dev `f68b774ee69f1d1d5f9e3c88ddeea41676a56bc7`: nova leitura de ferramenta **somente via borda OP-01** simulada; `dispatch(READ)` direto permanece bloqueado. [CI pós-merge #42748908649](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42748908649) success.

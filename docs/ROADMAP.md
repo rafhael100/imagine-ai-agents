@@ -1,3 +1,11 @@
+## Marco de segurança — SEC-18/SEC-19 (10/11/2026)
+
+- [PR Agents #177](https://github.com/rafhael100/imagine-ai-agents/pull/177) e [#178](https://github.com/rafhael100/imagine-ai-agents/pull/178) integrados à dev após CIs aprovadas. [CI pós-merge #42753075500](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42753075500) e [#42753536675](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42753536675) `success`: Run falha terminal após sugestão rejeitada; interface não vaza erro de gateway. **Gate vigente: 397 PHP / 82 lint + Python**.
+- [EVID-16](AIA-R01-EVID-16-SEGURANCA-TOOL-397.md) registra provas, riscos e critérios de aceite reais. Próxima etapa útil depende da revisão bilateral [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) e implementação homologada de IAM, ACL backend, LGPD, rollback e integração em ambiente isolado.
+- R01-G01..G11 / CORE-SEG-AUT **ABERTOS / NO-GO**. Não confundir mais mocks com conclusão de produto; sem `main`, cliente real, VPS, produção, token ou contratação.
+
+---
+
 ## Próximo marco após F1-30, SEC-16 e SEC-17 (10/11/2026)
 
 - **Base de laboratório entregue:** ferramenta de leitura passando exclusivamente pela borda OP-01, trilha com limite e resposta de sugestão validada. PRs [#173](https://github.com/rafhael100/imagine-ai-agents/pull/173), [#174](https://github.com/rafhael100/imagine-ai-agents/pull/174) e [#175](https://github.com/rafhael100/imagine-ai-agents/pull/175) integrados na dev, com CIs pós-merge aprovadas. **389 PHP / 82 lint + contratos Python**; documento [EVID-15](AIA-R01-EVID-15-HANDOFF-READ-TOOL-389.md).

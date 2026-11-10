@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## Estado verificado — 10/11/2026
+
+- [PR #177](https://github.com/rafhael100/imagine-ai-agents/pull/177) e [PR #178](https://github.com/rafhael100/imagine-ai-agents/pull/178) **MERGED na dev**, com [CIs pós-merge #42753075500](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42753075500) e [#42753536675](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42753536675) **success**. Falhas de sugestão encerram Run; gateway não expõe erro arbitrário.
+- **Gate de desenvolvimento atual:** 397 casos PHP, 82 lint e contratos Python. A fase offline continua sintética, sem IAM/CRM real; [EVID-16](docs/AIA-R01-EVID-16-SEGURANCA-TOOL-397.md).
+- **Produto operacional: NO-GO.** CRM [PR #57](https://github.com/rafhael100/imagine-crm/pull/57) OPEN/DRAFT, R01-G01..G11 + CORE/SEG/AUT ABERTOS. Necessárias revisão bilateral, autenticação de serviço, autorização backend por campo/empresa, privacidade e homologação autorizada.
+- `main`, VPS, segredos, dados reais, produção e fornecedores pagos não alterados.
+
+
 ## Resultado verificado — 10/11/2026
 
 - [PRs #173](https://github.com/rafhael100/imagine-ai-agents/pull/173), [#174](https://github.com/rafhael100/imagine-ai-agents/pull/174) e [#175](https://github.com/rafhael100/imagine-ai-agents/pull/175) **MERGED somente na dev**. Implementados: READ de ferramenta somente pela borda OP-01, proteção prévia de auditoria e validação fechada de sugestões.
