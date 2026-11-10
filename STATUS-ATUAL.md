@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## Estado revisado — F1-28/F1-29, 359 casos PHP (09/11/2026)
+
+- **PR #165 / F1-28** integrado à dev, commit `cba280c1b5106d1861d75d78bc8ad1185a9787b1`; [CI de revisão #42741450740](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42741450740) `success`. Negação antes de consumir nonce e leitura fictícia quando Run é repetida, contexto do coordenador difere ou auditoria não comporta todos os eventos.
+- **PR #166 / F1-29** integrado à dev, commit `6683e398614a49626cb446955938a398f98d7955`; [CI de revisão #42741942944](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42741942944) `success`. Falha do provider ou resultado inválido encerra a Run sintética em `FALHOU` com negação pública uniforme, sem efeito mutável.
+- **Gate atual:** 359 testes PHP, 82 arquivos PHP sem erros de sintaxe e contratos Python, em ambiente offline. A CI testa o SHA do PR, não integra automaticamente com CRM ou prova durabilidade.
+- **Estado operacional:** `NO-GO`. [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) permanece `OPEN/DRAFT`, R01-G01..G11 e CRM CORE/SEG/AUT `ABERTOS`. `main`, produção, VPS, segredos e dados reais não alterados.
+
+
 ## Checkpoint mais recente — demonstração offline pronta para revisão (09/11/2026)
 
 - [PR #162](https://github.com/rafhael100/imagine-ai-agents/pull/162) integrado em `e669f11dbc7a2adc052f4461c4e820a74aae52bc` após [CI #42739875000](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42739875000) `success`: demonstração CLI `php examples/f127-read-only-pilot-demo.php` de cinco cenários com uma sugestão fixa fictícia e quatro recusas seguras.
