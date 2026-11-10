@@ -9,6 +9,8 @@ use ImagineAI\MockTelemetry\MockCrmReadEdgeCounters;
 use ImagineAI\MockOrchestration\SupervisedCoordinator;
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence};
 use ImagineAI\Mocks\{MockSupervisedGateway, MockAiSuggestionProvider};
+use ImagineAI\Contracts\AiSuggestionProvider;
+use ImagineAI\Domain\Run;
 
 function f130Fixture(
     ?MockCrmOwnerPolicy $policy = null,
@@ -71,6 +73,43 @@ function f130Success(): array
         'write_calls' => 0,
     ];
 }
+
+/** A deliberately untrusted, purely synthetic provider for failure-path tests. */
+final class F129FaultProvider implements AiSuggestionProvider
+{
+    public int $calls = 0;
+
+    public function __construct(private readonly string $mode) {}
+
+    public function suggest(Run $run, array $fields): array
+    {
+        ++$this->calls;
+        if ($this->mode === 'THROW' || ($this->mode === 'THROW_ONCE' && $this->calls === 1)) {
+            throw new \RuntimeException('SYNTHETIC_PRIVATE_PROVIDER_FAILURE');
+        }
+        if ($this->mode === 'FORGE') {
+            return [
+                'kind' => 'SYNTHETIC_SUGGESTION',
+                'version' => 'mock-v1',
+                'run' => $run->id,
+                'source' => $run->context->resource,
+                'text' => 'SYNTHETIC_PRIVATE_UNTRUSTED_OUTPUT',
+            ];
+        }
+        return (new MockAiSuggestionProvider())->suggest($run, $fields);
+    }
+}
+
+function f129Fixture(F129FaultProvider $provider, bool $allowed = true): array
+{
+    [$edge, $counts, , $audit, $env, $owner, $ctx] =
+        f118Fixture($allowed ? f130Grant() : null);
+    $gateway = new MockSupervisedGateway();
+    $coordinator = new SupervisedCoordinator($ctx, $gateway, $provider);
+    return [new MockReadOnlyPilot($ctx, $edge, $coordinator),
+        $coordinator, $gateway, $counts, $audit, $env, $owner, $ctx];
+}
+
 
 return [
     'U30-01 minimal read can create a fictional draft without CRM mutation' => function (): void {
@@ -233,5 +272,64 @@ return [
             15, 'SYNTHETIC_PILOT_RUN_AFTER_FULL') === f130Denial());
         check(count($c->events()) === 1024 && $counts->snapshot()['attempts'] === 1
             && $audit->count() === 1 && $mut->submitCount() === 0);
+    },
+
+    'U32-01 provider exception closes active synthetic run as failed' => function (): void {
+        $provider = new F129FaultProvider('THROW');
+        [$pilot, $c, $gateway, $counts, $audit, $env, $owner, $ctx] = f129Fixture($provider);
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_PILOT_PROVIDER_THROW') === f130Denial());
+        check(array_column($c->events(), 'code') === [
+            'SYNTHETIC_STARTED', 'SYNTHETIC_STEP_CREATED', 'SYNTHETIC_RUN_CHANGED',
+        ]);
+        check($c->events()[2]['run_state'] === 'SYNTHETIC_FALHOU');
+        check($provider->calls === 1 && $counts->snapshot()['attempts'] === 1
+            && $audit->count() === 1 && $gateway->submitCount() === 0);
+    },
+    'U32-02 forged provider output cannot leave an active run or escape boundary' => function (): void {
+        $provider = new F129FaultProvider('FORGE');
+        [$pilot, $c, $gateway, $counts, $audit, $env, $owner, $ctx] = f129Fixture($provider);
+        $out = $pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_PILOT_PROVIDER_FORGE');
+        check($out === f130Denial());
+        check(array_column($c->events(), 'code') === [
+            'SYNTHETIC_STARTED', 'SYNTHETIC_STEP_CREATED',
+            'SYNTHETIC_SUGGESTED', 'SYNTHETIC_RUN_CHANGED',
+        ]);
+        check($c->events()[3]['run_state'] === 'SYNTHETIC_FALHOU');
+        check(!str_contains(json_encode($out, JSON_THROW_ON_ERROR),
+            'SYNTHETIC_PRIVATE_UNTRUSTED_OUTPUT'));
+        check(!str_contains(json_encode($c->events(), JSON_THROW_ON_ERROR),
+            'SYNTHETIC_PRIVATE_UNTRUSTED_OUTPUT'));
+        check($gateway->submitCount() === 0 && $counts->snapshot()['attempts'] === 1
+            && $audit->count() === 1);
+    },
+    'U32-03 denied owner policy never invokes a faulting provider or begins run' => function (): void {
+        $provider = new F129FaultProvider('THROW');
+        [$pilot, $c, $gateway, $counts, $audit, $env, $owner, $ctx] =
+            f129Fixture($provider, false);
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_PILOT_PROVIDER_UNAUTHORIZED') === f130Denial());
+        check($provider->calls === 0 && $c->events() === []
+            && $counts->snapshot()['attempts'] === 1 && $audit->count() === 1
+            && $gateway->submitCount() === 0);
+    },
+    'U32-04 a later fresh authorized run recovers after failed provider invocation' => function (): void {
+        $provider = new F129FaultProvider('THROW_ONCE');
+        [$pilot, $c, $gateway, $counts, $audit, $env, $owner, $ctx] = f129Fixture($provider);
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_PILOT_PROVIDER_FAIL_FIRST') === f130Denial());
+        [$freshEnv, $freshOwner] = f130Proof($ctx, 'PROVIDER_RECOVERY');
+        check($pilot->suggest(f112Wire($ctx), $freshEnv, $freshOwner, $ctx,
+            15, 'SYNTHETIC_PILOT_PROVIDER_RECOVER') === f130Success());
+        check(array_column($c->events(), 'code') === [
+            'SYNTHETIC_STARTED', 'SYNTHETIC_STEP_CREATED', 'SYNTHETIC_RUN_CHANGED',
+            'SYNTHETIC_STARTED', 'SYNTHETIC_STEP_CREATED',
+            'SYNTHETIC_SUGGESTED', 'SYNTHETIC_RUN_CHANGED',
+        ]);
+        check($c->events()[2]['run_state'] === 'SYNTHETIC_FALHOU'
+            && $c->events()[6]['run_state'] === 'SYNTHETIC_CONCLUIDA');
+        check($provider->calls === 2 && $gateway->submitCount() === 0
+            && $counts->snapshot()['attempts'] === 2 && $audit->count() === 2);
     },
 ];
