@@ -22,11 +22,13 @@ function toolFixture(?object $gateway = null, ?MockToolCatalog $catalog = null):
 }
 
 return [
-    'U04-01 allowed synthetic read returns only whitelisted fields' => function (): void {
+    'U04-01 legacy synthetic read requires CRM-owner OP-01 boundary' => function (): void {
         [$ctx, $gw, , $d, , , , $grant] = toolFixture();
-        $r = $d->dispatch(MockToolCatalog::READ, MockToolCatalog::VERSION, $ctx, $grant(MockToolCatalog::READ), ['fields' => ['ref']], 15);
-        check($r === ['kind' => 'READ', 'state' => 'SYNTHETIC_OK', 'data' => ['ref' => 'SYNTHETIC_A_LEAD']]);
-        check($gw->submitCount() === 0);
+        denied('READ_BOUNDARY_REQUIRED', fn() => $d->dispatch(
+            MockToolCatalog::READ, MockToolCatalog::VERSION, $ctx,
+            $grant(MockToolCatalog::READ), ['fields' => ['ref']], 15));
+        check($d->events()[0]['code'] === 'SYNTHETIC_DENIED');
+        check($gw->submitCount() === 0 && $gw->statusCount() === 0);
     },
     'U04-02 adversarial fake suggestion cannot write or elevate' => function (): void {
         [$ctx, $gw, , $d, $run, , , $grant] = toolFixture();
@@ -128,5 +130,38 @@ return [
         foreach ($d->events() as $index => $event) {
             check(array_keys($event) === ['sequence', 'product', 'tenant', 'tool', 'code'] && $event['sequence'] === $index + 1);
         }
+    },
+
+    'U35-01 valid READ grant cannot bypass owner even with all fields' => function (): void {
+        [$ctx, $gw, , $d, , , , $grant] = toolFixture();
+        denied('READ_BOUNDARY_REQUIRED', fn() => $d->dispatch(
+            MockToolCatalog::READ, MockToolCatalog::VERSION, $ctx,
+            $grant(MockToolCatalog::READ), ['fields' => ['stage', 'ref']], 15));
+        check($d->events()[0]['code'] === 'SYNTHETIC_DENIED');
+        check(!str_contains(json_encode($d->events(), JSON_THROW_ON_ERROR), 'SYNTHETIC_A_LEAD'));
+        check($gw->submitCount() === 0);
+    },
+    'U35-02 direct reads remain unavailable after repeated attempts' => function (): void {
+        [$ctx, $gw, , $d, , , , $grant] = toolFixture();
+        for ($i = 0; $i < 3; ++$i) {
+            denied('READ_BOUNDARY_REQUIRED', fn() => $d->dispatch(
+                MockToolCatalog::READ, MockToolCatalog::VERSION, $ctx,
+                $grant(MockToolCatalog::READ), ['fields' => ['ref']], 15));
+        }
+        check(array_column($d->events(), 'code') === [
+            'SYNTHETIC_DENIED', 'SYNTHETIC_DENIED', 'SYNTHETIC_DENIED',
+        ]);
+        check($gw->submitCount() === 0 && $gw->statusCount() === 0);
+    },
+    'U35-03 disabling direct READ does not remove supervised suggestion path' => function (): void {
+        [$ctx, $gw, , $d, $run, , , $grant] = toolFixture();
+        denied('READ_BOUNDARY_REQUIRED', fn() => $d->dispatch(
+            MockToolCatalog::READ, MockToolCatalog::VERSION, $ctx,
+            $grant(MockToolCatalog::READ), ['fields' => ['ref']], 15));
+        $result = $d->dispatch(MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+            $ctx, $grant(MockToolCatalog::SUGGEST), ['text' => 'SYNTHETIC_OK'], 15, $run);
+        check($result['kind'] === 'SUGGEST' && $result['state'] === 'SYNTHETIC_OK');
+        check(array_column($d->events(), 'code') === ['SYNTHETIC_DENIED', 'SYNTHETIC_SUGGESTED']);
+        check($gw->submitCount() === 0);
     },
 ];
