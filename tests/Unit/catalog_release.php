@@ -504,4 +504,83 @@ return [
         check($gate->current() === null && count($gate->events()) === 128);
         check($gate->events()[127]['code'] === 'SYNTHETIC_SUSPENDED');
     },
+
+    'U62-01 huge top-level manifest is denied before copying and sorting all keys' => function (): void {
+        $ctx = context();
+        $manifest = f106Manifest();
+        for ($i = 0; $i < 10000; ++$i) {
+            $manifest['unexpected_' . $i] = 'SYNTHETIC_NOISE';
+        }
+        denied('CATALOG_SCHEMA_DENIED', fn () => f106Snapshot($ctx,
+            'SYNTHETIC_SEC40_HUGE_MANIFEST', 'SYNTHETIC_SEC40_VERSION', $manifest));
+        check(f106Snapshot($ctx)->digest !== '');
+    },
+    'U62-02 oversized snapshot, template and version refs are all denied early' => function (): void {
+        $ctx = context();
+        $huge = 'SYNTHETIC_' . str_repeat('Q', 1024 * 1024);
+        denied('CATALOG_SCHEMA_DENIED', fn () => new MockAgentVersionSnapshot(
+            $huge, 'SYNTHETIC_AGENT', 'SYNTHETIC_VERSION', $ctx, f106Manifest()));
+        denied('CATALOG_SCHEMA_DENIED', fn () => new MockAgentVersionSnapshot(
+            'SYNTHETIC_SNAPSHOT', $huge, 'SYNTHETIC_VERSION', $ctx, f106Manifest()));
+        denied('CATALOG_SCHEMA_DENIED', fn () => new MockAgentVersionSnapshot(
+            'SYNTHETIC_SNAPSHOT', 'SYNTHETIC_AGENT', $huge, $ctx, f106Manifest()));
+    },
+    'U62-03 huge instruction and policy references are denied by common validator' => function (): void {
+        $ctx = context();
+        $huge = 'SYNTHETIC_' . str_repeat('P', 1024 * 1024);
+        denied('CATALOG_SCHEMA_DENIED', fn () => f106Snapshot($ctx,
+            'SYNTHETIC_SEC40_REF_A', 'SYNTHETIC_SEC40_V_A',
+            ['instruction_ref' => $huge]));
+        denied('CATALOG_SCHEMA_DENIED', fn () => f106Snapshot($ctx,
+            'SYNTHETIC_SEC40_REF_B', 'SYNTHETIC_SEC40_V_B',
+            ['policy_ref' => $huge]));
+    },
+    'U62-04 shared synthetic reference accepts 110 bytes and denies 111' => function (): void {
+        $within = 'SYNTHETIC_' . str_repeat('X', 100);
+        $beyond = $within . 'X';
+        check(strlen($within) === 110 && strlen($beyond) === 111);
+        MockAgentVersionSnapshot::syntheticRef($within);
+        denied('CATALOG_SCHEMA_DENIED', fn () => MockAgentVersionSnapshot::syntheticRef($beyond));
+        $snapshot = f106Snapshot(context(), $within, 'SYNTHETIC_VERSION_V1');
+        check($snapshot->ref === $within && strlen($snapshot->digest) === 64);
+    },
+    'U62-05 exact five manifest keys can be reordered without changing digest' => function (): void {
+        $ctx = context();
+        $standard = f106Snapshot($ctx);
+        $flipped = new MockAgentVersionSnapshot(
+            $standard->ref, $standard->templateRef, $standard->version,
+            $ctx, array_reverse(f106Manifest(), true));
+        check($standard->digest === $flipped->digest);
+        check($standard->manifest === $flipped->manifest);
+        $invalid = f106Manifest();
+        unset($invalid['risk']);
+        denied('CATALOG_SCHEMA_DENIED', fn () => new MockAgentVersionSnapshot(
+            'SYNTHETIC_SEC40_NO_RISK', 'SYNTHETIC_AGENT', 'SYNTHETIC_V1',
+            $ctx, $invalid));
+    },
+    'U62-06 manifest tools must remain bounded even if top-level keys are valid' => function (): void {
+        $ctx = context();
+        $tools = [];
+        for ($i = 0; $i < 5000; ++$i) $tools[] = 'SYNTHETIC_TOOL_' . $i;
+        denied('CATALOG_SCHEMA_DENIED', fn () => f106Snapshot($ctx,
+            'SYNTHETIC_SEC40_TOO_MANY_TOOLS', 'SYNTHETIC_SEC40_V_TOOLS',
+            ['tools' => $tools]));
+        $right = f106Snapshot($ctx, 'SYNTHETIC_SEC40_GOOD_TOOLS', 'SYNTHETIC_SEC40_GOOD_VERSION');
+        check($right->manifest['tools'] === ['SYNTHETIC_TOOL_READ']);
+    },
+    'U62-07 invalid construction never poisons catalog or next reviewed selection' => function (): void {
+        [$ctx, $catalog, $original, $review, $gate] = f106Fixture();
+        $before = $catalog->get($original->ref, $ctx);
+        denied('CATALOG_SCHEMA_DENIED', fn () => f106Snapshot($ctx,
+            'SYNTHETIC_SEC40_BAD', 'SYNTHETIC_SEC40_V_BAD',
+            ['instruction_ref' => 'SYNTHETIC_' . str_repeat('Z', 111)]));
+        check($catalog->get($original->ref, $ctx) === $before);
+        $new = f106Snapshot($ctx, 'SYNTHETIC_SEC40_VALID_SNAPSHOT',
+            'SYNTHETIC_SEC40_VALID_VERSION');
+        $catalog->addSnapshot($new);
+        $newReview = f106Review($new);
+        check($gate->promote('SYNTHETIC_SEC40_VALID_DECISION',
+            $new, $newReview, $ctx, 15) === 'ATIVO_SIMULADO');
+        check($gate->current(15) === $new->ref && count($gate->events()) === 1);
+    },
 ];
