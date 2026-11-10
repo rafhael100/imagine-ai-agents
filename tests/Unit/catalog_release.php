@@ -415,4 +415,93 @@ return [
         check($gate->suspend('SYNTHETIC_SEC30_STOP', $ctx) === 'SUSPENSO');
         check($gate->current() === null && count($gate->events()) === 2);
     },
+
+    'U56-01 revoked selected review hides active snapshot and keeps safe suspend available' => function (): void {
+        [$ctx, , $snapshot, $review, $gate] = f106Fixture();
+        $gate->promote('SYNTHETIC_SEC34_PROMOTE', $snapshot, $review, $ctx, 15);
+        check($gate->current() === $snapshot->ref && $gate->current(15) === $snapshot->ref);
+        $review->revoke();
+        $before = $gate->events();
+        check($gate->current() === null && $gate->current(15) === null);
+        check($gate->events() === $before);
+        check($gate->suspend('SYNTHETIC_SEC34_SUSPEND', $ctx) === 'SUSPENSO');
+        check($gate->current() === null && count($gate->events()) === 2);
+    },
+    'U56-02 explicit synthetic clock denies expired selected review without mutation' => function (): void {
+        [$ctx, , $snapshot, $review, $gate] = f106Fixture();
+        $gate->promote('SYNTHETIC_SEC34_PROMOTE', $snapshot, $review, $ctx, 15);
+        $before = $gate->events();
+        check($gate->current(29) === $snapshot->ref);
+        check($gate->current(30) === null && $gate->current(100) === null);
+        // Clockless legacy queries cannot establish wall-clock expiration.
+        check($gate->current() === $snapshot->ref);
+        check($gate->events() === $before);
+        check($gate->suspend('SYNTHETIC_SEC34_EXPIRED_STOP', $ctx) === 'SUSPENSO');
+    },
+    'U56-03 explicit clock earlier than issuance fails closed and does not consume history' => function (): void {
+        [$ctx, , $snapshot, $review, $gate] = f106Fixture();
+        check($gate->current(15) === null);
+        $gate->promote('SYNTHETIC_SEC34_PROMOTE', $snapshot, $review, $ctx, 15);
+        $before = $gate->events();
+        check($gate->current(9) === null && $gate->current(-1) === null);
+        check($gate->current(10) === $snapshot->ref);
+        check($gate->events() === $before);
+    },
+    'U56-04 new reviewed selection is independent from revoked historical review' => function (): void {
+        [$ctx, , $snapshot, $oldReview, $gate] = f106Fixture();
+        $gate->promote('SYNTHETIC_SEC34_OLD_SELECT', $snapshot, $oldReview, $ctx, 15);
+        $oldReview->revoke();
+        check($gate->current() === null);
+        $newReview = f106Review($snapshot, ['ref' => 'SYNTHETIC_SEC34_RENEWED_REVIEW']);
+        $gate->promote('SYNTHETIC_SEC34_NEW_SELECT', $snapshot, $newReview, $ctx, 15);
+        check($gate->current(15) === $snapshot->ref);
+        denied('REVIEW_DENIED', fn () => $gate->promote(
+            'SYNTHETIC_SEC34_OLD_REPLAY', $snapshot, $oldReview, $ctx, 15));
+        check($gate->current() === $snapshot->ref && count($gate->events()) === 2);
+        $newReview->revoke();
+        check($gate->current() === null);
+    },
+    'U56-05 rollback binds visibility to its own review and not prior selection' => function (): void {
+        [$ctx, $catalog, $v1, $r1, $gate] = f106Fixture();
+        $v2 = f106Snapshot($ctx, 'SYNTHETIC_SEC34_V2', 'SYNTHETIC_SEC34_VERSION_V2');
+        $catalog->addSnapshot($v2);
+        $r2 = f106Review($v2);
+        $gate->promote('SYNTHETIC_SEC34_V1_ACTIVE', $v1, $r1, $ctx, 15);
+        $gate->promote('SYNTHETIC_SEC34_V2_ACTIVE', $v2, $r2, $ctx, 15);
+        $r1->revoke();
+        check($gate->current(15) === $v2->ref);
+        $r1new = f106Review($v1, ['ref' => 'SYNTHETIC_SEC34_REVIEW_NEW']);
+        check($gate->rollback('SYNTHETIC_SEC34_GO_BACK', $v1, $r1new, $ctx, 15) === 'ATIVO_SIMULADO');
+        check($gate->current(15) === $v1->ref);
+        $r2->revoke();
+        check($gate->current(15) === $v1->ref);
+        $r1new->revoke();
+        check($gate->current() === null);
+    },
+    'U56-06 historical decision replay does not swap or revive a revoked review' => function (): void {
+        [$ctx, , $snapshot, $oldReview, $gate] = f106Fixture();
+        $gate->promote('SYNTHETIC_SEC34_ORIGINAL', $snapshot, $oldReview, $ctx, 15);
+        $gate->suspend('SYNTHETIC_SEC34_STOP', $ctx);
+        $newReview = f106Review($snapshot, ['ref' => 'SYNTHETIC_SEC34_CURRENT_REVIEW']);
+        $gate->promote('SYNTHETIC_SEC34_RESELECT', $snapshot, $newReview, $ctx, 15);
+        $before = $gate->events();
+        check($gate->promote('SYNTHETIC_SEC34_ORIGINAL',
+            $snapshot, $oldReview, $ctx, 15) === 'ATIVO_SIMULADO');
+        check($gate->current(15) === $snapshot->ref && $gate->events() === $before);
+        $oldReview->revoke();
+        denied('REVIEW_DENIED', fn () => $gate->promote(
+            'SYNTHETIC_SEC34_ORIGINAL', $snapshot, $oldReview, $ctx, 15));
+        check($gate->current(15) === $snapshot->ref);
+    },
+    'U56-07 full decision budget still reserves suspension after review revocation' => function (): void {
+        [$ctx, , $snapshot, $review, $gate] = f106Fixture();
+        f151FillPromotionGate($gate, $snapshot, $review, $ctx);
+        $review->revoke();
+        check($gate->current() === null && count($gate->events()) === 127);
+        denied('REVIEW_DENIED', fn () => $gate->promote(
+            'SYNTHETIC_SEC34_UNREVIEWED', $snapshot, $review, $ctx, 15));
+        check($gate->suspend('SYNTHETIC_SEC34_RESERVED_STOP', $ctx) === 'SUSPENSO');
+        check($gate->current() === null && count($gate->events()) === 128);
+        check($gate->events()[127]['code'] === 'SYNTHETIC_SUSPENDED');
+    },
 ];
