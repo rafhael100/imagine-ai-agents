@@ -144,7 +144,7 @@ def check(schema_path: Path = SCHEMA, probe: Path = PROBE) -> dict:
     # can be emitted by the public facade or the probe report.
     for sensitive in (
         "SYNTHETIC_EVID10_REQUEST", "SYNTHETIC_EVID10_NONCE",
-        "SYNTHETIC_EVID10_OWNER", "SYNTHETIC_PRINCIPAL", "authorization",
+        "SYNTHETIC_EVID10_OWNER", "SYNTHETIC_PRINCIPAL", "Bearer ", "access_token",
         "error_code", "stack_trace", "SYNTHETIC_B_LEAD",
     ):
         if sensitive in run.stdout:
