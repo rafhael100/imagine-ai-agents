@@ -6,11 +6,11 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **SEC-41 integrada à dev:** gate pós-merge verificado de **555 testes PHP, lint de 83 arquivos PHP e verificadores Python** ([CI #42897813673](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42897813673), commit `e77f0514526fbfc2f52a7f313203ab94c7ad69fb`). SEC-42 amplia a verificação Python sem alterar as contagens PHP. O número de testes não é percentual de conclusão do produto.
+**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **SEC-41 e SEC-42 integradas à dev:** gate pós-merge de **555 testes PHP, lint de 83 arquivos PHP e verificadores Python**, [CI #42899017010](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42899017010) `success` no commit `61a64f88e23fd0d880fa9a3f7bebfe9cf45141d3`. [EVID-27](docs/AIA-R01-EVID-27-SEC41-42-POSTMERGE.md). O número de testes não é percentual de conclusão do produto.
 
 ## Últimas entregas verificadas
 
-**SEC-42 em revisão:** matriz adversarial determinística de mais de 200 entradas para o parser OP-01, comparada à execução PHP em lotes limitados; contrato estrito e sem rede. [SEC-42](docs/AIA-FT01-SEC-42-PARIDADE-MUTACOES-OP01.md). Os 13 cenários reais permanecem `NAO_EXECUTADO` / **NO-GO**.
+**SEC-42 integrada à dev (PR #214):** matriz adversarial determinística de mais de 200 entradas para o parser OP-01, comparada à execução PHP em lotes limitados; contrato estrito e sem rede. [SEC-42](docs/AIA-FT01-SEC-42-PARIDADE-MUTACOES-OP01.md). Os 13 cenários reais permanecem `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-41 integrada à dev (PR #213):** a projeção OP-01 usa o mesmo contrato de validação na borda, resposta pública e telemetria. Leitores fictícios inconsistentes (inclusive valores de 1 MiB) não podem gerar auditoria de sucesso; nove novos testes U64-01..09. [SEC-41](docs/AIA-FT01-SEC-41-PROJECAO-OP01-UNIFICADA.md). Homologação CRM ainda `NAO_EXECUTADO` / **NO-GO**.
 

@@ -55,7 +55,7 @@ php tests/Unit/run.php
 EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=555 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**Gate SEC-41 integrado:** **555 testes PHP / lint de 83 arquivos PHP**, mais Python. [CI pós-merge #42897813673](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42897813673) aprovada. A [SEC-42](docs/AIA-FT01-SEC-42-PARIDADE-MUTACOES-OP01.md) adiciona uma matriz Python adversarial, ainda em revisão. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**Gate SEC-42 integrado:** **555 testes PHP / lint de 83 arquivos PHP**, mais Python. [CI pós-merge #42899017010](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42899017010) aprovada; [EVID-27](docs/AIA-R01-EVID-27-SEC41-42-POSTMERGE.md) registra SEC-41/42. A matriz Python adversarial é somente sintética. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
