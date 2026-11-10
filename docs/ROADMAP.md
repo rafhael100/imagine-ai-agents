@@ -1,3 +1,12 @@
+## Status atual — demonstração offline validada; próximo marco é contrato CRM real (09/11/2026)
+
+- [F1-27 / PR #162](https://github.com/rafhael100/imagine-ai-agents/pull/162), [CI #42739875000](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42739875000) `success`: demo CLI sem parâmetros, sem rede, com cinco cenários e relatórios minimizados. Merge apenas na dev `e669f11dbc7a2adc052f4461c4e820a74aae52bc`.
+- [CI-SEC-02 / PR #163](https://github.com/rafhael100/imagine-ai-agents/pull/163), [CI #42740221620](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42740221620) `success`: triggers de push e PR agora incluem `examples/**`. Merge dev `8d8b981f93b25e0a726131034247467bdce84f0c`. **351 PHP / 82 lint** + suites de contrato Python é o gate vigente.
+- **Próximo marco não substituível por mais mocks:** resolver o [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) e os gates de IAM, ACL multiempresa/campo, LGPD, contrato OP-01, Infra e revisão independente. A demonstração offline não aprova integração real; R01-G01..G11 e CRM CORE/SEG/AUT **ABERTOS, NO-GO**.
+- CI pode ser ignorada caso o repo se torne privado; sem `success` no SHA correto, não fazer merge de código. A fase offline oferece uma prova de fluxo, **não um sistema pronto para produção**.
+
+---
+
 ## Próximo marco: homologar piloto CRM OP-01 real (09/11/2026)
 
 - **EVID-10:** [PR Agents #159](https://github.com/rafhael100/imagine-ai-agents/pull/159), [CI de revisão #42737036742](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42737036742) `success`: contrato fechado de resposta OP-01 e verificação cruzada PHP↔Python sem rede.
