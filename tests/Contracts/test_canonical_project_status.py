@@ -23,7 +23,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("docs/historico/STATUS-ATUAL-ANTES-CONSOLIDACAO-2026-11-10.md", current)
         self.assertIn("R01-G01..G11", current)
         self.assertIn("CORE/SEG/AUT", current)
-        self.assertIn("555 testes PHP", current)
+        self.assertIn("565 testes PHP", current)
         self.assertIn("SEC-42 integrada à dev (PR #214)", current)
         self.assertIn("83 arquivos PHP", current)
         self.assertIn("NO-GO", current)
@@ -71,6 +71,16 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("NAO_EXECUTADO", current)
         self.assertIn("NO-GO", current)
 
+    def test_sec43_offline_recheck_preserves_no_go_and_reviewer_gate(self):
+        current = STATUS.read_text(encoding="utf-8")
+        rules = AGENT_RULES.read_text(encoding="utf-8")
+        self.assertIn("SEC-43 em revisão", current)
+        self.assertIn("565 testes PHP", current)
+        self.assertIn("83 arquivos PHP", current)
+        self.assertIn("AIA-FT01-SEC-43-REVALIDACAO-POS-LEITURA.md", rules)
+        self.assertIn("NAO_EXECUTADO", current)
+        self.assertIn("NO-GO", current)
+
     def test_history_preserved_without_overwriting_evidence(self):
         previous = ARCHIVE.read_text(encoding="utf-8")
         prior_roadmap = ARCHIVED_ROADMAP.read_text(encoding="utf-8")
@@ -89,7 +99,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertLess(len(current), 8000)
         self.assertGreater(len(history), 80000)
         self.assertIn("docs/historico/README-ANTES-CONSOLIDACAO-2026-11-10.md", current)
-        self.assertIn("EXPECTED_CASES=555", current)
+        self.assertIn("EXPECTED_CASES=565", current)
         self.assertIn("NO-GO", current)
         self.assertIn("CRM PR #57", current)
         self.assertIn("EXPECTED_CASES=397", history)
