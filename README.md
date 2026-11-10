@@ -1,5 +1,26 @@
 # Imagine AI Agents
 
+## Demonstração executável F1-27 — somente leitura, sem CRM real
+
+O laboratório FT01 pode ser apresentado por um comando local (PHP 8.1+ já instalado), sem rede, credenciais, banco, fornecedores nem dados de clientes:
+
+```bash
+php examples/f127-read-only-pilot-demo.php
+```
+
+O comando imprime **JSON estável** com cinco cenários: leitura mínima autorizada, bloqueio de replay, recusa de outra empresa, campo não permitido e ausência de concessão do produto dono. Apenas a primeira ação produz uma sugestão **fixa e fictícia**. A saída nunca contém IDs de lead, empresa, pessoa, token, prompt ou dados reais; `write_calls=0`, `external_calls=0`, `real_authorization=false` e `operational_decision=NO_GO` são obrigatórios.
+
+Para executar o gate offline completo em um checkout Git com o SHA correto:
+
+```bash
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=351 bash tools/run_r01_offline_quality_gate.sh
+```
+
+**Atenção:** o comando acima verifica o checkout local selecionado, mas não constitui revisão independente de um SHA autorizado; CI no PR com checkout SHA-fixado permanece necessária. Esta demonstração não é endpoint, não autentica serviço nem concede acesso CRM. Consulte `docs/AIA-FT01-F1-27-DEMO-CLI-LEITURA-MINIMA.md`. O CRM [PR #57](https://github.com/rafhael100/imagine-crm/pull/57) e gates R01/CORE/SEG/AUT permanecem abertos; nenhuma alteração em `main`, VPS ou produção.
+
+---
+
+
 ## FT01/F1-23 — falha de consulta de status auditável sem mudança de efeito (09/11/2026)
 
 - A reconciliação agora registra o evento fixo `STATUS_UNAVAILABLE` quando o gateway simulado falha. O erro original continua sendo comunicado, mas não é gravado na trilha, nem muda o último estado confirmado.
