@@ -210,7 +210,7 @@ return [
         f147FillAttempts($ledger);
         [, $intent] = fixture();
         $extra = new Attempt('SYNTHETIC_U47_PROOF_EXTRA', $intent, 'TIMEOUT');
-        $proof = new MockUsageProof('SYNTHETIC_U47_PROOF', $extra, 2);
+        $proof = new MockUsageProof('SYNTHETIC_PROOF_U47_EXTRA', $extra, 2);
         $snapshot = $ledger->events();
         denied('USAGE_CAPACITY_DENIED', fn() => $ledger->reconcile($extra, $proof, 15));
         check($ledger->events() === $snapshot);
@@ -223,7 +223,7 @@ return [
         foreach ($attempts as $attempt) $ledger->markUnknown($attempt, 15);
         check(count($ledger->events()) === 768);
         foreach ($attempts as $i => $attempt) {
-            $proof = new MockUsageProof('SYNTHETIC_U47_WRONG_PROOF_' . $i, $attempt, 2);
+            $proof = new MockUsageProof('SYNTHETIC_PROOF_U47_WRONG_' . $i, $attempt, 2);
             check($ledger->reconcile($attempt, $proof, 15)['reason'] === 'PROOF_CONFLICT');
         }
         check(count($ledger->events()) === 1024);
