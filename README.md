@@ -52,10 +52,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=546 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=555 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**Gate F163 verificado após merge:** **546 testes PHP / lint de 82 arquivos PHP**, mais verificações Python; [CI #42894696737](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42894696737) `success` e [EVID-26](docs/AIA-R01-EVID-26-F163-CI-POSTMERGE.md). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**Gate SEC-41 em revisão:** **555 testes PHP / lint de 83 arquivos PHP** e verificadores Python; o [gate F163 anterior (546)](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42894696737) foi aprovado. A nova CI exige o SHA revisado. [Projeção OP-01 compartilhada](docs/AIA-FT01-SEC-41-PROJECAO-OP01-UNIFICADA.md). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
