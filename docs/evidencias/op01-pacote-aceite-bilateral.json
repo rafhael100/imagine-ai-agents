@@ -1,0 +1,259 @@
+{
+  "api_crm_verificada": false,
+  "chamadas_externas": 0,
+  "contagens": {
+    "cenarios": 13,
+    "cenarios_nao_executados": 13,
+    "decisoes_pendentes": 7,
+    "gates": 14,
+    "gates_abertos": 14,
+    "gates_em_revisao": 0
+  },
+  "decisao_piloto": "NO_GO",
+  "decisoes": [
+    {
+      "aprovado": false,
+      "cenarios_homologacao": [
+        {
+          "cenario": "servico-sem-autenticacao-ou-chave-revogada",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N01"
+        },
+        {
+          "cenario": "issuer-audience-ou-ambiente-divergentes",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N02"
+        },
+        {
+          "cenario": "empresa-ou-principal-suspenso-revogado",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N03"
+        }
+      ],
+      "estado": "ABERTO_SEM_ACEITE",
+      "evidencias_pendentes": [
+        "identidade-servico-e-revogacao-verificadas",
+        "identidade-membro-e-revogacao"
+      ],
+      "gates": [
+        "R01-G01",
+        "CRM-AUT"
+      ],
+      "id": "OP01-R01",
+      "revisores_sugeridos": "CRM AUT + SEG"
+    },
+    {
+      "aprovado": false,
+      "cenarios_homologacao": [
+        {
+          "cenario": "empresa-ou-principal-suspenso-revogado",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N03"
+        },
+        {
+          "cenario": "recurso-inexistente-versus-outro-tenant",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N04"
+        },
+        {
+          "cenario": "projecao-de-campos-pessoais-ou-desconhecidos",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N05"
+        },
+        {
+          "cenario": "leitura-propria-com-escopo-minimo",
+          "esperado": "LEITURA_MINIMA",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-P01"
+        },
+        {
+          "cenario": "campos-permitidos-em-ordem-alternativa",
+          "esperado": "LEITURA_MINIMA",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-P02"
+        }
+      ],
+      "estado": "ABERTO_SEM_ACEITE",
+      "evidencias_pendentes": [
+        "ACL-recurso-campo-e-isolamento-tenant",
+        "propriedade-recurso-e-campos",
+        "ACL-RLS-e-threat-model"
+      ],
+      "gates": [
+        "R01-G02",
+        "CRM-CORE",
+        "CRM-SEG"
+      ],
+      "id": "OP01-R02",
+      "revisores_sugeridos": "CRM CORE + SEG"
+    },
+    {
+      "aprovado": false,
+      "cenarios_homologacao": [
+        {
+          "cenario": "replay-entre-instancias-e-reinicio",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N07"
+        },
+        {
+          "cenario": "revogacao-durante-espera-em-fila",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N08"
+        }
+      ],
+      "estado": "ABERTO_SEM_ACEITE",
+      "evidencias_pendentes": [
+        "idempotencia-replay-distribuido-reconciliacao",
+        "identidade-membro-e-revogacao"
+      ],
+      "gates": [
+        "R01-G03",
+        "CRM-AUT"
+      ],
+      "id": "OP01-R03",
+      "revisores_sugeridos": "CRM AUT + Infra"
+    },
+    {
+      "aprovado": false,
+      "cenarios_homologacao": [
+        {
+          "cenario": "projecao-de-campos-pessoais-ou-desconhecidos",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N05"
+        },
+        {
+          "cenario": "observabilidade-com-segredos-ou-payload",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N10"
+        }
+      ],
+      "estado": "ABERTO_SEM_ACEITE",
+      "evidencias_pendentes": [
+        "LGPD-finalidade-retencao-provedores",
+        "licenciamento-subprocessadores"
+      ],
+      "gates": [
+        "R01-G05",
+        "R01-G09"
+      ],
+      "id": "OP01-R04",
+      "revisores_sugeridos": "Privacidade + Jurídico"
+    },
+    {
+      "aprovado": false,
+      "cenarios_homologacao": [
+        {
+          "cenario": "escrita-ou-versao-nao-reconhecida",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N06"
+        },
+        {
+          "cenario": "campos-permitidos-em-ordem-alternativa",
+          "esperado": "LEITURA_MINIMA",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-P02"
+        }
+      ],
+      "estado": "ABERTO_SEM_ACEITE",
+      "evidencias_pendentes": [
+        "contrato-bilateral-versao-e-rollback",
+        "propriedade-recurso-e-campos"
+      ],
+      "gates": [
+        "R01-G08",
+        "CRM-CORE"
+      ],
+      "id": "OP01-R05",
+      "revisores_sugeridos": "Arquitetura + CRM CORE"
+    },
+    {
+      "aprovado": false,
+      "cenarios_homologacao": [
+        {
+          "cenario": "servico-crm-ou-autorizador-indisponivel",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N09"
+        },
+        {
+          "cenario": "observabilidade-com-segredos-ou-payload",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N10"
+        },
+        {
+          "cenario": "falha-telemetria-antes-do-parse",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N11"
+        }
+      ],
+      "estado": "ABERTO_SEM_ACEITE",
+      "evidencias_pendentes": [
+        "aceite-seguranca-e-integração-executada",
+        "isolamento-segredos-incidentes-recuperacao",
+        "ACL-RLS-e-threat-model"
+      ],
+      "gates": [
+        "R01-G07",
+        "R01-G10",
+        "CRM-SEG"
+      ],
+      "id": "OP01-R06",
+      "revisores_sugeridos": "Segurança + Operações + QA"
+    },
+    {
+      "aprovado": false,
+      "cenarios_homologacao": [
+        {
+          "cenario": "revogacao-durante-espera-em-fila",
+          "esperado": "NEGAR",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-N08"
+        },
+        {
+          "cenario": "leitura-propria-com-escopo-minimo",
+          "esperado": "LEITURA_MINIMA",
+          "estado": "NAO_EXECUTADO",
+          "id": "OP01-P01"
+        }
+      ],
+      "estado": "ABERTO_SEM_ACEITE",
+      "evidencias_pendentes": [
+        "aprovacoes-autenticadas-e-revogaveis",
+        "uso-tecnico-e-creditos-reconciliados",
+        "escopo-piloto-custos-autorizacao"
+      ],
+      "gates": [
+        "R01-G04",
+        "R01-G06",
+        "R01-G11"
+      ],
+      "id": "OP01-R07",
+      "revisores_sugeridos": "Direção + Produto + Financeiro"
+    }
+  ],
+  "fonte_crm": {
+    "blob_documental": "cefb390ec41a76d486b137279d92627f097d1d47",
+    "estado": "DRAFT_NOT_APPROVED",
+    "head_revisado": "97bc1e8d6ce4cf4b52378472c31cb49de6a66d51",
+    "pr": 57,
+    "repositorio": "rafhael100/imagine-crm"
+  },
+  "integracao_autorizada": false,
+  "observacao": "Inventario e proposta em rascunho; somente parecer humano independente e homologacao podem mudar os gates.",
+  "permite_credenciais": false,
+  "permite_deploy": false,
+  "report": "AIA_OP01_BILATERAL_REVIEW_PACKET_V1"
+}
