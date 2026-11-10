@@ -18,6 +18,23 @@ final class MockCrmOwnerPolicy
     /** @var array<string,bool> */
     private array $suspendedMembers = [];
     private bool $available = true;
+    // One monotonic epoch for this local owner fixture. A revoke/regrant,
+    // suspend/resume or outage/recovery must invalidate prior read receipts.
+    // Global scope deliberately fails closed across tenants.
+    private int $revision = 0;
+
+    public function revision(): int { return $this->revision; }
+
+    public function assertRevision(int $expected): void
+    {
+        if ($this->revision !== $expected) MockError::fail('RESOURCE_DENIED_OR_MISSING');
+    }
+
+    private function touch(): void
+    {
+        if ($this->revision === PHP_INT_MAX) MockError::fail('OWNER_POLICY_UNAVAILABLE');
+        ++$this->revision;
+    }
 
     /** Configure an explicit permit for exactly one fictional resource/context. */
     public function grantFixture(TenantContext $context, array $fields): void
@@ -25,12 +42,14 @@ final class MockCrmOwnerPolicy
         if (!self::validFixtureContext($context) || !self::validFields($fields)) {
             MockError::fail('OWNER_POLICY_SCHEMA_DENIED');
         }
+        $this->touch();
         $this->grants[$context->key()] = $fields;
     }
 
     public function revokeFixture(TenantContext $context): void
     {
         if (!self::validFixtureContext($context)) MockError::fail('OWNER_POLICY_SCHEMA_DENIED');
+        $this->touch();
         unset($this->grants[$context->key()]);
     }
 
@@ -39,6 +58,7 @@ final class MockCrmOwnerPolicy
         if (!in_array($tenant, ['SYNTHETIC_A', 'SYNTHETIC_B'], true)) {
             MockError::fail('OWNER_POLICY_SCHEMA_DENIED');
         }
+        $this->touch();
         if ($suspended) $this->suspendedTenants[$tenant] = true;
         else unset($this->suspendedTenants[$tenant]);
     }
@@ -50,11 +70,16 @@ final class MockCrmOwnerPolicy
             MockError::fail('OWNER_POLICY_SCHEMA_DENIED');
         }
         $key = $tenant . ':' . $principal;
+        $this->touch();
         if ($suspended) $this->suspendedMembers[$key] = true;
         else unset($this->suspendedMembers[$key]);
     }
 
-    public function setAvailable(bool $available): void { $this->available = $available; }
+    public function setAvailable(bool $available): void
+    {
+        $this->touch();
+        $this->available = $available;
+    }
 
     /**
      * Re-check a provider-owned fictional policy at each read.
