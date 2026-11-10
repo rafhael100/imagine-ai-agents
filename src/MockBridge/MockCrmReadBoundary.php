@@ -16,7 +16,23 @@ final class MockCrmReadBoundary
         private readonly MockCrmOwnerPolicy $ownerPolicy,
     ) {}
 
-    public function evaluate(
+    /**
+     * Non-consuming read permission check after the reader or suggestion
+     * provider returns. This is not authorization for a new read or a token.
+     */
+    public function recheck(
+        MockCrmReadRequest $request,
+        ?MockTrustEnvelope $envelope,
+        ?MockOwnerScopeEvidence $owner,
+        TenantContext $trustedContext,
+        int $now,
+    ): void {
+        $request->assertMatches($trustedContext);
+        $this->ownerPolicy->assertAllowed($trustedContext, $request->fields);
+        $this->gateway->recheck(
+            $envelope, $owner, $trustedContext, 'SYNTHETIC_LEAD_READ', $now);
+    }
+
         MockCrmReadRequest $request,
         ?MockTrustEnvelope $envelope,
         ?MockOwnerScopeEvidence $owner,
@@ -44,9 +60,7 @@ final class MockCrmReadBoundary
         // while a read is in progress. Check revocation/suspension again
         // before calling the projection safe or recording a success.
         // The already-consumed nonce is NOT consumed a second time.
-        $this->ownerPolicy->assertAllowed($trustedContext, $request->fields);
-        $this->gateway->recheck(
-            $envelope, $owner, $trustedContext, 'SYNTHETIC_LEAD_READ', $now);
+        $this->recheck($request, $envelope, $owner, $trustedContext, $now);
         $orderedProjection = MockReadProjectionInvariant::canonicalize(
             $projection, $request->fields, $trustedContext);
         if ($orderedProjection === null) MockError::fail('BRIDGE_PROJECTION_DENIED');
