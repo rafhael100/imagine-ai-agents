@@ -62,6 +62,8 @@ A [SEC-46](AIA-FT01-SEC-46-RECIBO-REVISAO-OWNER-ABA.md) foi integrada à dev, bl
 
 A [SEC-47](AIA-FT01-SEC-47-RECHECK-TEMPO-MONOTONICO.md) integrada à dev bloqueia retrocesso/expiração no recheck sintético, com oito regressões e **605 testes PHP / 83 lint**. [CI pós-merge #42923158871](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42923158871) e [EVID-32](AIA-R01-EVID-32-SEC47-CI-POSTMERGE.md) aprovadas; sem relógio real nem CRM.
 
+A [SEC-48](AIA-FT01-SEC-48-REENTRADA-LEITURA-OP01.md) nega reentrada durante leitura e impede auditoria de sucesso, mesmo se o adaptador ignorar a negação. Oito U70-01..08; **gate 613 PHP / 83 lint** em revisão. Apenas um processo, sem lock distribuído.
+
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 
 **Pacote de revisão disponível, aguardando decisões independentes:** [OP-01 JSON](evidencias/op01-pacote-aceite-bilateral.json) e [EVID-19](AIA-R01-EVID-19-PACOTE-BILATERAL-OP01.md) relacionam sete responsáveis sugeridos a 14 gates e 13 cenários ainda não homologados. [CI pós-merge #42770907072](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42770907072) success no arquivo gerado. **Este é um checklist, não um GO.** Registrar pareceres de CRM CORE/SEG/AUT, Privacidade, Infra e Direção com evidências reais; não abrir API antes da liberação.
