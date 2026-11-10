@@ -40,6 +40,13 @@ final class MockSupervisedGateway implements CrmEffectGateway
         $prior = $this->status($intent->context, $intent);
         if ($prior->state === 'NAO_SOLICITADO') MockError::fail('INTENT_NOT_SUBMITTED');
         if (in_array($prior->state, ['CONFIRMADO', 'NEGADO'], true)) MockError::fail('STATE_CONFLICT');
+        // Exact nonterminal observations are replays, not new evidence.
+        // A later PENDENTE observation must not be overwritten by a stale
+        // INDETERMINADO response (e.g. an older timeout result).
+        if ($prior->state === $state) return;
+        if ($prior->state === 'PENDENTE' && $state === 'INDETERMINADO') {
+            MockError::fail('STATE_CONFLICT');
+        }
         $this->evidence[$intent->key()] = new Effect($intent, $state,
             $state === 'CONFIRMADO' ? 'SYNTHETIC_EFFECT_' . hash('sha256', $intent->key()) : null,
             $state === 'CONFIRMADO' ? 'SYNTHETIC_MOCK_CRM' : null);

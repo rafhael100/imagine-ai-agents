@@ -273,4 +273,76 @@ return [
         check($gateway->status(context(), $first[0]) === $first[2]);
         check($gateway->count() === 256);
     },
+
+    'U55-01 pending observation cannot regress to stale indeterminate' => function (): void {
+        [$intent, $approval] = f154GatewayIntent(501);
+        $gateway = new MockSupervisedGateway('PENDENTE');
+        $gateway->submit($intent, $approval, 15);
+        $prior = $gateway->status(context(), $intent);
+        denied('STATE_CONFLICT', fn () => $gateway->recordSyntheticEvidence(
+            $intent, 'INDETERMINADO'));
+        check($gateway->status(context(), $intent) === $prior);
+        check($gateway->submitCount() === 1);
+    },
+    'U55-02 repeated pending evidence is idempotent by identity' => function (): void {
+        [$intent, $approval] = f154GatewayIntent(502);
+        $gateway = new MockSupervisedGateway('INDETERMINADO');
+        $gateway->submit($intent, $approval, 15);
+        $gateway->recordSyntheticEvidence($intent, 'PENDENTE');
+        $first = $gateway->status(context(), $intent);
+        $gateway->recordSyntheticEvidence($intent, 'PENDENTE');
+        check($gateway->status(context(), $intent) === $first);
+        denied('STATE_CONFLICT', fn () => $gateway->recordSyntheticEvidence(
+            $intent, 'INDETERMINADO'));
+    },
+    'U55-03 repeated initial indeterminate remains original immutable evidence' => function (): void {
+        [$intent, $approval] = f154GatewayIntent(503);
+        $gateway = new MockSupervisedGateway('INDETERMINADO');
+        $gateway->submit($intent, $approval, 15);
+        $prior = $gateway->status(context(), $intent);
+        $gateway->recordSyntheticEvidence($intent, 'INDETERMINADO');
+        $gateway->recordSyntheticEvidence($intent, 'INDETERMINADO');
+        check($gateway->status(context(), $intent) === $prior);
+        check($gateway->submitCount() === 1);
+    },
+    'U55-04 monotonic pending confirmation rejects later stale observations' => function (): void {
+        [$intent, $approval] = f154GatewayIntent(504);
+        $gateway = new MockSupervisedGateway('INDETERMINADO', true);
+        denied('SYNTHETIC_TIMEOUT', fn () => $gateway->submit($intent, $approval, 15));
+        $gateway->recordSyntheticEvidence($intent, 'PENDENTE');
+        $gateway->recordSyntheticEvidence($intent, 'CONFIRMADO');
+        $confirmed = $gateway->status(context(), $intent);
+        check($confirmed->isConfirmed() && $gateway->submitCount() === 1);
+        foreach (['INDETERMINADO', 'PENDENTE', 'NEGADO'] as $stale) {
+            denied('STATE_CONFLICT', fn () => $gateway->recordSyntheticEvidence($intent, $stale));
+            check($gateway->status(context(), $intent) === $confirmed);
+        }
+    },
+    'U55-05 one intent evidence cannot overwrite a different intent key' => function (): void {
+        [$a, $ap] = f154GatewayIntent(505);
+        [$b, $bp] = f154GatewayIntent(506);
+        $gateway = new MockSupervisedGateway('INDETERMINADO');
+        $gateway->submit($a, $ap, 15);
+        $gateway->submit($b, $bp, 15);
+        $initialB = $gateway->status(context(), $b);
+        $gateway->recordSyntheticEvidence($a, 'PENDENTE');
+        check($gateway->status(context(), $a)->state === 'PENDENTE');
+        check($gateway->status(context(), $b) === $initialB);
+        $gateway->recordSyntheticEvidence($b, 'NEGADO');
+        check($gateway->status(context(), $a)->state === 'PENDENTE');
+        check($gateway->status(context(), $b)->state === 'NEGADO');
+    },
+    'U55-06 invalid state and unsubmitted evidence cannot forge a proof' => function (): void {
+        [$intent, $approval] = f154GatewayIntent(507);
+        $gateway = new MockSupervisedGateway();
+        denied('INTENT_NOT_SUBMITTED', fn () => $gateway->recordSyntheticEvidence($intent, 'CONFIRMADO'));
+        denied('STATE_CONFLICT', fn () => $gateway->recordSyntheticEvidence($intent, 'FABRICATED'));
+        check($gateway->status(context(), $intent)->state === 'NAO_SOLICITADO');
+        $gateway->submit($intent, $approval, 15);
+        $gateway->recordSyntheticEvidence($intent, 'NEGADO');
+        $deniedEffect = $gateway->status(context(), $intent);
+        check($deniedEffect->state === 'NEGADO');
+        denied('STATE_CONFLICT', fn () => $gateway->recordSyntheticEvidence($intent, 'CONFIRMADO'));
+        check($gateway->status(context(), $intent) === $deniedEffect);
+    },
 ];

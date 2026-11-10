@@ -43,6 +43,10 @@ O catálogo de fontes sintéticas agora aceita até **256 fontes** e a trilha de
 
 O gateway local preserva no máximo **256 efeitos fictícios**, recusando novos envios ao esgotar a memória sem perder replays, conflitos ou consultas de status anteriores. Sete regressões testam também timeouts e isolamento por tenant. [Detalhes SEC-32](docs/AIA-FT01-SEC-32-EFEITOS-LIMITADOS.md). Nenhuma operação é enviada a clientes ou ao CRM real.
 
+## SEC-33 — Reconciliação monotônica fictícia
+
+Resultados `PENDENTE` não voltam a `INDETERMINADO`; observações não terminais repetidas preservam a prova anterior. Seis novos testes. [SEC-33](docs/AIA-FT01-SEC-33-EVIDENCIAS-MONOTONICAS.md). Sem CRM real.
+
 ## Executar e verificar, sem rede
 
 Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem instalar serviços ou baixar dependências.
@@ -50,10 +54,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=479 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=485 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**Baseline verificado na dev:** **479 testes PHP / lint de 82 arquivos PHP**, mais os verificadores Python de contrato e isolamento, [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) `success`. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**Baseline verificado na dev:** **485 testes PHP / lint de 82 arquivos PHP**, mais os verificadores Python de contrato e isolamento, [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) `success`. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 

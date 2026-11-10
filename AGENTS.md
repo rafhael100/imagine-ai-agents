@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline em revisão — SEC-33 (10/11/2026)
+
+- `MockSupervisedGateway`: proibir `PENDENTE → INDETERMINADO`, preservar replays idempotentes não terminais e estados terminais imutáveis.
+- **Gate esperado: 485 testes PHP / 82 lint + Python**. [SEC-33](docs/AIA-FT01-SEC-33-EVIDENCIAS-MONOTONICAS.md). Histórico anterior permanece.
+- CRM PR #57 OPEN/DRAFT; R01-G01..G11 e CORE/SEG/AUT ABERTOS/NO-GO. Somente dev sintética e offline, sem `main`, VPS, clientes, segredos, produção ou custos.
+
 ## Baseline em revisão — SEC-32 (10/11/2026)
 
 - `MockCrmEffectGateway`: máximo 256 efeitos fictícios por instância; recusar novas submissões antes de registrar efeito, não expulsar histórico, replays e conflitos íntegros.
