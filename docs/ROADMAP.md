@@ -1,3 +1,12 @@
+## Gate técnico SEC-13 — política CRM-owner obrigatória; integração real continua pendente (09/11/2026)
+
+- [PR Agents #168](https://github.com/rafhael100/imagine-ai-agents/pull/168) (merge dev `422bb277ecccf80f45b243a94903b63a305cd069`) removeu a possibilidade de `MockCrmReadBoundary` operar sem política explícita do produto dono. [CI de revisão #42743896039](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42743896039) e [CI pós-merge #42743951923](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42743951923) `success`.
+- **Baseline revisado: 362 testes PHP / 82 lint** e regressões Python. Nunca interpretar estes números como percentual de produto real pronto: cobrem apenas simulações em memória e contrato fictício.
+- O próximo avanço de integração depende de **CRM PR #57, G01/G02/G05/G08/G10/G11, CORE/SEG/AUT e demais gates aplicáveis**, com contrato e autorização de dados aprovados bilateralmente. Nenhum endpoint CRM real foi criado pelo Agents.
+- Preservar `NO-GO` para `main`, VPS, produção, clientes, segredos ou novas despesas até homologação e autorização específica.
+
+---
+
 ## Etapa offline consolidada — próximo marco requer CRM homologado (09/11/2026)
 
 - [F1-28 / PR #165](https://github.com/rafhael100/imagine-ai-agents/pull/165): CI [#42741450740](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42741450740) `success`; evita consumir nonce e leitura quando a Run não pode começar. Merge dev `cba280c1b5106d1861d75d78bc8ad1185a9787b1`.
