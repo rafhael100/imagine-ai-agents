@@ -30,7 +30,8 @@ for name in \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
   test_synthetic_php_isolation.py \
-  test_quality_gate_coverage.py
+  test_quality_gate_coverage.py \
+  test_canonical_project_status.py
 do
   python3 -m unittest discover -s tests/Contracts -p "$name" -v
 done
