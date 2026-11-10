@@ -71,7 +71,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertLess(len(current), 8000)
         self.assertGreater(len(history), 80000)
         self.assertIn("docs/historico/README-ANTES-CONSOLIDACAO-2026-11-10.md", current)
-        self.assertIn("EXPECTED_CASES=533", current)
+        self.assertIn("EXPECTED_CASES=546", current)
         self.assertIn("NO-GO", current)
         self.assertIn("CRM PR #57", current)
         self.assertIn("EXPECTED_CASES=397", history)
