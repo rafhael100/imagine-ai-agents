@@ -1,5 +1,12 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline em revisão — SEC-29 (10/11/2026)
+
+- `MockPromotionGate`: até 128 decisões e 256 eventos de auditoria, reservando capacidade antes de promover/rollback e uma vaga para suspensão; sem expulsar histórico.
+- **Gate esperado: 458 testes PHP / 82 lint + Python.** [SEC-29](docs/AIA-FT01-SEC-29-RESERVA-AUDITORIA-VERSOES.md). Números anteriores abaixo são históricos.
+- CRM PR #57 segue OPEN/DRAFT, R01-G01..G11 / CORE-SEG-AUT ABERTOS/NO-GO. Não tocar na `main`, VPS, produção, clientes, dados reais, segredos ou custos.
+
+
 ## Baseline em revisão — SEC-28 (10/11/2026)
 
 - Quadro de revisão sintético limitado a 128 digests sem expulsar histórico. Mesmo no limite, permitem-se o segundo papel independente e repetições idempotentes; nenhuma promoção real.
