@@ -182,4 +182,56 @@ return [
         check($counts->snapshot()['outcomes']['READ_SYNTHETIC_ONLY'] === 2
             && $audit->count() === 2);
     },
+
+    'U31-01 duplicate pilot run rejects fresh read before burning nonce or audit' => function (): void {
+        [$pilot, $mut, $c, $counts, , $audit, $env, $owner, $ctx] =
+            f130Fixture(f130Grant());
+        $id = 'SYNTHETIC_PILOT_RUN_COLLISION';
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx, 15, $id) === f130Success());
+        [$newEnv, $newOwner] = f130Proof($ctx, 'COLLISION_FRESH');
+        check($pilot->suggest(f112Wire($ctx), $newEnv, $newOwner, $ctx, 15, $id) === f130Denial());
+        check(count($c->events()) === 4 && $counts->snapshot()['attempts'] === 1
+            && $audit->count() === 1 && $mut->submitCount() === 0);
+        // The fresh envelope was not consumed: the same proof may open a new run.
+        check($pilot->suggest(f112Wire($ctx), $newEnv, $newOwner, $ctx,
+            15, 'SYNTHETIC_PILOT_RUN_AFTER_COLLISION') === f130Success());
+        check($counts->snapshot()['attempts'] === 2 && $audit->count() === 2);
+    },
+    'U31-02 misbound coordinator context denies before CRM-owned edge' => function (): void {
+        [$edge, $counts, , $audit, $env, $owner, $ctx] = f118Fixture(f130Grant());
+        $coordinator = new SupervisedCoordinator(context('SYNTHETIC_B'),
+            new MockSupervisedGateway(), new MockAiSuggestionProvider());
+        $pilot = new MockReadOnlyPilot($ctx, $edge, $coordinator);
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_PILOT_RUN_MISBOUND') === f130Denial());
+        check($counts->snapshot()['attempts'] === 0
+            && $audit->count() === 0 && $coordinator->events() === []);
+    },
+    'U31-03 insufficient trace room refuses before consuming a synthetic read' => function (): void {
+        [$pilot, $mut, $c, $counts, , $audit, $env, $owner, $ctx] =
+            f130Fixture(f130Grant());
+        for ($i = 0; $i < 1021; ++$i) {
+            $c->start('SYNTHETIC_PREFILL_RUN_' . $i);
+        }
+        check(count($c->events()) === 1021);
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_PILOT_RUN_NO_ROOM') === f130Denial());
+        check(count($c->events()) === 1021 && $counts->snapshot()['attempts'] === 0
+            && $audit->count() === 0 && $mut->submitCount() === 0);
+    },
+    'U31-04 exact four-slot room admits one run, then rejects further reads' => function (): void {
+        [$pilot, $mut, $c, $counts, , $audit, $env, $owner, $ctx] =
+            f130Fixture(f130Grant());
+        for ($i = 0; $i < 1020; ++$i) {
+            $c->start('SYNTHETIC_BOUNDARY_RUN_' . $i);
+        }
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_PILOT_RUN_LAST_FOUR') === f130Success());
+        check(count($c->events()) === 1024);
+        [$secondEnv, $secondOwner] = f130Proof($ctx, 'AFTER_FULL');
+        check($pilot->suggest(f112Wire($ctx), $secondEnv, $secondOwner, $ctx,
+            15, 'SYNTHETIC_PILOT_RUN_AFTER_FULL') === f130Denial());
+        check(count($c->events()) === 1024 && $counts->snapshot()['attempts'] === 1
+            && $audit->count() === 1 && $mut->submitCount() === 0);
+    },
 ];

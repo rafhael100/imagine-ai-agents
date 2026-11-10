@@ -39,9 +39,10 @@ final class MockReadOnlyPilot
             // The coordinator and read edge must operate for the same bound
             // mock context. Never trust caller-supplied tenant substitutions.
             $this->boundContext->assertSame($trustedContext);
-            if (preg_match('/^SYNTHETIC_[A-Z0-9_]{1,70}$/D', $runId) !== 1) {
-                throw new \LogicException('UNSAFE_SYNTHETIC_RUN_REF');
-            }
+            // Before a mock CRM read consumes its nonce and audit slot,
+            // validate run ownership and room for the entire four-event
+            // synthetic lifecycle. A failed preflight must be side-effect free.
+            $this->coordinator->assertPilotRunReady($runId, $trustedContext);
 
             $read = $this->edge->handle(
                 $wire, $envelope, $owner, $trustedContext, $now
