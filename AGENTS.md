@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline em revisão — SEC-36 (10/11/2026)
+
+- `MockToolDispatcher` recusa IDs de ferramentas acima de 128 bytes antes de consultar catálogo, provider ou borda CRM fictícia. Auditoria desses erros usa um hash de marcador fixo; nunca hashear entrada arbitrariamente longa.
+- **Gate esperado: 505 testes PHP / 82 lint + Python.** [SEC-36](docs/AIA-FT01-SEC-36-IDS-FERRAMENTA-LIMITADOS.md).
+- CRM PR #57 OPEN/DRAFT; R01-G01..G11 / CORE/SEG/AUT ABERTOS/NO-GO. Somente dev offline, sem `main`, VPS, produção, clientes, segredos ou custos.
+
 ## Baseline em revisão — SEC-35 (10/11/2026)
 
 - `SupervisedCoordinator::remember` normaliza ausência/solicitação para incerteza antes de comparar, bloqueia `PENDENTE → INDETERMINADO`, preserva objetos de respostas não terminais idênticas e mantém o fechamento de auditoria. Sem reenvio de operações.
