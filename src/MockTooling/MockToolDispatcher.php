@@ -13,6 +13,16 @@ use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence};
 final class MockToolDispatcher
 {
     private const MAX_TRACE_EVENTS = 1024;
+    // Only fixed, reviewed API-level errors may cross the mock dispatcher.
+    // A gateway can throw MockError with arbitrary text: never forward it.
+    private const PUBLIC_DENIAL_CODES = [
+        'TOOL_DENIED', 'CAPABILITY_DENIED', 'PARAMETER_DENIED',
+        'READ_BOUNDARY_REQUIRED', 'RUN_REQUIRED', 'CONTEXT_DENIED',
+        'RUN_NOT_OWNED', 'RUN_NOT_ACTIVE', 'TRACE_CAPACITY_EXCEEDED',
+        'TOOL_TRACE_CAPACITY_DENIED', 'INTENT_REQUIRED', 'INTENT_CONFLICT',
+        'APPROVAL_REQUIRED', 'IDEMPOTENCY_CONFLICT', 'STEP_NOT_OWNED',
+        'TOOL_SUGGESTION_DENIED', 'SYNTHETIC_STATUS_UNAVAILABLE',
+    ];
     private array $events = [];
 
     public function __construct(
@@ -97,8 +107,13 @@ final class MockToolDispatcher
             $this->trace($toolId, $context, $effect->state === 'CONFIRMADO' ? 'CONFIRMED' : 'UNKNOWN');
             return ['kind' => 'MUTATE', 'state' => $effect->state];
         } catch (MockError $error) {
-            // Never serialize exception text, prompt, resource or parameter values.
+            // The original exception may originate from an untrusted
+            // status gateway. Audit a fixed code and disclose only an
+            // explicitly reviewed error, never arbitrary exception text.
             $this->trace($toolId, $context, 'DENIED');
+            if (!in_array($error->getMessage(), self::PUBLIC_DENIAL_CODES, true)) {
+                MockError::fail('TOOL_EXECUTION_DENIED');
+            }
             throw $error;
         } catch (\Throwable) {
             // Unexpected adapter faults are recorded as a generic denial,
