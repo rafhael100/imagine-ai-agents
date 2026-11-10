@@ -9,6 +9,7 @@ use ImagineAI\MockCatalog\MockAgentVersionSnapshot;
 /** Read-only mock trust boundary. No networking, issuer verification or real IAM. */
 final class MockTrustGateway
 {
+    private const MAX_LOCAL_NONCES = 1024;
     private array $seenNonces = [];
     private readonly array $allowedScopes;
 
@@ -52,6 +53,11 @@ final class MockTrustGateway
         } else {
             // Historical single-gateway mock: no cross-instance durability.
             if (isset($this->seenNonces[$envelope->nonceRef])) MockError::fail('TRUST_REPLAY_DENIED');
+            // Never evict old nonce records; exceeding the mock's memory budget
+            // denies fresh requests rather than permitting replay.
+            if (count($this->seenNonces) >= self::MAX_LOCAL_NONCES) {
+                MockError::fail('TRUST_STATE_CAPACITY_DENIED');
+            }
             $this->seenNonces[$envelope->nonceRef] = $envelope->digest;
         }
         return [
