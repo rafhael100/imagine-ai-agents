@@ -6,9 +6,11 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **SEC-44 integrada à dev (PR #218): 575 testes PHP, lint de 83 arquivos PHP e verificadores Python** aprovados na [CI pós-merge #42906719897](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42906719897), commit `ded000871ad5f34a8e3697f91c6ba00b81941a70`. [EVID-29](docs/AIA-R01-EVID-29-SEC44-CI-POSTMERGE.md). O número de testes não é percentual de conclusão do produto.
+**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **SEC-45 em revisão: 585 testes PHP, lint de 83 arquivos PHP e verificadores Python**. Última CI pós-merge aprovada: SEC-44, **575 testes** ([CI #42906719897](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42906719897); [EVID-29](docs/AIA-R01-EVID-29-SEC44-CI-POSTMERGE.md)). O número de testes não é percentual de conclusão do produto.
 
 ## Últimas entregas verificadas
+
+**SEC-45 em revisão:** revalida autorização sintética após a sugestão e antes de concluir o Run. Revogação no provedor termina como `FALHOU`, sem resumo, nova leitura ou segundo nonce; dez regressões U67-01..10. [SEC-45](docs/AIA-FT01-SEC-45-REVALIDACAO-POS-SUGESTAO.md). Homologação CRM: `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-44 integrada à dev (PR #218):** a ferramenta OP-01 também usa a mesma invariante de projeção das outras três camadas; 10 regressões U66-01..10 validam ferramenta → edge → fachada → leitor, revogações durante a leitura, replay e auditoria. [SEC-44](docs/AIA-FT01-SEC-44-FERRAMENTA-PROJECAO-COMUM.md). CRM real: `NAO_EXECUTADO` / **NO-GO**.
 
