@@ -35,6 +35,9 @@ final class MockReadOnlyPilot
         int $now,
         string $runId,
     ): array {
+        // Track only a run started by this very invocation, so a provider
+        // failure cannot leave a fictional execution indefinitely active.
+        $run = null;
         try {
             // The coordinator and read edge must operate for the same bound
             // mock context. Never trust caller-supplied tenant substitutions.
@@ -80,8 +83,19 @@ final class MockReadOnlyPilot
                 'write_calls' => 0,
             ];
         } catch (\Throwable) {
-            // Uniform denial. No run or resource ID, policy reason, or text
-            // from an untrusted provider crosses this synthetic boundary.
+            // If a mock provider failed after starting a run, record the
+            // terminal FAILED state using the room reserved by preflight.
+            // Never overwrite a terminal state or issue a CRM write.
+            if ($run !== null && $run->state() === 'EXECUTANDO') {
+                try {
+                    $this->coordinator->transition($run, 'FALHOU');
+                } catch (\Throwable) {
+                    // The public contract remains uniformly denied even if
+                    // this in-memory diagnostic closure itself cannot run.
+                }
+            }
+            // No run or resource ID, policy reason, or untrusted text leaves
+            // this synthetic boundary in either the output or error handling.
             return self::denial();
         }
     }
