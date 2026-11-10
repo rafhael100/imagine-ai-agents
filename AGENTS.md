@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## Pacote bilateral de revisão OP-01 — 10/11/2026
+
+- [PR #184](https://github.com/rafhael100/imagine-ai-agents/pull/184), merge dev `65febcf1f271d40ab03534f1817f365bed68ba48`; [CI pós-merge #42770907072](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42770907072) `success`. Gerador e [pacote de revisão EVID-19](docs/AIA-R01-EVID-19-PACOTE-BILATERAL-OP01.md) mapeiam sete decisões, 14 gates e 13 cenários sem permitir aprovação automática.
+- **Baseline do laboratório permanece 403 PHP/82 lint + contratos Python.** CRM PR #57 continua OPEN/DRAFT e R01-G01..G11 / CRM CORE-SEG-AUT **ABERTOS/NO-GO**. Não liberar `main`, VPS, CRM real, credenciais, dados de clientes ou produção.
+
+
 ## Baseline de revisão vigente — SEC-20 / 10/11/2026
 
 - [PR #182](https://github.com/rafhael100/imagine-ai-agents/pull/182) integrado somente à dev (`c064a640fea07f6f353e9fe4329380c5a0354242`), [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) success. Projeção fictícia validada **antes** do registro de sucesso da auditoria.

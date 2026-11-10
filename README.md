@@ -23,6 +23,16 @@ EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=403 bash too
 
 **Baseline verificado na dev:** **403 testes PHP / lint de 82 arquivos PHP**, mais os verificadores Python de contrato e isolamento, [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) `success`. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
+## Pacote de aceite bilateral — revisão pendente
+
+O [pacote OP-01 gerado e versionado](docs/evidencias/op01-pacote-aceite-bilateral.json) reúne as **7 decisões**, os **14 gates** e os **13 cenários** ainda não executados, com [instruções de revisão EVID-19](docs/AIA-R01-EVID-19-PACOTE-BILATERAL-OP01.md). O verificador é executado no gate offline:
+
+```bash
+python3 tools/generate_op01_bilateral_packet.py --check
+```
+
+A [CI pós-merge #42770907072](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42770907072) foi aprovada. A saída permanece `NO_GO`, não fornece credenciais e não aprova contratos.
+
 ## Próximo marco de produto
 
 O [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) é uma proposta **OPEN/DRAFT não homologada**, sincronizada documentalmente em [EVID-17](docs/AIA-R01-EVID-17-RECONCILIACAO-CRM-PR57-2026-11-10.md). Faltam decisões e evidências independentes de autenticação serviço-serviço, autorização por empresa/recurso/campo **no backend CRM**, privacidade, retenção, replay distribuído, ambiente isolado, rollback e autorização formal de piloto. **R01-G01..G11 e CRM CORE/SEG/AUT permanecem ABERTOS/NO-GO.**
