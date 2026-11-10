@@ -30,6 +30,21 @@ function f110Vote(MockReviewBoard $board, MockReviewPacket $packet, TenantContex
     $board->vote($packet, $ctx, $digest ?? $packet->digest, $reviewer, $role, $decision, $now);
 }
 
+
+/** Fill distinct reviewed packet digests without any real identity or IAM. */
+function f150FillBoard(MockReviewBoard $board, int $count = 128, int $start = 0): array
+{
+    [, , $ctx, $suite, $baseline, $candidate] = f110Fixture();
+    $packets = [];
+    for ($i = $start; $i < $start + $count; ++$i) {
+        $packet = new MockReviewPacket('SYNTHETIC_PACKET_CAP_' . $i,
+            $ctx, $suite, $baseline, $candidate, 'SYNTHETIC_AUTHOR', 10, 40);
+        f110Vote($board, $packet, $ctx, 'PRODUCT', 'SYNTHETIC_REVIEWER_A');
+        $packets[] = $packet;
+    }
+    return [$ctx, $packets, $suite, $baseline, $candidate];
+}
+
 return [
     'U10-01 independent reviewers give only human handoff, never promotion' => function (): void {
         [$packet, $board, $ctx] = f110Fixture();
@@ -147,5 +162,87 @@ return [
         check(!str_contains(json_encode($view, JSON_THROW_ON_ERROR), 'SYNTHETIC_AUTHOR'));
         $status = $board->status($packet, $ctx, 15);
         check($status['real_authorization'] === false && $status['promotion_allowed'] === false);
+    },
+
+    'U50-01 no more than 128 independent packet digests consume review memory' => function (): void {
+        $board = new MockReviewBoard();
+        [$ctx, $packets, $suite, $baseline, $candidate] = f150FillBoard($board);
+        check(count($packets) === 128);
+        foreach ([$packets[0], $packets[127]] as $prior) {
+            check($board->status($prior, $ctx, 15)['review_count'] === 1);
+        }
+        $next = new MockReviewPacket('SYNTHETIC_PACKET_CAP_128', $ctx,
+            $suite, $baseline, $candidate, 'SYNTHETIC_AUTHOR', 10, 40);
+        denied('REVIEW_CAPACITY_DENIED', fn() => f110Vote($board, $next, $ctx,
+            'PRODUCT', 'SYNTHETIC_REVIEWER_A'));
+        check($board->status($next, $ctx, 15)['review_count'] === 0);
+        check($board->status($packets[127], $ctx, 15)['review_count'] === 1);
+    },
+    'U50-02 second independent role can finish existing packet after cap' => function (): void {
+        $board = new MockReviewBoard();
+        [$ctx, $packets] = f150FillBoard($board);
+        $packet = $packets[127];
+        f110Vote($board, $packet, $ctx, 'SECURITY', 'SYNTHETIC_REVIEWER_B');
+        $status = $board->status($packet, $ctx, 15);
+        check($status['review_count'] === 2
+            && $status['state'] === 'READY_FOR_HUMAN_HANDOFF'
+            && $status['real_authorization'] === false
+            && $status['promotion_allowed'] === false);
+    },
+    'U50-03 exact repeat at cap is idempotent but conflicting vote stays blocked' => function (): void {
+        $board = new MockReviewBoard();
+        [$ctx, $packets] = f150FillBoard($board);
+        $prior = $packets[0];
+        f110Vote($board, $prior, $ctx, 'PRODUCT', 'SYNTHETIC_REVIEWER_A');
+        denied('REVIEW_CONFLICT', fn() => f110Vote($board, $prior, $ctx,
+            'PRODUCT', 'SYNTHETIC_REVIEWER_B'));
+        denied('REVIEW_CONFLICT', fn() => f110Vote($board, $prior, $ctx,
+            'PRODUCT', 'SYNTHETIC_REVIEWER_A', 'REJECT'));
+        check($board->status($prior, $ctx, 15)['review_count'] === 1);
+    },
+    'U50-04 exhausted capacity cannot erase an earlier rejection' => function (): void {
+        $board = new MockReviewBoard();
+        [$packet, , $ctx] = f110Fixture();
+        f110Vote($board, $packet, $ctx, 'SECURITY',
+            'SYNTHETIC_REVIEWER_B', 'REJECT');
+        f150FillBoard($board, 127);
+        check($board->status($packet, $ctx, 15)['state'] === 'REJECTED');
+        denied('REVIEW_REJECTED', fn() => f110Vote($board, $packet, $ctx,
+            'PRODUCT', 'SYNTHETIC_REVIEWER_A'));
+        [$otherCtx, , $suite, $baseline, $candidate] = f150FillBoard(new MockReviewBoard(), 0);
+        $extra = new MockReviewPacket('SYNTHETIC_PACKET_OUT_OF_CAPACITY',
+            $ctx, $suite, $baseline, $candidate, 'SYNTHETIC_AUTHOR', 10, 40);
+        denied('REVIEW_CAPACITY_DENIED', fn() => f110Vote($board, $extra,
+            $otherCtx, 'PRODUCT', 'SYNTHETIC_REVIEWER_A'));
+        check($board->status($packet, $ctx, 15)['review_count'] === 1);
+    },
+    'U50-05 invalid or stale first vote never consumes final available packet slot' => function (): void {
+        $board = new MockReviewBoard();
+        [$ctx, , $suite, $baseline, $candidate] = f150FillBoard($board, 127);
+        $last = new MockReviewPacket('SYNTHETIC_PACKET_CAP_127',
+            $ctx, $suite, $baseline, $candidate, 'SYNTHETIC_AUTHOR', 10, 40);
+        denied('REVIEW_STALE', fn() => f110Vote($board, $last, $ctx,
+            'PRODUCT', 'SYNTHETIC_REVIEWER_A', 'ACKNOWLEDGE', 15, str_repeat('f', 64)));
+        denied('REVIEW_SCHEMA_DENIED', fn() => f110Vote($board, $last, $ctx,
+            'ADMIN', 'SYNTHETIC_REVIEWER_A'));
+        f110Vote($board, $last, $ctx, 'PRODUCT', 'SYNTHETIC_REVIEWER_A');
+        check($board->status($last, $ctx, 15)['review_count'] === 1);
+        $new = new MockReviewPacket('SYNTHETIC_PACKET_CAP_128', $ctx,
+            $suite, $baseline, $candidate, 'SYNTHETIC_AUTHOR', 10, 40);
+        denied('REVIEW_CAPACITY_DENIED', fn() => f110Vote($board, $new,
+            $ctx, 'PRODUCT', 'SYNTHETIC_REVIEWER_A'));
+    },
+    'U50-06 read-only unknown status remains non-authorizing when full' => function (): void {
+        $board = new MockReviewBoard();
+        [$ctx, , $suite, $baseline, $candidate] = f150FillBoard($board);
+        $unknown = new MockReviewPacket('SYNTHETIC_PACKET_CAP_UNKNOWN',
+            $ctx, $suite, $baseline, $candidate, 'SYNTHETIC_AUTHOR', 10, 40);
+        $status = $board->status($unknown, $ctx, 15);
+        check($status['state'] === 'AWAITING_INDEPENDENT_REVIEWS'
+            && $status['review_count'] === 0
+            && $status['promotion_allowed'] === false
+            && $status['real_authorization'] === false);
+        denied('REVIEW_CAPACITY_DENIED', fn() => f110Vote($board, $unknown,
+            $ctx, 'PRODUCT', 'SYNTHETIC_REVIEWER_A'));
     },
 ];

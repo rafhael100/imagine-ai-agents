@@ -9,6 +9,10 @@ use ImagineAI\MockCatalog\MockAgentVersionSnapshot;
 /** Ephemeral, fake separation-of-duties review. Not real authentication or an approval engine. */
 final class MockReviewBoard
 {
+    // This review lab is ephemeral: never evict old decisions or let fresh
+    // digests grow its in-process memory indefinitely. One packet has <=2 roles.
+    private const MAX_REVIEW_PACKETS = 128;
+
     /** @var array<string, array<string, array{reviewer:string,decision:string}>> */
     private array $votes = [];
 
@@ -45,6 +49,12 @@ final class MockReviewBoard
         }
         if ($decision === 'ACKNOWLEDGE' && $packet->reportGate !== 'REVIEW_REQUIRED') {
             MockError::fail('REVIEW_INELIGIBLE');
+        }
+        // Existing packets remain reviewable and exact replays stay
+        // idempotent, even at capacity. Only brand-new digests are denied.
+        // Deny BEFORE allocating the packet's first vote.
+        if ($existing === [] && count($this->votes) >= self::MAX_REVIEW_PACKETS) {
+            MockError::fail('REVIEW_CAPACITY_DENIED');
         }
         $this->votes[$packet->digest][$role] = ['reviewer' => $reviewerRef, 'decision' => $decision];
     }

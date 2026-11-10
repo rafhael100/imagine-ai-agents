@@ -23,6 +23,10 @@ O [PR #192](https://github.com/rafhael100/imagine-ai-agents/pull/192) limitou re
 
 Os [PRs #194](https://github.com/rafhael100/imagine-ai-agents/pull/194) e [#195](https://github.com/rafhael100/imagine-ai-agents/pull/195) vinculam o estado de transporte à identidade de medição e impõem limites nos objetos de tentativa, uso e prova. [CIs pós-merge #42863662530](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42863662530) e [#42864322239](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42864322239) aprovadas; ver [EVID-23](docs/AIA-R01-EVID-23-IDENTIDADE-USO-446.md). Esses controles são sintéticos.
 
+## Revisão independente com limite de memória — SEC-28
+
+O quadro de revisão sintético agora guarda até **128 pacotes com votos**, sem apagar decisões ou rejeições. Pacotes já iniciados ainda podem receber a segunda revisão independente. Veja [SEC-28](docs/AIA-FT01-SEC-28-REVISOES-BOUNDED.md). Isso não autentica revisores reais nem libera versões para clientes.
+
 ## Executar e verificar, sem rede
 
 Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem instalar serviços ou baixar dependências.
@@ -30,10 +34,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=446 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=452 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**Baseline verificado na dev:** **446 testes PHP / lint de 82 arquivos PHP**, mais os verificadores Python de contrato e isolamento, [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) `success`. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**Baseline verificado na dev:** **452 testes PHP / lint de 82 arquivos PHP**, mais os verificadores Python de contrato e isolamento, [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) `success`. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
