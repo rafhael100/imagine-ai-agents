@@ -25,15 +25,16 @@ final class MockCrmReadBoundary
     ): array {
         // Even a syntactically valid body cannot select another identity, tenant or resource.
         $request->assertMatches($trustedContext);
+        // Deny ungranted/suspended access before consuming a single-use proof.
+        // The CRM-owned policy remains mandatory and is never inferred from
+        // caller-supplied claims or a previously valid trust envelope.
+        $this->ownerPolicy->assertAllowed($trustedContext, $request->fields);
         $trusted = $this->gateway->authorize(
             $envelope, $owner, $trustedContext, 'SYNTHETIC_LEAD_READ', $now
         );
         if ($trusted['real_authorization'] !== false || $trusted['external_calls'] !== 0) {
             MockError::fail('BRIDGE_TRUST_DENIED');
         }
-        // Mandatory CRM-owner policy: there is no longer a legacy bypass
-        // for reads that happen to carry a plausible trust envelope.
-        $this->ownerPolicy->assertAllowed($trustedContext, $request->fields);
         // The reader has a hard-coded fictional dataset and denies unknown fields/resources.
         $projection = $this->reader->lead($trustedContext, $request->fields);
         if (count($projection) !== count($request->fields)) {
