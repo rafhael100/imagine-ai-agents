@@ -50,8 +50,34 @@ final class SupervisedCoordinator
     public function assertToolSuggestionReady(Run $run): void
     {
         $this->assertRunCompatible($run);
+        // Legacy standalone Runs remain accepted by the internal mock
+        // coordinator for old tests, but must never enter the tool surface.
+        $this->assertToolRunOwned($run);
         $run->assertActive();
         $this->assertTraceCapacity(2);
+    }
+
+    /**
+     * An effect exposed through a tool must belong to a canonical Run AND
+     * canonical Step recorded by this coordinator. A synthetically approved
+     * detached Intent is not sufficient authority to dispatch an effect.
+     */
+    public function assertToolIntentReady(Intent $intent): void
+    {
+        $this->assertRunCompatible($intent->step->run);
+        $this->assertToolRunOwned($intent->step->run);
+        if (($this->startedSteps[$intent->step->run->id][$intent->step->id] ?? null)
+            !== $intent->step) {
+            MockError::fail('STEP_NOT_OWNED');
+        }
+        $intent->step->run->assertActive();
+    }
+
+    private function assertToolRunOwned(Run $run): void
+    {
+        if (($this->startedRuns[$run->id] ?? null) !== $run) {
+            MockError::fail('RUN_NOT_OWNED');
+        }
     }
 
     public function start(string $id): Run
