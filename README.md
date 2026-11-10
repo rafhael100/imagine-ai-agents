@@ -9,7 +9,7 @@
 - Ferramenta `READ` governada pela borda; acesso direto legado bloqueado. Sugestões retornam conteúdo fixo e validado; falhas encerram Runs simuladas e não geram mutações automáticas.
 - **SEC-20:** validação integral da projeção fictícia **antes** de registrar `READ_SYNTHETIC_ONLY`, com regressões de campos extras, dados incorretos e referência de outro recurso ([PR #182](https://github.com/rafhael100/imagine-ai-agents/pull/182)).
 
-O [dossiê EVID-18](docs/AIA-R01-EVID-18-SEGURANCA-PROJECAO-403.md) descreve a validação mais recente, com CIs e limites.
+**SEC-21/22:** a ferramenta aceita somente Run/Step canônicos do coordenador, e IDs excessivos são recusados antes do registro de estado. [PR #186](https://github.com/rafhael100/imagine-ai-agents/pull/186) e [PR #187](https://github.com/rafhael100/imagine-ai-agents/pull/187) passaram também nas CIs pós-merge; consulte o [dossiê EVID-20](docs/AIA-R01-EVID-20-RUN-STEP-CANONICO-414.md). O dossiê EVID-18 é histórico.
 
 ## Executar e verificar, sem rede
 
@@ -18,10 +18,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=403 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=414 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**Baseline verificado na dev:** **403 testes PHP / lint de 82 arquivos PHP**, mais os verificadores Python de contrato e isolamento, [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) `success`. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**Baseline verificado na dev:** **414 testes PHP / lint de 82 arquivos PHP**, mais os verificadores Python de contrato e isolamento, [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) `success`. Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
