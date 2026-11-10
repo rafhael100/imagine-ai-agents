@@ -9,6 +9,8 @@ use ImagineAI\MockCatalog\MockAgentVersionSnapshot;
 /** Closed event codes and hashed fake references; never logs passage or prompt text. */
 final class MockKnowledgeTrace
 {
+    // No eviction: a missing prior audit event could conceal an earlier delivery.
+    private const MAX_EVENTS = 1024;
     private array $events = [];
 
     /** @param list<string> $sourceRefs */
@@ -21,6 +23,11 @@ final class MockKnowledgeTrace
         foreach ($sourceRefs as $sourceRef) {
             if (!is_string($sourceRef)) MockError::fail('KNOWLEDGE_SCHEMA_DENIED');
             MockAgentVersionSnapshot::syntheticRef($sourceRef);
+        }
+        // Check before appending; a saturated trace cannot claim a new
+        // selection, delivery, conflict resolution or close event succeeded.
+        if (count($this->events) >= self::MAX_EVENTS) {
+            MockError::fail('KNOWLEDGE_CAPACITY_DENIED');
         }
         $this->events[] = [
             'sequence' => count($this->events) + 1,
