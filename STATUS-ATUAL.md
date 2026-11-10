@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## Resultado verificado — 10/11/2026
+
+- [PRs #173](https://github.com/rafhael100/imagine-ai-agents/pull/173), [#174](https://github.com/rafhael100/imagine-ai-agents/pull/174) e [#175](https://github.com/rafhael100/imagine-ai-agents/pull/175) **MERGED somente na dev**. Implementados: READ de ferramenta somente pela borda OP-01, proteção prévia de auditoria e validação fechada de sugestões.
+- [CIs pós-merge #42748908649](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42748908649), [#42749287014](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42749287014) e [#42749779477](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42749779477) **success**, no commit de cada integração. **Baseline atual: 389 testes PHP, 82 lint e verificações de contrato Python.**
+- Documento de transição: [EVID-15](docs/AIA-R01-EVID-15-HANDOFF-READ-TOOL-389.md). A demonstração offline é testável, mas o produto real **não está finalizado**.
+- [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) permanece **OPEN/DRAFT** e as evidências de IAM/ACL/privacidade e homologação real continuam faltando. R01-G01..G11 + CRM CORE/SEG/AUT **ABERTOS / NO-GO**. Sem `main`, VPS, clientes, segredos, fornecedores pagos ou produção.
+
+
 ## Estado vigente: fronteira OP-01 protegida em laboratório (09/11/2026)
 
 - [EVID-14](docs/AIA-R01-EVID-14-CHECKPOINT-LEITURA-OP01.md) consolida SEC-13/14/15. [PR #170](https://github.com/rafhael100/imagine-ai-agents/pull/170) e [PR #171](https://github.com/rafhael100/imagine-ai-agents/pull/171) integrados à `dev`; a owner policy obrigatória é verificada antes do nonce e o caminho `MockToolDispatcher` sem borda foi desativado.

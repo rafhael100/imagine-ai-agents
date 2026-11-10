@@ -1,12 +1,27 @@
 # Imagine AI Agents
 
+## Marco de desenvolvimento mais recente — 10/11/2026
+
+A leitura de ferramentas pode usar `readThroughBoundary`, com borda OP-01 sintética e política do CRM dono; o atalho `dispatch(READ)` continua bloqueado. A trilha de ferramentas tem teto de 1.024 eventos e os resultados `SUGGEST` são validados antes de atravessar a interface. PRs [#173](https://github.com/rafhael100/imagine-ai-agents/pull/173), [#174](https://github.com/rafhael100/imagine-ai-agents/pull/174), [#175](https://github.com/rafhael100/imagine-ai-agents/pull/175) integrados **somente na dev**, com CI pós-merge aprovada.
+
+**Gate vigente: 389 testes PHP, 82 lint e regressões Python.** Para executar em checkout Git revisado:
+
+```bash
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=389 bash tools/run_r01_offline_quality_gate.sh
+```
+
+**NO-GO para CRM real e produção:** [EVID-15](docs/AIA-R01-EVID-15-HANDOFF-READ-TOOL-389.md) apresenta os gates pendentes. Sem autenticação/IAM ou ACL real; CRM PR #57 permanece DRAFT.
+
+---
+
+
 ## Estado atual — leitura OP-01 sem bypass no laboratório (09/11/2026)
 
 O caminho de leitura direta em `MockToolDispatcher` foi desativado: a ferramenta `READ` sem a borda autorizadora retorna `READ_BOUNDARY_REQUIRED`. O fluxo de demonstração de somente leitura continua disponível em `php examples/f127-read-only-pilot-demo.php`. [PR #170](https://github.com/rafhael100/imagine-ai-agents/pull/170) e [PR #171](https://github.com/rafhael100/imagine-ai-agents/pull/171) estão integrados **somente à dev**; [CI pós-merge #42746791090](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42746791090) aprovada.
 
 **Gate vigente:** 370 testes PHP, 82 arquivos PHP com lint, mais testes Python. Para checar um checkout revisado:
 ```bash
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=370 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=389 bash tools/run_r01_offline_quality_gate.sh
 ```
 
 Este é apenas um laboratório offline, não há autorização para CRM real, dados de clientes ou produção. Consulte [EVID-14](docs/AIA-R01-EVID-14-CHECKPOINT-LEITURA-OP01.md). O CRM PR #57 e gates R01/CORE/SEG/AUT continuam **NO-GO**.

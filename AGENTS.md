@@ -1,5 +1,14 @@
 # AGENTS.md — Imagine AI Agents
 
+## Checkpoint 10/11/2026 — governança de ferramenta, 389 testes
+
+- [F1-30 / PR #173](https://github.com/rafhael100/imagine-ai-agents/pull/173) integrado na dev `f68b774ee69f1d1d5f9e3c88ddeea41676a56bc7`: nova leitura de ferramenta **somente via borda OP-01** simulada; `dispatch(READ)` direto permanece bloqueado. [CI pós-merge #42748908649](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42748908649) success.
+- [SEC-16 / PR #174](https://github.com/rafhael100/imagine-ai-agents/pull/174) integrado `35ac011be66f0efc575692fef10783579eae7aaa`: reserva de auditoria da ferramenta antes de qualquer efeito, teto 1.024. [CI pós-merge #42749287014](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42749287014) success.
+- [SEC-17 / PR #175](https://github.com/rafhael100/imagine-ai-agents/pull/175) integrado `34cacc742837cabd8571668619a6116d96faba05`: payload `SUGGEST` estrito e erros de provedor neutralizados. [CI pós-merge #42749779477](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42749779477) success.
+- **Gate vigente: 389 testes PHP / 82 lint e contratos Python**. [EVID-15](docs/AIA-R01-EVID-15-HANDOFF-READ-TOOL-389.md) contém handoff e blockers.
+- Dados sintéticos, sem CRM real ou produção; [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) OPEN/DRAFT. R01-G01..G11 e CORE/SEG/AUT **ABERTOS / NO-GO**. Não alterar `main`, VPS, credenciais, clientes ou custos para aparentar homologação.
+
+
 ## Checkpoint mais recente — SEC-14/15 (09/11/2026)
 
 - **Fonte canônica:** [EVID-14](docs/AIA-R01-EVID-14-CHECKPOINT-LEITURA-OP01.md). [PR #170](https://github.com/rafhael100/imagine-ai-agents/pull/170) corrigiu ordem política-owner → consumo de nonce, CI #42746265495 success, dev `31ca96adcb161a0aff3d7b3764703501215cc7ce`.

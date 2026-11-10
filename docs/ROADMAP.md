@@ -1,3 +1,11 @@
+## Próximo marco após F1-30, SEC-16 e SEC-17 (10/11/2026)
+
+- **Base de laboratório entregue:** ferramenta de leitura passando exclusivamente pela borda OP-01, trilha com limite e resposta de sugestão validada. PRs [#173](https://github.com/rafhael100/imagine-ai-agents/pull/173), [#174](https://github.com/rafhael100/imagine-ai-agents/pull/174) e [#175](https://github.com/rafhael100/imagine-ai-agents/pull/175) integrados na dev, com CIs pós-merge aprovadas. **389 PHP / 82 lint + contratos Python**; documento [EVID-15](AIA-R01-EVID-15-HANDOFF-READ-TOOL-389.md).
+- **Próximo marco de produto, não substituível por mais mocks:** validação bilateral do [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57), autenticação entre serviços, ACL no backend CRM, proteção de dados e testes de integração reais em homologação autorizada. R01-G01..G11 e CORE/SEG/AUT **ABERTOS/NO-GO**.
+- Não declarar percentual comercial ou produto pronto por contagem de testes fictícios. `main`, VPS, clientes, credenciais, despesas e produção permanecem sem autorização.
+
+---
+
 ## Marco vigente — fechar contrato real OP-01, não ampliar mocks (09/11/2026)
 
 - [SEC-14 / Agents PR #170](https://github.com/rafhael100/imagine-ai-agents/pull/170) impede consumo desnecessário de nonce quando owner policy nega. [SEC-15 / Agents PR #171](https://github.com/rafhael100/imagine-ai-agents/pull/171) retira leitor direto do despachante: somente borda OP-01 poderá produzir projeção fictícia. CIs [#42746265495](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42746265495) e [pós-merge #42746791090](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42746791090) success. **Gate: 370 PHP/82 lint + Python**.
