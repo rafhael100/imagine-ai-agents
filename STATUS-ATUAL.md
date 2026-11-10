@@ -6,11 +6,13 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **Baseline verificável do laboratório: 518 testes PHP, lint de 82 arquivos PHP, testes Python de contrato, isolamento e demonstração.** O número de testes não é percentual de conclusão do produto.
+**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **Baseline verificável do laboratório: 526 testes PHP, lint de 82 arquivos PHP, testes Python de contrato, isolamento e demonstração.** O número de testes não é percentual de conclusão do produto.
 
 ## Últimas entregas verificadas
 
-**SEC-38 em revisão:** concessões de ferramenta sintética validam identificadores `id` e `toolId` com no máximo 90 bytes e formato fechado já na criação. Seis regressões U60-01..06 para 1 MiB, fronteira 90/91 bytes, padrões inválidos e revogação. [SEC-38](docs/AIA-FT01-SEC-38-CONCESSOES-LIMITADAS.md). Não implementa IAM real.
+**SEC-39 em revisão:** coordenador e provedor simulado recusam projeções de sugestões com mais de 3 campos, valores acima de 256 bytes, chaves ou tipos inválidos antes de chamar IA. Oito regressões U61-01..08. [SEC-39](docs/AIA-FT01-SEC-39-LIMITES-SUGESTOES.md). Sem IA externa ou CRM real.
+
+**SEC-38 integrada à dev:** concessões de ferramenta sintética validam identificadores `id` e `toolId` com no máximo 90 bytes e formato fechado já na criação. Seis regressões U60-01..06 para 1 MiB, fronteira 90/91 bytes, padrões inválidos e revogação. [SEC-38](docs/AIA-FT01-SEC-38-CONCESSOES-LIMITADAS.md). Não implementa IAM real.
 
 **SEC-37 integrada à dev:** parser OP-01 valida primeiro o total de 8 chaves e recusa referências com mais de 90 bytes antes do regex; não consome nonce ou auditoria de leitura para entradas inválidas. Sete regressões U59-01..07 com cargas grandes. [SEC-37](docs/AIA-FT01-SEC-37-PARSER-OP01-LIMITADO.md). Só dados sintéticos, sem API real.
 
