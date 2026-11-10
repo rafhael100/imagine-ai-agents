@@ -1,5 +1,12 @@
 # AGENTS.md — Imagine AI Agents
 
+## Baseline em revisão — SEC-30 (10/11/2026)
+
+- `MockAgentTemplateCatalog`: máximo 64 modelos e 256 snapshots sem evicção, preservando duplicatas idempotentes, conflitos e revogação de versões já registradas.
+- **Gate previsto: 465 testes PHP / 82 lint + Python**. [SEC-30](docs/AIA-FT01-SEC-30-CATALOGO-LIMITADO.md). Baselines menores abaixo são históricos.
+- CRM PR #57 OPEN/DRAFT, R01-G01..G11 e CORE/SEG/AUT ABERTOS/NO-GO. Sem `main`, VPS, clientes, credenciais, custos ou produção.
+
+
 ## Baseline em revisão — SEC-29 (10/11/2026)
 
 - `MockPromotionGate`: até 128 decisões e 256 eventos de auditoria, reservando capacidade antes de promover/rollback e uma vaga para suspensão; sem expulsar histórico.
