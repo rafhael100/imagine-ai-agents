@@ -87,6 +87,17 @@ final class F157ScriptedStatusGateway implements \ImagineAI\Contracts\CrmEffectG
     }
 }
 
+/** Prove the coordinator validates projections before any provider adapter. */
+final class F161SuggestionSpy implements \ImagineAI\Contracts\AiSuggestionProvider
+{
+    public int $calls = 0;
+    public function suggest(Run $run, array $fields): array
+    {
+        ++$this->calls;
+        return (new MockAiSuggestionProvider())->suggest($run, $fields);
+    }
+}
+
 return [
     'U02-01 exact approval permits only fake confirmed proof' => function (): void {
         $gateway = new MockSupervisedGateway('CONFIRMADO');
@@ -484,5 +495,85 @@ return [
         check($c->reconcile($intent) === $unknown);
         check($c->reconcile($intent)->state === 'PENDENTE');
         check($gateway->submits === 1);
+    },
+
+    'U61-01 oversized synthetic projection is denied before adapter invocation' => function (): void {
+        $spy = new F161SuggestionSpy();
+        $c = new SupervisedCoordinator(context(), new MockSupervisedGateway(), $spy);
+        $run = $c->start('SYNTHETIC_F161_RUN_01');
+        $fields = [];
+        for ($i = 0; $i < 20000; ++$i) $fields['arbitrary_' . $i] = 'SYNTHETIC_VALUE';
+        $before = $c->events();
+        denied('VALIDATION_FAILED', fn () => $c->suggest($run, $fields));
+        check($spy->calls === 0 && $c->events() === $before);
+        check($run->state() === 'EXECUTANDO');
+    },
+    'U61-02 a one-megabyte input cannot reach provider or trace' => function (): void {
+        $spy = new F161SuggestionSpy();
+        $c = new SupervisedCoordinator(context(), new MockSupervisedGateway(), $spy);
+        $run = $c->start('SYNTHETIC_F161_RUN_02');
+        $before = $c->events();
+        denied('VALIDATION_FAILED', fn () => $c->suggest($run,
+            ['text' => 'SYNTHETIC_' . str_repeat('X', 1024 * 1024)]));
+        check($spy->calls === 0 && $c->events() === $before);
+    },
+    'U61-03 direct provider also rejects huge arrays and text' => function (): void {
+        $run = new Run('SYNTHETIC_F161_DIRECT', context());
+        $run->transition('EXECUTANDO');
+        $provider = new MockAiSuggestionProvider();
+        denied('VALIDATION_FAILED', fn () => $provider->suggest($run,
+            ['text' => 'SYNTHETIC_' . str_repeat('Y', 1024 * 1024)]));
+        denied('VALIDATION_FAILED', fn () => $provider->suggest($run,
+            ['ref' => 'SYNTHETIC_A_LEAD', 'stage' => 'SYNTHETIC_NEW',
+                'text' => 'SYNTHETIC_TEST', 'extra' => 'SYNTHETIC_FORGED']));
+    },
+    'U61-04 256-byte text is allowed and 257-byte text denied' => function (): void {
+        $c = supervised();
+        $run = $c->start('SYNTHETIC_F161_RUN_04');
+        $ok = 'SYNTHETIC_' . str_repeat('A', 246);
+        check(strlen($ok) === 256);
+        $result = $c->suggest($run, ['text' => $ok]);
+        check($result['kind'] === 'SYNTHETIC_SUGGESTION');
+        $events = $c->events();
+        denied('VALIDATION_FAILED', fn () => $c->suggest($run, ['text' => $ok . 'A']));
+        check($c->events() === $events);
+    },
+    'U61-05 a three-field authorized synthetic projection still works' => function (): void {
+        $c = supervised();
+        $run = $c->start('SYNTHETIC_F161_RUN_05');
+        $fields = ['ref' => 'SYNTHETIC_A_LEAD',
+            'stage' => 'SYNTHETIC_NEW', 'text' => 'SYNTHETIC_SUMMARY'];
+        $result = $c->suggest($run, $fields);
+        check($result['kind'] === 'SYNTHETIC_SUGGESTION'
+            && $result['source'] === context()->resource
+            && count($c->events()) === 2);
+    },
+    'U61-06 invalid keys and nonstring values fail before provider' => function (): void {
+        $spy = new F161SuggestionSpy();
+        $c = new SupervisedCoordinator(context(), new MockSupervisedGateway(), $spy);
+        $run = $c->start('SYNTHETIC_F161_RUN_06');
+        foreach ([['rogue' => 'SYNTHETIC_DATA'], ['ref' => 17],
+            ['ref' => ['SYNTHETIC_DATA']], [0 => 'SYNTHETIC_DATA'],
+            ['text' => 'non synthetic'], ['text' => '']] as $fields) {
+            denied('VALIDATION_FAILED', fn () => $c->suggest($run, $fields));
+        }
+        check($spy->calls === 0 && count($c->events()) === 1);
+    },
+    'U61-07 legacy empty projection still works for synthetic trace fixtures' => function (): void {
+        $c = supervised();
+        $run = $c->start('SYNTHETIC_F161_RUN_07');
+        check($c->suggest($run, [])['kind'] === 'SYNTHETIC_SUGGESTION');
+        check((new MockAiSuggestionProvider())->suggest($run, [])['kind'] === 'SYNTHETIC_SUGGESTION');
+    },
+    'U61-08 valid suggestion following rejected input remains functional without mutation' => function (): void {
+        $spy = new F161SuggestionSpy();
+        $gateway = new MockSupervisedGateway('CONFIRMADO');
+        $c = new SupervisedCoordinator(context(), $gateway, $spy);
+        $run = $c->start('SYNTHETIC_F161_RUN_08');
+        denied('VALIDATION_FAILED', fn () => $c->suggest($run,
+            ['text' => 'SYNTHETIC_' . str_repeat('Z', 300)]));
+        $value = $c->suggest($run, ['text' => 'SYNTHETIC_SAMPLE']);
+        check($value['kind'] === 'SYNTHETIC_SUGGESTION' && $spy->calls === 1);
+        check(count($c->events()) === 2 && $gateway->submitCount() === 0);
     },
 ];

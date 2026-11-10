@@ -4,11 +4,11 @@
 
 ## Fase A — base de demonstração offline
 
-**Entregue na branch de desenvolvimento para avaliação técnica, não para clientes.** F1-12 a F1-30, SEC-11 a SEC-38 e os demais incrementos documentados criaram contratos sintéticos, borda OP-01, política fake de owner, prevenção de replay local, leitura de ferramenta governada, sugestões fixas e trilha limitada.
+**Entregue na branch de desenvolvimento para avaliação técnica, não para clientes.** F1-12 a F1-30, SEC-11 a SEC-39 e os demais incrementos documentados criaram contratos sintéticos, borda OP-01, política fake de owner, prevenção de replay local, leitura de ferramenta governada, sugestões fixas e trilha limitada.
 
 A [SEC-20 / PR #182](https://github.com/rafhael100/imagine-ai-agents/pull/182) valida projeções antes da auditoria de sucesso, com [CI pós-merge #42759202848](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42759202848) aprovada; veja [EVID-18](AIA-R01-EVID-18-SEGURANCA-PROJECAO-403.md).
 
-**Evidências mais recentes:** [PR #173](https://github.com/rafhael100/imagine-ai-agents/pull/173), [PR #174](https://github.com/rafhael100/imagine-ai-agents/pull/174), [PR #175](https://github.com/rafhael100/imagine-ai-agents/pull/175), [PR #177](https://github.com/rafhael100/imagine-ai-agents/pull/177), [PR #178](https://github.com/rafhael100/imagine-ai-agents/pull/178) e [EVID-16](AIA-R01-EVID-16-SEGURANCA-TOOL-397.md). Último gate validado no código: **518 testes PHP / 82 lint**, mais contratos Python e demonstração offline.
+**Evidências mais recentes:** [PR #173](https://github.com/rafhael100/imagine-ai-agents/pull/173), [PR #174](https://github.com/rafhael100/imagine-ai-agents/pull/174), [PR #175](https://github.com/rafhael100/imagine-ai-agents/pull/175), [PR #177](https://github.com/rafhael100/imagine-ai-agents/pull/177), [PR #178](https://github.com/rafhael100/imagine-ai-agents/pull/178) e [EVID-16](AIA-R01-EVID-16-SEGURANCA-TOOL-397.md). Último gate validado no código: **526 testes PHP / 82 lint**, mais contratos Python e demonstração offline.
 
 **Conclusão permitida:** laboratório executável para revisão. **Não** concluir que o agente SaaS, o IAM ou a integração CRM estejam operacionais.
 
@@ -41,6 +41,8 @@ A [SEC-36](AIA-FT01-SEC-36-IDS-FERRAMENTA-LIMITADOS.md) limita IDs de ferramenta
 A [SEC-37](AIA-FT01-SEC-37-PARSER-OP01-LIMITADO.md) limita o processamento da estrutura OP-01 antes de ordenar chaves e examinar referências, com sete regressões para entradas grandes e não consumo de nonce. Permanece offline.
 
 A [SEC-38](AIA-FT01-SEC-38-CONCESSOES-LIMITADAS.md) valida e limita as referências de concessões sintéticas antes de armazená-las, com seis regressões offline. Não cria identidade ou permissão reais.
+
+A [SEC-39](AIA-FT01-SEC-39-LIMITES-SUGESTOES.md) limita a projeção sintética de sugestões antes de chamar qualquer adaptador, com oito regressões offline. A política de IAM/CRM operacional continua pendente.
 
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 

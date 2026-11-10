@@ -116,6 +116,17 @@ final class SupervisedCoordinator
     {
         $this->assertRunCompatible($run);
         $run->assertActive();
+        // A coordinator is public to any AiSuggestionProvider adapter, not
+        // only the fixed mock. Reject oversized/untrusted projections before
+        // calling even a synthetic provider or writing a SUGGESTED event.
+        if (count($fields) > 3) MockError::fail('VALIDATION_FAILED');
+        foreach ($fields as $field => $value) {
+            if (!in_array($field, ['ref', 'stage', 'text'], true)
+                || !is_string($value) || strlen($value) > 256
+                || !str_starts_with($value, 'SYNTHETIC')) {
+                MockError::fail('VALIDATION_FAILED');
+            }
+        }
         $this->assertTraceCapacity(1); // Do not call a provider without space to record the event.
         $suggestion = $this->ai->suggest($run, $fields);
         $this->trace($run, 'SUGGESTED');
