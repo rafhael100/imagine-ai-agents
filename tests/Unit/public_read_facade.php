@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 use ImagineAI\Domain\TenantContext;
 use ImagineAI\MockBridge\{MockCrmOwnerPolicy, MockCrmReadPublicFacade};
-use ImagineAI\MockTrust\{MockTrustGateway, MockSharedTrustState};
+use ImagineAI\MockTrust\{MockTrustGateway, MockSharedTrustState, MockTrustEnvelope, MockOwnerScopeEvidence};
 use ImagineAI\MockAudit\MockCrmReadAuditTrail;
 use ImagineAI\Mocks\MockCrmReader;
 
@@ -274,7 +274,11 @@ return [
         $policy->grantFixture($ctx, ['ref']);
         check($policy->revision() === $revision + 2);
         check(!$facade->recheck($wire, $env, $owner, $ctx, 15));
-        [$fresh, $freshOwner] = f130Proof($ctx, 'SEC46_FRESH');
+        $fresh = new MockTrustEnvelope('SYNTHETIC_SEC46_FRESH_ENV',
+            'SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API', $ctx,
+            'SYNTHETIC_SEC46_FRESH_NONCE', ['SYNTHETIC_LEAD_READ'], 10, 40);
+        $freshOwner = new MockOwnerScopeEvidence('SYNTHETIC_SEC46_FRESH_OWNER',
+            $fresh->digest, $ctx, 'SYNTHETIC_LEAD_READ', 10, 40, true);
         check($facade->handle($wire, $fresh, $freshOwner, $ctx, 15)['state']
             === 'READ_SYNTHETIC_ONLY');
         check($facade->recheck($wire, $fresh, $freshOwner, $ctx, 15));
