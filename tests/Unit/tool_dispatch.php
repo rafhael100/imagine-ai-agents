@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use ImagineAI\Domain\{Approval, Intent, Run, TenantContext, MockError};
+use ImagineAI\Domain\{Approval, Intent, Run, Step, TenantContext, MockError};
 use ImagineAI\Contracts\{AiSuggestionProvider, CrmEffectGateway};
 use ImagineAI\MockOrchestration\SupervisedCoordinator;
 use ImagineAI\MockResilience\MockFaultGateway;
@@ -122,6 +122,18 @@ final class F140UntrustedStatusGateway implements CrmEffectGateway
 
     public function submitCount(): int { return $this->inner->submitCount(); }
     public function statusCount(): int { return $this->statuses; }
+}
+
+/** Provider counter for fail-closed tool ownership regressions. */
+final class F142CountingProvider implements AiSuggestionProvider
+{
+    public int $calls = 0;
+
+    public function suggest(Run $run, array $fields): array
+    {
+        ++$this->calls;
+        return (new MockAiSuggestionProvider())->suggest($run, $fields);
+    }
 }
 
 return [
@@ -577,5 +589,117 @@ return [
         denied('SYNTHETIC_STATUS_UNAVAILABLE', fn() => $d->dispatch(...$args));
         check($gw->submitCount() === 1 && $gw->statusCount() === 1
             && array_column($d->events(), 'code') === ['SYNTHETIC_UNKNOWN', 'SYNTHETIC_DENIED']);
+    },
+
+    'U42-01 standalone run cannot use tool suggestion without coordinator STARTED' => function (): void {
+        $ctx = context();
+        $gateway = new MockSupervisedGateway();
+        $ai = new F142CountingProvider();
+        $c = new SupervisedCoordinator($ctx, $gateway, $ai);
+        $tool = new MockToolDispatcher(new MockToolCatalog(), $c);
+        $run = new Run('SYNTHETIC_F142_STANDALONE_SUGGEST', $ctx);
+        $run->transition('EXECUTANDO');
+        $grant = new MockCapabilityGrant('SYNTHETIC_F142_SUGGEST',
+            MockToolCatalog::SUGGEST, $ctx, 10, 20);
+        denied('RUN_NOT_OWNED', fn() => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $grant, ['text' => 'SYNTHETIC_SUMMARY'], 15, $run));
+        check($ai->calls === 0 && $gateway->submitCount() === 0
+            && $c->events() === []
+            && array_column($tool->events(), 'code') === ['SYNTHETIC_DENIED']);
+    },
+    'U42-02 standalone run with fabricated approval cannot submit tool effect' => function (): void {
+        $ctx = context();
+        $gateway = new MockSupervisedGateway('CONFIRMADO');
+        $c = new SupervisedCoordinator($ctx, $gateway, new MockAiSuggestionProvider());
+        $tool = new MockToolDispatcher(new MockToolCatalog(), $c);
+        $run = new Run('SYNTHETIC_F142_STANDALONE_EFFECT', $ctx);
+        $run->transition('EXECUTANDO');
+        $intent = new Intent('SYNTHETIC_F142_INTENT', $run->step('SYNTHETIC_F142_STEP'),
+            'SYNTHETIC_F142_KEY', 'mock.task.create', 'SYNTHETIC_MATERIAL');
+        $approval = new Approval('SYNTHETIC_F142_APPROVAL', $intent,
+            'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+        $grant = new MockCapabilityGrant('SYNTHETIC_F142_MUTATE',
+            MockToolCatalog::MUTATE, $ctx, 10, 20);
+        denied('RUN_NOT_OWNED', fn() => $tool->dispatch(
+            MockToolCatalog::MUTATE, MockToolCatalog::VERSION, $ctx,
+            $grant, ['material' => 'SYNTHETIC_MATERIAL'], 15,
+            null, $intent, $approval));
+        check($gateway->submitCount() === 0 && $gateway->statusCount() === 0
+            && $c->events() === []
+            && array_column($tool->events(), 'code') === ['SYNTHETIC_DENIED']);
+    },
+    'U42-03 registered run and step preserve approved tool suggestion and effect' => function (): void {
+        [$ctx, $gateway, $c, $tool, $run, $intent, $approval, $grant] =
+            toolFixture(new MockSupervisedGateway('CONFIRMADO'));
+        $suggestion = $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $grant(MockToolCatalog::SUGGEST),
+            ['text' => 'SYNTHETIC_SUMMARY'], 15, $run);
+        check($suggestion['kind'] === 'SUGGEST' && $suggestion['state'] === 'SYNTHETIC_OK');
+        $out = $tool->dispatch(
+            MockToolCatalog::MUTATE, MockToolCatalog::VERSION, $ctx,
+            $grant(MockToolCatalog::MUTATE),
+            ['material' => 'SYNTHETIC_MATERIAL'], 15, null, $intent, $approval);
+        check($out === ['kind' => 'MUTATE', 'state' => 'CONFIRMADO']
+            && $gateway->submitCount() === 1 && $gateway->statusCount() === 0
+            && array_column($tool->events(), 'code') ===
+                ['SYNTHETIC_SUGGESTED', 'SYNTHETIC_CONFIRMED']);
+    },
+    'U42-04 detached same-ID run cannot borrow an existing tool identity' => function (): void {
+        [$ctx, $gateway, $c, $tool, $run, , , $grant] = toolFixture();
+        $clone = new Run($run->id, $ctx);
+        $clone->transition('EXECUTANDO');
+        $before = $c->events();
+        denied('RUN_NOT_OWNED', fn() => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $grant(MockToolCatalog::SUGGEST),
+            ['text' => 'SYNTHETIC_SUMMARY'], 15, $clone));
+        check($c->events() === $before && $gateway->submitCount() === 0);
+    },
+    'U42-05 detached Step cannot borrow another approved tool Intent' => function (): void {
+        [$ctx, $gateway, $c, $tool, $run, $original, , $grant] = toolFixture();
+        $forgedStep = new Step($original->step->id, $run);
+        $forged = new Intent($original->id, $forgedStep,
+            $original->idempotencyKey, $original->operation, $original->material);
+        $approval = new Approval('SYNTHETIC_F142_FORGED_APPROVAL', $forged,
+            'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+        $before = $c->events();
+        denied('STEP_NOT_OWNED', fn() => $tool->dispatch(
+            MockToolCatalog::MUTATE, MockToolCatalog::VERSION, $ctx,
+            $grant(MockToolCatalog::MUTATE),
+            ['material' => 'SYNTHETIC_MATERIAL'], 15, null, $forged, $approval));
+        check($gateway->submitCount() === 0 && $c->events() === $before
+            && array_column($tool->events(), 'code') === ['SYNTHETIC_DENIED']);
+    },
+    'U42-06 denied detached intent does not taint a fresh canonical attempt' => function (): void {
+        $ctx = context();
+        $gateway = new MockSupervisedGateway('CONFIRMADO');
+        $c = new SupervisedCoordinator($ctx, $gateway, new MockAiSuggestionProvider());
+        $tool = new MockToolDispatcher(new MockToolCatalog(), $c);
+        $grant = new MockCapabilityGrant('SYNTHETIC_F142_RECOVERY_GRANT',
+            MockToolCatalog::MUTATE, $ctx, 10, 20);
+        $run = new Run('SYNTHETIC_F142_DETACHED', $ctx);
+        $run->transition('EXECUTANDO');
+        $bad = new Intent('SYNTHETIC_F142_BAD', $run->step('SYNTHETIC_F142_BAD_STEP'),
+            'SYNTHETIC_F142_BAD_KEY', 'mock.task.create', 'SYNTHETIC_MATERIAL');
+        $badApproval = new Approval('SYNTHETIC_F142_BAD_APPROVAL', $bad,
+            'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+        denied('RUN_NOT_OWNED', fn() => $tool->dispatch(
+            MockToolCatalog::MUTATE, MockToolCatalog::VERSION, $ctx,
+            $grant, ['material' => 'SYNTHETIC_MATERIAL'], 15,
+            null, $bad, $badApproval));
+        $real = $c->start('SYNTHETIC_F142_CANONICAL');
+        $step = $c->step($real, 'SYNTHETIC_F142_CANONICAL_STEP');
+        $valid = new Intent('SYNTHETIC_F142_VALID', $step,
+            'SYNTHETIC_F142_VALID_KEY', 'mock.task.create', 'SYNTHETIC_MATERIAL');
+        $approval = new Approval('SYNTHETIC_F142_VALID_APPROVAL', $valid,
+            'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+        check($tool->dispatch(MockToolCatalog::MUTATE, MockToolCatalog::VERSION,
+            $ctx, $grant, ['material' => 'SYNTHETIC_MATERIAL'], 15,
+            null, $valid, $approval) === ['kind' => 'MUTATE', 'state' => 'CONFIRMADO']);
+        check($gateway->submitCount() === 1
+            && array_column($tool->events(), 'code') ===
+                ['SYNTHETIC_DENIED', 'SYNTHETIC_CONFIRMED']);
     },
 ];
