@@ -6,9 +6,11 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` fora da entrega. **SEC-46 integrada à dev (PR #222): 597 testes PHP, lint de 83 arquivos PHP e Python**, [CI pós-merge #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251) `success`, commit `6d676f5a93ef837c3dc3f852b8a5b78be82c6e7b`. [EVID-31](docs/AIA-R01-EVID-31-SEC46-CI-POSTMERGE.md). O número de testes não é percentual de conclusão do produto.
+**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` inalterada. **SEC-47 em revisão:** gate de **605 testes PHP, lint de 83 arquivos PHP e Python**; último pós-merge aprovado [SEC-46 #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251), [EVID-31](docs/AIA-R01-EVID-31-SEC46-CI-POSTMERGE.md). O número de testes não é percentual de conclusão do produto.
 
 ## Últimas entregas verificadas
+
+**SEC-47 em revisão:** recheck monotônico por recibo bloqueia retrocesso e restauração artificial de provas expiradas. Oito regressões U69-01..08; [SEC-47](docs/AIA-FT01-SEC-47-RECHECK-TEMPO-MONOTONICO.md). Relógio ainda sintético; CRM real `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-46 integrada à dev (PR #222):** revisão monotônica da política e recibo local de leitura impedem revogação+reconcessão e recheck sem leitura prévia. 12 regressões U68-01..12; [SEC-46](docs/AIA-FT01-SEC-46-RECIBO-REVISAO-OWNER-ABA.md). CRM real: `NAO_EXECUTADO` / **NO-GO**.
 
@@ -68,7 +70,7 @@ A [SEC-20 / PR #182](https://github.com/rafhael100/imagine-ai-agents/pull/182) c
 
 ```bash
 php examples/f127-read-only-pilot-demo.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=465 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=605 bash tools/run_r01_offline_quality_gate.sh
 ```
 
 O comando acima exige PHP e Python já instalados, não emite credenciais e não acessa CRM real. O sucesso não abre gates operacionais.
