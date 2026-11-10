@@ -82,8 +82,8 @@ def is_safe_response(response: object, fields: object) -> bool:
         return False
     projection = response["projection"]
     if (type(fields) is not list or len(fields) not in (1, 2)
-        or len(fields) != len(set(fields)) or
-        any(type(field) is not str or field not in ("ref", "stage") for field in fields)):
+        or any(type(field) is not str or field not in ("ref", "stage") for field in fields)
+        or len(fields) != len(set(fields))):
         return False
     if type(projection) is not dict or list(projection) != fields:
         return False
