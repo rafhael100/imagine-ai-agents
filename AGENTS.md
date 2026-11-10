@@ -1,5 +1,13 @@
 # AGENTS.md — Imagine AI Agents
 
+## Checkpoint de entrega offline F1-27 e CI-SEC-02 (09/11/2026)
+
+- **F1-27:** [PR #162](https://github.com/rafhael100/imagine-ai-agents/pull/162), merge `e669f11dbc7a2adc052f4461c4e820a74aae52bc`; [CI #42739875000](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42739875000) `success` no SHA `c401bafac4b521d72c548a9c72a5acb980443658`. O comando `php examples/f127-read-only-pilot-demo.php` demonstra cinco cenários exclusivamente fictícios e reporta `NO_GO`.
+- **CI-SEC-02:** [PR #163](https://github.com/rafhael100/imagine-ai-agents/pull/163), merge `8d8b981f93b25e0a726131034247467bdce84f0c`; [CI #42740221620](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42740221620) `success` no SHA `521ec9187ea9c6805337b7878092d416f1acb294`. O workflow agora inclui alterações de `examples/**` para push e PR. **Gate vigente: 351 PHP/82 lint, além das suítes de contrato Python.**
+- **Escopo encerrável:** demonstração técnica offline somente leitura disponível e verificável. **Produto operacional NÃO concluído**; CRM PR #57 OPEN/DRAFT, R01-G01..G11 e CRM CORE/SEG/AUT ABERTOS, sem integração, IAM, dados reais, VPS ou produção.
+- A CI GitHub é restrita a repositório **público**; se virar privado, um job ignorado nunca conta como aprovação. Revisar fluxo e custo ANTES da mudança. Somente branch dev, sem `main`.
+
+
 ## Checkpoint técnico mais recente — OP-01/EVID-10 e F1-26 (09/11/2026)
 
 - **Integração somente dev:** [PR #159](https://github.com/rafhael100/imagine-ai-agents/pull/159), merge `4a03adf5f91e760950adaa3239fb2c8dba05da6d`; [CI #42737036742](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42737036742) `success` no HEAD `ead3d791c7c512bd39a81a14b48afea14fb27c48`. A CI agora exige schema e paridade offline de respostas públicas OP-01 geradas pelo PHP.
