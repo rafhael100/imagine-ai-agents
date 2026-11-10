@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 use ImagineAI\Domain\TenantContext;
 use ImagineAI\MockBridge\{MockCrmOwnerPolicy, MockCrmReadBoundary, MockCrmReadRequest};
-use ImagineAI\MockTrust\MockTrustGateway;
+use ImagineAI\MockTrust\{MockTrustGateway, MockSharedTrustState};
 use ImagineAI\MockAudit\{MockCrmReadAuditTrail, MockCrmReadAuditedBoundary};
 use ImagineAI\Mocks\MockCrmReader;
 
@@ -15,6 +15,18 @@ function f116Fixture(MockCrmOwnerPolicy $policy, ?TenantContext $context = null)
         ['SYNTHETIC_LEAD_READ']);
     $boundary = new MockCrmReadBoundary($gateway, new MockCrmReader(), $policy);
     return [$boundary, $env, $owner, $ctx];
+}
+
+/** Uses a shared synthetic nonce store so failed attempts are observable. */
+function f134Fixture(?MockCrmOwnerPolicy $policy = null): array
+{
+    [, $env, $owner, $ctx] = f112Fixture();
+    $store = new MockSharedTrustState();
+    $policy ??= new MockCrmOwnerPolicy();
+    $gateway = new MockTrustGateway('SYNTHETIC_AGENT_SERVICE',
+        'SYNTHETIC_CRM_API', ['SYNTHETIC_LEAD_READ'], $store);
+    return [new MockCrmReadBoundary($gateway, new MockCrmReader(), $policy),
+        $store, $policy, $env, $owner, $ctx];
 }
 
 return [
@@ -222,5 +234,61 @@ return [
         [$second, $newEnv, $newOwner] = f116Fixture($policy);
         denied('RESOURCE_DENIED_OR_MISSING', fn() => $second->evaluate(
             new MockCrmReadRequest(f112Wire($ctx)), $newEnv, $newOwner, $ctx, 15));
+    },
+
+    'U34-01 missing grant denies before nonce consumption, permitting authorized later attempt' => function (): void {
+        [$bridge, $store, $policy, $env, $owner, $ctx] = f134Fixture();
+        $req = new MockCrmReadRequest(f112Wire($ctx));
+        denied('RESOURCE_DENIED_OR_MISSING', fn() => $bridge->evaluate($req, $env, $owner, $ctx, 15));
+        check($store->countConsumed() === 0);
+        $policy->grantFixture($ctx, ['ref']);
+        check($bridge->evaluate($req, $env, $owner, $ctx, 15)['state'] === 'READ_SYNTHETIC_ONLY');
+        check($store->countConsumed() === 1);
+    },
+    'U34-02 revoked grant cannot burn a fresh nonce before restoration' => function (): void {
+        $policy = new MockCrmOwnerPolicy();
+        $policy->grantFixture(context(), ['ref']);
+        [$bridge, $store, , $env, $owner, $ctx] = f134Fixture($policy);
+        $policy->revokeFixture($ctx);
+        $req = new MockCrmReadRequest(f112Wire($ctx));
+        denied('RESOURCE_DENIED_OR_MISSING', fn() => $bridge->evaluate($req, $env, $owner, $ctx, 15));
+        check($store->countConsumed() === 0);
+        $policy->grantFixture($ctx, ['ref']);
+        check($bridge->evaluate($req, $env, $owner, $ctx, 15)['state'] === 'READ_SYNTHETIC_ONLY');
+    },
+    'U34-03 suspended tenant cannot exhaust nonce registry via denied reads' => function (): void {
+        $policy = new MockCrmOwnerPolicy();
+        $policy->grantFixture(context(), ['ref']);
+        [$bridge, $store, , $env, $owner, $ctx] = f134Fixture($policy);
+        $policy->setTenantSuspended('SYNTHETIC_A', true);
+        $req = new MockCrmReadRequest(f112Wire($ctx));
+        denied('RESOURCE_DENIED_OR_MISSING', fn() => $bridge->evaluate($req, $env, $owner, $ctx, 15));
+        check($store->countConsumed() === 0);
+        $policy->setTenantSuspended('SYNTHETIC_A', false);
+        check($bridge->evaluate($req, $env, $owner, $ctx, 15)['state'] === 'READ_SYNTHETIC_ONLY');
+    },
+    'U34-04 policy outage preserves nonce until independent owner decision succeeds' => function (): void {
+        $policy = new MockCrmOwnerPolicy();
+        $policy->grantFixture(context(), ['ref']);
+        [$bridge, $store, , $env, $owner, $ctx] = f134Fixture($policy);
+        $policy->setAvailable(false);
+        $req = new MockCrmReadRequest(f112Wire($ctx));
+        denied('OWNER_POLICY_UNAVAILABLE', fn() => $bridge->evaluate($req, $env, $owner, $ctx, 15));
+        check($store->countConsumed() === 0);
+        $policy->setAvailable(true);
+        check($bridge->evaluate($req, $env, $owner, $ctx, 15)['state'] === 'READ_SYNTHETIC_ONLY');
+    },
+    'U34-05 field outside owner grant never consumes proof or returns projection' => function (): void {
+        $policy = new MockCrmOwnerPolicy();
+        $policy->grantFixture(context(), ['ref']);
+        [$bridge, $store, , $env, $owner, $ctx] = f134Fixture($policy);
+        $wire = f112Wire($ctx); $wire['fields'] = ['stage', 'ref'];
+        $req = new MockCrmReadRequest($wire);
+        denied('RESOURCE_DENIED_OR_MISSING', fn() => $bridge->evaluate($req, $env, $owner, $ctx, 15));
+        check($store->countConsumed() === 0);
+        $policy->grantFixture($ctx, ['ref', 'stage']);
+        check(array_keys($bridge->evaluate($req, $env, $owner, $ctx, 15)['projection'])
+            === ['stage', 'ref']);
+        check($store->countConsumed() === 1);
     },
 ];
