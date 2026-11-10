@@ -45,9 +45,8 @@ final class MockCrmReadBoundary
         // before calling the projection safe or recording a success.
         // The already-consumed nonce is NOT consumed a second time.
         $this->ownerPolicy->assertAllowed($trustedContext, $request->fields);
-        if ($envelope === null || $owner === null) MockError::fail('TRUST_DENIED');
-        $envelope->assertValid($trustedContext, $now);
-        $owner->assertValid($envelope, $trustedContext, 'SYNTHETIC_LEAD_READ', $now);
+        $this->gateway->recheck(
+            $envelope, $owner, $trustedContext, 'SYNTHETIC_LEAD_READ', $now);
         $orderedProjection = MockReadProjectionInvariant::canonicalize(
             $projection, $request->fields, $trustedContext);
         if ($orderedProjection === null) MockError::fail('BRIDGE_PROJECTION_DENIED');
