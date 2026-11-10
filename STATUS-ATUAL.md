@@ -6,9 +6,11 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **Baseline verificável do laboratório: 452 testes PHP, lint de 82 arquivos PHP, testes Python de contrato, isolamento e demonstração.** O número de testes não é percentual de conclusão do produto.
+**Branch de trabalho:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` permanece fora desta entrega. **Baseline verificável do laboratório: 458 testes PHP, lint de 82 arquivos PHP, testes Python de contrato, isolamento e demonstração.** O número de testes não é percentual de conclusão do produto.
 
 ## Últimas entregas verificadas
+
+**SEC-29 em revisão:** limite de decisões e eventos do controle de versões simulado, com reserva de espaço para suspensão e seis regressões. [Evidência técnica SEC-29](docs/AIA-FT01-SEC-29-RESERVA-AUDITORIA-VERSOES.md). A execução segue offline e o CRM real continua **NO-GO**.
 
 **SEC-28:** o quadro de revisão local limita registros de votação a 128 pacotes sem descartar decisões anteriores. O segundo parecer de pacotes já iniciados continua possível. [Detalhes e regressões](docs/AIA-FT01-SEC-28-REVISOES-BOUNDED.md). **Isto não é homologação real.**
 
@@ -35,7 +37,7 @@ A [SEC-20 / PR #182](https://github.com/rafhael100/imagine-ai-agents/pull/182) c
 
 ```bash
 php examples/f127-read-only-pilot-demo.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=452 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=82 EXPECTED_CASES=458 bash tools/run_r01_offline_quality_gate.sh
 ```
 
 O comando acima exige PHP e Python já instalados, não emite credenciais e não acessa CRM real. O sucesso não abre gates operacionais.
