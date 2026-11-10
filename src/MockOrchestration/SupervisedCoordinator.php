@@ -26,6 +26,22 @@ final class SupervisedCoordinator
         private readonly AiSuggestionProvider $ai,
     ) {}
 
+    /**
+     * Side-effect-free readiness probe for the exactly four trace events
+     * created by an offline read-only pilot: STARTED, STEP_CREATED,
+     * SUGGESTED, RUN_CHANGED. Never reserves a nonce or performs a read.
+     * This in-process check is NOT an atomic distributed reservation.
+     */
+    public function assertPilotRunReady(string $id, TenantContext $context): void
+    {
+        $this->context->assertSame($context);
+        if (preg_match('/^SYNTHETIC_[A-Z0-9_]{1,70}$/D', $id) !== 1) {
+            MockError::fail('INVALID_SYNTHETIC_REF');
+        }
+        if (isset($this->startedRuns[$id])) MockError::fail('RUN_ID_CONFLICT');
+        $this->assertTraceCapacity(4);
+    }
+
     public function start(string $id): Run
     {
         if (isset($this->startedRuns[$id])) MockError::fail('RUN_ID_CONFLICT');
