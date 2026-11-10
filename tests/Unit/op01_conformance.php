@@ -226,7 +226,10 @@ $tests += [
         check($result === f163Denial());
         $visible = json_encode([$result, $audit->entries(), $counts->snapshot()],
             JSON_THROW_ON_ERROR);
-        foreach (['Bearer', 'SUPER_SECRET', 'authorization', 'SYNTHETIC_A_LEAD'] as $secret) {
+        // "real_authorization" is a mandatory safe response key; check
+        // secrets and raw untrusted payload, not that contractual field name.
+        foreach (['Bearer', 'SUPER_SECRET',
+            'SYNTHETIC_SUPER_SECRET_MARKER_123', 'SYNTHETIC_A_LEAD'] as $secret) {
             check(!str_contains($visible, $secret));
         }
         check($state->countConsumed() === 0 && $audit->count() === 0);
