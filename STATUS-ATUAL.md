@@ -1,5 +1,13 @@
 # STATUS-ATUAL — Imagine AI Agents
 
+## Checkpoint mais recente — demonstração offline pronta para revisão (09/11/2026)
+
+- [PR #162](https://github.com/rafhael100/imagine-ai-agents/pull/162) integrado em `e669f11dbc7a2adc052f4461c4e820a74aae52bc` após [CI #42739875000](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42739875000) `success`: demonstração CLI `php examples/f127-read-only-pilot-demo.php` de cinco cenários com uma sugestão fixa fictícia e quatro recusas seguras.
+- [PR #163](https://github.com/rafhael100/imagine-ai-agents/pull/163) integrado em `8d8b981f93b25e0a726131034247467bdce84f0c` após [CI #42740221620](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42740221620) `success`: alterações em `examples/**` não passam despercebidas pelo workflow. **Baseline: 351 testes PHP, lint de 82 arquivos PHP, regressões Python incluídas.**
+- **Estado da fase offline:** demonstração e controles sintéticos verificáveis, sem conexão com CRM, LLM, SQL ou cliente. Não é produto comercial pronto. O CRM [PR #57](https://github.com/rafhael100/imagine-crm/pull/57) segue OPEN/DRAFT. R01-G01..G11 e CRM CORE/SEG/AUT **ABERTOS / NO-GO**.
+- **Próximo passo legítimo:** aceitar bilateralmente OP-01, autenticação/IAM real, ACL em backend, LGPD, Infra e homologação de integração. Ações de `main`, VPS, produção, custos e credenciais continuam bloqueadas.
+
+
 ## Resultado de revisão EVID-10 + FT01/F1-26 (09/11/2026)
 
 - [PR #159](https://github.com/rafhael100/imagine-ai-agents/pull/159) integrado à dev em `4a03adf5f91e760950adaa3239fb2c8dba05da6d` após [CI #42737036742](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42737036742) `success` no HEAD da revisão. Resposta OP-01 fictícia agora tem schema fechado e validação de paridade PHP↔Python.
