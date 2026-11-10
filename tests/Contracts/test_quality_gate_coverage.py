@@ -16,7 +16,7 @@ class QualityGateCoverage(unittest.TestCase):
     def test_all_offline_contract_regressions_still_run(self):
         for name in (
             "test_r01_readiness.py", "test_op01_contract_parity.py",
-            "test_op01_contract_matrix.py", "test_op01_public_response_parity.py",
+            "test_op01_contract_matrix.py", "test_op01_public_response_parity.py", "test_f127_offline_pilot_demo.py",
             "test_ci_guardrails.py",
             "test_op01_readiness_dashboard.py", "test_op01_dashboard_generator.py",
             "test_synthetic_php_isolation.py", "test_quality_gate_coverage.py",
@@ -49,7 +49,7 @@ class QualityGateCoverage(unittest.TestCase):
 
     def test_ci_calls_same_local_entrypoint(self):
         self.assertIn("bash tools/run_r01_offline_quality_gate.sh", self.workflow)
-        self.assertIn("EXPECTED_PHP: '81'", self.workflow)
+        self.assertIn("EXPECTED_PHP: '82'", self.workflow)
         self.assertIn("EXPECTED_CASES: '351'", self.workflow)
 
     def test_no_installation_or_direct_external_integration(self):
