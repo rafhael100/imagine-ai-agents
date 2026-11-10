@@ -235,4 +235,79 @@ return [
         check($ledger->budget($ctx, 'mock.task.create', 1, 15)['state'] === 'INDETERMINADO');
         check(count($ledger->alerts()) <= 2);
     },
+
+    'U48-01 a reused usage event ID with a changed transport state is a conflict' => function (): void {
+        [$ctx, $attempt, , $ledger] = usageFixture();
+        $first = $ledger->record('SYNTHETIC_U48_SAME_EVENT', $attempt,
+            'OBSERVADO', 2, 'SYNTHETIC_MATERIAL', 15);
+        $forged = new Attempt($attempt->id, $attempt->intent, 'ENVIADA');
+        $previous = $ledger->events();
+        denied('USAGE_EVENT_CONFLICT', fn() => $ledger->record(
+            'SYNTHETIC_U48_SAME_EVENT', $forged,
+            'OBSERVADO', 2, 'SYNTHETIC_MATERIAL', 15));
+        check($first->units === 2 && $ledger->used() === 2
+            && $ledger->events() === $previous);
+    },
+    'U48-02 changed transport state cannot create a second event for known attempt' => function (): void {
+        [, $attempt, , $ledger] = usageFixture();
+        $ledger->record('SYNTHETIC_U48_ORIGINAL', $attempt,
+            'ESTIMADO', 2, 'SYNTHETIC_MATERIAL', 15);
+        $forged = new Attempt($attempt->id, $attempt->intent, 'ENVIADA');
+        $previous = $ledger->events();
+        denied('USAGE_ATTEMPT_CONFLICT', fn() => $ledger->record(
+            'SYNTHETIC_U48_NEW_EVENT', $forged,
+            'OBSERVADO', 5, 'SYNTHETIC_MATERIAL', 15));
+        check($ledger->used() === 2 && $ledger->events() === $previous);
+    },
+    'U48-03 forged TIMEOUT cannot taint an observed ENVIADA attempt' => function (): void {
+        [$ctx, $attempt, , $ledger] = usageFixture();
+        $sent = new Attempt($attempt->id, $attempt->intent, 'ENVIADA');
+        $ledger->record('SYNTHETIC_U48_SENT_OBS', $sent,
+            'OBSERVADO', 3, 'SYNTHETIC_MATERIAL', 15);
+        $events = $ledger->events();
+        denied('USAGE_ATTEMPT_CONFLICT', fn() => $ledger->markUnknown($attempt, 15));
+        check($ledger->events() === $events && $ledger->used() === 3
+            && $ledger->budget($ctx, 'mock.task.create', 1, 15)['state']
+                === 'SYNTHETIC_WITHIN_QUOTA');
+    },
+    'U48-04 fake proof with same attempt ID but another state never reconciles' => function (): void {
+        [$ctx, $attempt, , $ledger] = usageFixture();
+        $ledger->record('SYNTHETIC_U48_PROOF_OBS', $attempt,
+            'OBSERVADO', 4, 'SYNTHETIC_MATERIAL', 15);
+        $different = new Attempt($attempt->id, $attempt->intent, 'RESPOSTA');
+        $bad = new MockUsageProof('SYNTHETIC_PROOF_U48_MISMATCH', $different, 4);
+        $result = $ledger->reconcile($attempt, $bad, 15);
+        check($result === ['state' => 'INDETERMINADO', 'reason' => 'PROOF_CONFLICT']
+            && $ledger->budget($ctx, 'mock.task.create', 1, 15)['state']
+                === 'INDETERMINADO');
+        $valid = new MockUsageProof('SYNTHETIC_PROOF_U48_VALID', $attempt, 4);
+        check($ledger->reconcile($attempt, $valid, 15)['reason'] === 'PROOF_CONFLICT');
+    },
+    'U48-05 same-state separate Attempt instance keeps exact idempotent behavior' => function (): void {
+        [, $attempt, , $ledger] = usageFixture();
+        $first = $ledger->record('SYNTHETIC_U48_DUP', $attempt,
+            'OBSERVADO', 4, 'SYNTHETIC_MATERIAL', 15);
+        $duplicate = new Attempt($attempt->id, $attempt->intent, $attempt->state);
+        $again = $ledger->record('SYNTHETIC_U48_DUP', $duplicate,
+            'OBSERVADO', 4, 'SYNTHETIC_MATERIAL', 15);
+        check($again === $first && $ledger->used() === 4
+            && count($ledger->events()) === 1);
+        $proof = new MockUsageProof('SYNTHETIC_PROOF_U48_MATCH', $duplicate, 4);
+        check($ledger->reconcile($attempt, $proof, 15)['state'] === 'CONCILIADO');
+    },
+    'U48-06 transport state cannot change after an unknown timeout was recorded' => function (): void {
+        [$ctx, $attempt, , $ledger] = usageFixture();
+        $ledger->markUnknown($attempt, 15);
+        $events = $ledger->events();
+        $changed = new Attempt($attempt->id, $attempt->intent, 'ENVIADA');
+        denied('USAGE_ATTEMPT_CONFLICT', fn() => $ledger->record(
+            'SYNTHETIC_U48_LATE', $changed,
+            'OBSERVADO', 4, 'SYNTHETIC_MATERIAL', 15));
+        check($ledger->used() === 0 && $ledger->events() === $events);
+        check($ledger->budget($ctx, 'mock.task.create', 1, 15)['state']
+            === 'INDETERMINADO');
+        $ledger->record('SYNTHETIC_U48_SAME_STATE_LATE', $attempt,
+            'OBSERVADO', 4, 'SYNTHETIC_MATERIAL', 15);
+        check($ledger->used() === 4);
+    },
 ];
