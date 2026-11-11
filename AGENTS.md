@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## F184 — segunda observação interativa exclusivamente no browser (11/11/2026)
+
+- A aba de supervisão F108 tem controles locais de **concordância, divergência e reinício** para o caso fictício que aguardava segundo voto. Cópia das contagens `SYNTHETIC_QUEUE_SUPERVISION_V1` em JS, **sem alterar fixture F182, jobs, auditoria ou CRM**; dupla chamada é bloqueada, total indeterminado permanece 3, reset descarta a hipótese. [Guia F184](docs/AIA-FT01-F184-ENSAIO-INTERATIVO-REVISAO-FILA.md).
+- Gate PHP existente: **776 testes / lint 97**; acrescentar os seis testes Python F184 e asserções DOM Node. F184 não autentica revisor, não é workflow operacional; `NO-GO`, CRM PR #57 OPEN/DRAFT, 13 cenários reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT abertos, sem `main`/VPS/deploy/PII/custos.
+
 ## F183 — supervisão integrada à prévia visual F108 (11/11/2026)
 
 - `examples/f108-laboratorio-navegavel.html` tem quinta aba `supervision` com métricas fechadas de fila/revisão e JSON fixo `SYNTHETIC_QUEUE_SUPERVISION_V1`, **idêntico à saída de F182**. Integração no navegador é local, sem fetch, storage ou backend; `NO_GO` permanece evidente. [Guia F183](docs/AIA-FT01-F183-SUPERVISAO-VISUAL-OFFLINE.md).
