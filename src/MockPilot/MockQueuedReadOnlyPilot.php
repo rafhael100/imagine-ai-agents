@@ -72,6 +72,9 @@ final class MockQueuedReadOnlyPilot
                 if ($this->queue->needsReview($context)) {
                     return self::reviewRequired();
                 }
+                if ($this->queue->admissionState($context)['state'] === 'PAUSED') {
+                    return self::paused();
+                }
                 return $this->queue->hasActiveReservation($context)
                     ? self::inProgress() : self::empty();
             }
@@ -130,6 +133,15 @@ final class MockQueuedReadOnlyPilot
         // Never call this a successful or empty delivery. Exposes no job ID.
         return ['contract' => 'SYNTHETIC_QUEUED_PILOT_V1',
             'state' => 'REVIEW_REQUIRED', 'summary' => null,
+            'real_authorization' => false, 'external_calls' => 0,
+            'write_calls' => 0];
+    }
+
+    private static function paused(): array
+    {
+        // A paused queue is not an empty queue and cannot silently claim work.
+        return ['contract' => 'SYNTHETIC_QUEUED_PILOT_V1',
+            'state' => 'PAUSED', 'summary' => null,
             'real_authorization' => false, 'external_calls' => 0,
             'write_calls' => 0];
     }

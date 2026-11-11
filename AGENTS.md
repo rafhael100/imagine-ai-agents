@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## SEC-61 — suspensão explícita de novas admissões da fila (11/11/2026)
+
+- `MockReadOnlyRunQueue` suporta `pauseAdmission`, `resumeAdmission` e `admissionState` apenas sintéticas, com refs de decisão idempotentes, limite de 32 (última decisão reservada para PAUSE) e auditoria mascarada. PAUSED impede novos enqueues/claims, mas mantém finish/cancel legítimos e expiração para `INDETERMINADO`. Piloto expõe PAUSED em vez de EMPTY; batch para sem leituras. Em trace saturado, pausa falha fechada sem reabrir admissões. [SEC-61](docs/AIA-FT01-SEC-61-PAUSA-ADMISSAO-FILA.md).
+- Gate proposto **827 PHP / lint 101 + Python/DOM**, U92-01..17. NÃO é comando operacional, IAM ou suspensão de CRM real. CRM PR #57 OPEN/DRAFT, 13 casos reais `NAO_EXECUTADO`, R01-G01..G11 e CORE/SEG/AUT NO-GO. Main, VPS, deploy, clientes e custos intocados.
+
 ## EVID-42 — SEC-60 e F187 integradas na dev (11/11/2026)
 
 - SEC-60 PR #261 integrado, SHA `8a9a280bef3766c9d8b45e4b556ad3ad13ab2ffc`, CI pós-merge #43019868566 `success`: protege Runs irmãos canônicos no callback do mesmo coordenador; não é sandbox.

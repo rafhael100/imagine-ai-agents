@@ -76,7 +76,7 @@ final class MockQueuedBatchRunner
                 $pair['owner'], $fields, $now, $leaseTicks);
             if (($out['state'] ?? null) === 'EMPTY') break;
             if (in_array(($out['state'] ?? null),
-                ['REVIEW_REQUIRED', 'IN_PROGRESS'], true)) {
+                ['REVIEW_REQUIRED', 'IN_PROGRESS', 'PAUSED'], true)) {
                 // A pending lease or uncertain outcome is not another read.
                 // Stop before consuming further proof slots in this batch.
                 $pendingState = $out['state'];
