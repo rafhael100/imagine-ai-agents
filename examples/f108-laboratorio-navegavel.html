@@ -55,6 +55,12 @@ button:disabled{cursor:not-allowed;opacity:.53}
 .draft-saved-row span{font-size:12px;color:#263b58;flex:1;min-width:150px;overflow-wrap:anywhere}
 .draft-saved-row button{font-size:11px;padding:8px 11px}
 #agent-draft-collection{margin:12px 0}
+.draft-transfer{border-top:1px solid #e6edf7;margin-top:18px;padding-top:18px}
+.draft-transfer h3{margin:0 0 9px}
+.draft-transfer label{font-size:12px;font-weight:750;color:#506784;display:block;margin:14px 0 7px}
+.draft-transfer textarea{display:block;width:100%;min-height:106px;resize:vertical;background:#f8fbff;color:#253b5a;border:1px solid #cddcf0;border-radius:10px;padding:13px;font:12px ui-monospace,SFMono-Regular,Consolas,monospace}
+.draft-transfer textarea:focus-visible{outline:3px solid #78adff;outline-offset:2px}
+.draft-transfer .actions{margin:14px 0 8px}
 .supervision-table{border-collapse:collapse;width:100%;font-size:13px}
 .supervision-table tr{border-bottom:1px solid #e8edf6}.supervision-table tr:last-child{border-bottom:0}
 .supervision-table th{font-weight:550;text-align:left;color:#667b99;padding:13px 0}
@@ -147,6 +153,18 @@ button:disabled{cursor:not-allowed;opacity:.53}
     <p class="muted" role="status" aria-live="polite" id="agent-draft-collection-status">Nenhum rascunho adicionado nesta sessão.</p>
     <div id="agent-draft-collection" aria-label="Lista de rascunhos fictícios"></div>
     <button type="button" class="secondary" id="agent-draft-clear-all">Zerar lista da sessão</button>
+   </div>
+   <div class="draft-transfer" aria-label="Transferência manual de rascunhos">
+    <h3>Exportar ou importar JSON fictício</h3>
+    <p class="muted">Gere um pacote para copiar manualmente ou cole um pacote já exportado. O texto não é enviado a lugar nenhum. Importações inválidas não alteram a coleção.</p>
+    <label for="agent-draft-transfer-json">Pacote JSON local (máximo 4.096 caracteres)</label>
+    <textarea id="agent-draft-transfer-json" rows="5" maxlength="4096" spellcheck="false" autocomplete="off" placeholder='{"version":"SYNTHETIC_AGENT_DRAFTS_V1","drafts":[]}'></textarea>
+    <div class="actions">
+     <button type="button" class="secondary" id="agent-draft-export">Gerar JSON para copiar</button>
+     <button type="button" class="primary" id="agent-draft-import">Validar e importar JSON</button>
+     <button type="button" class="secondary" id="agent-draft-clear-json">Limpar somente o campo</button>
+    </div>
+    <p class="muted" role="status" aria-live="polite" id="agent-draft-transfer-status">Nenhum pacote gerado ou importado.</p>
    </div>
    <p class="muted" style="margin-top:14px">O nome é apenas texto local, não é um prompt enviado a IA e não gera acesso ao CRM. Para cada modelo há somente um objetivo de demonstração já definido. Não há salvamento, aprovação, credenciais ou cobrança.</p>
   </div>
