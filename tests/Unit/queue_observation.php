@@ -163,4 +163,94 @@ return [
             && $coord->events() === [] && $audit->count() === 0
             && $counts->snapshot()['attempts'] === 0 && $mut->submitCount() === 0);
     },
+
+    'U84-01 request_ref cannot belong to two pending Runs' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U84_RUN_A', 'SYNTHETIC_U84_REQ_A', 10);
+        denied('QUEUE_REQUEST_CONFLICT', fn () => $q->enqueue(
+            context(), 'SYNTHETIC_U84_RUN_B', 'SYNTHETIC_U84_REQ_A', 11));
+        check($q->counts()['PENDENTE'] === 1 && count($q->events()) === 1
+            && $q->status(context(), 'SYNTHETIC_U84_RUN_B')['state']
+                === 'DENIED_OR_NOT_FOUND');
+    },
+    'U84-02 legitimate same-run replay stays idempotent' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $first = $q->enqueue(context(),
+            'SYNTHETIC_U84_SAME', 'SYNTHETIC_U84_REQ_SAME', 10);
+        $again = $q->enqueue(context(),
+            'SYNTHETIC_U84_SAME', 'SYNTHETIC_U84_REQ_SAME', 11);
+        check($first === $again && count($q->events()) === 1
+            && $q->counts()['PENDENTE'] === 1);
+    },
+    'U84-03 completed request cannot be reassigned with a new Run' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U84_DONE_A', 'SYNTHETIC_U84_REQ_DONE', 10);
+        $lease = $q->claim(context(), 11, 5);
+        $q->finish(context(), $lease['run_ref'], $lease['claim_ref'], 'CONCLUIDA', 12);
+        denied('QUEUE_REQUEST_CONFLICT', fn () => $q->enqueue(
+            context(), 'SYNTHETIC_U84_DONE_B', 'SYNTHETIC_U84_REQ_DONE', 13));
+        check($q->counts()['CONCLUIDA'] === 1 && count($q->events()) === 3
+            && $q->counts()['PENDENTE'] === 0);
+    },
+    'U84-04 canceled request correlation remains reserved' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U84_CANCEL_A', 'SYNTHETIC_U84_REQ_C', 10);
+        $q->cancel(context(), 'SYNTHETIC_U84_CANCEL_A', 11);
+        denied('QUEUE_REQUEST_CONFLICT', fn () => $q->enqueue(
+            context(), 'SYNTHETIC_U84_CANCEL_B', 'SYNTHETIC_U84_REQ_C', 12));
+        check($q->counts()['CANCELADA'] === 1 && count($q->events()) === 2);
+    },
+    'U84-05 indeterminate request never becomes a fresh pending Run' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U84_UNCERTAIN_A',
+            'SYNTHETIC_U84_REQ_UNCERTAIN', 10);
+        $q->claim(context(), 11, 2);
+        check($q->claim(context(), 13, 5) === null && $q->needsReview(context()));
+        denied('QUEUE_REQUEST_CONFLICT', fn () => $q->enqueue(
+            context(), 'SYNTHETIC_U84_UNCERTAIN_B',
+            'SYNTHETIC_U84_REQ_UNCERTAIN', 14));
+        check($q->counts()['INDETERMINADO'] === 1
+            && $q->counts()['PENDENTE'] === 0
+            && count($q->events()) === 3);
+    },
+    'U84-06 separate request references remain valid FIFO work' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U84_FIFO_A', 'SYNTHETIC_U84_REQ_A', 10);
+        $q->enqueue(context(), 'SYNTHETIC_U84_FIFO_B', 'SYNTHETIC_U84_REQ_B', 10);
+        $a = $q->claim(context(), 11, 5);
+        $b = $q->claim(context(), 11, 5);
+        check($a['run_ref'] === 'SYNTHETIC_U84_FIFO_A'
+            && $b['run_ref'] === 'SYNTHETIC_U84_FIFO_B'
+            && $q->counts()['RESERVADA'] === 2
+            && count($q->events()) === 4);
+    },
+    'U84-07 full queue preserves idempotency conflict before capacity error' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        for ($i = 0; $i < 64; ++$i) {
+            $q->enqueue(context(), 'SYNTHETIC_U84_CAP_RUN_' . $i,
+                'SYNTHETIC_U84_CAP_REQ_' . $i, 10);
+        }
+        denied('QUEUE_REQUEST_CONFLICT', fn () => $q->enqueue(
+            context(), 'SYNTHETIC_U84_EXTRA_RUN',
+            'SYNTHETIC_U84_CAP_REQ_0', 11));
+        denied('QUEUE_CAPACITY_DENIED', fn () => $q->enqueue(
+            context(), 'SYNTHETIC_U84_EXTRA_RUN',
+            'SYNTHETIC_U84_NEW_REQ', 11));
+        check($q->counts()['PENDENTE'] === 64 && count($q->events()) === 64);
+    },
+    'U84-08 rejected duplicate cannot consume proof or cause a second read' => function (): void {
+        [$runner, $q, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $q->enqueue($ctx, 'SYNTHETIC_U84_PIPE_A', 'SYNTHETIC_U84_PIPE_REQ', 10);
+        denied('QUEUE_REQUEST_CONFLICT', fn () => $q->enqueue(
+            $ctx, 'SYNTHETIC_U84_PIPE_B', 'SYNTHETIC_U84_PIPE_REQ', 11));
+        check($runner->runNext($ctx, $env, $owner, ['ref'], 15, 5)['state']
+            === 'SUGGESTION_SYNTHETIC_ONLY');
+        check($runner->runNext($ctx, $env, $owner, ['ref'], 16, 5)
+            === f183QueuedState('EMPTY'));
+        check($q->counts()['CONCLUIDA'] === 1
+            && $counts->snapshot()['attempts'] === 1
+            && $audit->count() === 1 && $mut->submitCount() === 0);
+    },
+
 ];
