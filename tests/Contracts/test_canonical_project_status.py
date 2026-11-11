@@ -263,6 +263,30 @@ class CanonicalProjectStatusTests(unittest.TestCase):
                     "629 testes PHP"):
             self.assertIn(old, current)
 
+    def test_evid41_five_deliveries_are_postmerge_verified_offline(self):
+        status = STATUS.read_text(encoding="utf-8")
+        readme = README.read_text(encoding="utf-8")
+        rules = AGENT_RULES.read_text(encoding="utf-8")
+        evidence = (ROOT / "docs/AIA-R01-EVID-41-F184-F186-SEC58-59-CI-POSTMERGE.md").read_text(encoding="utf-8")
+        for pr, ci in ((255, 43009103944), (256, 43010448505),
+                       (257, 43011660965), (258, 43012704139),
+                       (259, 43013609438)):
+            self.assertIn(f"#{pr}", evidence)
+            self.assertIn(str(ci), evidence)
+        self.assertIn("08b17e5139ab1d638410100771a424d83ad76481", evidence)
+        self.assertIn("43013609438", status)
+        self.assertIn("800 testes PHP", status)
+        self.assertIn("lint 99 + Python/DOM", status)
+        self.assertIn("800 PHP/lint 99", readme)
+        self.assertIn("EVID-41", status)
+        self.assertIn("EVID-41", readme)
+        self.assertIn("EVID-41", rules)
+        self.assertIn("OPEN/DRAFT", evidence)
+        self.assertIn("NAO_EXECUTADO", evidence)
+        self.assertIn("NO-GO", evidence)
+        self.assertIn("699 testes PHP", status)
+        self.assertIn("776 testes PHP", status)
+
     def test_evid40_four_deliveries_and_f183_ui_are_postmerge_offline(self):
         current = STATUS.read_text(encoding="utf-8")
         readme = README.read_text(encoding="utf-8")
