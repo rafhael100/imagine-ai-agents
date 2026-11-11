@@ -23,6 +23,17 @@ final class MockReadOnlyPilot
     ) {}
 
     /**
+     * Queue/batch adapters must check this before claiming local work.
+     * Coordinator also taints a swallowed provider reentry attempt so the
+     * outer suggestion fails rather than succeeding after a denied callback.
+     * In-process only, not a distributed worker lock.
+     */
+    public function assertQueueAdmissionReady(): void
+    {
+        $this->coordinator->assertProviderCallbackIdle();
+    }
+
+    /**
      * The only successful output is a fixed synthetic draft.
      * A denied read never starts an agent run or invokes the suggestion provider.
      * @param array<string, mixed> $wire A fictional request, never HTTP input.

@@ -22,6 +22,15 @@ final class MockQueuedReadOnlyPilot
     ) {}
 
     /**
+     * Preflight for callers that may schedule more than one queued job.
+     * Must happen before any queue claim or allocation of audit/nonce.
+     */
+    public function assertQueueAdmissionReady(): void
+    {
+        $this->pilot->assertQueueAdmissionReady();
+    }
+
+    /**
      * The job supplies only a synthetic request reference and Run reference.
      * The request wire is constructed from the bound context, never from
      * tenant/resource identifiers supplied by a caller or model.
@@ -37,6 +46,9 @@ final class MockQueuedReadOnlyPilot
         int $leaseTicks,
     ): array {
         try {
+            // Check before even inspecting caller context/fields. A caught
+            // nested attempt must poison the outer provider callback.
+            $this->assertQueueAdmissionReady();
             $this->boundContext->assertSame($context);
             // Validate fields BEFORE claiming a queued job, so invalid user
             // input does not burn a legitimate pending job or CRM nonce.

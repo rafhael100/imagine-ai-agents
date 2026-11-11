@@ -37,6 +37,9 @@ final class MockQueuedBatchRunner
         int $leaseTicks,
     ): array {
         try {
+            // Check callback state first; even a forged foreign context
+            // must not let a nested batch attempt escape sticky denial.
+            $this->pilot->assertQueueAdmissionReady();
             $this->boundContext->assertSame($context);
             if (!array_is_list($pairs) || count($pairs) < 1
                 || count($pairs) > self::MAX_BATCH
