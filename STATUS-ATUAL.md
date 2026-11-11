@@ -6,7 +6,7 @@
 
 **Fase:** offline. **NO-GO**.
 
-**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **851 testes PHP / lint 106 + Python/DOM**; PRs #280–283, EVID-44,EVID-45,EVID-46,EVID-47; CI 43038243942; [CI #43076603247](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43076603247) `success`, [EVID-43](docs/AIA-R01-EVID-43-SEC61-F189-F190-CI-POSTMERGE.md). **NO-GO**.
+**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **851 testes PHP / lint 106 + Python/DOM**; PRs #280–283, EVID-44,EVID-45,EVID-46,EVID-47; CI 43038243942; [CI #43088648397](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43088648397) `success`, [EVID-43](docs/AIA-R01-EVID-43-SEC61-F189-F190-CI-POSTMERGE.md). **NO-GO**.
 
 ## Últimas entregas verificadas
 
