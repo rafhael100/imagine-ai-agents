@@ -55,7 +55,7 @@ php tests/Unit/run.php
 EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=87 EXPECTED_CASES=699 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**OP-01:** resposta PR #239 (660 PHP), builder PR #240 (672). **Fila PR #241 integrada (687). Piloto em fila em revisão (699 PHP / lint 87).** [Fila](docs/AIA-FT01-QUEUE-LEITURA-SUPERVISIONADA-OFFLINE.md), [piloto](docs/AIA-FT01-QUEUE-PILOTO-OP01-COMPOSICAO-OFFLINE.md). **NO-GO**.
+**OP-01 integrado:** PRs #239 (660), #240 (672), #241 (687) e **#242 (699 testes PHP / lint 87)**. [CI #42951498940](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42951498940), [EVID-39](docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md). **NO-GO**.
 
 **SEC-53 integrada (PR #237): 648 testes PHP**. [CI #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). **NO-GO**.
 
