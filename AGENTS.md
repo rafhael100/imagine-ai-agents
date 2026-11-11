@@ -3,7 +3,7 @@
 ## SEC-51 — impedir reentrada da ferramenta durante callback (10/11/2026)
 
 - `MockToolDispatcher` bloqueia SUGGEST/MUTATE/READ aninhados pela mesma instância durante callback de sugestão; mesmo que o provedor engula a negação, a sugestão externa falha e encerra o Run como `FALHOU`. Guarda em memória com limpeza garantida, não uma trava distribuída.
-- **Gate esperado: 633 testes PHP / lint 83 + Python**, U73-01..04. [SEC-51](docs/AIA-FT01-SEC-51-REENTRADA-FERRAMENTAS-CALLBACK.md). Exigir CI verde no PR e pós-merge.
+- **Gate pós-merge aprovado: 633 testes PHP / lint 83 + Python**, U73-01..04. [CI #42940604581](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42940604581), [SEC-51](docs/AIA-FT01-SEC-51-REENTRADA-FERRAMENTAS-CALLBACK.md) e [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md).
 - CRM PR #57 OPEN/DRAFT, 13 casos reais `NAO_EXECUTADO`, gates R01-G01..G11/CORE/SEG/AUT NO-GO. Nenhum `main`, VPS, deploy, cliente, segredo ou despesa.
 
 ## SEC-50 — capability grant revalidada após READ/SUGGEST (10/11/2026)
