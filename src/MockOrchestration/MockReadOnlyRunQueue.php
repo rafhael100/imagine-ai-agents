@@ -112,7 +112,9 @@ final class MockReadOnlyRunQueue
             return $this->admissionView();
         }
         if (!$this->admissionPaused) MockError::fail('QUEUE_CONTROL_STATE_DENIED');
-        if (count($this->controlDecisions) >= self::MAX_CONTROL_DECISIONS) {
+        // Reserve one final control decision for an emergency PAUSE.
+        // Never return OPEN if no future bounded PAUSE could be recorded.
+        if (count($this->controlDecisions) >= self::MAX_CONTROL_DECISIONS - 1) {
             MockError::fail('QUEUE_CONTROL_CAPACITY_DENIED');
         }
         // Never reopen a queue that cannot record the resume event.
