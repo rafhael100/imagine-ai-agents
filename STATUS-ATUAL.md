@@ -6,21 +6,23 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **SEC-51 integrada à dev (PR #233): 633 testes PHP / lint de 83 arquivos PHP e Python**. [CI pós-merge #42940604581](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42940604581) `success` no SHA `872597580bf93261cbb858a8c9eb6f2fe342e9d7`; [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md). Sem aprovação de piloto/produção.
+**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **SEC-52 integrada à dev (PR #235): 640 testes PHP / lint de 83 arquivos PHP e Python**. [CI pós-merge #42943113650](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42943113650) `success` no SHA `c74eabb82c0e69b9a1bbd5ed320a8ac5f247e7e0`; [EVID-37](docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md). CRM **NO-GO**.
 
 ## Últimas entregas verificadas
 
-**SEC-51 integrada à dev (PR #233):** reentrada de SUGGEST/MUTATE/READ durante callback de sugestão bloqueada; quatro regressões U73-01..04. [SEC-51](docs/AIA-FT01-SEC-51-REENTRADA-FERRAMENTAS-CALLBACK.md), [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
+**SEC-52 integrada à dev (PR #235):** guarda compartilhada de callback entre despachantes; sete U74-01..07, [SEC-52](docs/AIA-FT01-SEC-52-GUARDA-COORDENADOR-CALLBACK.md), [EVID-37](docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
+
+**SEC-51 integrada à dev (PR #233):** baseline **633 testes PHP**, [CI #42940604581](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42940604581); reentrada de SUGGEST/MUTATE/READ durante callback de sugestão bloqueada; quatro regressões U73-01..04. [SEC-51](docs/AIA-FT01-SEC-51-REENTRADA-FERRAMENTAS-CALLBACK.md), [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-50 integrada à dev (PR #230):** capability grant revogada durante leitor/provedor nega o resultado da ferramenta; sugestão fecha Run como `FALHOU`. Baseline **629 testes PHP**, U72-01..08, [CI #42938703131](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42938703131), [SEC-50](docs/AIA-FT01-SEC-50-CAPABILITY-RECHECK-POS-FERRAMENTA.md), [EVID-35](docs/AIA-R01-EVID-35-SEC50-CI-POSTMERGE.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-49 integrada à dev (PR #228):** epoch do trust compartilhado; oito U71-01..08, [SEC-49](docs/AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md), [EVID-34](docs/AIA-R01-EVID-34-SEC49-CI-POSTMERGE.md).
 
-**SEC-48 integrada à dev (PR #226):** leitura aninhada da mesma fachada é negada antes do leitor/nonce; o guard interno impede auditoria de sucesso na chamada externa. Oito U70-01..08, [SEC-48](docs/AIA-FT01-SEC-48-REENTRADA-LEITURA-OP01.md); [EVID-33](docs/AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md), [CI #42924834951](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42924834951). CRM real `NAO_EXECUTADO` / **NO-GO**.
+**SEC-48 integrada à dev (PR #226):** nega READ aninhada antes de auditoria positiva; U70-01..08. [SEC-48](docs/AIA-FT01-SEC-48-REENTRADA-LEITURA-OP01.md), [EVID-33](docs/AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md), [CI #42924834951](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42924834951). CRM **NO-GO**.
 
-**SEC-47 integrada à dev (PR #224):** recheck monotônico por recibo bloqueia retrocesso e restauração artificial de provas expiradas. Oito regressões U69-01..08; [SEC-47](docs/AIA-FT01-SEC-47-RECHECK-TEMPO-MONOTONICO.md); [EVID-32](docs/AIA-R01-EVID-32-SEC47-CI-POSTMERGE.md), [CI #42923158871](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42923158871). Relógio ainda sintético; CRM real `NAO_EXECUTADO` / **NO-GO**.
+**SEC-47 integrada à dev (PR #224):** recheck monotônico por recibo; U69-01..08. [SEC-47](docs/AIA-FT01-SEC-47-RECHECK-TEMPO-MONOTONICO.md), [EVID-32](docs/AIA-R01-EVID-32-SEC47-CI-POSTMERGE.md), [CI #42923158871](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42923158871). CRM **NO-GO**.
 
-**SEC-46 integrada à dev (PR #222):** revisão monotônica da política e recibo local de leitura impedem revogação+reconcessão e recheck sem leitura prévia. 12 regressões U68-01..12; [SEC-46](docs/AIA-FT01-SEC-46-RECIBO-REVISAO-OWNER-ABA.md), [EVID-31](docs/AIA-R01-EVID-31-SEC46-CI-POSTMERGE.md), [CI #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251). CRM real: `NAO_EXECUTADO` / **NO-GO**.
+**SEC-46 integrada à dev (PR #222):** revisão monotônica e recibo contra ABA; U68-01..12. [SEC-46](docs/AIA-FT01-SEC-46-RECIBO-REVISAO-OWNER-ABA.md), [EVID-31](docs/AIA-R01-EVID-31-SEC46-CI-POSTMERGE.md), [CI #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251). CRM **NO-GO**.
 
 **SEC-45 integrada à dev (PR #220):** revalida autorização sintética após a sugestão e antes de concluir o Run. Revogação no provedor termina como `FALHOU`, sem resumo, nova leitura ou segundo nonce; dez regressões U67-01..10. [SEC-45](docs/AIA-FT01-SEC-45-REVALIDACAO-POS-SUGESTAO.md); [EVID-30](docs/AIA-R01-EVID-30-SEC45-CI-POSTMERGE.md), [CI #42913437800](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42913437800). Homologação CRM: `NAO_EXECUTADO` / **NO-GO**.
 
@@ -36,9 +38,9 @@
 
 [EVID-24](docs/AIA-R01-EVID-24-CONSOLIDACAO-SEC39-40.md): SEC-39/40; [CI #42889307984](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42889307984) aprovada, 533 testes PHP. Não autoriza CRM.
 
-**SEC-40 integrada à dev (PR #209):** manifesta versões fictícias apenas com 5 chaves e limita referências sintéticas comuns a 110 bytes antes de regex; preserva ordem indiferente e checks anteriores. Sete regressões U62-01..07. [SEC-40](docs/AIA-FT01-SEC-40-MANIFESTO-LIMITADO.md). Sem registro real de agentes.
+**SEC-40 integrada à dev (PR #209):** limites de manifestos/referências; U62-01..07, [SEC-40](docs/AIA-FT01-SEC-40-MANIFESTO-LIMITADO.md). Sem registro real de agentes.
 
-**SEC-39 integrada à dev:** coordenador e provedor simulado recusam projeções de sugestões com mais de 3 campos, valores acima de 256 bytes, chaves ou tipos inválidos antes de chamar IA. Oito regressões U61-01..08. [SEC-39](docs/AIA-FT01-SEC-39-LIMITES-SUGESTOES.md). Sem IA externa ou CRM real.
+**SEC-39 integrada à dev:** limita projeções sintéticas antes de chamar provedor, U61-01..08. [SEC-39](docs/AIA-FT01-SEC-39-LIMITES-SUGESTOES.md). Sem IA real.
 
 **SEC-38 integrada à dev:** concessões de ferramenta sintética validam identificadores `id` e `toolId` com no máximo 90 bytes e formato fechado já na criação. Seis regressões U60-01..06 para 1 MiB, fronteira 90/91 bytes, padrões inválidos e revogação. [SEC-38](docs/AIA-FT01-SEC-38-CONCESSOES-LIMITADAS.md). Não implementa IAM real.
 
