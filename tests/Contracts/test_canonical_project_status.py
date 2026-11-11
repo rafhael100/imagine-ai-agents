@@ -238,7 +238,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("640 testes PHP", current)
         self.assertIn("633 testes PHP", current)
         self.assertIn("629 testes PHP", current)
-        self.assertIn("EXPECTED_CASES=792", current)
+        self.assertIn("EXPECTED_CASES=800", current)
         self.assertIn("NO-GO", current)
         self.assertIn("NAO_EXECUTADO", evidence)
 
@@ -305,7 +305,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertLess(len(current), 8000)
         self.assertGreater(len(history), 80000)
         self.assertIn("docs/historico/README-ANTES-CONSOLIDACAO-2026-11-10.md", current)
-        self.assertIn("EXPECTED_CASES=792", current)
+        self.assertIn("EXPECTED_CASES=800", current)
         self.assertIn("NO-GO", current)
         self.assertIn("CRM PR #57", current)
         self.assertIn("EXPECTED_CASES=397", history)
