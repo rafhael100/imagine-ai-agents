@@ -152,7 +152,12 @@ final class SupervisedCoordinator
         $this->providerCallbackActive = true;
         $this->providerCallbackReentryObserved = false;
         try {
-            $suggestion = $this->ai->suggest($run, $fields);
+            // The provider receives the same Run object that lifecycle code uses.
+            // Lock Run::transition / Run::step for this callback as well as
+            // the coordinator entrypoints guarded by SEC-52.
+            $suggestion = $run->withReadOnlySuggestion(
+                fn (): array => $this->ai->suggest($run, $fields)
+            );
             // A callback can swallow a denied nested operation; never treat
             // that provider response as an approved suggestion.
             if ($this->providerCallbackReentryObserved) {
