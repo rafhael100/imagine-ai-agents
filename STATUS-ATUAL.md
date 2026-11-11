@@ -6,9 +6,11 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **SEC-50 integrada à dev (PR #230): 629 testes PHP / lint de 83 arquivos PHP e Python**. [CI pós-merge #42938703131](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42938703131) concluída com sucesso no SHA `efc6f26a57c3c6c631f4dddaecfc843bab7b72c7`; [EVID-35](docs/AIA-R01-EVID-35-SEC50-CI-POSTMERGE.md). O número de testes não é percentual de conclusão do produto.
+**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **SEC-51 integrada à dev (PR #233): 633 testes PHP / lint de 83 arquivos PHP e Python**. [CI pós-merge #42940604581](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42940604581) `success` no SHA `872597580bf93261cbb858a8c9eb6f2fe342e9d7`; [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md). Sem aprovação de piloto/produção.
 
 ## Últimas entregas verificadas
+
+**SEC-51 integrada à dev (PR #233):** reentrada de SUGGEST/MUTATE/READ durante callback de sugestão bloqueada; quatro regressões U73-01..04. [SEC-51](docs/AIA-FT01-SEC-51-REENTRADA-FERRAMENTAS-CALLBACK.md), [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-50 integrada à dev (PR #230):** capability grant revogada durante leitor/provedor nega o resultado da ferramenta; sugestão fecha Run como `FALHOU`. Oito U72-01..08, [SEC-50](docs/AIA-FT01-SEC-50-CAPABILITY-RECHECK-POS-FERRAMENTA.md), [EVID-35](docs/AIA-R01-EVID-35-SEC50-CI-POSTMERGE.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
 
@@ -50,9 +52,9 @@
 
 **SEC-33 integrada à dev:** impede regressão de evidências sintéticas de `PENDENTE` para `INDETERMINADO`, preserva replays não terminais sem alocar novo efeito e mantém resultados terminais imutáveis. Seis regressões U55-01..06. [SEC-33](docs/AIA-FT01-SEC-33-EVIDENCIAS-MONOTONICAS.md). Sem CRM ou IAM real.
 
-**SEC-32 integrada à dev:** limite de 256 efeitos fictícios por instância do gateway, sem expulsão de histórico e com falha fechada para novas submissões; sete regressões U54-01..07. [Documento SEC-32](docs/AIA-FT01-SEC-32-EFEITOS-LIMITADOS.md). Sem vínculo com CRM real ou autorização de piloto.
+**SEC-32:** limita a 256 efeitos sintéticos; [documentação](docs/AIA-FT01-SEC-32-EFEITOS-LIMITADOS.md). Sem CRM real.
 
-**SEC-31 integrada à dev:** limites de 256 fontes sintéticas e 1.024 registros de seleção/entrega, sem apagar histórico, com negação quando a trilha não puder registrar o resultado. Sete regressões U53-01..07. [Documento SEC-31](docs/AIA-FT01-SEC-31-LIMITES-CONHECIMENTO.md). Nenhum serviço externo de conhecimento é utilizado.
+**SEC-31:** limites locais de 256 fontes e 1.024 eventos; [documentação](docs/AIA-FT01-SEC-31-LIMITES-CONHECIMENTO.md). Sem RAG real.
 
 **SEC-30 — catálogo limitado:** limites de modelos/snapshots fictícios sem apagar histórico. [Detalhes](docs/AIA-FT01-SEC-30-CATALOGO-LIMITADO.md). Sem agentes publicados.
 
