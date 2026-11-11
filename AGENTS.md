@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## F183 — supervisão integrada à prévia visual F108 (11/11/2026)
+
+- `examples/f108-laboratorio-navegavel.html` tem quinta aba `supervision` com métricas fechadas de fila/revisão e JSON fixo `SYNTHETIC_QUEUE_SUPERVISION_V1`, **idêntico à saída de F182**. Integração no navegador é local, sem fetch, storage ou backend; `NO_GO` permanece evidente. [Guia F183](docs/AIA-FT01-F183-SUPERVISAO-VISUAL-OFFLINE.md).
+- Gate atual proposto: **776 testes PHP / lint 97 + Python**, seis testes F183 obrigatórios e smoke Node F108 quando runtime já estiver disponível. Nenhum teste visual autoriza CRM, IAM, aprovação real, requeue, mudança em `main` ou deploy; CRM PR #57 OPEN/DRAFT, 13 cenários `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO.
+
 ## REV-02/F182 — overview de supervisão sem identificadores (11/11/2026)
 
 - `MockUncertaintyReviewBoard::overview` produz a visão agregada, tipada e fechada da fila (pendente/reserva/concluída/falha/cancelada/incerta) e da revisão (primeira/segunda/consenso não resolutivo/conflito). Protege contexto do quadro e fila, não exporta IDs, não libera `INDETERMINADO`, não reenvia nem autentica ninguém. CLI F182 comprova o contrato com casos fictícios. [REV-02/F182](docs/AIA-FT01-REV-02-OVERVIEW-QUEUE-REVIEWS-F182.md).
