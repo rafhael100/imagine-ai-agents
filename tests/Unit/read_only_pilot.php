@@ -815,13 +815,13 @@ return [
             && $queue->counts()['FALHOU'] === 1
             && $mut->submitCount() === 0 && count($coord->events()) === 4);
     },
-    'U79-09 expired reservation never triggers automatic retry' => function (): void {
+    'U79-09 expired reservation reports review without automatic retry' => function (): void {
         [$runner, $queue, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
             f179QueuedFixture();
         $queue->enqueue($ctx, 'SYNTHETIC_Q79_RUN_09', 'SYNTHETIC_Q79_REQ_09', 10);
         $queue->claim($ctx, 11, 2);
         check($runner->runNext($ctx, $env, $owner, ['ref'], 13, 5)['state']
-            === 'EMPTY');
+            === 'REVIEW_REQUIRED');
         check($queue->counts()['INDETERMINADO'] === 1
             && $coord->events() === [] && $counts->snapshot()['attempts'] === 0);
     },
