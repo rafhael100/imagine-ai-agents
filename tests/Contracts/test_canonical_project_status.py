@@ -275,7 +275,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
             self.assertIn(str(ci), evidence)
         self.assertIn("776 testes PHP", current)
         self.assertIn("97 + Python", current)
-        self.assertIn("776 PHP/lint 97", readme)
+        self.assertIn("776 PHP / lint 97", evidence)
         self.assertIn("F108_SMOKE_PASS", evidence)
         self.assertIn("EVID-40", readme)
         self.assertIn("EVID-40", rules)
