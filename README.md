@@ -52,10 +52,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=613 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=621 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**SEC-48 integrada:** **613 testes PHP / lint 83 + Python**; [CI #42924834951](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42924834951) aprovada, [EVID-33](docs/AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md). Histórico: [SEC-47 #42923158871](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42923158871), [SEC-46 #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**SEC-49 em revisão:** **621 testes PHP / lint 83 + Python**; [SEC-49](docs/AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md) nega recuperação silenciosa do estado compartilhado. Última CI pós-merge: [SEC-48 #42924834951](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42924834951), [EVID-33](docs/AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 

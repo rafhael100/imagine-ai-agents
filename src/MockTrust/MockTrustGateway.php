@@ -37,6 +37,21 @@ final class MockTrustGateway
         $this->allowedScopes = $allowedScopes;
     }
 
+    /** Monotonic revision of the optional, in-process shared state. */
+    public function trustRevision(): int
+    {
+        return $this->sharedState?->revision() ?? 0;
+    }
+
+    public function assertTrustRevision(int $expected): void
+    {
+        if ($this->sharedState === null) {
+            if ($expected !== 0) MockError::fail('TRUST_STATE_UNAVAILABLE');
+            return;
+        }
+        $this->sharedState->assertRevision($expected);
+    }
+
     /**
      * Read-only, non-consuming recheck after an untrusted reader returns.
      * This deliberately does not inspect the already-used local nonce.

@@ -23,7 +23,7 @@ final class MockCrmReadPublicFacade
      * Replacing the lease (rather than keeping a map) bounds memory to one
      * local slot and fails closed for overlapping mock runs.
      * @var ?array{envelope:MockTrustEnvelope,owner:MockOwnerScopeEvidence,
-     *   context:string,request_hash:string,revision:int,observed_at:int}
+     *   context:string,request_hash:string,revision:int,trust_revision:int,observed_at:int}
      */
     private ?array $lastReadReceipt = null;
     // A second call to handle() on the same facade while a reader is active
@@ -90,6 +90,7 @@ final class MockCrmReadPublicFacade
             // A temporarily revoked/resumed policy cannot reactivate a prior
             // read, even if the current owner grant looks permitted again.
             $this->readBoundary->assertPolicyRevision($receipt['revision']);
+            $this->readBoundary->assertTrustRevision($receipt['trust_revision']);
             return true;
         } catch (\Throwable) {
             // Fail closed after any exception in the authenticated recheck,
@@ -147,6 +148,7 @@ final class MockCrmReadPublicFacade
                 'context' => $trustedContext->key(),
                 'request_hash' => self::wireFingerprint($wire),
                 'revision' => $this->readBoundary->policyRevision(),
+                'trust_revision' => $this->readBoundary->trustRevision(),
                 'observed_at' => $now,
             ];
             return self::response('READ_SYNTHETIC_ONLY', $projection);

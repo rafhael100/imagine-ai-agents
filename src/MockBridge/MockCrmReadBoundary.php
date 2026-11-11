@@ -45,6 +45,16 @@ final class MockCrmReadBoundary
         $this->ownerPolicy->assertRevision($expected);
     }
 
+    public function trustRevision(): int
+    {
+        return $this->gateway->trustRevision();
+    }
+
+    public function assertTrustRevision(int $expected): void
+    {
+        $this->gateway->assertTrustRevision($expected);
+    }
+
     public function evaluate(
         MockCrmReadRequest $request,
         ?MockTrustEnvelope $envelope,
@@ -65,6 +75,7 @@ final class MockCrmReadBoundary
         if ($trusted['real_authorization'] !== false || $trusted['external_calls'] !== 0) {
             MockError::fail('BRIDGE_TRUST_DENIED');
         }
+        $trustRevision = $this->gateway->trustRevision();
         // The reader is replaceable behind the CrmReader contract. Inspect its
         // entire (at most two-field) result BEFORE a success audit is written.
         // The common invariant also reorders an otherwise valid reader output
@@ -78,6 +89,7 @@ final class MockCrmReadBoundary
         // Even a revoke/regrant or suspend/resume inside the reader must NOT
         // turn old authorization into a valid success (ABA safety).
         $this->ownerPolicy->assertRevision($policyRevision);
+        $this->gateway->assertTrustRevision($trustRevision);
         $orderedProjection = MockReadProjectionInvariant::canonicalize(
             $projection, $request->fields, $trustedContext);
         if ($orderedProjection === null) MockError::fail('BRIDGE_PROJECTION_DENIED');
