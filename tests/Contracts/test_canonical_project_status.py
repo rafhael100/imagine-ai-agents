@@ -192,6 +192,22 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("NAO_EXECUTADO", current)
         self.assertIn("CRM PR #57", current)
 
+    def test_sec51_callback_reentry_is_postmerge_verified_but_offline(self):
+        current = STATUS.read_text(encoding="utf-8")
+        readme = README.read_text(encoding="utf-8")
+        evidence = (ROOT / "docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md").read_text(encoding="utf-8")
+        self.assertIn("SEC-51 integrada à dev (PR #233)", current)
+        self.assertIn("633 testes PHP", current)
+        self.assertIn("42940604581", current)
+        self.assertIn("42940604581", evidence)
+        self.assertIn("872597580bf93261cbb858a8c9eb6f2fe342e9d7", evidence)
+        self.assertIn("633 testes PHP", readme)
+        # Historic SEC-50 evidence must remain visible after advancing to SEC-51.
+        self.assertIn("629 testes PHP", current)
+        self.assertIn("42938703131", current)
+        self.assertIn("NO-GO", current)
+        self.assertIn("NAO_EXECUTADO", evidence)
+
     def test_history_preserved_without_overwriting_evidence(self):
         previous = ARCHIVE.read_text(encoding="utf-8")
         prior_roadmap = ARCHIVED_ROADMAP.read_text(encoding="utf-8")
