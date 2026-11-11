@@ -38,6 +38,7 @@ for name in \
   test_f186_draft_collection.py \
   test_f187_draft_transfer.py \
   test_f190_queue_pause_demo.py \
+  test_f191_rehearsal_verifier.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
@@ -55,6 +56,8 @@ if command -v node >/dev/null 2>&1; then
 else
   echo 'NODE_VISUAL_SMOKE_SKIPPED: Node not installed (no install attempted)'
 fi
+
+python3 tools/verify_f190_rehearsal.py
 
 php -l tools/op01_php_parser_probe.php
 php -l tools/op01_php_public_response_probe.php
