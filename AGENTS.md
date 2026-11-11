@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## EVID-43 — SEC-61, F189 e F190 pós-merge validados (11/11/2026)
+
+- SEC-61 PR #264 squash `91381e2eb6d242461a472e79bc6568d35a8bdd8b` CI pós-merge #43035537495 `success` (827 PHP/lint 101); F189 #265 squash `4c4bcea504a6375f1497d1ff9d1b0dbad780849f` CI #43037555601 `success` (835/102); F190 #266 squash `768ef0b14c267d3b4c927311875fe52498812a55` CI #43038243942 `success` (835/103). [EVID-43](docs/AIA-R01-EVID-43-SEC61-F189-F190-CI-POSTMERGE.md).
+- **Baseline integrado 835 testes PHP / lint 103 + Python/DOM**. Pausa, supervisão e ensaio são mocks locais. CRM PR #57 OPEN/DRAFT, 13 cenários reais `NAO_EXECUTADO`, gates R01-G01..G11/CORE/SEG/AUT NO-GO; main, VPS, clientes, produção, segredos e gastos intocados.
+
 ## F190 — ensaio executável de pausa/revisão/retomada em PHP (11/11/2026)
 
 - `examples/f190-queue-admission-demo.php` cria duas requisições fictícias; primeiro lease expira durante PAUSED, pedido pendente só sai após RESUME, dois revisores ainda deixam 1 `INDETERMINADO`. Emite somente dois `SYNTHETIC_QUEUE_SUPERVISION_V1` fechados no JSON `SYNTHETIC_QUEUE_PAUSE_REHEARSAL_V1`, sem IDs nem escrita real. [F190](docs/AIA-FT01-F190-ENSAIO-PAUSA-RETOMADA-OFFLINE.md).
