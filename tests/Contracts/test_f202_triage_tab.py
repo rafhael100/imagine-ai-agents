@@ -49,7 +49,7 @@ class F202Tests(unittest.TestCase):
         self.assertIn("F202_TRIAGE_COUNTER_DENIED", page)
         self.assertIn("triageFlags(info)", page)
         self.assertIn("operational_decision", page)
-        self.assertIn("Nenhuma etapa equivale", page)
+        self.assertIn("nenhuma etapa equivale", page)
         self.assertNotIn("fetch(", page)
         self.assertNotIn("XMLHttpRequest", page)
 
