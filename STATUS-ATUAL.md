@@ -1,14 +1,16 @@
 # Imagine AI Agents — estado atual
 
-**Consolidado em 10/11/2026.** Fontes: GitHub e CIs verificadas. **Produção: NO-GO.**
+**Consolidado em 11/11/2026.** Fonte: commits e CIs do GitHub. **Produção: NO-GO.**
 
 ## Estado executivo
 
-**Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
+**Fase:** laboratório PHP offline e sintético. OP-01 e sugestões têm testes locais, mas **não existe produto operacional, CRM autenticado, VPS ou acesso a clientes. Piloto real/produção: NO-GO**.
 
-**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **Piloto em fila OP-01 integrado (PR #242): 699 testes PHP / lint 87 + Python**. [CI pós-merge #42951498940](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42951498940) `success`; [EVID-39](docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md). **NO-GO**.
+**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **F183 integrado: 776 testes PHP / lint 97 + Python e smoke DOM**. [CI pós-merge #42981975813](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42981975813) `success`, [EVID-40](docs/AIA-R01-EVID-40-SEC57-REV02-F183-POSTMERGE.md). **NO-GO**.
 
 ## Últimas entregas verificadas
+
+**SEC-57/REV-01/REV-02/F183 integrados:** PR #250 (753 PHP, CI #42980115062); #251 (766 PHP, CI #42980489349); #252 (776 PHP, CI #42981149687); #253 (UI F108, CI #42981975813). [EVID-40](docs/AIA-R01-EVID-40-SEC57-REV02-F183-POSTMERGE.md). Tudo sintético, **NO-GO**.
 
 **OP-01 integrado:** PR #239 resposta única (660 PHP, CI #42949459592); #240 builder (672 PHP, CI #42949959755); #241 fila FIFO (687 PHP, CI #42950862393); #242 piloto em fila (699 PHP, CI #42951498940). [EVID-39](docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md). CRM real **NO-GO**.
 
