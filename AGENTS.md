@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## F201 — ensaio executável da triagem F200, apenas offline (11/11/2026)
+
+- `examples/f201-queue-triage-demo.php` exercita seis fases sintéticas da fila e emite envelope fechado sem IDs; `tools/verify_f201_triage.py` valida esquema, determinismo e contagens, com 12 regressões Python. [F201](docs/AIA-FT01-F201-ENSAIO-TRIAGEM-OFFLINE.md).
+- **Baseline proposto 851 PHP / lint 106 + Python/DOM**. A incerteza pós-retomada permanece. Nenhuma indicação de triagem é autorização para CRM, worker ou produção. CRM #57 OPEN/DRAFT, 13 cenários reais NAO_EXECUTADO e R01-G01..G11/CORE/SEG/AUT NO-GO; main, VPS, produção, segredos e gastos intocados.
+
+
 ## F200 — triagem PHP agregada sem autoridade operacional (11/11/2026)
 
 - Nova classe `src/MockOrchestration/MockQueueTriage.php` sintetiza PAUSED → REVIEW_REQUIRED → LEASE_IN_PROGRESS → PENDING → QUIET, com precedência de risco, contagens fechadas, tenant isolado, proteção de invariantes e nenhuma mutação.
