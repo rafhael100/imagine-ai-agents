@@ -55,6 +55,8 @@ php tests/Unit/run.php
 EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=84 EXPECTED_CASES=660 bash tools/run_r01_offline_quality_gate.sh
 ```
 
+**OP-01 resposta compartilhada em revisão:** 660 testes PHP / lint 84 esperados. [Contrato sintético](docs/AIA-FT01-OP01-RESPOSTA-COMPARTILHADA-2026-11-10.md). **NO-GO**.
+
 **SEC-53 integrada (PR #237): 648 testes PHP**. [CI #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). **NO-GO**.
 
 **SEC-52 integrada (PR #235): 640 testes PHP**. [EVID-37](docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md).
