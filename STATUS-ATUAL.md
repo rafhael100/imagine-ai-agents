@@ -12,7 +12,7 @@
 
 **OP-01 integrado:** PR #239 resposta única (660 PHP, CI #42949459592); #240 builder (672 PHP, CI #42949959755); #241 fila FIFO (687 PHP, CI #42950862393); #242 piloto em fila (699 PHP, CI #42951498940). [EVID-39](docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md). CRM real **NO-GO**.
 
-**SEC-53 integrada à dev (PR #237):** baseline **648 testes PHP**, [CI #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088); bloqueia alteração de Run, U75-01..08, [SEC-53](docs/AIA-FT01-SEC-53-RUN-LIFECYCLE-READONLY-CALLBACK.md), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
+**SEC-53 integrada à dev (PR #237):** baseline **648 testes PHP**, lint de **83 arquivos PHP**, [CI #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088); bloqueia alteração de Run, U75-01..08, [SEC-53](docs/AIA-FT01-SEC-53-RUN-LIFECYCLE-READONLY-CALLBACK.md), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-52 integrada à dev (PR #235):** baseline **640 testes PHP**; [CI #42943113650](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42943113650), guarda compartilhada; sete U74-01..07, [SEC-52](docs/AIA-FT01-SEC-52-GUARDA-COORDENADOR-CALLBACK.md), [EVID-37](docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
 
