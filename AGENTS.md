@@ -1,5 +1,12 @@
 # AGENTS.md — Imagine AI Agents
 
+## EVID-47 — triagem PHP F200, ensaio F201, visual F202 e ataques F203 integrados (11/11/2026)
+
+- PR #280 squash `99e0793c2b352794772d9f70db553c0728eacde1`, CI pós-merge #43086311234 success; #281 squash `3168601ddeeb8f98eae7a678c6de3fdda1038851`, CI #43087249037 success; #282 squash `d964fa0a0175ce2b1fd7030af47f2afead2a6df7`, CI #43088119546 success; #283 squash `c0cc7fa1de79c793d8bb48cb745ece50639c25d1`, CI #43088648397 success. [EVID-47](docs/AIA-R01-EVID-47-F200-F203-CI-POSTMERGE.md).
+- **851 testes PHP / lint 106 + Python/DOM** após novos 16 casos U100, 25 contratos Python F201–F203 e 24 ataques Node. Continua apenas laboratório; F200/F202 são avaliações de leitura, nunca ordens operacionais.
+- CRM PR #57 OPEN/DRAFT e 13 homologações reais NAO_EXECUTADO; gates R01-G01..G11/CORE/SEG/AUT NO-GO. Main, VPS, produção, credenciais, clientes e custos intocados.
+
+
 ## F203 — 24 adversários contra o validador real da triagem F202 (11/11/2026)
 
 - Smoke Node novo extrai o código real de F202 e recusa 24 pacotes hostis antes de renderizar; seis contratos Python exigem cobertura e gate offline. [F203](docs/AIA-FT01-F203-ATAQUES-JORNADA-TRIAGEM.md).
