@@ -197,7 +197,7 @@ button:disabled{cursor:not-allowed;opacity:.53}
  </div>
 </section>
 <section class="page" id="page-supervision" hidden>
- <div class="sectiontitle"><div><span class="overline">F183 · Visão supervisionada</span><h1>Fila e revisões</h1><p class="muted">Dados de teste derivados do contrato F182. Nenhuma conexão com CRM, clientes ou servidores.</p></div><span class="tag">NO-GO · Offline</span></div>
+ <div class="sectiontitle"><div><span class="overline">F183/F189 · Visão supervisionada</span><h1>Fila e revisões</h1><p class="muted">Dados de teste derivados do contrato F182. Nenhuma conexão com CRM, clientes ou servidores.</p><p class="muted">Admissão na fila: <strong id="supervision-admission">—</strong></p></div><span class="tag">NO-GO · Offline</span></div>
  <div class="hero"><div><span class="pill">Snapshot fixo · 100% fictício</span><h2>Incerteza não é conclusão.</h2><p>Uma revisão concordante não encerra uma tarefa indeterminada. Esta tela não pode reenviar solicitações nem alterar dados.</p></div><div class="herostat"><strong id="supervision-decision">NO-GO</strong><small>Operação real bloqueada</small></div></div>
  <div class="metrics">
    <div class="panel metric"><small>Concluídas</small><strong id="supervision-completed">0</strong><span class="hint">Somente laboratório</span></div>
@@ -261,7 +261,7 @@ button:disabled{cursor:not-allowed;opacity:.53}
 </main>
 </div>
 </div>
-<script type="application/json" id="f183-supervision-data">{"contract":"SYNTHETIC_QUEUE_SUPERVISION_V1","queue":{"pending":0,"reserved":0,"completed":1,"failed":0,"cancelled":0,"indeterminate":3},"review":{"awaiting_first":0,"awaiting_second":1,"reviewed_unresolved":1,"conflict":1},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0}</script>
+<script type="application/json" id="f183-supervision-data">{"contract":"SYNTHETIC_QUEUE_SUPERVISION_V1","queue":{"pending":0,"reserved":0,"completed":1,"failed":0,"cancelled":0,"indeterminate":3},"review":{"awaiting_first":0,"awaiting_second":1,"reviewed_unresolved":1,"conflict":1},"admission":{"state":"OPEN"},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0}</script>
 <script>
 (function(){
 "use strict";
@@ -277,6 +277,8 @@ const get=id=>document.getElementById(id);
 function drawSupervision(){
  const data=JSON.parse(get("f183-supervision-data").textContent);
  if(data.contract!=="SYNTHETIC_QUEUE_SUPERVISION_V1"||data.operational_decision!=="NO_GO"||data.real_authorization!==false||data.external_calls!==0||data.write_calls!==0)throw Error("SYNTHETIC_F183_CONTRACT_DENIED");
+ if(!data.admission||Object.keys(data.admission).join("|")!=="state"||!["OPEN","PAUSED"].includes(data.admission.state))throw Error("SYNTHETIC_F189_ADMISSION_DENIED");
+ get("supervision-admission").textContent=data.admission.state==="PAUSED"?"PAUSADA · SIMULADA":"ABERTA · SIMULADA";
  const metrics=[
   ["supervision-completed",data.queue.completed],
   ["supervision-indeterminate",data.queue.indeterminate],
