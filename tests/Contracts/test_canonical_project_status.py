@@ -157,7 +157,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("AIA-FT01-SEC-48-REENTRADA-LEITURA-OP01.md", rules)
         self.assertIn("EVID-33", current)
         self.assertIn("42924834951", current)
-        self.assertIn("42924834951", readme)
+        self.assertIn("42924834951", (ROOT / "docs/AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md").read_text(encoding="utf-8"))
         self.assertIn("NAO_EXECUTADO", current)
         self.assertIn("NO-GO", current)
         self.assertIn("CRM PR #57", current)
