@@ -54,7 +54,7 @@
 
 **SEC-31 integrada à dev:** limites de 256 fontes sintéticas e 1.024 registros de seleção/entrega, sem apagar histórico, com negação quando a trilha não puder registrar o resultado. Sete regressões U53-01..07. [Documento SEC-31](docs/AIA-FT01-SEC-31-LIMITES-CONHECIMENTO.md). Nenhum serviço externo de conhecimento é utilizado.
 
-**SEC-30 integrada em desenvolvimento:** o catálogo de modelos e snapshots sintéticos possui limites definidos, sem evicção de versões e com preservação de conflitos, replays e desativação. [Documento técnico](docs/AIA-FT01-SEC-30-CATALOGO-LIMITADO.md). **Não é uma publicação de agentes para clientes.**
+**SEC-30 — catálogo limitado:** limites de modelos/snapshots fictícios sem apagar histórico. [Detalhes](docs/AIA-FT01-SEC-30-CATALOGO-LIMITADO.md). Sem agentes publicados.
 
 **SEC-29 integrada à dev (PR #198):** limite de decisões e eventos do controle de versões simulado, com reserva de espaço para suspensão e seis regressões. [Evidência técnica SEC-29](docs/AIA-FT01-SEC-29-RESERVA-AUDITORIA-VERSOES.md). A execução segue offline e o CRM real continua **NO-GO**.
 
