@@ -232,4 +232,62 @@ assert.equal(byId("agent-draft-count").textContent, "0 / 5", "clear all destroys
 assert.equal(byId("agent-draft-collection").children.length, 1, "empty placeholder only");
 assert.equal(byId("agent-draft-test").disabled, true, "clear all revokes current preview");
 assert.equal(byId("audit-runs").textContent, "0", "draft collection did not execute scenarios");
-console.log("F108_SMOKE_PASS: 5 pages, 6 scenarios, 14 synthetic events, review sandbox, reset, agent shortcut, agent drafts, bounded draft collection, offline CSP");
+// F187: transfer packages are explicit, local-only and atomically validated.
+byId("agent-draft-template").value="crm";
+byId("agent-draft-name").value="Agente Alfa";
+byId("agent-draft-generate").click();
+byId("agent-draft-save").click();
+byId("agent-draft-template").value="universidade";
+byId("agent-draft-name").value="Tutor Beta";
+byId("agent-draft-generate").click();
+byId("agent-draft-save").click();
+assert.equal(byId("agent-draft-count").textContent, "2 / 5", "fixture for export");
+byId("agent-draft-export").click();
+const transferPackage=byId("agent-draft-transfer-json").value;
+assert.deepEqual(JSON.parse(transferPackage),{
+ version:"SYNTHETIC_AGENT_DRAFTS_V1",
+ drafts:[{name:"Agente Alfa",template:"crm"},{name:"Tutor Beta",template:"universidade"}]
+}, "export closed deterministic schema");
+byId("agent-draft-clear-json").click();
+assert.equal(byId("agent-draft-transfer-json").value, "", "only JSON text cleared");
+assert.equal(byId("agent-draft-count").textContent, "2 / 5", "clear JSON preserves drafts");
+byId("agent-draft-clear-all").click();
+assert.equal(byId("agent-draft-count").textContent, "0 / 5", "local list cleared");
+byId("agent-draft-transfer-json").value=transferPackage;
+byId("agent-draft-import").click();
+assert.equal(byId("agent-draft-count").textContent, "2 / 5", "roundtrip restored list");
+assert.equal(byId("agent-draft-collection").children[1].children[0].textContent,
+ "Tutor Beta · Tutor de Conhecimento", "roundtrip model preserved");
+const expectedList=[
+ byId("agent-draft-collection").children[0].children[0].textContent,
+ byId("agent-draft-collection").children[1].children[0].textContent
+];
+function rejectedImport(packet,description){
+ byId("agent-draft-transfer-json").value=packet;
+ byId("agent-draft-import").click();
+ assert.equal(byId("agent-draft-count").textContent, "2 / 5", description+" count unchanged");
+ assert.deepEqual(byId("agent-draft-collection").children.map(x=>x.children[0].textContent),
+  expectedList, description+" list unchanged");
+ assert.equal(byId("agent-draft-transfer-status").textContent.includes("não foi alterada"), true,
+  description+" fail closed");
+}
+rejectedImport('not json', "malformed JSON");
+rejectedImport(JSON.stringify({version:"UNKNOWN",drafts:[]}), "unknown version");
+rejectedImport(JSON.stringify({version:"SYNTHETIC_AGENT_DRAFTS_V1",drafts:[],token:"SYNTHETIC_SECRET"}), "extra top-level key");
+rejectedImport(JSON.stringify({version:"SYNTHETIC_AGENT_DRAFTS_V1",drafts:[{name:"Agente Malicioso",template:"__proto__"}]}), "prototype model");
+rejectedImport(JSON.stringify({version:"SYNTHETIC_AGENT_DRAFTS_V1",drafts:[{name:"Agente Alfa",template:"crm",role:"admin"}]}), "unexpected role");
+rejectedImport(JSON.stringify({version:"SYNTHETIC_AGENT_DRAFTS_V1",drafts:[
+ {name:"Agente Alfa",template:"crm"},{name:"AGENTE ALFA",template:"performance"}]}), "casefold duplicates");
+rejectedImport(JSON.stringify({version:"SYNTHETIC_AGENT_DRAFTS_V1",drafts:[
+ {name:"Agente Válido",template:"crm"},{name:"<script>alert(1)</script>",template:"universidade"}]}), "atomic rejection of unsafe second item");
+rejectedImport(JSON.stringify({version:"SYNTHETIC_AGENT_DRAFTS_V1",
+ drafts:Array.from({length:6},(_,i)=>({name:"Agente "+i,template:"crm"}))}), "sixth item denied");
+rejectedImport("X".repeat(100000), "oversized input");
+byId("agent-draft-transfer-json").value=JSON.stringify({
+ version:"SYNTHETIC_AGENT_DRAFTS_V1",drafts:[]
+});
+byId("agent-draft-import").click();
+assert.equal(byId("agent-draft-count").textContent, "0 / 5", "explicit empty packet clears drafts");
+assert.equal(byId("agent-draft-test").disabled, true, "successful import invalidates old preview");
+assert.equal(byId("audit-runs").textContent, "0", "transfer never executes scenarios");
+console.log("F108_SMOKE_PASS: 5 pages, 6 scenarios, 14 synthetic events, review sandbox, reset, agent shortcut, agent drafts, bounded draft collection, atomic JSON transfer, offline CSP");

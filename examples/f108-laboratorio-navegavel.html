@@ -55,6 +55,12 @@ button:disabled{cursor:not-allowed;opacity:.53}
 .draft-saved-row span{font-size:12px;color:#263b58;flex:1;min-width:150px;overflow-wrap:anywhere}
 .draft-saved-row button{font-size:11px;padding:8px 11px}
 #agent-draft-collection{margin:12px 0}
+.draft-transfer{border-top:1px solid #e6edf7;margin-top:18px;padding-top:18px}
+.draft-transfer h3{margin:0 0 9px}
+.draft-transfer label{font-size:12px;font-weight:750;color:#506784;display:block;margin:14px 0 7px}
+.draft-transfer textarea{display:block;width:100%;min-height:106px;resize:vertical;background:#f8fbff;color:#253b5a;border:1px solid #cddcf0;border-radius:10px;padding:13px;font:12px ui-monospace,SFMono-Regular,Consolas,monospace}
+.draft-transfer textarea:focus-visible{outline:3px solid #78adff;outline-offset:2px}
+.draft-transfer .actions{margin:14px 0 8px}
 .supervision-table{border-collapse:collapse;width:100%;font-size:13px}
 .supervision-table tr{border-bottom:1px solid #e8edf6}.supervision-table tr:last-child{border-bottom:0}
 .supervision-table th{font-weight:550;text-align:left;color:#667b99;padding:13px 0}
@@ -147,6 +153,18 @@ button:disabled{cursor:not-allowed;opacity:.53}
     <p class="muted" role="status" aria-live="polite" id="agent-draft-collection-status">Nenhum rascunho adicionado nesta sessão.</p>
     <div id="agent-draft-collection" aria-label="Lista de rascunhos fictícios"></div>
     <button type="button" class="secondary" id="agent-draft-clear-all">Zerar lista da sessão</button>
+   </div>
+   <div class="draft-transfer" aria-label="Transferência manual de rascunhos">
+    <h3>Exportar ou importar JSON fictício</h3>
+    <p class="muted">Gere um pacote para copiar manualmente ou cole um pacote já exportado. O texto não é enviado a lugar nenhum. Importações inválidas não alteram a coleção.</p>
+    <label for="agent-draft-transfer-json">Pacote JSON local (máximo 4.096 caracteres)</label>
+    <textarea id="agent-draft-transfer-json" rows="5" maxlength="4096" spellcheck="false" autocomplete="off" placeholder='{"version":"SYNTHETIC_AGENT_DRAFTS_V1","drafts":[]}'></textarea>
+    <div class="actions">
+     <button type="button" class="secondary" id="agent-draft-export">Gerar JSON para copiar</button>
+     <button type="button" class="primary" id="agent-draft-import">Validar e importar JSON</button>
+     <button type="button" class="secondary" id="agent-draft-clear-json">Limpar somente o campo</button>
+    </div>
+    <p class="muted" role="status" aria-live="polite" id="agent-draft-transfer-status">Nenhum pacote gerado ou importado.</p>
    </div>
    <p class="muted" style="margin-top:14px">O nome é apenas texto local, não é um prompt enviado a IA e não gera acesso ao CRM. Para cada modelo há somente um objetivo de demonstração já definido. Não há salvamento, aprovação, credenciais ou cobrança.</p>
   </div>
@@ -443,6 +461,80 @@ function clearSessionDrafts(){
  clearAgentDraft();
  drawSessionDrafts("Lista descartada; nenhum agente foi publicado.");
 }
+// F187: strict, user-mediated JSON transfer. No browser storage or network.
+// Validation is atomic: a malformed item cannot partially overwrite the list.
+const DRAFT_TRANSFER_VERSION="SYNTHETIC_AGENT_DRAFTS_V1";
+const MAX_TRANSFER_CHARS=4096;
+function writeTransferStatus(message){
+ get("agent-draft-transfer-status").textContent=message;
+}
+function exportSessionDrafts(){
+ const packet={
+  version:DRAFT_TRANSFER_VERSION,
+  drafts:sessionAgentDrafts.map(x=>({name:x.name,template:x.templateKey}))
+ };
+ const text=JSON.stringify(packet);
+ if(text.length>MAX_TRANSFER_CHARS){
+  writeTransferStatus("Exportação recusada por limite de tamanho.");
+  return;
+ }
+ get("agent-draft-transfer-json").value=text;
+ writeTransferStatus("Pacote fictício gerado. Copie o texto manualmente; nenhuma transferência ocorreu.");
+}
+function normalizedTransferName(value){
+ if(typeof value!=="string"||value.length>80)return null;
+ const name=value.normalize("NFC").trim().replace(/\s+/g," ");
+ if(name.length<3||name.length>48||!/^[\p{L}\p{N} ._-]+$/u.test(name))return null;
+ return name;
+}
+function importSessionDrafts(){
+ const raw=get("agent-draft-transfer-json").value;
+ if(typeof raw!=="string"||raw.length>MAX_TRANSFER_CHARS){
+  writeTransferStatus("Importação recusada. A lista atual não foi alterada.");
+  return;
+ }
+ let packet;
+ try {packet=JSON.parse(raw);}
+ catch {writeTransferStatus("JSON inválido. A lista atual não foi alterada.");return;}
+ if(packet===null||typeof packet!=="object"||Array.isArray(packet)||
+   Object.keys(packet).sort().join("|")!=="drafts|version"||
+   packet.version!==DRAFT_TRANSFER_VERSION||!Array.isArray(packet.drafts)||
+   packet.drafts.length>MAX_SESSION_DRAFTS){
+  writeTransferStatus("Formato ou capacidade inválida. A lista atual não foi alterada.");
+  return;
+ }
+ const staged=[];const usedNames=new Set();
+ for(const item of packet.drafts){
+  if(item===null||typeof item!=="object"||Array.isArray(item)||
+    Object.keys(item).sort().join("|")!=="name|template"||
+    typeof item.template!=="string"||
+    !Object.prototype.hasOwnProperty.call(agentDraftTemplates,item.template)){
+   writeTransferStatus("Item inválido. A lista atual não foi alterada.");
+   return;
+  }
+  const name=normalizedTransferName(item.name);
+  if(name===null||name!==item.name){
+   writeTransferStatus("Nome inválido. A lista atual não foi alterada.");
+   return;
+  }
+  const lookup=name.toLocaleLowerCase("pt-BR");
+  if(usedNames.has(lookup)){
+   writeTransferStatus("Nome duplicado. A lista atual não foi alterada.");
+   return;
+  }
+  usedNames.add(lookup);
+  staged.push(Object.freeze({name,templateKey:item.template,lookup}));
+ }
+ // All data has been checked before this single collection replacement.
+ sessionAgentDrafts.splice(0,sessionAgentDrafts.length,...staged);
+ clearAgentDraft();
+ drawSessionDrafts("Pacote validado e importado apenas nesta sessão.");
+ writeTransferStatus("Importação local concluída: "+String(staged.length)+" rascunho(s), não publicados.");
+}
+function clearTransferText(){
+ get("agent-draft-transfer-json").value="";
+ writeTransferStatus("Campo JSON limpo; lista de rascunhos preservada.");
+}
 let chosen="allow",runs=0,denials=0,conflicts=0,sequence=0,logs=[];
 function page(name){for(const p of ["overview","agents","lab","supervision","audit"]){get("page-"+p).hidden=p!==name;}for(const b of document.querySelectorAll("[data-page-button]")){if(b.dataset.pageButton===name)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");}window.scrollTo(0,0);if(name==="audit")drawAudit();}
 function choose(id){if(!Object.prototype.hasOwnProperty.call(scenarios,id))return;chosen=id;const s=scenarios[id];get("case-id").textContent=s.id;get("case-title").textContent=s.title;get("case-subtitle").textContent=s.desc;get("fixture-product").textContent=s.product;get("fixture-tenant").textContent=s.tenant;get("fixture-source").textContent=s.source;get("fixture-grant").textContent=s.grant;for(const b of document.querySelectorAll("[data-scenario]")){const selected=b.dataset.scenario===id;b.classList.toggle("selected",selected);b.setAttribute("aria-pressed",String(selected));}clearResult();}
@@ -468,6 +560,9 @@ get("agent-draft-reset").addEventListener("click",clearAgentDraft);
 get("agent-draft-test").addEventListener("click",exploreAgentDraft);
 get("agent-draft-save").addEventListener("click",saveDraftToSession);
 get("agent-draft-clear-all").addEventListener("click",clearSessionDrafts);
+get("agent-draft-export").addEventListener("click",exportSessionDrafts);
+get("agent-draft-import").addEventListener("click",importSessionDrafts);
+get("agent-draft-clear-json").addEventListener("click",clearTransferText);
 drawSupervision();choose("allow");drawAudit();page("overview");drawReviewSimulation();drawAgentDraft("Nenhum rascunho configurado.");
 })();
 </script>

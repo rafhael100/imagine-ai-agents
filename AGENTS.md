@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## F187 — export/import manual de JSON de rascunhos fictícios (11/11/2026)
+
+- Coleção F186 no navegador agora gera JSON `SYNTHETIC_AGENT_DRAFTS_V1` com `{name,template}` e permite colar para importar. Esquema estrito, versões/propriedades fechadas, limite de 4096 caracteres / 5 itens, nomes NFC e únicos em `pt-BR`, modelo apenas CRM/Performance/Universidade. Validação de **todos** os itens antes de uma única substituição atômica; qualquer erro preserva coleção. Sem storage, download/upload automático, IAM, API, CRM ou publicação. [F187](docs/AIA-FT01-F187-TRANSFERENCIA-MANUAL-RASCUNHOS-JSON.md).
+- Gate PHP preservado: **810 testes / lint 100**, sete contratos Python F187 e smoke Node expandido. `main` intacta; CRM PR #57 OPEN/DRAFT, 13 homologações reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO. Sem VPS, produção, dados pessoais reais ou novos custos.
+
 ## SEC-60 — bloquear mutações diretas em Runs irmãos durante callback (11/11/2026)
 
 - Um provedor com referência capturada a outro Run canônico do mesmo coordenador podia usar `Run::transition`, `Run::step` ou `new Step` diretamente nesse objeto durante outra sugestão. Agora `SupervisedCoordinator::suggest` abre escopo read-only com token separado em **todos** os Runs registrados, marca qualquer tentativa capturada e nega a sugestão externa; `finally` encerra todas as guardas mesmo com erro. Um token falso não remove a proteção. [SEC-60](docs/AIA-FT01-SEC-60-GUARDA-CROSS-RUN-CALLBACK.md).
