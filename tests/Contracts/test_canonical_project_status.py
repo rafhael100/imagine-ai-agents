@@ -238,7 +238,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("640 testes PHP", current)
         self.assertIn("633 testes PHP", current)
         self.assertIn("629 testes PHP", current)
-        self.assertIn("EXPECTED_CASES=648", current)
+        self.assertIn("EXPECTED_CASES=660", current)
         self.assertIn("NO-GO", current)
         self.assertIn("NAO_EXECUTADO", evidence)
 
