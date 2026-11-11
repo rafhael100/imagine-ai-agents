@@ -60,9 +60,11 @@ A [SEC-45](AIA-FT01-SEC-45-REVALIDACAO-POS-SUGESTAO.md) foi integrada à dev: re
 
 A [SEC-46](AIA-FT01-SEC-46-RECIBO-REVISAO-OWNER-ABA.md) foi integrada à dev, bloqueando revogação+reconcessão (ABA) e recheck sem recibo. 12 regressões; **597 testes PHP / 83 lint** aprovados na [CI pós-merge #42918687251](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42918687251), [EVID-31](AIA-R01-EVID-31-SEC46-CI-POSTMERGE.md). É memória local, não ACL/nonce distribuídos.
 
-A [SEC-47](AIA-FT01-SEC-47-RECHECK-TEMPO-MONOTONICO.md) integrada: 605 PHP / 83 lint, [CI #42923158871](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42923158871), [EVID-32](AIA-R01-EVID-32-SEC47-CI-POSTMERGE.md). Relógio somente sintético.
+[SEC-47](AIA-FT01-SEC-47-RECHECK-TEMPO-MONOTONICO.md): 605 PHP, [CI #42923158871](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42923158871), [EVID-32](AIA-R01-EVID-32-SEC47-CI-POSTMERGE.md).
 
-A [SEC-48](AIA-FT01-SEC-48-REENTRADA-LEITURA-OP01.md) integrada à dev bloqueia leitura aninhada; oito U70-01..08, **613 PHP / 83 lint**. [CI #42924834951](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42924834951), [EVID-33](AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md). Sem lock distribuído.
+[SEC-48](AIA-FT01-SEC-48-REENTRADA-LEITURA-OP01.md): 613 PHP, [CI #42924834951](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42924834951), [EVID-33](AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md).
+
+A [SEC-49](AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md) bloqueia recuperação do trust compartilhado durante leitura/sugestão. Oito U71-01..08; **621 PHP / 83 lint** em revisão, sem CRM real.
 
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 
