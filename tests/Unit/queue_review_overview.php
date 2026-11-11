@@ -9,8 +9,8 @@ function f187OverviewFixture(): array
     for ($i = 1; $i <= 3; ++$i) {
         $q->enqueue($ctx, 'SYNTHETIC_U87_RUN_' . $i,
             'SYNTHETIC_U87_REQ_' . $i, 10);
-        $q->claim($ctx, 11, 2);
     }
+    for ($i = 1; $i <= 3; ++$i) $q->claim($ctx, 11, 2);
     $q->claim($ctx, 13, 5);
     return [new MockUncertaintyReviewBoard($ctx, $q), $q, $ctx];
 }
