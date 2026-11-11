@@ -58,7 +58,8 @@ for name in \
   test_evid44_postmerge.py \
   test_evid45_postmerge.py \
   test_evid46_postmerge.py \
-  test_evid47_postmerge.py
+  test_evid47_postmerge.py \
+  test_evid48_postmerge.py
 do
   python3 -m unittest discover -s tests/Contracts -p "$name" -v
 done
