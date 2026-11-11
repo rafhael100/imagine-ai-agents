@@ -33,6 +33,10 @@ h1{font-size:clamp(26px,3vw,35px);letter-spacing:-1.2px;line-height:1.15;margin:
 @media(max-width:1100px){.metrics{grid-template-columns:repeat(2,1fr)}.labgrid{grid-template-columns:310px minmax(0,1fr)}.gridagents{grid-template-columns:repeat(2,1fr)}.herostat{min-width:130px}}
 @media(max-width:850px){.app{display:block}.sidebar{position:relative;padding:13px 17px;gap:10px}.brand{padding:0}.brandmark{width:33px;height:33px;font-size:22px;border-radius:10px}.sidegroup,.sidebottom{display:none}.nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:0;overflow:visible}.nav button{font-size:11px;padding:10px;white-space:nowrap}.nav button span{font-size:13px;width:auto}.topbar{height:70px}.twocol,.labgrid{grid-template-columns:1fr}.content{padding-top:28px}.hero{padding:25px}.gridagents{grid-template-columns:1fr 1fr}}
 @media(max-width:550px){.metrics,.gridagents{grid-template-columns:1fr 1fr}.herostat{display:none}.hero h2{font-size:23px}.sectiontitle{align-items:start}.sectiontitle h1{font-size:26px}.metric{padding:16px}.metric strong{font-size:25px}.topbar .eyebrow{display:none}.mode{font-size:9px;padding:7px}.auditrow{grid-template-columns:55px 1fr;gap:6px}.auditrow .description{grid-column:2}.console{padding:18px}.gridagents{grid-template-columns:1fr}.nav{grid-template-columns:repeat(2,minmax(0,1fr))}.nav button{white-space:normal;min-height:40px}.fixture strong{overflow-wrap:anywhere;font-size:10px;line-height:1.35}.content{padding-left:17px;padding-right:17px}}
+.supervision-table{border-collapse:collapse;width:100%;font-size:13px}
+.supervision-table tr{border-bottom:1px solid #e8edf6}.supervision-table tr:last-child{border-bottom:0}
+.supervision-table th{font-weight:550;text-align:left;color:#667b99;padding:13px 0}
+.supervision-table td{font-weight:850;font-variant-numeric:tabular-nums;text-align:right;padding:13px 0;color:#183154}
 </style>
 </head>
 <body>
@@ -44,6 +48,7 @@ h1{font-size:clamp(26px,3vw,35px);letter-spacing:-1.2px;line-height:1.15;margin:
     <button type="button" data-page-button="overview" aria-current="page"><span aria-hidden="true">▦</span> Visão geral</button>
     <button type="button" data-page-button="agents"><span aria-hidden="true">◇</span> Agentes fictícios</button>
     <button type="button" data-page-button="lab"><span aria-hidden="true">◉</span> Testar cenários</button>
+    <button type="button" data-page-button="supervision"><span aria-hidden="true">☷</span> Supervisão da fila</button>
     <button type="button" data-page-button="audit"><span aria-hidden="true">▤</span> Trilha local</button>
   </nav>
   <div class="sidebottom"><strong><span class="dot"></span> Modo offline</strong><p>Dados 100% fictícios. Sem autenticação, APIs, banco de dados, IA real ou publicação.</p></div>
@@ -110,6 +115,38 @@ h1{font-size:clamp(26px,3vw,35px);letter-spacing:-1.2px;line-height:1.15;margin:
    <p class="footnote">O resultado apresentado é calculado por regras fixas em JavaScript, apenas para demonstrar o comportamento esperado. Não é o executor PHP real.</p>
   </article>
  </div>
+</section>
+<section class="page" id="page-supervision" hidden>
+ <div class="sectiontitle"><div><span class="overline">F183 · Visão supervisionada</span><h1>Fila e revisões</h1><p class="muted">Dados de teste derivados do contrato F182. Nenhuma conexão com CRM, clientes ou servidores.</p></div><span class="tag">NO-GO · Offline</span></div>
+ <div class="hero"><div><span class="pill">Snapshot fixo · 100% fictício</span><h2>Incerteza não é conclusão.</h2><p>Uma revisão concordante não encerra uma tarefa indeterminada. Esta tela não pode reenviar solicitações nem alterar dados.</p></div><div class="herostat"><strong id="supervision-decision">NO-GO</strong><small>Operação real bloqueada</small></div></div>
+ <div class="metrics">
+   <div class="panel metric"><small>Concluídas</small><strong id="supervision-completed">0</strong><span class="hint">Somente laboratório</span></div>
+   <div class="panel metric"><small>Indeterminadas</small><strong id="supervision-indeterminate">0</strong><span class="hint">Sem retry automático</span></div>
+   <div class="panel metric"><small>Revisões pendentes</small><strong id="supervision-pending-review">0</strong><span class="hint">Primeira ou segunda observação</span></div>
+   <div class="panel metric"><small>Conflitos de revisão</small><strong id="supervision-conflict">0</strong><span class="hint">Nunca aprovados implicitamente</span></div>
+ </div>
+ <div class="twocol">
+  <article class="panel"><div class="panelhead"><h2>Execuções da fila</h2><span class="tag">Sem IDs</span></div><div class="panelbody">
+   <table class="supervision-table" aria-label="Tarefas da fila sintética"><tbody>
+    <tr><th scope="row">Pendentes</th><td id="supervision-pending">0</td></tr>
+    <tr><th scope="row">Reservadas</th><td id="supervision-reserved">0</td></tr>
+    <tr><th scope="row">Concluídas</th><td id="supervision-completed-row">0</td></tr>
+    <tr><th scope="row">Falhas confirmadas</th><td id="supervision-failed">0</td></tr>
+    <tr><th scope="row">Canceladas</th><td id="supervision-cancelled">0</td></tr>
+    <tr><th scope="row">Indeterminadas</th><td id="supervision-indeterminate-row">0</td></tr>
+   </tbody></table>
+  </div></article>
+  <article class="panel"><div class="panelhead"><h2>Revisões</h2><span class="tag">Sem decisão operacional</span></div><div class="panelbody">
+   <table class="supervision-table" aria-label="Etapas de revisão sintética"><tbody>
+    <tr><th scope="row">Aguardam primeira revisão</th><td id="supervision-first">0</td></tr>
+    <tr><th scope="row">Aguardam segunda revisão</th><td id="supervision-second">0</td></tr>
+    <tr><th scope="row">Revisadas, ainda sem conclusão</th><td id="supervision-unresolved">0</td></tr>
+    <tr><th scope="row">Revisões conflitantes</th><td id="supervision-conflict-row">0</td></tr>
+   </tbody></table>
+   <p class="muted" style="margin-top:20px">Mesmo após dois votos, o resultado continua indeterminado. Não há autorização para reenvio ou uso de dados reais.</p>
+  </div></article>
+ </div>
+ <div class="panel" style="margin-top:18px"><div class="panelbody"><strong>Limites da prévia</strong><p class="muted" style="margin-top:8px">Contagens de um único JSON sintético incorporado à página. Sem atualização ao vivo, dados de clientes, autenticação, CRM, worker ou acesso de revisão real. Os 13 cenários de homologação OP-01 continuam não executados.</p></div></div>
 </section>
 <section class="page" id="page-audit" hidden>
  <div class="sectiontitle"><div><span class="overline">Evidências locais</span><h1>Trilha de simulação</h1><p class="muted">Eventos criados somente nesta aba. Ao atualizar a página, a trilha desaparece.</p></div></div>
