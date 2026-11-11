@@ -39,6 +39,7 @@ for name in \
   test_f187_draft_transfer.py \
   test_f190_queue_pause_demo.py \
   test_f191_rehearsal_verifier.py \
+  test_f193_supervision_report.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
@@ -58,6 +59,8 @@ else
 fi
 
 python3 tools/verify_f190_rehearsal.py
+# Inert HTML rendering must succeed; the preview is not persisted.
+python3 tools/render_f190_supervision.py >/dev/null
 
 php -l tools/op01_php_parser_probe.php
 php -l tools/op01_php_public_response_probe.php
