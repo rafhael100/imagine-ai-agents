@@ -19,7 +19,12 @@ final class MockQueuedReadOnlyPilot
         private readonly TenantContext $boundContext,
         private readonly MockReadOnlyRunQueue $queue,
         private readonly MockReadOnlyPilot $pilot,
-    ) {}
+    ) {
+        // Bind once before any Run can be enqueued or claimed through this
+        // composed pilot; a later provider cannot sidestep SEC-54 by calling
+        // the same queue's mutators directly.
+        $this->pilot->bindQueueAdmissionGuard($this->queue);
+    }
 
     /**
      * Preflight for callers that may schedule more than one queued job.
