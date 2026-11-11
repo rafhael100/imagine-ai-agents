@@ -46,11 +46,10 @@ final class MockQueuedReadOnlyPilot
         int $leaseTicks,
     ): array {
         try {
-            $this->boundContext->assertSame($context);
-            // A nested pilot call from an injected suggestion provider must
-            // not reserve another FIFO job or consume a second trust proof.
-            // This call marks the coordinator callback as contaminated.
+            // Check before even inspecting caller context/fields. A caught
+            // nested attempt must poison the outer provider callback.
             $this->assertQueueAdmissionReady();
+            $this->boundContext->assertSame($context);
             // Validate fields BEFORE claiming a queued job, so invalid user
             // input does not burn a legitimate pending job or CRM nonce.
             MockCrmReadRequestBuilder::fromContext(
