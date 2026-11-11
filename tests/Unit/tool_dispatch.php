@@ -1342,4 +1342,129 @@ return [
             ['SYNTHETIC_STARTED', 'SYNTHETIC_RUN_CHANGED']);
     },
 
+
+    'U75-01 captured canonical Run cannot transition directly during suggestion' => function (): void {
+        $run = null; $nested = '';
+        [$tool, $grant, $ctx, $run, $coord, $gateway, $provider] =
+            f172SuggestionFixture(function () use (&$run, &$nested): void {
+                try { $run->transition('CONCLUIDA'); }
+                catch (MockError $e) { $nested = $e->getMessage(); }
+            });
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($nested === 'PROVIDER_CALLBACK_DENIED'
+            && $run->state() === 'FALHOU' && $provider->calls === 1
+            && $gateway->submitCount() === 0);
+        check(array_column($coord->events(), 'code') ===
+            ['SYNTHETIC_STARTED', 'SYNTHETIC_RUN_CHANGED']);
+        check(array_column($tool->events(), 'code') === ['SYNTHETIC_DENIED']);
+    },
+    'U75-02 canonical Run cannot create detached Step inside provider callback' => function (): void {
+        $run = null; $nested = '';
+        [$tool, $grant, $ctx, $run, $coord, $gateway, $provider] =
+            f172SuggestionFixture(function () use (&$run, &$nested): void {
+                try { $run->step('SYNTHETIC_SEC53_UNOWNED_STEP'); }
+                catch (MockError $e) { $nested = $e->getMessage(); }
+            });
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($nested === 'PROVIDER_CALLBACK_DENIED'
+            && $run->state() === 'FALHOU' && $provider->calls === 1);
+        check($gateway->submitCount() === 0 && count($coord->events()) === 2);
+    },
+    'U75-03 nested read-only scope cannot reset active Run callback guard' => function (): void {
+        $run = null; $nested = '';
+        [$tool, $grant, $ctx, $run, $coord, $gateway, $provider] =
+            f172SuggestionFixture(function () use (&$run, &$nested): void {
+                try { $run->withReadOnlySuggestion(fn (): array => []); }
+                catch (MockError $e) { $nested = $e->getMessage(); }
+            });
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($nested === 'PROVIDER_CALLBACK_DENIED' && $run->state() === 'FALHOU'
+            && $gateway->submitCount() === 0);
+    },
+    'U75-04 uncaught direct Run mutation fails without SUGGESTED or success' => function (): void {
+        $run = null;
+        [$tool, $grant, $ctx, $run, $coord, $gateway, $provider] =
+            f172SuggestionFixture(function () use (&$run): void {
+                $run->transition('AGUARDANDO');
+            });
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($run->state() === 'FALHOU' && $provider->calls === 1
+            && $gateway->submitCount() === 0);
+        check(!in_array('SYNTHETIC_SUGGESTED', array_column($coord->events(), 'code'), true));
+    },
+    'U75-05 swallowed illegal lifecycle transition still contaminates suggestion' => function (): void {
+        $run = null; $nested = '';
+        [$tool, $grant, $ctx, $run, $coord, $gateway, $provider] =
+            f172SuggestionFixture(function () use (&$run, &$nested): void {
+                try { $run->transition('RECEBIDA'); }
+                catch (MockError $e) { $nested = $e->getMessage(); }
+            });
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($nested === 'PROVIDER_CALLBACK_DENIED' && $run->state() === 'FALHOU'
+            && $gateway->submitCount() === 0);
+    },
+    'U75-06 direct coordinator suggestion blocks Run mutation without tool' => function (): void {
+        $run = null; $nested = '';
+        $provider = new F172MutatingSuggestionProvider(
+            function () use (&$run, &$nested): void {
+                try { $run->transition('CANCELADA'); }
+                catch (MockError $e) { $nested = $e->getMessage(); }
+            });
+        $gateway = new MockSupervisedGateway();
+        $coord = new SupervisedCoordinator(context(), $gateway, $provider);
+        $run = $coord->start('SYNTHETIC_SEC53_DIRECT_COORDINATOR');
+        denied('PROVIDER_CALLBACK_DENIED', fn () =>
+            $coord->suggest($run, ['text' => 'SYNTHETIC_DRAFT']));
+        check($nested === 'PROVIDER_CALLBACK_DENIED'
+            && $run->state() === 'EXECUTANDO' && $provider->calls === 1
+            && array_column($coord->events(), 'code') === ['SYNTHETIC_STARTED']
+            && $gateway->submitCount() === 0);
+    },
+    'U75-07 callback guard cleans up so another Run can succeed afterward' => function (): void {
+        $run = null; $first = true;
+        [$tool, $grant, $ctx, $run, $coord, $gateway, $provider] =
+            f172SuggestionFixture(function () use (&$run, &$first): void {
+                if (!$first) return;
+                $first = false;
+                try { $run->transition('CANCELADA'); }
+                catch (MockError) { /* denial must poison first suggestion */ }
+            });
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx, $grant,
+            ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        $fresh = $coord->start('SYNTHETIC_SEC53_FRESH_RUN');
+        $result = $tool->dispatch(MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+            $ctx, $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $fresh);
+        check($result['state'] === 'SYNTHETIC_OK' && $run->state() === 'FALHOU'
+            && $fresh->state() === 'EXECUTANDO' && $provider->calls === 2
+            && $gateway->submitCount() === 0);
+        $coord->transition($fresh, 'CONCLUIDA');
+        check($fresh->state() === 'CONCLUIDA');
+    },
+    'U75-08 provider may inspect canonical Run read-only without failure' => function (): void {
+        $run = null; $seen = '';
+        [$tool, $grant, $ctx, $run, $coord, $gateway, $provider] =
+            f172SuggestionFixture(function () use (&$run, &$seen): void {
+                $run->assertActive();
+                $seen = $run->state();
+            });
+        $result = $tool->dispatch(MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+            $ctx, $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run);
+        check($result['state'] === 'SYNTHETIC_OK' && $seen === 'EXECUTANDO'
+            && $run->state() === 'EXECUTANDO' && $provider->calls === 1
+            && $gateway->submitCount() === 0);
+        check(array_column($coord->events(), 'code') ===
+            ['SYNTHETIC_STARTED', 'SYNTHETIC_SUGGESTED']);
+    },
+
 ];
