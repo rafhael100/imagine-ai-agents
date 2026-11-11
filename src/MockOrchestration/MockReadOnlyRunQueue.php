@@ -103,7 +103,12 @@ final class MockReadOnlyRunQueue
     {
         $this->boundContext->assertSame($context);
         self::reference($runRef, 80);
-        self::reference($claimRef, 90);
+        // Claim references are machine-generated SHA-256 hex, unlike the
+        // uppercase domain IDs received on the enqueue boundary.
+        if (strlen($claimRef) !== 74
+            || preg_match('/^SYNTHETIC_[a-f0-9]{64}$/D', $claimRef) !== 1) {
+            MockError::fail('QUEUE_CLAIM_DENIED');
+        }
         $this->clock($now);
         if (!in_array($result, ['CONCLUIDA', 'FALHOU'], true)) {
             MockError::fail('QUEUE_STATE_DENIED');
