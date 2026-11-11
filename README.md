@@ -55,7 +55,7 @@ php tests/Unit/run.php
 EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=97 EXPECTED_CASES=776 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**OP-01:** histórico **699 testes PHP**; SEC-57/REV-01/REV-02 integradas (753/766/776). **F183 em revisão:** aba de supervisão no laboratório F108 com a mesma fixture F182 e testes PHP 776/lint 97. [Guia](docs/AIA-FT01-F183-SUPERVISAO-VISUAL-OFFLINE.md). **NO-GO**.
+**OP-01:** histórico **699 testes PHP**; SEC-57/REV-01/REV-02/F183 integrados (753/766/776). **Baseline 776 PHP/lint 97**, [CI #42981975813](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42981975813), [EVID-40](docs/AIA-R01-EVID-40-SEC57-REV02-F183-POSTMERGE.md). Aba [F183](docs/AIA-FT01-F183-SUPERVISAO-VISUAL-OFFLINE.md). **NO-GO**.
 
 **SEC-53 integrada (PR #237): 648 testes PHP**. [CI #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). **NO-GO**.
 
