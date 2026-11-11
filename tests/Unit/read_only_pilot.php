@@ -6,7 +6,7 @@ use ImagineAI\Domain\TenantContext;
 use ImagineAI\MockBridge\MockCrmOwnerPolicy;
 use ImagineAI\MockAudit\MockCrmReadAuditTrail;
 use ImagineAI\MockTelemetry\MockCrmReadEdgeCounters;
-use ImagineAI\MockOrchestration\SupervisedCoordinator;
+use ImagineAI\MockOrchestration\{SupervisedCoordinator, MockReadOnlyRunQueue};
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence};
 use ImagineAI\Mocks\{MockSupervisedGateway, MockAiSuggestionProvider};
 use ImagineAI\Contracts\AiSuggestionProvider;
@@ -561,4 +561,162 @@ return [
         check($mut->submitCount() === 0 && $counts->snapshot()['attempts'] === 1
             && $audit->count() === 1);
     },
+
+    'U78-01 empty synthetic queue has no claim and all counters zero' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        check($q->claim(context(), 10, 5) === null && $q->events() === []);
+        check(array_sum($q->counts()) === 0);
+    },
+    'U78-02 enqueue is idempotent without duplicate audit slots' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $one = $q->enqueue(context(), 'SYNTHETIC_Q78_RUN_02',
+            'SYNTHETIC_Q78_REQUEST_02', 10);
+        $two = $q->enqueue(context(), 'SYNTHETIC_Q78_RUN_02',
+            'SYNTHETIC_Q78_REQUEST_02', 10);
+        check($one === $two && $one['state'] === 'PENDENTE'
+            && count($q->events()) === 1 && $q->counts()['PENDENTE'] === 1);
+    },
+    'U78-03 changed request on existing job rejects before state mutation' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_Q78_RUN_03',
+            'SYNTHETIC_Q78_REQUEST_A', 10);
+        denied('QUEUE_IDEMPOTENCY_CONFLICT', fn () => $q->enqueue(
+            context(), 'SYNTHETIC_Q78_RUN_03', 'SYNTHETIC_Q78_REQUEST_B', 11));
+        check($q->counts()['PENDENTE'] === 1 && count($q->events()) === 1);
+    },
+    'U78-04 claims are FIFO and never grant a CRM read by themselves' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_Q78_A', 'SYNTHETIC_Q78_REQ_A', 10);
+        $q->enqueue(context(), 'SYNTHETIC_Q78_B', 'SYNTHETIC_Q78_REQ_B', 10);
+        $a = $q->claim(context(), 11, 5);
+        $b = $q->claim(context(), 11, 5);
+        check($a['run_ref'] === 'SYNTHETIC_Q78_A'
+            && $b['run_ref'] === 'SYNTHETIC_Q78_B'
+            && $a['state'] === 'RESERVADA'
+            && $b['state'] === 'RESERVADA'
+            && !isset($a['token']) && !isset($a['authorization']));
+        check($q->claim(context(), 12, 5) === null);
+    },
+    'U78-05 queue is bound to one tenant and rejects foreign claims' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_Q78_A', 'SYNTHETIC_Q78_REQ_A', 10);
+        denied('CONTEXT_DENIED', fn () => $q->claim(context('SYNTHETIC_B'), 11, 5));
+        denied('CONTEXT_DENIED', fn () => $q->cancel(
+            context('SYNTHETIC_B'), 'SYNTHETIC_Q78_A', 11));
+        check($q->counts()['PENDENTE'] === 1 && count($q->events()) === 1);
+    },
+    'U78-06 invalid references and oversized values are refused' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        foreach (['BAD', 'SYNTHETIC_', 'SYNTHETIC_a', 'SYNTHETIC_'
+            . str_repeat('Z', 1024 * 1024)] as $bad) {
+            denied('QUEUE_REF_DENIED', fn () => $q->enqueue(
+                context(), $bad, 'SYNTHETIC_Q78_VALID', 10));
+        }
+        denied('QUEUE_REF_DENIED', fn () => $q->enqueue(
+            context(), 'SYNTHETIC_Q78_RUN_06', 'SYNTHETIC_BAD-REQUEST', 10));
+        check($q->counts()['PENDENTE'] === 0 && $q->events() === []);
+    },
+    'U78-07 finishing a valid claim is stable under duplicate confirmation' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_Q78_RUN_07', 'SYNTHETIC_Q78_REQ_07', 10);
+        $claim = $q->claim(context(), 12, 5);
+        $done = $q->finish(context(), $claim['run_ref'],
+            $claim['claim_ref'], 'CONCLUIDA', 13);
+        $again = $q->finish(context(), $claim['run_ref'],
+            $claim['claim_ref'], 'CONCLUIDA', 14);
+        check($done === $again && $done['state'] === 'CONCLUIDA'
+            && $done['attempts'] === 1 && count($q->events()) === 3);
+        check($q->claim(context(), 15, 5) === null);
+    },
+    'U78-08 failed local claims do not retry or create new jobs' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_Q78_RUN_08', 'SYNTHETIC_Q78_REQ_08', 10);
+        $claim = $q->claim(context(), 11, 5);
+        $out = $q->finish(context(), $claim['run_ref'],
+            $claim['claim_ref'], 'FALHOU', 12);
+        check($out['state'] === 'FALHOU'
+            && $q->claim(context(), 13, 5) === null
+            && $q->counts()['FALHOU'] === 1);
+    },
+    'U78-09 wrong claim marker and illegal outcome deny without trace' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_Q78_RUN_09', 'SYNTHETIC_Q78_REQ_09', 10);
+        $claim = $q->claim(context(), 11, 5);
+        denied('QUEUE_CLAIM_DENIED', fn () => $q->finish(
+            context(), $claim['run_ref'], 'SYNTHETIC_WRONG', 'CONCLUIDA', 12));
+        denied('QUEUE_STATE_DENIED', fn () => $q->finish(
+            context(), $claim['run_ref'], $claim['claim_ref'], 'ALLOW', 12));
+        check($q->counts()['RESERVADA'] === 1 && count($q->events()) === 2);
+    },
+    'U78-10 expired claim becomes indeterminate and never requeued' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_Q78_RUN_10', 'SYNTHETIC_Q78_REQ_10', 10);
+        $claim = $q->claim(context(), 11, 3);
+        denied('QUEUE_CLAIM_EXPIRED', fn () => $q->finish(
+            context(), $claim['run_ref'], $claim['claim_ref'], 'CONCLUIDA', 14));
+        check($q->counts()['INDETERMINADO'] === 1
+            && $q->claim(context(), 15, 3) === null
+            && array_column($q->events(), 'code') === [
+                'SYNTHETIC_ENQUEUED', 'SYNTHETIC_CLAIMED',
+                'SYNTHETIC_LEASE_EXPIRED']);
+    },
+    'U78-11 claim expiry audit reserves space and does not retry silently' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_Q78_RUN_11A', 'SYNTHETIC_Q78_REQ_11A', 10);
+        $q->enqueue(context(), 'SYNTHETIC_Q78_RUN_11B', 'SYNTHETIC_Q78_REQ_11B', 10);
+        $claim = $q->claim(context(), 11, 2);
+        $next = $q->claim(context(), 13, 2);
+        check($next['run_ref'] === 'SYNTHETIC_Q78_RUN_11B'
+            && $next['claim_ref'] !== $claim['claim_ref']
+            && $q->counts()['INDETERMINADO'] === 1
+            && $q->counts()['RESERVADA'] === 1);
+    },
+    'U78-12 only pending jobs are cancellable, idempotently' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_Q78_RUN_12A', 'SYNTHETIC_Q78_REQ_12A', 10);
+        $q->enqueue(context(), 'SYNTHETIC_Q78_RUN_12B', 'SYNTHETIC_Q78_REQ_12B', 10);
+        $one = $q->cancel(context(), 'SYNTHETIC_Q78_RUN_12A', 10);
+        check($one === $q->cancel(context(), 'SYNTHETIC_Q78_RUN_12A', 11));
+        $next = $q->claim(context(), 12, 5);
+        denied('QUEUE_STATE_DENIED', fn () => $q->cancel(
+            context(), 'SYNTHETIC_Q78_RUN_12B', 13));
+        check($next['run_ref'] === 'SYNTHETIC_Q78_RUN_12B'
+            && $q->counts()['CANCELADA'] === 1);
+    },
+    'U78-13 clock rollback and invalid leases fail closed' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_Q78_RUN_13', 'SYNTHETIC_Q78_REQ_13', 15);
+        denied('QUEUE_TIME_DENIED', fn () => $q->claim(context(), 14, 2));
+        foreach ([0, 301] as $ticks) {
+            denied('QUEUE_LEASE_DENIED', fn () => $q->claim(context(), 16, $ticks));
+        }
+        denied('QUEUE_LEASE_DENIED', fn () => $q->claim(context(), PHP_INT_MAX, 5));
+        check($q->counts()['PENDENTE'] === 1);
+    },
+    'U78-14 finite queue rejects a 65th job without eviction' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        for ($i = 0; $i < 64; ++$i) {
+            $q->enqueue(context(), 'SYNTHETIC_Q78_CAP_' . $i,
+                'SYNTHETIC_Q78_REQ_' . $i, 10);
+        }
+        denied('QUEUE_CAPACITY_DENIED', fn () => $q->enqueue(
+            context(), 'SYNTHETIC_Q78_CAP_64', 'SYNTHETIC_Q78_REQ_64', 10));
+        check($q->counts()['PENDENTE'] === 64 && count($q->events()) === 64);
+        check($q->status(context(), 'SYNTHETIC_Q78_CAP_0')['state'] === 'PENDENTE');
+    },
+    'U78-15 queue events hash identifiers and expose no payloads' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_Q78_PRIVATE_RUN',
+            'SYNTHETIC_Q78_PRIVATE_REQUEST', 10);
+        $claim = $q->claim(context(), 11, 5);
+        $q->finish(context(), $claim['run_ref'],
+            $claim['claim_ref'], 'CONCLUIDA', 12);
+        $visible = json_encode([$q->events(), $q->counts()], JSON_THROW_ON_ERROR);
+        check(!str_contains($visible, 'SYNTHETIC_A_LEAD')
+            && !str_contains($visible, 'SYNTHETIC_Q78_PRIVATE_RUN')
+            && !str_contains($visible, 'SYNTHETIC_Q78_PRIVATE_REQUEST')
+            && !str_contains($visible, 'SYNTHETIC_PRINCIPAL')
+            && count($q->events()) === 3);
+    },
+
 ];
