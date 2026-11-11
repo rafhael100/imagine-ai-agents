@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## SEC-50 — capability grant revalidada após READ/SUGGEST (10/11/2026)
+
+- `MockToolDispatcher` revalida a mesma `MockCapabilityGrant` após a leitura OP-01 e antes de divulgar projeção, e após o provedor de sugestão e antes do resultado. Revogação gera negação de ferramenta; SUGGEST encerra o Run como `FALHOU`. Auditoria da leitura legítima já efetuada permanece verdadeira.
+- **Gate esperado: 629 testes PHP / lint 83 + Python**, oito U72-01..08. [SEC-50](docs/AIA-FT01-SEC-50-CAPABILITY-RECHECK-POS-FERRAMENTA.md).
+- Não há falso undo de MUTATE nem autorização real. CRM PR #57 OPEN/DRAFT, 13 casos reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO; sem `main`, VPS, produção, clientes, segredos ou gastos.
+
 ## SEC-49 — epoch monotônico do trust compartilhado integrado à dev (10/11/2026)
 
 - `MockSharedTrustState` avança `revision` na alteração de disponibilidade e na primeira revogação de digest; consumo de nonce não avança. `MockTrustGateway` expõe a revisão sem nova autorização. `MockCrmReadBoundary` exige revisão estável antes/depois do leitor e a fachada vincula `trust_revision` ao recibo para recheck pós-sugestão.
