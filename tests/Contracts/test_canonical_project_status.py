@@ -208,6 +208,21 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("NO-GO", current)
         self.assertIn("NAO_EXECUTADO", evidence)
 
+    def test_sec52_cross_dispatcher_callback_guard_is_postmerge_offline(self):
+        current = STATUS.read_text(encoding="utf-8")
+        readme = README.read_text(encoding="utf-8")
+        evidence = (ROOT / "docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md").read_text(encoding="utf-8")
+        self.assertIn("SEC-52 integrada à dev (PR #235)", current)
+        self.assertIn("640 testes PHP", current)
+        self.assertIn("42943113650", current)
+        self.assertIn("42943113650", evidence)
+        self.assertIn("c74eabb82c0e69b9a1bbd5ed320a8ac5f247e7e0", evidence)
+        self.assertIn("640 testes PHP", readme)
+        self.assertIn("633 testes PHP", current)
+        self.assertIn("629 testes PHP", current)
+        self.assertIn("NO-GO", current)
+        self.assertIn("NAO_EXECUTADO", evidence)
+
     def test_history_preserved_without_overwriting_evidence(self):
         previous = ARCHIVE.read_text(encoding="utf-8")
         prior_roadmap = ARCHIVED_ROADMAP.read_text(encoding="utf-8")
