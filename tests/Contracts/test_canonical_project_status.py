@@ -263,6 +263,29 @@ class CanonicalProjectStatusTests(unittest.TestCase):
                     "629 testes PHP"):
             self.assertIn(old, current)
 
+    def test_evid42_sec60_f187_are_postmerge_verified_offline(self):
+        status = STATUS.read_text(encoding="utf-8")
+        readme = README.read_text(encoding="utf-8")
+        rules = AGENT_RULES.read_text(encoding="utf-8")
+        evidence = (ROOT / "docs/AIA-R01-EVID-42-SEC60-F187-CI-POSTMERGE.md").read_text(encoding="utf-8")
+        for pr, ci in ((261, 43019868566), (262, 43020983307)):
+            self.assertIn(f"#{pr}", evidence)
+            self.assertIn(str(ci), evidence)
+            self.assertIn(str(ci), status)
+        self.assertIn("6351c9e8ac657e9e72be7830b591679c33d63910", evidence)
+        self.assertIn("810 testes PHP", status)
+        self.assertIn("lint 100 + Python/DOM", status)
+        self.assertIn("810 PHP/lint 100", readme)
+        self.assertIn("EVID-42", status)
+        self.assertIn("EVID-42", readme)
+        self.assertIn("EVID-42", rules)
+        self.assertIn("EVID-41", status)
+        self.assertIn("800 testes PHP", status)
+        self.assertIn("776 testes PHP", status)
+        self.assertIn("OPEN/DRAFT", evidence)
+        self.assertIn("NAO_EXECUTADO", evidence)
+        self.assertIn("NO-GO", evidence)
+
     def test_evid41_five_deliveries_are_postmerge_verified_offline(self):
         status = STATUS.read_text(encoding="utf-8")
         readme = README.read_text(encoding="utf-8")
@@ -276,7 +299,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("08b17e5139ab1d638410100771a424d83ad76481", evidence)
         self.assertIn("43013609438", status)
         self.assertIn("800 testes PHP", status)
-        self.assertIn("lint 99 + Python/DOM", status)
+        self.assertIn("800 PHP / lint 99", evidence)
         self.assertIn("800 PHP / lint 99", evidence)
         self.assertIn("EVID-41", status)
         self.assertIn("EVID-41", readme)
