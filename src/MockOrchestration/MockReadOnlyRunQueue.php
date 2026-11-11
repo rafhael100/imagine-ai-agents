@@ -22,13 +22,44 @@ final class MockReadOnlyRunQueue
     private array $jobs = [];
     private array $trace = [];
     private ?int $observedAt = null;
+    // Optional while this queue is used as a standalone laboratory fixture.
+    // A queue consumed by a supervised pilot must bind exactly once to its
+    // coordinator; a provider callback can otherwise bypass the pilot guard
+    // by directly calling enqueue/claim/finish/cancel on the same object.
+    private ?SupervisedCoordinator $admissionCoordinator = null;
 
     public function __construct(private readonly TenantContext $boundContext) {}
+
+    /**
+     * Bind this queue to the same coordinator as the pilot, once. A second
+     * different coordinator can never replace the first one.
+     * This is per-object/process protection, never distributed IAM.
+     */
+    public function bindAdmissionCoordinator(SupervisedCoordinator $coordinator): void
+    {
+        if ($this->admissionCoordinator !== null) {
+            // A swallowed rebinding attempt during a provider callback
+            // still taints the already-active coordinator.
+            $this->admissionCoordinator->assertProviderCallbackIdle();
+            if ($this->admissionCoordinator !== $coordinator) {
+                MockError::fail('QUEUE_COORDINATOR_CONFLICT');
+            }
+            return;
+        }
+        $coordinator->assertProviderCallbackIdle();
+        $this->admissionCoordinator = $coordinator;
+    }
+
+    private function assertAdmissionIdle(): void
+    {
+        $this->admissionCoordinator?->assertProviderCallbackIdle();
+    }
 
     /** Enqueue one synthetic OP-01 read-only Run reference, idempotently. */
     public function enqueue(TenantContext $context, string $runRef,
         string $requestRef, int $now): array
     {
+        $this->assertAdmissionIdle();
         $this->boundContext->assertSame($context);
         self::reference($runRef, 80);
         self::reference($requestRef, 90);
@@ -64,6 +95,7 @@ final class MockReadOnlyRunQueue
      */
     public function claim(TenantContext $context, int $now, int $leaseTicks): ?array
     {
+        $this->assertAdmissionIdle();
         $this->boundContext->assertSame($context);
         if ($leaseTicks < 1 || $leaseTicks > self::MAX_LEASE_TICKS
             || $now > PHP_INT_MAX - $leaseTicks) {
@@ -111,6 +143,7 @@ final class MockReadOnlyRunQueue
     public function finish(TenantContext $context, string $runRef,
         string $claimRef, string $result, int $now): array
     {
+        $this->assertAdmissionIdle();
         $this->boundContext->assertSame($context);
         self::reference($runRef, 80);
         // Claim references are machine-generated SHA-256 hex, unlike the
@@ -144,6 +177,7 @@ final class MockReadOnlyRunQueue
     /** Cancel only a not-yet-claimed read. Never cancel an in-flight effect. */
     public function cancel(TenantContext $context, string $runRef, int $now): array
     {
+        $this->assertAdmissionIdle();
         $this->boundContext->assertSame($context);
         self::reference($runRef, 80);
         $this->clock($now);
