@@ -33,6 +33,7 @@ for name in \
   test_f181_queue_observation_demo.py \
   test_f182_queue_supervision_demo.py \
   test_f183_supervision_tab.py \
+  test_f184_review_sandbox.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \

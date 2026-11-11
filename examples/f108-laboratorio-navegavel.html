@@ -33,6 +33,10 @@ h1{font-size:clamp(26px,3vw,35px);letter-spacing:-1.2px;line-height:1.15;margin:
 @media(max-width:1100px){.metrics{grid-template-columns:repeat(2,1fr)}.labgrid{grid-template-columns:310px minmax(0,1fr)}.gridagents{grid-template-columns:repeat(2,1fr)}.herostat{min-width:130px}}
 @media(max-width:850px){.app{display:block}.sidebar{position:relative;padding:13px 17px;gap:10px}.brand{padding:0}.brandmark{width:33px;height:33px;font-size:22px;border-radius:10px}.sidegroup,.sidebottom{display:none}.nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:0;overflow:visible}.nav button{font-size:11px;padding:10px;white-space:nowrap}.nav button span{font-size:13px;width:auto}.topbar{height:70px}.twocol,.labgrid{grid-template-columns:1fr}.content{padding-top:28px}.hero{padding:25px}.gridagents{grid-template-columns:1fr 1fr}}
 @media(max-width:550px){.metrics,.gridagents{grid-template-columns:1fr 1fr}.herostat{display:none}.hero h2{font-size:23px}.sectiontitle{align-items:start}.sectiontitle h1{font-size:26px}.metric{padding:16px}.metric strong{font-size:25px}.topbar .eyebrow{display:none}.mode{font-size:9px;padding:7px}.auditrow{grid-template-columns:55px 1fr;gap:6px}.auditrow .description{grid-column:2}.console{padding:18px}.gridagents{grid-template-columns:1fr}.nav{grid-template-columns:repeat(2,minmax(0,1fr))}.nav button{white-space:normal;min-height:40px}.fixture strong{overflow-wrap:anywhere;font-size:10px;line-height:1.35}.content{padding-left:17px;padding-right:17px}}
+.review-sim-grid{margin-bottom:14px}
+.review-sim-grid .metric{padding:15px}
+.review-sim-grid strong{font-variant-numeric:tabular-nums}
+button:disabled{cursor:not-allowed;opacity:.53}
 .supervision-table{border-collapse:collapse;width:100%;font-size:13px}
 .supervision-table tr{border-bottom:1px solid #e8edf6}.supervision-table tr:last-child{border-bottom:0}
 .supervision-table th{font-weight:550;text-align:left;color:#667b99;padding:13px 0}
@@ -146,6 +150,26 @@ h1{font-size:clamp(26px,3vw,35px);letter-spacing:-1.2px;line-height:1.15;margin:
    <p class="muted" style="margin-top:20px">Mesmo após dois votos, o resultado continua indeterminado. Não há autorização para reenvio ou uso de dados reais.</p>
   </div></article>
  </div>
+ <div class="panel" style="margin-top:18px">
+  <div class="panelhead"><h2>Ensaio de segunda observação</h2><span class="tag">F184 · Simulação local</span></div>
+  <div class="panelbody">
+   <p class="muted">O caso fictício nº 3 aguarda a segunda observação. Escolha um resultado hipotético para ver <strong>somente a simulação</strong> mudar. O snapshot original acima permanece intacto.</p>
+   <div class="actions" style="margin-top:16px">
+    <button type="button" class="primary" id="review-sim-agree">Simular concordância</button>
+    <button type="button" class="secondary" id="review-sim-disagree">Simular divergência</button>
+    <button type="button" class="secondary" id="review-sim-reset">Reiniciar ensaio</button>
+   </div>
+   <p class="muted" role="status" aria-live="polite" id="review-sim-message">Nenhuma segunda observação simulada.</p>
+   <div class="metrics review-sim-grid" aria-label="Resultados hipotéticos do ensaio">
+    <div class="panel metric"><small>Aguardam segunda observação</small><strong id="review-sim-second">1</strong></div>
+    <div class="panel metric"><small>Revisadas, não resolvidas</small><strong id="review-sim-unresolved">1</strong></div>
+    <div class="panel metric"><small>Revisões conflitantes</small><strong id="review-sim-conflict">1</strong></div>
+    <div class="panel metric"><small>Resultados indeterminados</small><strong id="review-sim-indeterminate">3</strong></div>
+   </div>
+   <p class="muted" id="review-sim-events">0 observações fictícias adicionadas nesta sessão.</p>
+   <p class="muted" style="margin-top:12px"><strong>Sem autorização:</strong> estes botões não verificam a identidade de um revisor, não gravam histórico operacional, não alteram o relatório PHP e não enviam dados. Recarregar a página descarta o ensaio.</p>
+  </div>
+ </div>
  <div class="panel" style="margin-top:18px"><div class="panelbody"><strong>Limites da prévia</strong><p class="muted" style="margin-top:8px">Contagens de um único JSON sintético incorporado à página. Sem atualização ao vivo, dados de clientes, autenticação, CRM, worker ou acesso de revisão real. Os 13 cenários de homologação OP-01 continuam não executados.</p></div></div>
 </section>
 <section class="page" id="page-audit" hidden>
@@ -197,6 +221,42 @@ function drawSupervision(){
  get("supervision-decision").textContent="NO-GO";
 }
 
+// F184: local UI projection only; the F182 PHP snapshot stays immutable.
+let reviewSimulationDecision=null;
+function drawReviewSimulation(){
+ const source=JSON.parse(get("f183-supervision-data").textContent);
+ if(source.contract!=="SYNTHETIC_QUEUE_SUPERVISION_V1"||source.operational_decision!=="NO_GO"||source.real_authorization!==false||source.external_calls!==0||source.write_calls!==0)throw Error("SYNTHETIC_F184_CONTRACT_DENIED");
+ const result={...source.review};
+ if(reviewSimulationDecision!==null){
+  if(result.awaiting_second<1)throw Error("SYNTHETIC_F184_REVIEW_DENIED");
+  result.awaiting_second-=1;
+  if(reviewSimulationDecision==="AGREE")result.reviewed_unresolved+=1;
+  else if(reviewSimulationDecision==="DISAGREE")result.conflict+=1;
+  else throw Error("SYNTHETIC_F184_INVALID_DECISION");
+ }
+ const total=result.awaiting_first+result.awaiting_second+result.reviewed_unresolved+result.conflict;
+ if(total!==source.queue.indeterminate)throw Error("SYNTHETIC_F184_UNCERTAINTY_DENIED");
+ get("review-sim-second").textContent=String(result.awaiting_second);
+ get("review-sim-unresolved").textContent=String(result.reviewed_unresolved);
+ get("review-sim-conflict").textContent=String(result.conflict);
+ get("review-sim-indeterminate").textContent=String(source.queue.indeterminate);
+ get("review-sim-message").textContent=reviewSimulationDecision==="AGREE"?
+  "Observação concordante simulada. O resultado continua indeterminado.":
+  reviewSimulationDecision==="DISAGREE"?
+  "Divergência simulada. A incerteza permanece e não há aprovação.":
+  "Nenhuma segunda observação simulada.";
+ get("review-sim-events").textContent=reviewSimulationDecision===null?
+  "0 observações fictícias adicionadas nesta sessão.":
+  "1 observação fictícia nesta sessão; nenhum evento persistido.";
+ get("review-sim-agree").disabled=reviewSimulationDecision!==null;
+ get("review-sim-disagree").disabled=reviewSimulationDecision!==null;
+}
+function applyReviewSimulation(decision){
+ if(reviewSimulationDecision!==null||!["AGREE","DISAGREE"].includes(decision))return;
+ reviewSimulationDecision=decision;
+ drawReviewSimulation();
+}
+function resetReviewSimulation(){reviewSimulationDecision=null;drawReviewSimulation();}
 let chosen="allow",runs=0,denials=0,conflicts=0,sequence=0,logs=[];
 function page(name){for(const p of ["overview","agents","lab","supervision","audit"]){get("page-"+p).hidden=p!==name;}for(const b of document.querySelectorAll("[data-page-button]")){if(b.dataset.pageButton===name)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");}window.scrollTo(0,0);if(name==="audit")drawAudit();}
 function choose(id){if(!Object.prototype.hasOwnProperty.call(scenarios,id))return;chosen=id;const s=scenarios[id];get("case-id").textContent=s.id;get("case-title").textContent=s.title;get("case-subtitle").textContent=s.desc;get("fixture-product").textContent=s.product;get("fixture-tenant").textContent=s.tenant;get("fixture-source").textContent=s.source;get("fixture-grant").textContent=s.grant;for(const b of document.querySelectorAll("[data-scenario]")){const selected=b.dataset.scenario===id;b.classList.toggle("selected",selected);b.setAttribute("aria-pressed",String(selected));}clearResult();}
@@ -212,7 +272,10 @@ for(const b of document.querySelectorAll("[data-agent-scenario]"))b.addEventList
 get("run-button").addEventListener("click",run);
 get("clear-result").addEventListener("click",clearResult);
 get("reset-audit").addEventListener("click",reset);
-drawSupervision();choose("allow");drawAudit();page("overview");
+get("review-sim-agree").addEventListener("click",()=>applyReviewSimulation("AGREE"));
+get("review-sim-disagree").addEventListener("click",()=>applyReviewSimulation("DISAGREE"));
+get("review-sim-reset").addEventListener("click",resetReviewSimulation);
+drawSupervision();choose("allow");drawAudit();page("overview");drawReviewSimulation();
 })();
 </script>
 </body></html>
