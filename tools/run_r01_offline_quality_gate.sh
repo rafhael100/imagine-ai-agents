@@ -40,6 +40,7 @@ for name in \
   test_f190_queue_pause_demo.py \
   test_f191_rehearsal_verifier.py \
   test_f193_supervision_report.py \
+  test_f194_visual_baseline.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
