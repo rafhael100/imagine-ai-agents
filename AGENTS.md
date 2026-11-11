@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## EVID-48 — capacidade da fila F204 integrada, CI pós-merge aprovada (11/11/2026)
+
+- F204 PR #285 squash `e6eee470f6b49d45488b2f93122cf5c452626695`, CI pós-merge #43090143368 `success`, 14 testes PHP U101 novos e inventário **865 PHP / lint 107 + Python/DOM**. [EVID-48](docs/AIA-R01-EVID-48-F204-CI-POSTMERGE.md).
+- Diagnóstico de slots/pressão e orçamento de pausa é apenas informativo: **não** autoriza IAM, CRM real, novas admissões nem produção. CRM PR #57 OPEN/DRAFT; 13 casos reais NAO_EXECUTADO; gates R01-G01..G11/CORE/SEG/AUT NO-GO. Main, VPS, clientes, credenciais, gastos e produção intocados.
+
+
 ## F204 — capacidade agregada da fila sem efeitos (11/11/2026)
 
 - Método PHP `MockReadOnlyRunQueue::capacityOverview` mostra capacidade de 64 tarefas, 256 eventos e 32 decisões, sem IDs; alerta NORMAL/NEAR_LIMIT/EXHAUSTED e protege orçamento de pausa de emergência. Quatorze regressões U101-01..14 cobrem saturação, isolamento e invariância sem mutações. [F204](docs/AIA-FT01-F204-CAPACIDADE-FILA-OFFLINE.md).
