@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## SEC-55 — não confundir fila vazia com reserva ativa/incerteza (11/11/2026)
+
+- A fila expõe apenas sinais read-only de `RESERVADA` e `INDETERMINADO` ligados ao contexto. `MockQueuedReadOnlyPilot` devolve `IN_PROGRESS` ou `REVIEW_REQUIRED` antes de `EMPTY`; `MockQueuedBatchRunner` interrompe o lote sem contar/consumir mais provas quando não houve leitura. [SEC-55](docs/AIA-FT01-SEC-55-ESTADOS-OBSERVAVEIS-QUEUE.md).
+- Gate solicitado: **733 testes PHP / lint 91 + Python** (U83-01..12); NO-GO operacional, CRM PR #57 OPEN/DRAFT, 13 cenários reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT não aprovados. Não tocar `main`, VPS, produção.
+
 ## SEC-54 — admissão de fila proibida durante callback de sugestão (11/11/2026)
 
 - `MockReadOnlyPilot::assertQueueAdmissionReady` aplica a guarda *sticky* do coordenador **antes** de qualquer reserva no `MockQueuedReadOnlyPilot` e `MockQueuedBatchRunner`. Uma reentrada capturada pelo provedor invalida o resultado externo e não consome outro job. [Documento SEC-54](docs/AIA-FT01-SEC-54-QUEUE-ADMISSION-CALLBACK-REENTRY.md).
