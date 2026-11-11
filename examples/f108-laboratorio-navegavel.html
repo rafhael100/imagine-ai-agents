@@ -327,8 +327,8 @@ function generateAgentDraft(){
  if(!Object.prototype.hasOwnProperty.call(agentDraftTemplates,key)||raw.length>80){
   agentDraft=null;drawAgentDraft("Rascunho recusado: escolha um modelo e um nome válidos.");return;
  }
- const name=raw.normalize("NFC").trim().replace(/\\s+/g," ");
- if(name.length<3||name.length>48||!/^[\\p{L}\\p{N} ._-]+$/u.test(name)){
+ const name=raw.normalize("NFC").trim().replace(/\s+/g," ");
+ if(name.length<3||name.length>48||!/^[\p{L}\p{N} ._-]+$/u.test(name)){
   agentDraft=null;drawAgentDraft("Rascunho recusado: use 3 a 48 letras, números, espaços ou sinais simples.");return;
  }
  agentDraft=Object.freeze({name,template:agentDraftTemplates[key]});
