@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## DEMO F180 — lote read-only executável (10/11/2026)
+
+- `examples/f180-queued-batch-demo.php` demonstra dois pedidos fictícios autorizados e um negado, com JSON de contagens sem IDs, segredos ou tráfego; cinco testes Python no gate offline. [Guia](docs/AIA-FT01-DEMO-LOTE-OP01-F180.md).
+- Gate solicitado: **711 PHP / lint 89 e Python**. CRM real OPEN/DRAFT/NO-GO, sem `main`, VPS, secrets, custos ou produção.
+
 ## BATCH — lote read-only supervisionado (10/11/2026)
 
 - `MockQueuedBatchRunner` processa até 8 provas fictícias por chamada explícita, validadas integralmente antes do primeiro claim. Sem retry, IAM ou escrita. Saída de contagens agregadas. [Especificação](docs/AIA-FT01-QUEUE-LOTE-SUPERVISIONADO-OFFLINE.md).
