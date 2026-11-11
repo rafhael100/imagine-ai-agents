@@ -34,7 +34,7 @@ class Evid47Tests(unittest.TestCase):
             self.assertIn("EVID-46", body)
             self.assertIn("EVID-47", body)
             self.assertIn("NO-GO", body)
-        self.assertIn("865 testes PHP / lint 107", status)
+        self.assertIn("879 testes PHP / lint 109", status)
         self.assertIn("43038243942", status)
         self.assertIn("43088648397", status)
         self.assertIn("EVID-43", agents)
