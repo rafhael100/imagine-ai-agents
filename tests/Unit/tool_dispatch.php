@@ -1378,7 +1378,7 @@ return [
         $run = null; $nested = '';
         [$tool, $grant, $ctx, $run, $coord, $gateway, $provider] =
             f172SuggestionFixture(function () use (&$run, &$nested): void {
-                try { $run->withReadOnlySuggestion(fn (): array => []); }
+                try { $run->withReadOnlySuggestion(new MockAiSuggestionProvider(), ['text' => 'SYNTHETIC_DRAFT']); }
                 catch (MockError $e) { $nested = $e->getMessage(); }
             });
         denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
