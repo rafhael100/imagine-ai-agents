@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace ImagineAI\MockTelemetry;
 
 use ImagineAI\Domain\TenantContext;
-use ImagineAI\MockBridge\{MockCrmReadPublicFacade, MockCrmReadRequest, MockReadProjectionInvariant};
+use ImagineAI\MockBridge\{MockCrmReadPublicFacade, MockCrmReadRequest, MockCrmPublicResponseContract};
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence};
 
 /**
@@ -46,7 +46,7 @@ final class MockCrmReadEdgeBoundary
         try {
             $ticket = $this->counters->begin();
         } catch (\Throwable) {
-            return self::denial();
+            return MockCrmPublicResponseContract::denial();
         }
 
         try {
@@ -54,12 +54,12 @@ final class MockCrmReadEdgeBoundary
         } catch (\Throwable) {
             // Parsing failed BEFORE the F1-13 audit decorator; count category only.
             try { $this->counters->finish($ticket, 'SCHEMA_DENIED'); } catch (\Throwable) {}
-            return self::denial();
+            return MockCrmPublicResponseContract::denial();
         }
 
         try {
             $result = $this->facade->handle($wire, $envelope, $owner, $trustedContext, $now);
-            if (!self::isSafeResponse($result, $request, $trustedContext)) {
+            if (!MockCrmPublicResponseContract::isSafe($result, $request, $trustedContext)) {
                 throw new \LogicException('UNSAFE_SYNTHETIC_EDGE_RESULT');
             }
             $outcome = $result['state'] === 'READ_SYNTHETIC_ONLY'
@@ -69,42 +69,8 @@ final class MockCrmReadEdgeBoundary
         } catch (\Throwable) {
             // Never return potentially unsafe data if telemetry cannot be completed.
             try { $this->counters->finish($ticket, 'INTERNAL_DENIED'); } catch (\Throwable) {}
-            return self::denial();
+            return MockCrmPublicResponseContract::denial();
         }
     }
 
-    private static function isSafeResponse(array $result, MockCrmReadRequest $request,
-        TenantContext $trustedContext): bool
-    {
-        if (array_keys($result) !== ['contract', 'state', 'projection',
-                'real_authorization', 'external_calls']
-            || ($result['contract'] ?? null) !== 'SYNTHETIC_CRM_AIA_PUBLIC_V1'
-            || ($result['real_authorization'] ?? null) !== false
-            || ($result['external_calls'] ?? null) !== 0) {
-            return false;
-        }
-        if (($result['state'] ?? null) === 'DENIED_OR_NOT_FOUND') {
-            return $result['projection'] === null;
-        }
-        if (($result['state'] ?? null) !== 'READ_SYNTHETIC_ONLY'
-            || !is_array($result['projection'])
-            || !MockReadProjectionInvariant::isCanonical(
-                $result['projection'], $request->fields, $trustedContext)) {
-            return false;
-        }
-        // Even if the public facade changes, the edge requires the same
-        // resource-bound, ordered, bounded, synthetic-only projection.
-        return true;
-    }
-
-    private static function denial(): array
-    {
-        return [
-            'contract' => 'SYNTHETIC_CRM_AIA_PUBLIC_V1',
-            'state' => 'DENIED_OR_NOT_FOUND',
-            'projection' => null,
-            'real_authorization' => false,
-            'external_calls' => 0,
-        ];
-    }
 }
