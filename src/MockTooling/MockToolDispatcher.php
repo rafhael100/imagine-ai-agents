@@ -83,6 +83,11 @@ final class MockToolDispatcher
                         || $value['text'] !== 'SYNTHETIC summary proposal only') {
                         MockError::fail('TOOL_SUGGESTION_DENIED');
                     }
+                    // An injected provider may revoke the capability during
+                    // a draft. Recheck before returning trusted tool data.
+                    // The same injected grant/clock are reused; no token is
+                    // issued and no new permission is inferred.
+                    $grant->assertPermits($toolId, $context, $now);
                 } catch (\Throwable) {
                     // A rejected/failed provider MUST NOT leave this
                     // synthetic Run active for a subsequent approved action.
@@ -181,6 +186,12 @@ final class MockToolDispatcher
                     $out['projection'], $request->fields, $context)) {
                 MockError::fail('READ_DENIED');
             }
+            // The reader can revoke the independent tool capability
+            // after OP-01 ownership/trust has authorized its own read.
+            // Never deliver that result through a now-revoked tool grant.
+            // The CRM read audit truthfully retains the original read
+            // success; the tool itself emits DENIED, not READ.
+            $grant->assertPermits($toolId, $context, $now);
             // A fourth independent validator would risk policy drift.
             // The tool checks the same exact resource-bound, two-field,
             // 90-byte invariant as the reader, public facade and edge.
