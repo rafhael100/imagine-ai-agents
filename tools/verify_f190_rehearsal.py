@@ -41,7 +41,9 @@ def verify(payload):
         entry = payload[stage]
         if type(entry) is not dict:
             raise ValueError("INVALID_SUPERVISION")
-        if frozenset(entry) != frozenset({"contract", "queue", "review", "admission", "operational_decision", "real_authorization", "external_calls", "write_calls"}):\n            raise ValueError("INVALID_SUPERVISION_SCHEMA")\n        if entry.get("contract") != "SYNTHETIC_QUEUE_SUPERVISION_V1":
+        if frozenset(entry) != frozenset({"contract", "queue", "review", "admission", "operational_decision", "real_authorization", "external_calls", "write_calls"}):
+            raise ValueError("INVALID_SUPERVISION_SCHEMA")
+        if entry.get("contract") != "SYNTHETIC_QUEUE_SUPERVISION_V1":
             raise ValueError("INVALID_SUPERVISION_CONTRACT")
         if entry.get("admission") != {"state": state}:
             raise ValueError("INVALID_ADMISSION")
