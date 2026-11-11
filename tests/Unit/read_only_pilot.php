@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use ImagineAI\MockPilot\{MockReadOnlyPilot, MockQueuedReadOnlyPilot};
+use ImagineAI\MockPilot\{MockReadOnlyPilot, MockQueuedReadOnlyPilot, MockQueuedBatchRunner};
 use ImagineAI\Domain\TenantContext;
 use ImagineAI\MockBridge\MockCrmOwnerPolicy;
 use ImagineAI\MockAudit\MockCrmReadAuditTrail;
@@ -862,6 +862,182 @@ return [
             && !str_contains($visible, 'SYNTHETIC_Q79_PRIVATE')
             && !str_contains($visible, 'claim_ref')
             && $out['write_calls'] === 0 && $out['external_calls'] === 0);
+    },
+
+
+    'U80-01 empty read-only batch has no read or provider effect' => function (): void {
+        [$pilot, $q, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $batch = new MockQueuedBatchRunner($ctx, $pilot);
+        $out = $batch->drain($ctx, [['envelope' => $env, 'owner' => $owner]],
+            ['ref'], 15, 5);
+        check($out['state'] === 'EMPTY' && $out['processed'] === 0
+            && $out['succeeded'] === 0 && $out['denied'] === 0
+            && $counts->snapshot()['attempts'] === 0
+            && $coord->events() === [] && $mut->submitCount() === 0);
+    },
+    'U80-02 two distinct proofs complete two fictional FIFO jobs' => function (): void {
+        [$pilot, $q, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $batch = new MockQueuedBatchRunner($ctx, $pilot);
+        $q->enqueue($ctx, 'SYNTHETIC_U80_RUN_A', 'SYNTHETIC_U80_REQ_A', 10);
+        $q->enqueue($ctx, 'SYNTHETIC_U80_RUN_B', 'SYNTHETIC_U80_REQ_B', 10);
+        [$envB, $ownerB] = f130Proof($ctx, 'U80_02B');
+        $out = $batch->drain($ctx, [
+            ['envelope' => $env, 'owner' => $owner],
+            ['envelope' => $envB, 'owner' => $ownerB],
+        ], ['ref'], 15, 5);
+        check($out['state'] === 'BATCH_SYNTHETIC_ONLY'
+            && $out['processed'] === 2 && $out['succeeded'] === 2
+            && $out['denied'] === 0 && $q->counts()['CONCLUIDA'] === 2
+            && $counts->snapshot()['attempts'] === 2 && $audit->count() === 2
+            && $mut->submitCount() === 0 && count($coord->events()) === 8);
+    },
+    'U80-03 missing first owner proof fails while next independent read works' => function (): void {
+        [$pilot, $q, $mut, $coord, $counts, $audit, , , $ctx] =
+            f179QueuedFixture();
+        $batch = new MockQueuedBatchRunner($ctx, $pilot);
+        $q->enqueue($ctx, 'SYNTHETIC_U80_RUN_03A', 'SYNTHETIC_U80_REQ_03A', 10);
+        $q->enqueue($ctx, 'SYNTHETIC_U80_RUN_03B', 'SYNTHETIC_U80_REQ_03B', 10);
+        [$envB, $ownerB] = f130Proof($ctx, 'U80_03B');
+        $out = $batch->drain($ctx, [
+            ['envelope' => null, 'owner' => null],
+            ['envelope' => $envB, 'owner' => $ownerB],
+        ], ['ref'], 15, 5);
+        check($out['processed'] === 2 && $out['succeeded'] === 1
+            && $out['denied'] === 1
+            && $q->counts()['FALHOU'] === 1 && $q->counts()['CONCLUIDA'] === 1
+            && $mut->submitCount() === 0);
+    },
+    'U80-04 cancelled job is skipped and batch stops on empty queue' => function (): void {
+        [$pilot, $q, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $batch = new MockQueuedBatchRunner($ctx, $pilot);
+        $q->enqueue($ctx, 'SYNTHETIC_U80_CANCEL', 'SYNTHETIC_U80_REQ_C', 10);
+        $q->enqueue($ctx, 'SYNTHETIC_U80_LIVE', 'SYNTHETIC_U80_REQ_L', 10);
+        $q->cancel($ctx, 'SYNTHETIC_U80_CANCEL', 11);
+        [$envB, $ownerB] = f130Proof($ctx, 'U80_04');
+        $out = $batch->drain($ctx, [
+            ['envelope' => $env, 'owner' => $owner],
+            ['envelope' => $envB, 'owner' => $ownerB],
+        ], ['ref'], 15, 5);
+        check($out['processed'] === 1 && $out['succeeded'] === 1
+            && $q->counts()['CANCELADA'] === 1
+            && $q->counts()['CONCLUIDA'] === 1
+            && $audit->count() === 1);
+    },
+    'U80-05 replayed proof cannot authorize second queued item in batch' => function (): void {
+        [$pilot, $q, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $batch = new MockQueuedBatchRunner($ctx, $pilot);
+        $q->enqueue($ctx, 'SYNTHETIC_U80_REPLAY_A', 'SYNTHETIC_U80_REQ_RA', 10);
+        $q->enqueue($ctx, 'SYNTHETIC_U80_REPLAY_B', 'SYNTHETIC_U80_REQ_RB', 10);
+        $out = $batch->drain($ctx, [
+            ['envelope' => $env, 'owner' => $owner],
+            ['envelope' => $env, 'owner' => $owner],
+        ], ['ref'], 15, 5);
+        check($out['processed'] === 2 && $out['succeeded'] === 1
+            && $out['denied'] === 1 && $mut->submitCount() === 0
+            && $q->counts()['FALHOU'] === 1
+            && $q->counts()['CONCLUIDA'] === 1);
+    },
+    'U80-06 invalid fields fail before any queued claim or CRM nonce' => function (): void {
+        [$pilot, $q, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $batch = new MockQueuedBatchRunner($ctx, $pilot);
+        $q->enqueue($ctx, 'SYNTHETIC_U80_FIELDS', 'SYNTHETIC_U80_REQ_F', 10);
+        $before = count($q->events());
+        $out = $batch->drain($ctx, [
+            ['envelope' => $env, 'owner' => $owner],
+        ], ['email'], 15, 5);
+        check($out['state'] === 'DENIED_OR_NOT_FOUND'
+            && $q->counts()['PENDENTE'] === 1
+            && count($q->events()) === $before
+            && $audit->count() === 0 && $counts->snapshot()['attempts'] === 0);
+    },
+    'U80-07 foreign tenant denied without claiming or leaking job details' => function (): void {
+        [$pilot, $q, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $batch = new MockQueuedBatchRunner($ctx, $pilot);
+        $q->enqueue($ctx, 'SYNTHETIC_U80_FOREIGN', 'SYNTHETIC_U80_REQ_FO', 10);
+        $out = $batch->drain(context('SYNTHETIC_B'), [
+            ['envelope' => $env, 'owner' => $owner],
+        ], ['ref'], 15, 5);
+        check($out['state'] === 'DENIED_OR_NOT_FOUND'
+            && $out['processed'] === 0 && $q->counts()['PENDENTE'] === 1
+            && $coord->events() === [] && $audit->count() === 0);
+    },
+    'U80-08 nine-item proof list is denied before consuming first job' => function (): void {
+        [$pilot, $q, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $batch = new MockQueuedBatchRunner($ctx, $pilot);
+        $q->enqueue($ctx, 'SYNTHETIC_U80_LIMIT', 'SYNTHETIC_U80_REQ_LIM', 10);
+        $pairs = array_fill(0, 9, ['envelope' => $env, 'owner' => $owner]);
+        $out = $batch->drain($ctx, $pairs, ['ref'], 15, 5);
+        check($out['processed'] === 0 && $out['state'] === 'DENIED_OR_NOT_FOUND'
+            && $q->counts()['PENDENTE'] === 1 && $audit->count() === 0);
+    },
+    'U80-09 malformed last proof denies entire batch without consuming first' => function (): void {
+        [$pilot, $q, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $batch = new MockQueuedBatchRunner($ctx, $pilot);
+        $q->enqueue($ctx, 'SYNTHETIC_U80_PAIR', 'SYNTHETIC_U80_REQ_PAIR', 10);
+        $out = $batch->drain($ctx, [
+            ['envelope' => $env, 'owner' => $owner],
+            ['owner' => $owner, 'envelope' => $env],
+        ], ['ref'], 15, 5);
+        check($out['processed'] === 0 && $out['state'] === 'DENIED_OR_NOT_FOUND'
+            && $q->counts()['PENDENTE'] === 1 && $audit->count() === 0);
+    },
+    'U80-10 explicit eight-item batch is processed with eight unique proofs' => function (): void {
+        [$pilot, $q, $mut, $coord, $counts, $audit, , , $ctx] =
+            f179QueuedFixture();
+        $batch = new MockQueuedBatchRunner($ctx, $pilot);
+        $pairs = [];
+        for ($i = 0; $i < 8; ++$i) {
+            $q->enqueue($ctx, 'SYNTHETIC_U80_EIGHT_' . $i,
+                'SYNTHETIC_U80_REQ_EIGHT_' . $i, 10);
+            [$env, $owner] = f130Proof($ctx, 'U80_10_' . $i);
+            $pairs[] = ['envelope' => $env, 'owner' => $owner];
+        }
+        $out = $batch->drain($ctx, $pairs, ['ref'], 15, 5);
+        check($out['processed'] === 8 && $out['succeeded'] === 8
+            && $out['denied'] === 0 && $q->counts()['CONCLUIDA'] === 8
+            && $audit->count() === 8 && $mut->submitCount() === 0
+            && count($coord->events()) === 32);
+    },
+    'U80-11 invalid lease and negative time cannot burn pending items' => function (): void {
+        [$pilot, $q, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $batch = new MockQueuedBatchRunner($ctx, $pilot);
+        $q->enqueue($ctx, 'SYNTHETIC_U80_TIME', 'SYNTHETIC_U80_REQ_TIME', 10);
+        foreach ([0, 301] as $lease) {
+            $out = $batch->drain($ctx, [
+                ['envelope' => $env, 'owner' => $owner],
+            ], ['ref'], 15, $lease);
+            check($out['state'] === 'DENIED_OR_NOT_FOUND');
+        }
+        check($batch->drain($ctx, [
+            ['envelope' => $env, 'owner' => $owner],
+        ], ['ref'], -1, 5)['state'] === 'DENIED_OR_NOT_FOUND');
+        check($q->counts()['PENDENTE'] === 1 && $audit->count() === 0);
+    },
+    'U80-12 batch output is aggregate-only, never a tenant or claim leak' => function (): void {
+        [$pilot, $q, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $batch = new MockQueuedBatchRunner($ctx, $pilot);
+        $q->enqueue($ctx, 'SYNTHETIC_U80_PRIVATE', 'SYNTHETIC_U80_PRIVATE_REQ', 10);
+        $out = $batch->drain($ctx, [
+            ['envelope' => $env, 'owner' => $owner],
+        ], ['ref'], 15, 5);
+        $visible = json_encode($out, JSON_THROW_ON_ERROR);
+        check($out['processed'] === 1 && $out['succeeded'] === 1
+            && $out['real_authorization'] === false
+            && $out['external_calls'] === 0 && $out['write_calls'] === 0);
+        foreach ([$ctx->resource, $ctx->principal, $ctx->tenant,
+                  'SYNTHETIC_U80_PRIVATE', 'claim_ref', 'SYNTHETIC_BRIDGE_NONCE'] as $marker) {
+            check(!str_contains($visible, $marker));
+        }
     },
 
 ];
