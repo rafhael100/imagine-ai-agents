@@ -1211,4 +1211,135 @@ return [
             ['SYNTHETIC_DENIED', 'SYNTHETIC_SUGGESTED']);
     },
 
+
+    'U74-01 coordinator blocks swallowed recursive suggestion directly' => function (): void {
+        $coord = null; $ctx = null; $run = null; $nested = '';
+        [$tool, $grant, $ctx, $run, $coord, $gw, $provider] =
+            f172SuggestionFixture(function () use (&$coord, &$run, &$nested): void {
+                try { $coord->suggest($run, ['text' => 'SYNTHETIC_DRAFT']); }
+                catch (MockError $e) { $nested = $e->getMessage(); }
+            });
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($nested === 'PROVIDER_CALLBACK_DENIED' && $provider->calls === 1
+            && $gw->submitCount() === 0 && $run->state() === 'FALHOU');
+        check(array_column($coord->events(), 'code') ===
+            ['SYNTHETIC_STARTED', 'SYNTHETIC_RUN_CHANGED']);
+    },
+    'U74-02 second dispatcher cannot recursively suggest through shared coordinator' => function (): void {
+        $other = null; $ctx = null; $run = null; $grant = null; $nested = '';
+        [$tool, $grant, $ctx, $run, $coord, $gw, $provider] =
+            f172SuggestionFixture(function () use (&$other, &$ctx, &$run, &$grant, &$nested): void {
+                try { $other->dispatch(MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+                    $ctx, $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run); }
+                catch (MockError $e) { $nested = $e->getMessage(); }
+            });
+        $other = new MockToolDispatcher(new MockToolCatalog(), $coord);
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($nested === 'TOOL_SUGGESTION_DENIED' && $other->events() === []
+            && $provider->calls === 1 && $run->state() === 'FALHOU');
+        check($gw->submitCount() === 0
+            && array_column($tool->events(), 'code') === ['SYNTHETIC_DENIED']);
+    },
+    'U74-03 second dispatcher denies valid approved fake mutation during provider' => function (): void {
+        $other = null; $ctx = null; $intent = null; $approval = null;
+        $writeGrant = null; $nested = '';
+        [$tool, $grant, $ctx, $run, $coord, $gw, $provider] =
+            f172SuggestionFixture(function () use (&$other, &$ctx, &$intent,
+                &$approval, &$writeGrant, &$nested): void {
+                try { $other->dispatch(MockToolCatalog::MUTATE, MockToolCatalog::VERSION,
+                    $ctx, $writeGrant, ['material' => 'SYNTHETIC_MATERIAL'], 15,
+                    null, $intent, $approval); }
+                catch (MockError $e) { $nested = $e->getMessage(); }
+            });
+        $other = new MockToolDispatcher(new MockToolCatalog(), $coord);
+        $step = $coord->step($run, 'SYNTHETIC_SEC52_STEP');
+        $intent = new Intent('SYNTHETIC_SEC52_INTENT', $step,
+            'SYNTHETIC_SEC52_KEY', 'mock.task.create', 'SYNTHETIC_MATERIAL');
+        $approval = new Approval('SYNTHETIC_SEC52_APPROVAL', $intent,
+            'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+        $writeGrant = new MockCapabilityGrant('SYNTHETIC_SEC52_WRITE',
+            MockToolCatalog::MUTATE, $ctx, 10, 20);
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($nested === 'TOOL_SUGGESTION_DENIED' && $provider->calls === 1
+            && $other->events() === [] && $run->state() === 'FALHOU');
+        check($gw->submitCount() === 0 && $gw->statusCount() === 0);
+    },
+    'U74-04 second dispatcher denies read before edge even with valid grant' => function (): void {
+        $other = null; $ctx = null; $readGrant = null; $nested = null;
+        [$tool, $grant, $ctx, $run, $coord, $gw, $provider] =
+            f172SuggestionFixture(function () use (&$other, &$ctx, &$readGrant, &$nested): void {
+                $nested = $other->readThroughBoundary(
+                    MockToolCatalog::READ, MockToolCatalog::VERSION, $ctx,
+                    $readGrant, [], null, null, 15);
+            });
+        $other = new MockToolDispatcher(new MockToolCatalog(), $coord);
+        $readGrant = new MockCapabilityGrant('SYNTHETIC_SEC52_READ',
+            MockToolCatalog::READ, $ctx, 10, 20);
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($nested === f136Denied() && $other->events() === []
+            && $provider->calls === 1 && $gw->submitCount() === 0
+            && $run->state() === 'FALHOU');
+    },
+    'U74-05 direct coordinator execute denied despite valid fake approval' => function (): void {
+        $coord = null; $intent = null; $approval = null; $nested = '';
+        [$tool, $grant, $ctx, $run, $coord, $gw, $provider] =
+            f172SuggestionFixture(function () use (&$coord, &$intent, &$approval, &$nested): void {
+                try { $coord->execute($intent, $approval, 15); }
+                catch (MockError $e) { $nested = $e->getMessage(); }
+            });
+        $step = $coord->step($run, 'SYNTHETIC_SEC52_EXEC_STEP');
+        $intent = new Intent('SYNTHETIC_SEC52_EXEC_INTENT', $step,
+            'SYNTHETIC_SEC52_EXEC_KEY', 'mock.task.create', 'SYNTHETIC_MATERIAL');
+        $approval = new Approval('SYNTHETIC_SEC52_EXEC_APPROVAL', $intent,
+            'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($nested === 'PROVIDER_CALLBACK_DENIED'
+            && $gw->submitCount() === 0 && $run->state() === 'FALHOU');
+        check(!in_array('SYNTHETIC_SUBMITTED', array_column($coord->events(), 'code'), true));
+    },
+    'U74-06 coordinator guard resets and new healthy run succeeds' => function (): void {
+        $coord = null; $run = null; $first = true;
+        [$tool, $grant, $ctx, $run, $coord, $gw, $provider] =
+            f172SuggestionFixture(function () use (&$coord, &$run, &$first): void {
+                if (!$first) return;
+                $first = false;
+                try { $coord->start('SYNTHETIC_SEC52_BAD_NESTED'); }
+                catch (MockError) { /* outer callback must still be denied */ }
+            });
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        $fresh = $coord->start('SYNTHETIC_SEC52_FRESH');
+        $result = $tool->dispatch(MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+            $ctx, $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $fresh);
+        check($result['state'] === 'SYNTHETIC_OK' && $fresh->state() === 'EXECUTANDO'
+            && $run->state() === 'FALHOU' && $provider->calls === 2
+            && $gw->submitCount() === 0);
+    },
+    'U74-07 direct lifecycle transition from provider is rejected' => function (): void {
+        $coord = null; $run = null; $nested = '';
+        [$tool, $grant, $ctx, $run, $coord, $gw, $provider] =
+            f172SuggestionFixture(function () use (&$coord, &$run, &$nested): void {
+                try { $coord->transition($run, 'CONCLUIDA'); }
+                catch (MockError $e) { $nested = $e->getMessage(); }
+            });
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($nested === 'PROVIDER_CALLBACK_DENIED' && $provider->calls === 1
+            && $run->state() === 'FALHOU' && $gw->submitCount() === 0);
+        check(array_column($coord->events(), 'code') ===
+            ['SYNTHETIC_STARTED', 'SYNTHETIC_RUN_CHANGED']);
+    },
+
 ];
