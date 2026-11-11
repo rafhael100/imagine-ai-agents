@@ -261,6 +261,17 @@ button:disabled{cursor:not-allowed;opacity:.53}
     <div class="panel metric"><small>Indeterminadas</small><strong id="queue-transition-unknown">—</strong></div>
     <div class="panel metric"><small>Revisadas sem conclusão</small><strong id="queue-transition-unresolved">—</strong></div>
    </div>
+   <div class="panel" style="margin:16px 0" aria-label="Variação agregada entre PAUSED e OPEN">
+    <div class="panelhead"><h2>Variação entre os dois estados</h2><span class="tag">Não é um comando de fila</span></div>
+    <div class="panelbody">
+     <table class="supervision-table"><tbody>
+      <tr><th scope="row">Pendentes</th><td id="queue-delta-pending">—</td></tr>
+      <tr><th scope="row">Concluídas</th><td id="queue-delta-completed">—</td></tr>
+      <tr><th scope="row">Indeterminadas</th><td id="queue-delta-unknown">—</td></tr>
+     </tbody></table>
+     <p class="muted">A diferença é calculada localmente sobre os dois snapshots F190 verificados; não significa que uma operação real foi executada.</p>
+    </div>
+   </div>
    <p class="muted" id="queue-transition-explanation">A incerteza permanece mesmo após duas observações concordantes. Nenhuma autorização operacional é concedida.</p>
    <p class="muted" style="margin-top:12px"><strong>Limite:</strong> o snapshot F182 e o ensaio F184 acima permanecem imutáveis.</p>
   </div>
@@ -357,6 +368,11 @@ function drawTransition(){
  get("queue-transition-completed").textContent=String(view.queue.completed);
  get("queue-transition-unknown").textContent=String(view.queue.indeterminate);
  get("queue-transition-unresolved").textContent=String(view.review.reviewed_unresolved);
+ const before=transitionRaw.paused.queue, after=transitionRaw.resumed.queue;
+ const signedDelta=value=>value>0?"+"+String(value):value<0?"−"+String(-value):"0";
+ get("queue-delta-pending").textContent=signedDelta(after.pending-before.pending);
+ get("queue-delta-completed").textContent=signedDelta(after.completed-before.completed);
+ get("queue-delta-unknown").textContent=signedDelta(after.indeterminate-before.indeterminate);
  get("queue-transition-paused").setAttribute("aria-pressed",String(transitionSelection==="paused"));
  get("queue-transition-resumed").setAttribute("aria-pressed",String(transitionSelection==="resumed"));
 }
