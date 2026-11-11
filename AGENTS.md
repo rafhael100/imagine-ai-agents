@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## F186 — coleção transitória de até cinco rascunhos (11/11/2026)
+
+- No F108, um rascunho F185 válido pode ser adicionado a uma lista **apenas da sessão** (até 5); o mesmo nome `pt-BR` + modelo é idempotente, nome conflitante é negado, sem evicção no limite. Retomar um item deriva escopo do catálogo fechado; remover invalida prévia correspondente; botão de item removido não revive rascunho; zerar lista descarta tudo. Só `textContent`, sem storage, SQL, IAM ou rede. [Guia F186](docs/AIA-FT01-F186-COLECAO-RASCUNHOS-SESSION.md).
+- Gate PHP preservado **776/lint 97**; sete testes Python F186 e smoke Node expandido. Não permite cadastro/persistência de agente operacional. CRM PR #57 OPEN/DRAFT, 13 cenários reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT **NO-GO**. `main` sem alterações, VPS/produção/dados reais/segredos/custos não autorizados.
+
 ## F185 — configurador de rascunhos de agentes no catálogo F108 (11/11/2026)
 
 - A página "Agentes fictícios" aceita um nome local normalizado/limitado e um de três modelos fechados, mostra prévia não publicada e abre **somente** o cenário sintético correspondente (CRM U07-01, Performance U07-08, Universidade U07-09), sem executar automaticamente o teste. Alteração de campos invalida o rascunho; HTML hostil, nomes excessivos e `__proto__` negados. [F185](docs/AIA-FT01-F185-CONFIGURADOR-RASCUNHOS-AGENTES.md).
