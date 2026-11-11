@@ -52,7 +52,8 @@ try {
         ] || $out['review'] !== [
             'awaiting_first' => 0, 'awaiting_second' => 1,
             'reviewed_unresolved' => 1, 'conflict' => 1,
-        ] || count($board->events()) !== 5
+        ] || $out['admission'] !== ['state' => 'OPEN']
+        || count($board->events()) !== 5
         || $queue->counts()['INDETERMINADO'] !== 3
         || $queue->claim($ctx, 15, 5) !== null) {
         throw new RuntimeException('SYNTHETIC_F182_INVARIANT_DENIED');

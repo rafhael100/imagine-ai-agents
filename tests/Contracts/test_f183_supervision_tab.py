@@ -40,6 +40,9 @@ class F183SupervisionTabTests(unittest.TestCase):
         self.assertIn('aria-label="Tarefas da fila sintética"', self.html)
         self.assertIn('aria-label="Etapas de revisão sintética"', self.html)
         self.assertIn('id="supervision-decision"', self.html)
+        self.assertIn('id="supervision-admission"', self.html)
+        self.assertEqual(self.fixture["admission"], {"state": "OPEN"})
+        self.assertIn('SYNTHETIC_F189_ADMISSION_DENIED', self.html)
         self.assertIn('drawSupervision();choose("allow");', self.html)
         self.assertEqual(self.fixture["operational_decision"], "NO_GO")
 

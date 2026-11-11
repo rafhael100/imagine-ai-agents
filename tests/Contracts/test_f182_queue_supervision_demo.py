@@ -32,6 +32,7 @@ class F182QueueSupervisionDemoTests(unittest.TestCase):
                 "awaiting_first": 0, "awaiting_second": 1,
                 "reviewed_unresolved": 1, "conflict": 1,
             },
+            "admission": {"state": "OPEN"},
             "operational_decision": "NO_GO",
             "real_authorization": False,
             "external_calls": 0,

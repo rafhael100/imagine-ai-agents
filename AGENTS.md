@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## F189 — refletir estado de admissão no overview e tela offline (11/11/2026)
+
+- `MockUncertaintyReviewBoard::overview` acrescenta `admission:{state:OPEN|PAUSED}` do controle SEC-61, sem decisãoRef nem IDs; contagens e revisões não mudam. A fixture PHP F182, o JSON estático F183, a aba F108 e seus testes de paridade foram sincronizados. Estado desconhecido é negado no JS; "ABERTA · SIMULADA" nunca representa disponibilidade real. [F189](docs/AIA-FT01-F189-ESTADO-ADMISSAO-SUPERVISAO.md).
+- Gate proposto **835 PHP / lint 102 + Python/DOM**, U93-01..08. CRM PR #57 OPEN/DRAFT e 13 cenários reais `NAO_EXECUTADO`; R01-G01..G11/CORE/SEG/AUT NO-GO. Sem main, CRM integrado, dados pessoais, VPS, deploy ou custos.
+
 ## SEC-61 — suspensão explícita de novas admissões da fila (11/11/2026)
 
 - `MockReadOnlyRunQueue` suporta `pauseAdmission`, `resumeAdmission` e `admissionState` apenas sintéticas, com refs de decisão idempotentes, limite de 32 (última decisão reservada para PAUSE) e auditoria mascarada. PAUSED impede novos enqueues/claims, mas mantém finish/cancel legítimos e expiração para `INDETERMINADO`. Piloto expõe PAUSED em vez de EMPTY; batch para sem leituras. Em trace saturado, pausa falha fechada sem reabrir admissões. [SEC-61](docs/AIA-FT01-SEC-61-PAUSA-ADMISSAO-FILA.md).
