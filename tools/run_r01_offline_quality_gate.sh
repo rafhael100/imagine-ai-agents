@@ -51,7 +51,8 @@ for name in \
   test_synthetic_php_isolation.py \
   test_quality_gate_coverage.py \
   test_canonical_project_status.py \
-  test_evid44_postmerge.py
+  test_evid44_postmerge.py \
+  test_evid45_postmerge.py
 do
   python3 -m unittest discover -s tests/Contracts -p "$name" -v
 done

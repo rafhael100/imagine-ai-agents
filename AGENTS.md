@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## EVID-45 — F196/F197/F198 pós-merge (11/11/2026)
+
+- F196 PR #274 (CI #43075578789, SHA dc9a0b71ff970f7594e210d157f480bdcc84587a) adiciona painel PAUSED/OPEN com paridade PHP/HTML; F197 #275 (CI #43076103326, SHA 808dd778c208a59220dad9c1897148d689ca3132) exibe deltas sem alterar a fila; F198 #276 (CI #43076603247, SHA fa5046e0bce0e343e7f645f9b91de6ddb4467470) acrescenta 16 ataques ao validador do navegador. Todos integrados na dev com CI pós-merge success. [EVID-45](docs/AIA-R01-EVID-45-F196-F198-CI-POSTMERGE.md).
+- Baseline PHP **835/lint 103**, mais 16 testes Python e smoke DOM/adversarial Node. **NO-GO**: CRM PR #57 OPEN/DRAFT, 13 cenários reais NAO_EXECUTADO, R01-G01..G11/CORE/SEG/AUT pendentes. Sem alteração na main, VPS, IAM, clientes, produção, segredos ou custos.
+
+
 ## EVID-44 — F191 a F195 com CI pós-merge aprovada (11/11/2026)
 
 - F191 #268 CI #43047660682 (verificador determinístico); F192 #269 CI #43048120334 (contratos estritos); F193 #270 CI #43049412790 (HTML estático); F194 #271 CI #43049695153 (baseline visual 835/103); F195 #272 CI #43050336317 (deltas de supervisão). Todas integradas na dev; [EVID-44](docs/AIA-R01-EVID-44-F191-F195-CI-POSTMERGE.md).
