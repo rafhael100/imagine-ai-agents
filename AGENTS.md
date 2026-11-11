@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## SEC-56 — request_ref única e terminal na fila local (11/11/2026)
+
+- Em `MockReadOnlyRunQueue::enqueue`, o mesmo `(run_ref,request_ref)` é idempotente, mas `request_ref` já associada a **outro** Run nega `QUEUE_REQUEST_CONFLICT`, incluindo jobs concluídos, cancelados ou incertos. Varrer no máximo 64 entradas antes de auditoria, sem evicção. [Documento](docs/AIA-FT01-SEC-56-IDEMPOTENCIA-REQUEST-REF-FILA.md).
+- Gate solicitado: **741 PHP / lint 91 + Python**, U84-01..08. Prova sintética não é nonce distribuído nem identidade. CRM PR #57 OPEN/DRAFT, 13 casos reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT: NO-GO. Sem `main`, VPS, produção ou custos.
+
 ## SEC-55 — não confundir fila vazia com reserva ativa/incerteza (11/11/2026)
 
 - A fila expõe apenas sinais read-only de `RESERVADA` e `INDETERMINADO` ligados ao contexto. `MockQueuedReadOnlyPilot` devolve `IN_PROGRESS` ou `REVIEW_REQUIRED` antes de `EMPTY`; `MockQueuedBatchRunner` interrompe o lote sem contar/consumir mais provas quando não houve leitura. [SEC-55](docs/AIA-FT01-SEC-55-ESTADOS-OBSERVAVEIS-QUEUE.md).
