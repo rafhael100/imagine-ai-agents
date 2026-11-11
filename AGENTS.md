@@ -1,5 +1,12 @@
 # AGENTS.md — Imagine AI Agents
 
+## F200 — triagem PHP agregada sem autoridade operacional (11/11/2026)
+
+- Nova classe `src/MockOrchestration/MockQueueTriage.php` sintetiza PAUSED → REVIEW_REQUIRED → LEASE_IN_PROGRESS → PENDING → QUIET, com precedência de risco, contagens fechadas, tenant isolado, proteção de invariantes e nenhuma mutação.
+- 16 regressões PHP U100-01..16; **baseline proposto 851 testes PHP / lint 105 + Python/DOM**. [F200](docs/AIA-FT01-F200-TRIAGEM-FILA-SINTETICA.md).
+- `next_step` é indicação informativa e **nunca comando**, autorização, início de worker nem permissão CRM. CRM #57 OPEN/DRAFT, 13 cenários reais NAO_EXECUTADO, R01-G01..G11/CORE/SEG/AUT NO-GO; sem main, VPS, clientes, deploy, segredos ou custos.
+
+
 ## EVID-46 — matriz de alcance dos agentes F199 validada (11/11/2026)
 
 - EVID-45 PR #277 squash `c6fd19ee9b4fa9b847cd8b0801959624534aeeac`, CI pós-merge #43077639745 success. F199 PR #278 squash `c355bd5ae7044ee17db90ffffdcb5006f64cb2a9`, CI pós-merge #43078227186 success. [EVID-46](docs/AIA-R01-EVID-46-F199-CI-POSTMERGE.md).
