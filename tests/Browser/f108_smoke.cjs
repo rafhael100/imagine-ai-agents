@@ -35,6 +35,9 @@ const elements = new Map(ids.map(id => [id, new Element(id)]));
 const fixture = beforeScript.match(/<script type="application\/json" id="f183-supervision-data">([^<]+)<\/script>/);
 assert(fixture, "embedded F183 static JSON exists");
 elements.get("f183-supervision-data").textContent = fixture[1];
+const f196 = beforeScript.match(/<script type="application\\/json" id="f196-transition-data">([^<]+)<\\/script>/);
+assert(f196, "embedded F196 synthetic PHP fixture exists");
+elements.get("f196-transition-data").textContent = f196[1];
 const selectors = {
     "[data-page-button]": [], "[data-goto]": [], "[data-scenario]": [],
     "[data-agent-scenario]": []
@@ -80,6 +83,26 @@ assert.equal(byId("supervision-unresolved").textContent, "1", "matching votes do
 assert.equal(byId("supervision-decision").textContent, "NO-GO", "never authorized");
 assert.equal(byId("supervision-admission").textContent, "ABERTA · SIMULADA",
  "F189 open admission shown as offline fixture, not as actual availability");
+// F196 transition selection is visual only and leaves F182 and F184 untouched.
+assert.equal(byId("queue-transition-state").textContent, "PAUSADA · SIMULADA");
+assert.equal(byId("queue-transition-pending").textContent, "1");
+assert.equal(byId("queue-transition-completed").textContent, "0");
+assert.equal(byId("queue-transition-unknown").textContent, "1");
+assert.equal(byId("queue-transition-unresolved").textContent, "1");
+assert.equal(byId("queue-transition-paused").attributes.get("aria-pressed"), "true");
+byId("queue-transition-resumed").click();
+assert.equal(byId("queue-transition-state").textContent, "RETOMADA · SIMULADA");
+assert.equal(byId("queue-transition-pending").textContent, "0");
+assert.equal(byId("queue-transition-completed").textContent, "1");
+assert.equal(byId("queue-transition-unknown").textContent, "1");
+assert.equal(byId("queue-transition-unresolved").textContent, "1");
+assert.equal(byId("queue-transition-paused").attributes.get("aria-pressed"), "false");
+assert.equal(byId("queue-transition-resumed").attributes.get("aria-pressed"), "true");
+assert.equal(byId("supervision-indeterminate").textContent, "3", "F182 immutable");
+assert.equal(byId("supervision-decision").textContent, "NO-GO");
+byId("queue-transition-paused").click();
+assert.equal(byId("queue-transition-completed").textContent, "0");
+assert.equal(byId("queue-transition-pending").textContent, "1");
 // F184: reviewing is a disposable browser-only *hypothesis*, not a vote
 // recorded by the PHP notebook or a change to the official F182 snapshot.
 assert.equal(byId("review-sim-second").textContent, "1", "initial second review pending");
