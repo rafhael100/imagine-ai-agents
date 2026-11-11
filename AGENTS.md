@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## REV-02/F182 — overview de supervisão sem identificadores (11/11/2026)
+
+- `MockUncertaintyReviewBoard::overview` produz a visão agregada, tipada e fechada da fila (pendente/reserva/concluída/falha/cancelada/incerta) e da revisão (primeira/segunda/consenso não resolutivo/conflito). Protege contexto do quadro e fila, não exporta IDs, não libera `INDETERMINADO`, não reenvia nem autentica ninguém. CLI F182 comprova o contrato com casos fictícios. [REV-02/F182](docs/AIA-FT01-REV-02-OVERVIEW-QUEUE-REVIEWS-F182.md).
+- Gate previsto: **776 testes PHP / lint 97 + Python**; U87-01..10 + cinco testes F182. Apenas fonte futura para dashboard, sem HTTP/CRM real. R01-G01..G11, CORE/SEG/AUT NO-GO, CRM PR #57 OPEN/DRAFT, 13 cenários OP-01 reais `NAO_EXECUTADO`, sem `main`, VPS ou produção.
+
 ## REV-01 — revisão sintética dupla de resultado incerto (11/11/2026)
 
 - `MockUncertaintyReviewBoard` registra até 2 observações de referências fictícias de revisores distintos sobre Runs `INDETERMINADO`, com replays idempotentes, estados `AWAITING_SECOND_REVIEW`/`REVIEWED_UNRESOLVED`/`REVIEW_CONFLICT`, limites 64 casos/128 eventos e trilha minimizada. **Nunca** altera o estado indeterminado da fila, reenvia operação, autentica revisor ou libera o CRM. [REV-01](docs/AIA-FT01-REV-01-REVISAO-DUPLA-INCERTEZA-OFFLINE.md).

@@ -83,6 +83,59 @@ final class MockUncertaintyReviewBoard
         return self::view($this->votes[$runRef] ?? []);
     }
 
+    /**
+     * Read-only, closed aggregate contract for future administrative UIs.
+     * No run IDs, claims, reviewers or individual reasons escape.
+     * This neither changes queue state nor confirms an unknown outcome.
+     */
+    public function overview(TenantContext $context): array
+    {
+        $this->context->assertSame($context);
+        // Also check queue ownership (the board and queue could have been
+        // wired to different synthetic tenants by a faulty caller).
+        $this->queue->needsReview($context);
+        $counts = $this->queue->counts();
+        $reviewed = [
+            'awaiting_first' => 0,
+            'awaiting_second' => 0,
+            'reviewed_unresolved' => 0,
+            'conflict' => 0,
+        ];
+        $withVotes = 0;
+        foreach ($this->votes as $runRef => $votes) {
+            if (($this->queue->status($context, $runRef)['state'] ?? null)
+                !== 'INDETERMINADO') {
+                MockError::fail('REVIEW_INVARIANT_DENIED');
+            }
+            ++$withVotes;
+            $state = self::view($votes)['state'];
+            if ($state === 'AWAITING_SECOND_REVIEW') ++$reviewed['awaiting_second'];
+            elseif ($state === 'REVIEWED_UNRESOLVED') ++$reviewed['reviewed_unresolved'];
+            elseif ($state === 'REVIEW_CONFLICT') ++$reviewed['conflict'];
+            else MockError::fail('REVIEW_INVARIANT_DENIED');
+        }
+        if ($withVotes > $counts['INDETERMINADO']) {
+            MockError::fail('REVIEW_INVARIANT_DENIED');
+        }
+        $reviewed['awaiting_first'] = $counts['INDETERMINADO'] - $withVotes;
+        return [
+            'contract' => 'SYNTHETIC_QUEUE_SUPERVISION_V1',
+            'queue' => [
+                'pending' => $counts['PENDENTE'],
+                'reserved' => $counts['RESERVADA'],
+                'completed' => $counts['CONCLUIDA'],
+                'failed' => $counts['FALHOU'],
+                'cancelled' => $counts['CANCELADA'],
+                'indeterminate' => $counts['INDETERMINADO'],
+            ],
+            'review' => $reviewed,
+            'operational_decision' => 'NO_GO',
+            'real_authorization' => false,
+            'external_calls' => 0,
+            'write_calls' => 0,
+        ];
+    }
+
     public function events(): array { return $this->events; }
 
     private static function view(array $votes): array
