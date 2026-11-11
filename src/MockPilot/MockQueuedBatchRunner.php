@@ -68,17 +68,18 @@ final class MockQueuedBatchRunner
         $processed = 0;
         $succeeded = 0;
         $denied = 0;
-        $reviewRequired = false;
+        $pendingState = null;
         foreach ($pairs as $pair) {
             // Calls are explicit and limited by MAX_BATCH; a denied or
             // indeterminate job cannot be automatically retried here.
             $out = $this->pilot->runNext($context, $pair['envelope'],
                 $pair['owner'], $fields, $now, $leaseTicks);
             if (($out['state'] ?? null) === 'EMPTY') break;
-            if (($out['state'] ?? null) === 'REVIEW_REQUIRED') {
-                // Do not count an unresolved claim as a new processed read,
-                // and do not burn unused synthetic proofs on further polls.
-                $reviewRequired = true;
+            if (in_array(($out['state'] ?? null),
+                ['REVIEW_REQUIRED', 'IN_PROGRESS'], true)) {
+                // A pending lease or uncertain outcome is not another read.
+                // Stop before consuming further proof slots in this batch.
+                $pendingState = $out['state'];
                 break;
             }
             ++$processed;
@@ -90,7 +91,7 @@ final class MockQueuedBatchRunner
         }
         return [
             'contract' => 'SYNTHETIC_QUEUED_BATCH_V1',
-            'state' => $reviewRequired ? 'REVIEW_REQUIRED' : ($processed === 0 ? 'EMPTY' : 'BATCH_SYNTHETIC_ONLY'),
+            'state' => $pendingState ?? ($processed === 0 ? 'EMPTY' : 'BATCH_SYNTHETIC_ONLY'),
             'processed' => $processed,
             'succeeded' => $succeeded,
             'denied' => $denied,
