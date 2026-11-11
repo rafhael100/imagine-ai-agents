@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## OP-01 — request builder vinculado ao contexto (10/11/2026)
+
+- `MockCrmReadRequestBuilder` cria pedido sintético a partir do `TenantContext` já vinculado e dos únicos campos autorizados pelo parser; não copia claims arbitrários, nem gera identidade ou nonce. Demo f127 já usa o builder. [Documentação](docs/AIA-FT01-OP01-CONSTRUCAO-REQUEST-CONTEXTO-VINCULADO.md).
+- Gate esperado: **672 PHP / lint 85 + Python** (U77-01..12). Propostas de resposta OP-01 compartilhada e builder NÃO ratificam CRM PR #57 OPEN/DRAFT, 13 casos `NAO_EXECUTADO`, gates NO-GO. `main`/VPS/produção intocadas.
+
 ## OP-01 — resposta pública compartilhada (10/11/2026)
 
 - `MockCrmPublicResponseContract` é a única validação do envelope sintético no edge, READ e piloto. **12 regressões U76-01..12**; gate esperado 660 PHP / lint 84 + Python. Ver [projeto](docs/AIA-FT01-OP01-RESPOSTA-COMPARTILHADA-2026-11-10.md).

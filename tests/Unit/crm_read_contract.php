@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 use ImagineAI\Domain\TenantContext;
 use ImagineAI\Mocks\MockCrmReader;
-use ImagineAI\MockBridge\{MockCrmReadBoundary, MockCrmReadRequest, MockCrmOwnerPolicy};
+use ImagineAI\MockBridge\{MockCrmReadBoundary, MockCrmReadRequest, MockCrmOwnerPolicy, MockCrmReadRequestBuilder};
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence, MockTrustGateway};
 
 function f112Wire(?TenantContext $ctx = null): array {
@@ -200,4 +200,134 @@ return [
         $reversed = array_reverse(f112Wire(), true);
         check((new MockCrmReadRequest($reversed))->ref === 'SYNTHETIC_REQUEST_A');
     },
+
+    'U77-01 builder generates exact closed OP01 request from synthetic identity' => function (): void {
+        $ctx = context();
+        $wire = MockCrmReadRequestBuilder::fromContext(
+            $ctx, 'SYNTHETIC_BUILDER_01', ['ref']);
+        check(array_keys($wire) === [
+            'contract', 'request_ref', 'operation', 'tenant_ref',
+            'principal_ref', 'resource_ref', 'purpose_ref', 'fields']);
+        check($wire['request_ref'] === 'SYNTHETIC_BUILDER_01');
+        check($wire['tenant_ref'] === $ctx->tenant
+            && $wire['principal_ref'] === $ctx->principal
+            && $wire['resource_ref'] === $ctx->resource
+            && $wire['purpose_ref'] === $ctx->purpose
+            && $wire['operation'] === 'crm.lead.read_minimal');
+        (new MockCrmReadRequest($wire))->assertMatches($ctx);
+    },
+    'U77-02 builder preserves two requested fields in explicit order' => function (): void {
+        $ctx = context();
+        $wire = MockCrmReadRequestBuilder::fromContext(
+            $ctx, 'SYNTHETIC_BUILDER_02', ['stage', 'ref']);
+        check($wire['fields'] === ['stage', 'ref']);
+        [$boundary, $env, $owner] = f112Fixture();
+        $out = $boundary->evaluate(new MockCrmReadRequest($wire),
+            $env, $owner, $ctx, 15);
+        check($out['projection'] === [
+            'stage' => 'SYNTHETIC_NEW', 'ref' => $ctx->resource]);
+    },
+    'U77-03 tenant B can only be sourced from its trusted context' => function (): void {
+        $ctxA = context();
+        $ctxB = context('SYNTHETIC_B');
+        $a = MockCrmReadRequestBuilder::fromContext(
+            $ctxA, 'SYNTHETIC_BUILDER_03A', ['ref']);
+        $b = MockCrmReadRequestBuilder::fromContext(
+            $ctxB, 'SYNTHETIC_BUILDER_03B', ['ref']);
+        check($a['tenant_ref'] === 'SYNTHETIC_A'
+            && $b['tenant_ref'] === 'SYNTHETIC_B'
+            && $b['resource_ref'] === 'SYNTHETIC_B_LEAD');
+        denied('BRIDGE_CONTEXT_DENIED', fn () =>
+            (new MockCrmReadRequest($b))->assertMatches($ctxA));
+    },
+    'U77-04 invalid and empty request references fail before output' => function (): void {
+        $ctx = context();
+        foreach (['BAD', 'SYNTHETIC_', 'SYNTHETIC_haslower',
+                  'SYNTHETIC_A-B'] as $bad) {
+            denied('BRIDGE_SCHEMA_DENIED', fn () =>
+                MockCrmReadRequestBuilder::fromContext($ctx, $bad, ['ref']));
+        }
+    },
+    'U77-05 large request reference and exact 90 byte boundary' => function (): void {
+        $ctx = context();
+        $full = 'SYNTHETIC_' . str_repeat('A', 80);
+        check(strlen($full) === 90);
+        check(MockCrmReadRequestBuilder::fromContext(
+            $ctx, $full, ['ref'])['request_ref'] === $full);
+        denied('BRIDGE_SCHEMA_DENIED', fn () =>
+            MockCrmReadRequestBuilder::fromContext($ctx, $full . 'B', ['ref']));
+        denied('BRIDGE_SCHEMA_DENIED', fn () =>
+            MockCrmReadRequestBuilder::fromContext(
+                $ctx, 'SYNTHETIC_' . str_repeat('C', 1024 * 1024), ['ref']));
+    },
+    'U77-06 empty or oversized field lists are denied without constructing' => function (): void {
+        $ctx = context();
+        foreach ([[], ['ref', 'stage', 'ref'],
+                  array_fill(0, 20000, 'ref')] as $fields) {
+            denied('BRIDGE_SCHEMA_DENIED', fn () =>
+                MockCrmReadRequestBuilder::fromContext(
+                    $ctx, 'SYNTHETIC_BUILDER_06', $fields));
+        }
+    },
+    'U77-07 unknown private fields and duplicates never enter the output' => function (): void {
+        $ctx = context();
+        foreach ([['email'], ['notes'], ['ref', 'ref'], ['stage', 'stage']] as $fields) {
+            denied('BRIDGE_SCHEMA_DENIED', fn () =>
+                MockCrmReadRequestBuilder::fromContext(
+                    $ctx, 'SYNTHETIC_BUILDER_07', $fields));
+        }
+    },
+    'U77-08 associative and type-mixed fields are invalid' => function (): void {
+        $ctx = context();
+        foreach ([['field' => 'ref'], [0], ['ref', false], [null]] as $fields) {
+            denied('BRIDGE_SCHEMA_DENIED', fn () =>
+                MockCrmReadRequestBuilder::fromContext(
+                    $ctx, 'SYNTHETIC_BUILDER_08', $fields));
+        }
+    },
+    'U77-09 builder never copies arbitrary claims or bearer flags' => function (): void {
+        $ctx = context();
+        $wire = MockCrmReadRequestBuilder::fromContext(
+            $ctx, 'SYNTHETIC_BUILDER_09', ['ref']);
+        check(!isset($wire['authorization']) && !isset($wire['role'])
+            && !isset($wire['is_admin']) && !isset($wire['allow'])
+            && count($wire) === 8);
+        $forged = $wire; $forged['tenant_ref'] = 'SYNTHETIC_B';
+        denied('BRIDGE_CONTEXT_DENIED', fn () =>
+            (new MockCrmReadRequest($forged))->assertMatches($ctx));
+        (new MockCrmReadRequest($wire))->assertMatches($ctx);
+    },
+    'U77-10 idempotent builder has no nonce allocation nor side effects' => function (): void {
+        $ctx = context();
+        $first = MockCrmReadRequestBuilder::fromContext(
+            $ctx, 'SYNTHETIC_BUILDER_10', ['ref']);
+        $second = MockCrmReadRequestBuilder::fromContext(
+            $ctx, 'SYNTHETIC_BUILDER_10', ['ref']);
+        check($first === $second);
+        $second['resource_ref'] = 'SYNTHETIC_B_LEAD';
+        check($first['resource_ref'] === $ctx->resource);
+    },
+    'U77-11 a valid builder request does not bypass CRM owner denial' => function (): void {
+        $ctx = context();
+        [$facade, $policy, $audit, $env, $owner] =
+            f117Fixture(new MockCrmOwnerPolicy());
+        $wire = MockCrmReadRequestBuilder::fromContext(
+            $ctx, 'SYNTHETIC_BUILDER_11', ['ref']);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)
+            === f117GenericDenial());
+        check($audit->count() === 1);
+    },
+    'U77-12 builder supports isolated read-only pilot with no effects' => function (): void {
+        $ctx = context();
+        [$pilot, $mut, $coordinator, $counts, $policy, $audit, $env, $owner] =
+            f130Fixture(f130Grant());
+        $wire = MockCrmReadRequestBuilder::fromContext(
+            $ctx, 'SYNTHETIC_BUILDER_12', ['ref']);
+        $result = $pilot->suggest($wire, $env, $owner, $ctx, 15,
+            'SYNTHETIC_BUILDER_PILOT_12');
+        check($result === f130Success() && $mut->submitCount() === 0
+            && $mut->statusCount() === 0 && $audit->count() === 1
+            && $counts->snapshot()['attempts'] === 1);
+    },
+
 ];
