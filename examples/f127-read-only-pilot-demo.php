@@ -15,7 +15,7 @@ spl_autoload_register(static function (string $class): void {
 });
 
 use ImagineAI\Domain\TenantContext;
-use ImagineAI\MockBridge\{MockCrmOwnerPolicy, MockCrmReadBoundary, MockCrmReadPublicFacade};
+use ImagineAI\MockBridge\{MockCrmOwnerPolicy, MockCrmReadBoundary, MockCrmReadPublicFacade, MockCrmReadRequestBuilder};
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence, MockTrustGateway};
 use ImagineAI\MockAudit\MockCrmReadAuditTrail;
 use ImagineAI\MockTelemetry\{MockCrmReadEdgeBoundary, MockCrmReadEdgeCounters};
@@ -55,16 +55,10 @@ function demoFixture(bool $grant): array
         $context, $mutations, new MockAiSuggestionProvider(),
     );
     $pilot = new MockReadOnlyPilot($context, $edge, $coordinator);
-    $wire = [
-        'contract' => 'SYNTHETIC_CRM_AIA_READ_V1',
-        'request_ref' => 'SYNTHETIC_DEMO_REQUEST',
-        'operation' => 'crm.lead.read_minimal',
-        'tenant_ref' => $context->tenant,
-        'principal_ref' => $context->principal,
-        'resource_ref' => $context->resource,
-        'purpose_ref' => $context->purpose,
-        'fields' => ['ref', 'stage'],
-    ];
+    // The consumer derives all identity/resource fields from the bound
+    // synthetic context, never from a proposed request body or AI output.
+    $wire = MockCrmReadRequestBuilder::fromContext(
+        $context, 'SYNTHETIC_DEMO_REQUEST', ['ref', 'stage']);
     return [$pilot, $wire, $envelope, $owner, $context, $audit, $counters,
         $coordinator, $mutations];
 }
