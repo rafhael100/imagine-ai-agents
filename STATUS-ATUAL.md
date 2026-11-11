@@ -12,7 +12,7 @@
 
 **SEC-51 integrada à dev (PR #233):** reentrada de SUGGEST/MUTATE/READ durante callback de sugestão bloqueada; quatro regressões U73-01..04. [SEC-51](docs/AIA-FT01-SEC-51-REENTRADA-FERRAMENTAS-CALLBACK.md), [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
 
-**SEC-50 integrada à dev (PR #230):** capability grant revogada durante leitor/provedor nega o resultado da ferramenta; sugestão fecha Run como `FALHOU`. Oito U72-01..08, [SEC-50](docs/AIA-FT01-SEC-50-CAPABILITY-RECHECK-POS-FERRAMENTA.md), [EVID-35](docs/AIA-R01-EVID-35-SEC50-CI-POSTMERGE.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
+**SEC-50 integrada à dev (PR #230):** capability grant revogada durante leitor/provedor nega o resultado da ferramenta; sugestão fecha Run como `FALHOU`. Baseline **629 testes PHP**, U72-01..08, [CI #42938703131](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42938703131), [SEC-50](docs/AIA-FT01-SEC-50-CAPABILITY-RECHECK-POS-FERRAMENTA.md), [EVID-35](docs/AIA-R01-EVID-35-SEC50-CI-POSTMERGE.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-49 integrada à dev (PR #228):** epoch do trust compartilhado; oito U71-01..08, [SEC-49](docs/AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md), [EVID-34](docs/AIA-R01-EVID-34-SEC49-CI-POSTMERGE.md).
 
