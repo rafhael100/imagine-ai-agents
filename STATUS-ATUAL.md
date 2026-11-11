@@ -1,6 +1,6 @@
 # Imagine AI Agents — estado atual
 
-**Consolidado em 11/11/2026.** Fonte: commits e CIs do GitHub. **Produção: NO-GO.**
+**11/11/2026.** Fonte: GitHub. **Produção: NO-GO.**
 
 ## Estado executivo
 
@@ -12,7 +12,7 @@
 
 **SEC-57/REV-01/REV-02/F183 integrados:** PR #250 (753 PHP, CI #42980115062); #251 (766 PHP, CI #42980489349); #252 (776 PHP, CI #42981149687); #253 (UI F108, CI #42981975813). [EVID-40](docs/AIA-R01-EVID-40-SEC57-REV02-F183-POSTMERGE.md). Tudo sintético, **NO-GO**.
 
-**OP-01 integrado:** PR #239 resposta única (660 PHP, CI #42949459592); #240 builder (672 PHP, CI #42949959755); #241 fila FIFO (687 PHP, CI #42950862393); #242 piloto em fila (699 PHP, CI #42951498940). [EVID-39](docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md). CRM real **NO-GO**.
+**OP-01 integrado:** PR #239 resposta única (660 PHP, CI #42949459592); #240 builder (672 PHP, CI #42949959755); #241 fila FIFO (687 PHP, CI #42950862393); #242 piloto em fila (699 testes PHP, CI #42951498940). [EVID-39](docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md). CRM real **NO-GO**.
 
 **SEC-53 integrada à dev (PR #237):** baseline **648 testes PHP**, lint de **83 arquivos PHP**, [CI #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088); bloqueia alteração de Run, U75-01..08, [SEC-53](docs/AIA-FT01-SEC-53-RUN-LIFECYCLE-READONLY-CALLBACK.md), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
 
