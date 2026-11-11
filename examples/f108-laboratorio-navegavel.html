@@ -48,6 +48,13 @@ button:disabled{cursor:not-allowed;opacity:.53}
 .draft-result dt{color:#8090ab;font-size:10px;font-weight:700}
 .draft-result dd{font-size:12px;font-weight:650;margin:4px 0 0;overflow-wrap:anywhere}
 @media(max-width:700px){.draft-fields,.draft-result dl{grid-template-columns:1fr}}
+.draft-session{border-top:1px solid #e6edf7;margin-top:18px;padding-top:18px}
+.draft-session-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.draft-session-heading strong{font-size:12px;color:#4e688c;font-variant-numeric:tabular-nums}
+.draft-saved-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;border-bottom:1px solid #edf1f7;padding:12px 0}
+.draft-saved-row span{font-size:12px;color:#263b58;flex:1;min-width:150px;overflow-wrap:anywhere}
+.draft-saved-row button{font-size:11px;padding:8px 11px}
+#agent-draft-collection{margin:12px 0}
 .supervision-table{border-collapse:collapse;width:100%;font-size:13px}
 .supervision-table tr{border-bottom:1px solid #e8edf6}.supervision-table tr:last-child{border-bottom:0}
 .supervision-table th{font-weight:550;text-align:left;color:#667b99;padding:13px 0}
@@ -122,6 +129,7 @@ button:disabled{cursor:not-allowed;opacity:.53}
    </div>
    <div class="actions">
     <button type="button" class="primary" id="agent-draft-generate">Pré-visualizar rascunho</button>
+    <button type="button" class="secondary" id="agent-draft-save" disabled>Adicionar à lista local</button>
     <button type="button" class="secondary" id="agent-draft-test" disabled>Ver cenário vinculado</button>
     <button type="button" class="secondary" id="agent-draft-reset">Limpar rascunho</button>
    </div>
@@ -133,6 +141,12 @@ button:disabled{cursor:not-allowed;opacity:.53}
      <div><dt>Objetivo fechado</dt><dd id="agent-draft-preview-purpose">—</dd></div>
      <div><dt>Estado</dt><dd id="agent-draft-preview-state">NÃO PUBLICADO · NO-GO</dd></div>
     </dl>
+   </div>
+   <div class="draft-session" aria-label="Rascunhos desta sessão local">
+    <div class="draft-session-heading"><h3>Rascunhos da sessão</h3><strong id="agent-draft-count">0 / 5</strong></div>
+    <p class="muted" role="status" aria-live="polite" id="agent-draft-collection-status">Nenhum rascunho adicionado nesta sessão.</p>
+    <div id="agent-draft-collection" aria-label="Lista de rascunhos fictícios"></div>
+    <button type="button" class="secondary" id="agent-draft-clear-all">Zerar lista da sessão</button>
    </div>
    <p class="muted" style="margin-top:14px">O nome é apenas texto local, não é um prompt enviado a IA e não gera acesso ao CRM. Para cada modelo há somente um objetivo de demonstração já definido. Não há salvamento, aprovação, credenciais ou cobrança.</p>
   </div>
