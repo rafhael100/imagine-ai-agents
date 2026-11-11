@@ -25,6 +25,8 @@ final class MockToolDispatcher
         'TOOL_SUGGESTION_DENIED', 'SYNTHETIC_STATUS_UNAVAILABLE',
     ];
     private array $events = [];
+    private bool $suggestionCallbackActive = false;
+    private bool $suggestionCallbackReentryObserved = false;
 
     public function __construct(
         private readonly MockToolCatalog $catalog,
@@ -47,6 +49,12 @@ final class MockToolDispatcher
         ?Intent $intent = null,
         ?Approval $approval = null,
     ): array {
+        // Reject reentrant tool calls before touching catalog or gateway.
+        // Even a swallowed denial contaminates the outer suggestion.
+        if ($this->suggestionCallbackActive) {
+            $this->suggestionCallbackReentryObserved = true;
+            MockError::fail('TOOL_SUGGESTION_DENIED');
+        }
         // Reserve one local audit event before any tool, suggestion or
         // synthetic effect executes. No event capacity means no operation.
         $this->assertTraceRoom();
@@ -71,8 +79,13 @@ final class MockToolDispatcher
                 // response may need one additional event to close this Run
                 // as FALHOU; reject before invocation if neither fits.
                 $this->coordinator->assertToolSuggestionReady($run);
+                $this->suggestionCallbackActive = true;
+                $this->suggestionCallbackReentryObserved = false;
                 try {
                     $value = $this->coordinator->suggest($run, ['text' => $parameters['text']]);
+                    if ($this->suggestionCallbackReentryObserved) {
+                        MockError::fail('TOOL_SUGGESTION_DENIED');
+                    }
                     // A coordinator SUGGESTED event only means a provider
                     // answered. It is not proof of trusted output content.
                     if (array_keys($value) !== ['kind', 'version', 'run', 'source', 'text']
@@ -100,6 +113,9 @@ final class MockToolDispatcher
                         // Never leak secondary diagnostic failures.
                     }
                     MockError::fail('TOOL_SUGGESTION_DENIED');
+                } finally {
+                    $this->suggestionCallbackActive = false;
+                    $this->suggestionCallbackReentryObserved = false;
                 }
                 $this->trace($toolId, $context, 'SUGGESTED');
                 return ['kind' => 'SUGGEST', 'state' => 'SYNTHETIC_OK', 'data' => $value];
@@ -153,6 +169,10 @@ final class MockToolDispatcher
         ?MockOwnerScopeEvidence $owner,
         int $now,
     ): array {
+        if ($this->suggestionCallbackActive) {
+            $this->suggestionCallbackReentryObserved = true;
+            return self::deniedRead();
+        }
         // If no trace can be written, refuse before consuming a nonce.
         // This endpoint returns a generic denial by contract.
         if (count($this->events) >= self::MAX_TRACE_EVENTS) {
