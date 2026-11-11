@@ -32,6 +32,7 @@ for name in \
   test_f180_queued_batch_demo.py \
   test_f181_queue_observation_demo.py \
   test_f182_queue_supervision_demo.py \
+  test_f183_supervision_tab.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
@@ -41,6 +42,14 @@ for name in \
 do
   python3 -m unittest discover -s tests/Contracts -p "$name" -v
 done
+
+# Run the original dependency-free DOM test when Node is already available.
+# The mandatory Python F183 parity suite still runs where Node is absent.
+if command -v node >/dev/null 2>&1; then
+  node tests/Browser/f108_smoke.cjs
+else
+  echo 'NODE_VISUAL_SMOKE_SKIPPED: Node not installed (no install attempted)'
+fi
 
 php -l tools/op01_php_parser_probe.php
 php -l tools/op01_php_public_response_probe.php
