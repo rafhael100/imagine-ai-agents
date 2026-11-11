@@ -38,6 +38,16 @@ final class MockReadOnlyRunQueue
             if ($old['request'] !== $requestRef) MockError::fail('QUEUE_IDEMPOTENCY_CONFLICT');
             return self::view($runRef, $old);
         }
+        // A single request ref must never designate two different Runs.
+        // Terminal and uncertain jobs remain indexed until the process ends:
+        // reuse after cancellation/timeout would destroy correlation and
+        // could silently authorize a second synthetic read with fresh proof.
+        // At most 64 entries are scanned; no unbounded index or eviction.
+        foreach ($this->jobs as $known) {
+            if ($known['request'] === $requestRef) {
+                MockError::fail('QUEUE_REQUEST_CONFLICT');
+            }
+        }
         if (count($this->jobs) >= self::MAX_JOBS) MockError::fail('QUEUE_CAPACITY_DENIED');
         $this->assertTraceRoom(1);
         $this->jobs[$runRef] = [
