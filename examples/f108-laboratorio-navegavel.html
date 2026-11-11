@@ -37,6 +37,17 @@ h1{font-size:clamp(26px,3vw,35px);letter-spacing:-1.2px;line-height:1.15;margin:
 .review-sim-grid .metric{padding:15px}
 .review-sim-grid strong{font-variant-numeric:tabular-nums}
 button:disabled{cursor:not-allowed;opacity:.53}
+.draft-workbench{margin-top:22px}
+.draft-fields{display:grid;grid-template-columns:1fr 1.4fr;gap:14px;margin:19px 0}
+.draft-fields label{display:block;font-size:12px;color:#506784;font-weight:750;margin-bottom:7px}
+.draft-fields select,.draft-fields input{width:100%;border:1px solid #cddcf0;border-radius:10px;padding:12px;background:#fff;font:inherit;font-size:13px;color:#253b5a}
+.draft-fields select:focus-visible,.draft-fields input:focus-visible{outline:3px solid #78adff;outline-offset:2px}
+.draft-result{border:1px solid #dce7f8;background:#f7faff;border-radius:12px;padding:17px}
+.draft-result p{color:#456587;font-size:12px;font-weight:700;margin:0 0 11px}
+.draft-result dl{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.draft-result dt{color:#8090ab;font-size:10px;font-weight:700}
+.draft-result dd{font-size:12px;font-weight:650;margin:4px 0 0;overflow-wrap:anywhere}
+@media(max-width:700px){.draft-fields,.draft-result dl{grid-template-columns:1fr}}
 .supervision-table{border-collapse:collapse;width:100%;font-size:13px}
 .supervision-table tr{border-bottom:1px solid #e8edf6}.supervision-table tr:last-child{border-bottom:0}
 .supervision-table th{font-weight:550;text-align:left;color:#667b99;padding:13px 0}
@@ -92,6 +103,39 @@ button:disabled{cursor:not-allowed;opacity:.53}
  <article class="panel agent"><div class="avatar" aria-hidden="true">✦</div><span class="tag">SINTÉTICO · CRM</span><h2>Assistente de Qualificação</h2><p>Demonstra como conhecimento autorizado e escopo de empresa influenciam uma recomendação sem criar tarefas reais.</p><div class="agentfoot"><small>Versão ilustrativa v0.1</small><button class="linkbtn" type="button" data-agent-scenario="allow">Testar</button></div></article>
  <article class="panel agent"><div class="avatar" aria-hidden="true">◈</div><span class="tag">SINTÉTICO · PERFORMANCE</span><h2>Analista de Campanhas</h2><p>Mostra a recusa conservadora quando alguém solicita preço, saldo ou desempenho dinâmico sem consultar a fonte oficial.</p><div class="agentfoot"><small>Versão ilustrativa v0.1</small><button class="linkbtn" type="button" data-agent-scenario="dynamic">Testar</button></div></article>
  <article class="panel agent"><div class="avatar" aria-hidden="true">▧</div><span class="tag">SINTÉTICO · UNIVERSIDADE</span><h2>Tutor de Conhecimento</h2><p>Explora o tratamento de um documento com instruções maliciosas como conteúdo não confiável, sem executar comandos.</p><div class="agentfoot"><small>Versão ilustrativa v0.1</small><button class="linkbtn" type="button" data-agent-scenario="injection">Testar</button></div></article>
+ </div>
+ <div class="panel draft-workbench">
+  <div class="panelhead"><h2>Configurar rascunho de agente</h2><span class="tag">F185 · Apenas navegador</span></div>
+  <div class="panelbody">
+   <p class="muted">Escolha um modelo fictício e dê nome ao rascunho. Ele não será salvo, publicado nem vinculado a uma empresa.</p>
+   <div class="draft-fields">
+    <div><label for="agent-draft-template">Modelo permitido</label>
+     <select id="agent-draft-template" autocomplete="off">
+      <option value="crm">Qualificação CRM</option>
+      <option value="performance">Análise de Performance</option>
+      <option value="universidade">Tutor de Conhecimento</option>
+     </select>
+    </div>
+    <div><label for="agent-draft-name">Nome do rascunho (3 a 48 caracteres)</label>
+     <input id="agent-draft-name" type="text" maxlength="48" autocomplete="off" spellcheck="false" placeholder="Ex.: Agente de apoio" />
+    </div>
+   </div>
+   <div class="actions">
+    <button type="button" class="primary" id="agent-draft-generate">Pré-visualizar rascunho</button>
+    <button type="button" class="secondary" id="agent-draft-test" disabled>Ver cenário vinculado</button>
+    <button type="button" class="secondary" id="agent-draft-reset">Limpar rascunho</button>
+   </div>
+   <div class="draft-result" aria-label="Prévia local do agente">
+    <p role="status" aria-live="polite" id="agent-draft-status">Nenhum rascunho configurado.</p>
+    <dl>
+     <div><dt>Nome</dt><dd id="agent-draft-preview-name">—</dd></div>
+     <div><dt>Modelo</dt><dd id="agent-draft-preview-template">—</dd></div>
+     <div><dt>Objetivo fechado</dt><dd id="agent-draft-preview-purpose">—</dd></div>
+     <div><dt>Estado</dt><dd id="agent-draft-preview-state">NÃO PUBLICADO · NO-GO</dd></div>
+    </dl>
+   </div>
+   <p class="muted" style="margin-top:14px">O nome é apenas texto local, não é um prompt enviado a IA e não gera acesso ao CRM. Para cada modelo há somente um objetivo de demonstração já definido. Não há salvamento, aprovação, credenciais ou cobrança.</p>
+  </div>
  </div>
  <p class="footnote">Os produtos aqui são apenas exemplos conceituais. O protótipo não permite acesso a informações de empresas ou clientes.</p>
 </section>
@@ -257,6 +301,52 @@ function applyReviewSimulation(decision){
  drawReviewSimulation();
 }
 function resetReviewSimulation(){reviewSimulationDecision=null;drawReviewSimulation();}
+// F185: browser-only draft configuration. Only fixed scenario keys can be
+// selected; user-provided names are never used as executable instructions.
+const agentDraftTemplates=Object.freeze({
+ crm:Object.freeze({title:"Qualificação CRM",purpose:"Resumir apenas campos fictícios autorizados.",scenario:"allow"}),
+ performance:Object.freeze({title:"Análise de Performance",purpose:"Negar dados de campanha sem fonte dinâmica oficial.",scenario:"dynamic"}),
+ universidade:Object.freeze({title:"Tutor de Conhecimento",purpose:"Tratar texto potencialmente malicioso como dado não confiável.",scenario:"injection"})
+});
+let agentDraft=null;
+function drawAgentDraft(message){
+ get("agent-draft-preview-name").textContent=agentDraft===null?"—":agentDraft.name;
+ get("agent-draft-preview-template").textContent=agentDraft===null?"—":agentDraft.template.title;
+ get("agent-draft-preview-purpose").textContent=agentDraft===null?"—":agentDraft.template.purpose;
+ get("agent-draft-preview-state").textContent=agentDraft===null?"NÃO PUBLICADO · NO-GO":"RASCUNHO LOCAL · SEM APROVAÇÃO";
+ get("agent-draft-test").disabled=agentDraft===null;
+ get("agent-draft-status").textContent=message;
+}
+function invalidateAgentDraft(){
+ agentDraft=null;
+ drawAgentDraft("Configuração alterada. Pré-visualize novamente para habilitar o teste.");
+}
+function generateAgentDraft(){
+ const key=String(get("agent-draft-template").value??"");
+ const raw=String(get("agent-draft-name").value??"");
+ if(!Object.prototype.hasOwnProperty.call(agentDraftTemplates,key)||raw.length>80){
+  agentDraft=null;drawAgentDraft("Rascunho recusado: escolha um modelo e um nome válidos.");return;
+ }
+ const name=raw.normalize("NFC").trim().replace(/\s+/g," ");
+ if(name.length<3||name.length>48||!/^[\p{L}\p{N} ._-]+$/u.test(name)){
+  agentDraft=null;drawAgentDraft("Rascunho recusado: use 3 a 48 letras, números, espaços ou sinais simples.");return;
+ }
+ agentDraft=Object.freeze({name,template:agentDraftTemplates[key]});
+ drawAgentDraft("Rascunho configurado somente nesta aba. Nada foi publicado.");
+}
+function clearAgentDraft(){
+ agentDraft=null;
+ get("agent-draft-name").value="";
+ get("agent-draft-template").value="crm";
+ drawAgentDraft("Nenhum rascunho configurado.");
+}
+function exploreAgentDraft(){
+ if(agentDraft===null)return;
+ const scenario=agentDraft.template.scenario;
+ if(!["allow","dynamic","injection"].includes(scenario))return;
+ choose(scenario);
+ page("lab");
+}
 let chosen="allow",runs=0,denials=0,conflicts=0,sequence=0,logs=[];
 function page(name){for(const p of ["overview","agents","lab","supervision","audit"]){get("page-"+p).hidden=p!==name;}for(const b of document.querySelectorAll("[data-page-button]")){if(b.dataset.pageButton===name)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");}window.scrollTo(0,0);if(name==="audit")drawAudit();}
 function choose(id){if(!Object.prototype.hasOwnProperty.call(scenarios,id))return;chosen=id;const s=scenarios[id];get("case-id").textContent=s.id;get("case-title").textContent=s.title;get("case-subtitle").textContent=s.desc;get("fixture-product").textContent=s.product;get("fixture-tenant").textContent=s.tenant;get("fixture-source").textContent=s.source;get("fixture-grant").textContent=s.grant;for(const b of document.querySelectorAll("[data-scenario]")){const selected=b.dataset.scenario===id;b.classList.toggle("selected",selected);b.setAttribute("aria-pressed",String(selected));}clearResult();}
@@ -275,7 +365,12 @@ get("reset-audit").addEventListener("click",reset);
 get("review-sim-agree").addEventListener("click",()=>applyReviewSimulation("AGREE"));
 get("review-sim-disagree").addEventListener("click",()=>applyReviewSimulation("DISAGREE"));
 get("review-sim-reset").addEventListener("click",resetReviewSimulation);
-drawSupervision();choose("allow");drawAudit();page("overview");drawReviewSimulation();
+get("agent-draft-template").addEventListener("change",invalidateAgentDraft);
+get("agent-draft-name").addEventListener("input",invalidateAgentDraft);
+get("agent-draft-generate").addEventListener("click",generateAgentDraft);
+get("agent-draft-reset").addEventListener("click",clearAgentDraft);
+get("agent-draft-test").addEventListener("click",exploreAgentDraft);
+drawSupervision();choose("allow");drawAudit();page("overview");drawReviewSimulation();drawAgentDraft("Nenhum rascunho configurado.");
 })();
 </script>
 </body></html>

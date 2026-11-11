@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## F185 — configurador de rascunhos de agentes no catálogo F108 (11/11/2026)
+
+- A página "Agentes fictícios" aceita um nome local normalizado/limitado e um de três modelos fechados, mostra prévia não publicada e abre **somente** o cenário sintético correspondente (CRM U07-01, Performance U07-08, Universidade U07-09), sem executar automaticamente o teste. Alteração de campos invalida o rascunho; HTML hostil, nomes excessivos e `__proto__` negados. [F185](docs/AIA-FT01-F185-CONFIGURADOR-RASCUNHOS-AGENTES.md).
+- Gate preservado **776 PHP/lint 97**; sete Python obrigatórios F185 e smoke Node quando disponível. Sem storage, backend, real IAM, CRM, publicação, cliente ou custos; CRM PR #57 OPEN/DRAFT, 13 cenários reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO. Manter `main` intacta.
+
 ## F184 — segunda observação interativa exclusivamente no browser (11/11/2026)
 
 - A aba de supervisão F108 tem controles locais de **concordância, divergência e reinício** para o caso fictício que aguardava segundo voto. Cópia das contagens `SYNTHETIC_QUEUE_SUPERVISION_V1` em JS, **sem alterar fixture F182, jobs, auditoria ou CRM**; dupla chamada é bloqueada, total indeterminado permanece 3, reset descarta a hipótese. [Guia F184](docs/AIA-FT01-F184-ENSAIO-INTERATIVO-REVISAO-FILA.md).

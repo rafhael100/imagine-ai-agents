@@ -17,7 +17,7 @@ class QualityGateCoverage(unittest.TestCase):
         for name in (
             "test_r01_readiness.py", "test_op01_contract_parity.py",
             "test_op01_parser_mutation_parity.py",
-            "test_op01_bilateral_packet.py", "test_op01_contract_matrix.py", "test_op01_public_response_parity.py", "test_f127_offline_pilot_demo.py", "test_f180_queued_batch_demo.py", "test_f181_queue_observation_demo.py", "test_f182_queue_supervision_demo.py", "test_f183_supervision_tab.py", "test_f184_review_sandbox.py",
+            "test_op01_bilateral_packet.py", "test_op01_contract_matrix.py", "test_op01_public_response_parity.py", "test_f127_offline_pilot_demo.py", "test_f180_queued_batch_demo.py", "test_f181_queue_observation_demo.py", "test_f182_queue_supervision_demo.py", "test_f183_supervision_tab.py", "test_f184_review_sandbox.py", "test_f185_agent_draft_workbench.py",
             "test_ci_guardrails.py",
             "test_op01_readiness_dashboard.py", "test_op01_dashboard_generator.py",
             "test_synthetic_php_isolation.py", "test_quality_gate_coverage.py",
