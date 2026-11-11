@@ -263,6 +263,30 @@ class CanonicalProjectStatusTests(unittest.TestCase):
                     "629 testes PHP"):
             self.assertIn(old, current)
 
+    def test_evid40_four_deliveries_and_f183_ui_are_postmerge_offline(self):
+        current = STATUS.read_text(encoding="utf-8")
+        readme = README.read_text(encoding="utf-8")
+        rules = AGENT_RULES.read_text(encoding="utf-8")
+        evidence = (ROOT / "docs/AIA-R01-EVID-40-SEC57-REV02-F183-POSTMERGE.md").read_text(encoding="utf-8")
+        for pr, ci in ((250, 42980115062), (251, 42980489349),
+                       (252, 42981149687), (253, 42981975813)):
+            self.assertIn(f"#{pr}", evidence)
+            self.assertIn(str(ci), current)
+            self.assertIn(str(ci), evidence)
+        self.assertIn("776 testes PHP", current)
+        self.assertIn("97 + Python", current)
+        self.assertIn("776 PHP/lint 97", readme)
+        self.assertIn("F108_SMOKE_PASS", evidence)
+        self.assertIn("EVID-40", readme)
+        self.assertIn("EVID-40", rules)
+        self.assertIn("0a40ab2f3ba2fe24f0c449484fbd2280396f82ca", evidence)
+        self.assertIn("NO-GO", current)
+        self.assertIn("OPEN/DRAFT", evidence)
+        self.assertIn("NAO_EXECUTADO", evidence)
+        for old in ("699 testes PHP", "648 testes PHP", "640 testes PHP",
+                    "633 testes PHP", "629 testes PHP"):
+            self.assertIn(old, current)
+
     def test_history_preserved_without_overwriting_evidence(self):
         previous = ARCHIVE.read_text(encoding="utf-8")
         prior_roadmap = ARCHIVED_ROADMAP.read_text(encoding="utf-8")
