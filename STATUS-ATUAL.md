@@ -4,17 +4,19 @@
 
 ## Estado executivo
 
-**Fase:** PHP e UI sintéticos offline. **Sem SaaS operacional, CRM autenticado, VPS ou clientes. Piloto real/produção: NO-GO**.
+**Fase:** laboratório offline. **Sem CRM real, VPS ou clientes. Produção: NO-GO**.
 
-**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **800 testes PHP / lint 99 + Python/DOM**; [CI pós-merge #43013609438](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43013609438) `success`, [EVID-41](docs/AIA-R01-EVID-41-F184-F186-SEC58-59-CI-POSTMERGE.md). **NO-GO**.
+**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **810 testes PHP / lint 100 + Python/DOM**; [CI #43020983307](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43020983307) `success`, [EVID-42](docs/AIA-R01-EVID-42-SEC60-F187-CI-POSTMERGE.md). **NO-GO**.
 
 ## Últimas entregas verificadas
 
-**F184/F185/F186/SEC-58/SEC-59:** PRs #255–#259 integrados na dev, CIs pós-merge aprovadas; **800 testes PHP / lint 99**, [EVID-41](docs/AIA-R01-EVID-41-F184-F186-SEC58-59-CI-POSTMERGE.md). CRM real **NO-GO**.
+**SEC-60/F187:** #261 CI #43019868566 (cross-Run); #262 CI #43020983307 (JSON), **810 testes PHP / lint 100**. [EVID-42](docs/AIA-R01-EVID-42-SEC60-F187-CI-POSTMERGE.md). **NO-GO**.
 
-**SEC-57/REV-01/REV-02/F183:** #250 CI #42980115062; #251 CI #42980489349; #252 CI #42981149687; #253 CI #42981975813 (**776 testes PHP**). [EVID-40](docs/AIA-R01-EVID-40-SEC57-REV02-F183-POSTMERGE.md). **NO-GO**.
+**F184–SEC-59:** #255–259, CI #43013609438, **800 testes PHP**; [EVID-41](docs/AIA-R01-EVID-41-F184-F186-SEC58-59-CI-POSTMERGE.md). CRM real **NO-GO**.
 
-**OP-01:** #239 CI #42949459592 (660); #240 CI #42949959755 (672); #241 CI #42950862393 (687); #242 CI #42951498940 (**699 testes PHP**). [EVID-39](docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md). **NO-GO**.
+**SEC-57–F183:** #250 CI #42980115062; #251 CI #42980489349; #252 CI #42981149687; #253 CI #42981975813 (**776 testes PHP**). [EVID-40](docs/AIA-R01-EVID-40-SEC57-REV02-F183-POSTMERGE.md). **NO-GO**.
+
+**OP-01:** #239 CI #42949459592; #240 CI #42949959755; #241 CI #42950862393; #242 CI #42951498940 (**699 testes PHP**). [EVID-39](docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md). **NO-GO**.
 
 **SEC-53 integrada à dev (PR #237):** baseline **648 testes PHP**, lint de **83 arquivos PHP**, [CI #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088); bloqueia alteração de Run, U75-01..08, [SEC-53](docs/AIA-FT01-SEC-53-RUN-LIFECYCLE-READONLY-CALLBACK.md), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
 
