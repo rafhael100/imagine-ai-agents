@@ -59,6 +59,7 @@ done
 # The mandatory Python F183 parity suite still runs where Node is absent.
 if command -v node >/dev/null 2>&1; then
   node tests/Browser/f108_smoke.cjs
+  node tests/Browser/f196_tamper_smoke.cjs
 else
   echo 'NODE_VISUAL_SMOKE_SKIPPED: Node not installed (no install attempted)'
 fi
