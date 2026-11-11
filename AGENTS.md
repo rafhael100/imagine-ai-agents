@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## F203 — 24 adversários contra o validador real da triagem F202 (11/11/2026)
+
+- Smoke Node novo extrai o código real de F202 e recusa 24 pacotes hostis antes de renderizar; seis contratos Python exigem cobertura e gate offline. [F203](docs/AIA-FT01-F203-ATAQUES-JORNADA-TRIAGEM.md).
+- Baseline **851 testes PHP / lint 106 + Python/DOM** inalterado. F202 segue laboratório sintético sem papel, IAM, rede, CRM real ou gravação. CRM #57 OPEN/DRAFT, 13 cenários reais NAO_EXECUTADO, R01-G01..G11/CORE/SEG/AUT NO-GO. Main, VPS, produção, clientes, credenciais e custos não alterados.
+
+
 ## F202 — jornada de triagem em seis estados na prévia F108 (11/11/2026)
 
 - O laboratório de agentes oferece agora seis seleções `QUIET/PENDING/LEASE_IN_PROGRESS/REVIEW_REQUIRED/PAUSED/REVIEW_REQUIRED`, somente para visualização de snapshots offline F201. [F202](docs/AIA-FT01-F202-JORNADA-TRIAGEM-VISUAL.md).
