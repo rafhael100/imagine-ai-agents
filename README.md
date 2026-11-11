@@ -52,10 +52,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=99 EXPECTED_CASES=800 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=100 EXPECTED_CASES=810 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**OP-01:** histórico **699 testes PHP**, agora **800 PHP/lint 99**; [CI #43013609438](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43013609438). PRs #255–259 integrados: [EVID-41](docs/AIA-R01-EVID-41-F184-F186-SEC58-59-CI-POSTMERGE.md); [EVID-40](docs/AIA-R01-EVID-40-SEC57-REV02-F183-POSTMERGE.md). **NO-GO**.
+**OP-01:** histórico **699 testes PHP**, EVID-41 integrada (800). **SEC-60 em revisão: 810 PHP/lint 100.** [Guarda cross-Run](docs/AIA-FT01-SEC-60-GUARDA-CROSS-RUN-CALLBACK.md), [EVID-41](docs/AIA-R01-EVID-41-F184-F186-SEC58-59-CI-POSTMERGE.md). **NO-GO**.
 
 **SEC-53 integrada (PR #237): 648 testes PHP**. [CI #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). **NO-GO**.
 

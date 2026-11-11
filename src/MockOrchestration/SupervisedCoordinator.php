@@ -151,14 +151,29 @@ final class SupervisedCoordinator
         $this->assertTraceCapacity(1); // Do not call a provider without space to record the event.
         $this->providerCallbackActive = true;
         $this->providerCallbackReentryObserved = false;
+        // Protect all already-registered canonical Runs. Otherwise an
+        // injected provider can mutate a different, captured Run directly,
+        // bypassing both SEC-53 (current Run only) and coordinator tracing.
+        $scopeToken = new \stdClass();
+        $guardedRuns = [];
+        $crossRunMutation = false;
         try {
-            // The provider receives the same Run object that lifecycle code uses.
-            // Lock Run::transition / Run::step for this callback as well as
-            // the coordinator entrypoints guarded by SEC-52.
-            $suggestion = $run->withReadOnlySuggestion($this->ai, $fields);
-            // A callback can swallow a denied nested operation; never treat
-            // that provider response as an approved suggestion.
-            if ($this->providerCallbackReentryObserved) {
+            try {
+                foreach ($this->startedRuns as $registeredRun) {
+                    $registeredRun->beginCoordinatorSuggestionScope($scopeToken);
+                    $guardedRuns[] = $registeredRun;
+                }
+                $suggestion = $run->withReadOnlySuggestion($this->ai, $fields);
+            } finally {
+                // Always clear scopes, including on uncaught provider errors.
+                // A swallowed direct mutation taints the outer suggestion.
+                foreach ($guardedRuns as $guardedRun) {
+                    if ($guardedRun->endCoordinatorSuggestionScope($scopeToken)) {
+                        $crossRunMutation = true;
+                    }
+                }
+            }
+            if ($this->providerCallbackReentryObserved || $crossRunMutation) {
                 MockError::fail('PROVIDER_CALLBACK_DENIED');
             }
         } finally {

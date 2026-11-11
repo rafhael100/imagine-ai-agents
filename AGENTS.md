@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## SEC-60 — bloquear mutações diretas em Runs irmãos durante callback (11/11/2026)
+
+- Um provedor com referência capturada a outro Run canônico do mesmo coordenador podia usar `Run::transition`, `Run::step` ou `new Step` diretamente nesse objeto durante outra sugestão. Agora `SupervisedCoordinator::suggest` abre escopo read-only com token separado em **todos** os Runs registrados, marca qualquer tentativa capturada e nega a sugestão externa; `finally` encerra todas as guardas mesmo com erro. Um token falso não remove a proteção. [SEC-60](docs/AIA-FT01-SEC-60-GUARDA-CROSS-RUN-CALLBACK.md).
+- Gate proposto: **810 PHP / lint 100 + Python/DOM**, U91-01..10. Guarda de objetos no mesmo processo, **não** sandbox nem ACL distribuída; CRM PR #57 OPEN/DRAFT, 13 cenários reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO. Sem mudanças em main, deploy, VPS, dados reais ou gastos.
+
 ## EVID-41 — continuidade integrada e gate offline 800/99 (11/11/2026)
 
 - F184 PR #255 (CI #43009103944): ensaio da segunda observação no F108; F185 #256 (CI #43010448505): configurador seguro de rascunhos; F186 #257 (CI #43011660965): coleção transitória de 5 rascunhos; SEC-58 #258 (CI #43012704139): relógio monotônico confirmado só após mutação; SEC-59 #259 (CI #43013609438): construtor direto de Step protegido. Todos integrados na `dev` com CI pós-merge `success`. [EVID-41](docs/AIA-R01-EVID-41-F184-F186-SEC58-59-CI-POSTMERGE.md).
