@@ -1,9 +1,9 @@
 # AGENTS.md — Imagine AI Agents
 
-## SEC-49 — epoch monotônico do trust compartilhado (10/11/2026)
+## SEC-49 — epoch monotônico do trust compartilhado integrado à dev (10/11/2026)
 
 - `MockSharedTrustState` avança `revision` na alteração de disponibilidade e na primeira revogação de digest; consumo de nonce não avança. `MockTrustGateway` expõe a revisão sem nova autorização. `MockCrmReadBoundary` exige revisão estável antes/depois do leitor e a fachada vincula `trust_revision` ao recibo para recheck pós-sugestão.
-- **Gate esperado: 621 testes PHP / lint de 83 arquivos + Python**, oito U71-01..08. [SEC-49](docs/AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md).
+- **Gate pós-merge aprovado: 621 testes PHP / lint de 83 arquivos + Python**, U71-01..08. [CI #42933553917](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42933553917), [SEC-49](docs/AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md), [EVID-34](docs/AIA-R01-EVID-34-SEC49-CI-POSTMERGE.md).
 - Somente simulação in-process; CRM PR #57 OPEN/DRAFT, 13 casos reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO. Nenhum `main`, VPS, produção, segredos ou gastos.
 
 ## SEC-48 — negar reentrada de leitura integrada à dev (10/11/2026)
