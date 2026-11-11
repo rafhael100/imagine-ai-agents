@@ -223,6 +223,25 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("NO-GO", current)
         self.assertIn("NAO_EXECUTADO", evidence)
 
+    def test_sec53_run_lifecycle_guard_is_postmerge_verified_offline(self):
+        current = STATUS.read_text(encoding="utf-8")
+        readme = README.read_text(encoding="utf-8")
+        rules = AGENT_RULES.read_text(encoding="utf-8")
+        evidence = (ROOT / "docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md").read_text(encoding="utf-8")
+        self.assertIn("SEC-53 integrada à dev (PR #237)", current)
+        self.assertIn("648 testes PHP", current)
+        self.assertIn("42945854088", current)
+        self.assertIn("42945854088", evidence)
+        self.assertIn("ad7fc7b718235e0b5e6befaaaf7976adca15bc2a", evidence)
+        self.assertIn("648 testes PHP", readme)
+        self.assertIn("AIA-FT01-SEC-53-RUN-LIFECYCLE-READONLY-CALLBACK.md", rules)
+        self.assertIn("640 testes PHP", current)
+        self.assertIn("633 testes PHP", current)
+        self.assertIn("629 testes PHP", current)
+        self.assertIn("EXPECTED_CASES=648", current)
+        self.assertIn("NO-GO", current)
+        self.assertIn("NAO_EXECUTADO", evidence)
+
     def test_history_preserved_without_overwriting_evidence(self):
         previous = ARCHIVE.read_text(encoding="utf-8")
         prior_roadmap = ARCHIVED_ROADMAP.read_text(encoding="utf-8")
