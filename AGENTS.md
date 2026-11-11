@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## EVID-41 — continuidade integrada e gate offline 800/99 (11/11/2026)
+
+- F184 PR #255 (CI #43009103944): ensaio da segunda observação no F108; F185 #256 (CI #43010448505): configurador seguro de rascunhos; F186 #257 (CI #43011660965): coleção transitória de 5 rascunhos; SEC-58 #258 (CI #43012704139): relógio monotônico confirmado só após mutação; SEC-59 #259 (CI #43013609438): construtor direto de Step protegido. Todos integrados na `dev` com CI pós-merge `success`. [EVID-41](docs/AIA-R01-EVID-41-F184-F186-SEC58-59-CI-POSTMERGE.md).
+- **Baseline atual verificado: 800 testes PHP / lint 99 + Python/DOM**. Ainda só fixtures sintéticas; CRM PR #57 OPEN/DRAFT, 13 cenários reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT **NO-GO**. Sem `main`, VPS, clientes, produção, IAM real nem custos.
+
 ## SEC-59 — vedar construção direta de Step dentro de callback (11/11/2026)
 
 - A SEC-53 protegia `Run::step` mas o provedor podia usar `new Step(...,$run)` porque o construtor chamava apenas `assertActive`. Agora `Step::__construct` exige `Run::assertStepCreationReady`, validação sticky de callback antes do ID, e `Run::step` usa a mesma verificação. Tentativa capturada ainda falha externamente, sem STEP_CREATED/SUGGESTED. Inspeção de Step existente e criação fora do callback continuam válidas. [SEC-59](docs/AIA-FT01-SEC-59-CONSTRUTOR-STEP-GUARDADO.md).
