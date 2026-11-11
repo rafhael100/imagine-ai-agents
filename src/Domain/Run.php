@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace ImagineAI\Domain;
 
+use ImagineAI\Contracts\AiSuggestionProvider;
+
 /** Minimal mock lifecycle. Completing a run never confirms an effect. */
 final class Run
 {
@@ -29,10 +31,9 @@ final class Run
      * A swallowed mutation attempt permanently denies the outer callback.
      * Process-local only; not a permission/authentication boundary.
      *
-     * @param callable():array $provider
      * @return array
      */
-    public function withReadOnlySuggestion(callable $provider): array
+    public function withReadOnlySuggestion(AiSuggestionProvider $provider, array $fields): array
     {
         if ($this->suggestionReadOnly) {
             $this->suggestionMutationAttempt = true;
@@ -41,7 +42,7 @@ final class Run
         $this->suggestionReadOnly = true;
         $this->suggestionMutationAttempt = false;
         try {
-            $result = $provider();
+            $result = $provider->suggest($this, $fields);
             if ($this->suggestionMutationAttempt) {
                 MockError::fail('PROVIDER_CALLBACK_DENIED');
             }
