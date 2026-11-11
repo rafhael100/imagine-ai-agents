@@ -31,6 +31,7 @@ for name in \
   test_f127_offline_pilot_demo.py \
   test_f180_queued_batch_demo.py \
   test_f181_queue_observation_demo.py \
+  test_f182_queue_supervision_demo.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
