@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## F190 — ensaio executável de pausa/revisão/retomada em PHP (11/11/2026)
+
+- `examples/f190-queue-admission-demo.php` cria duas requisições fictícias; primeiro lease expira durante PAUSED, pedido pendente só sai após RESUME, dois revisores ainda deixam 1 `INDETERMINADO`. Emite somente dois `SYNTHETIC_QUEUE_SUPERVISION_V1` fechados no JSON `SYNTHETIC_QUEUE_PAUSE_REHEARSAL_V1`, sem IDs nem escrita real. [F190](docs/AIA-FT01-F190-ENSAIO-PAUSA-RETOMADA-OFFLINE.md).
+- Gate proposto: **835 testes PHP / lint 103 + Python/DOM**, 7 testes Python novos e CLI offline. F189/#265 integrado; CRM PR #57 OPEN/DRAFT, 13 cenários reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO. Sem main, VPS, deploy, identidade real, dados pessoais ou gastos.
+
 ## F189 — refletir estado de admissão no overview e tela offline (11/11/2026)
 
 - `MockUncertaintyReviewBoard::overview` acrescenta `admission:{state:OPEN|PAUSED}` do controle SEC-61, sem decisãoRef nem IDs; contagens e revisões não mudam. A fixture PHP F182, o JSON estático F183, a aba F108 e seus testes de paridade foram sincronizados. Estado desconhecido é negado no JS; "ABERTA · SIMULADA" nunca representa disponibilidade real. [F189](docs/AIA-FT01-F189-ESTADO-ADMISSAO-SUPERVISAO.md).

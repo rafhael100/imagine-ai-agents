@@ -52,10 +52,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=102 EXPECTED_CASES=835 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=103 EXPECTED_CASES=835 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**OP-01:** SEC-61/#264 integrado (827). **F189 em revisão: 835 PHP/lint 102** — [estado OPEN/PAUSED no painel](docs/AIA-FT01-F189-ESTADO-ADMISSAO-SUPERVISAO.md); [EVID-42](docs/AIA-R01-EVID-42-SEC60-F187-CI-POSTMERGE.md). **NO-GO**.
+**OP-01:** SEC-61/#264 e F189/#265 integrados. **F190 em revisão: 835 PHP/lint 103** — [ensaio de pausa/retomada](docs/AIA-FT01-F190-ENSAIO-PAUSA-RETOMADA-OFFLINE.md); [EVID-42](docs/AIA-R01-EVID-42-SEC60-F187-CI-POSTMERGE.md). **NO-GO**.
 
 **SEC-53 integrada (PR #237): 648 testes PHP**. [CI #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). **NO-GO**.
 

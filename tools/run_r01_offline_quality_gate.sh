@@ -37,6 +37,7 @@ for name in \
   test_f185_agent_draft_workbench.py \
   test_f186_draft_collection.py \
   test_f187_draft_transfer.py \
+  test_f190_queue_pause_demo.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
