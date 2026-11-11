@@ -1,6 +1,6 @@
 # Imagine AI Agents
 
-**10/11/2026:** PHP sintético offline na branch `dev/ft01-aia-core-mocks-2026-11-06`. **Sem serviço a clientes, CRM real, autenticação ou produção. NO-GO.**
+**11/11/2026:** PHP sintético offline na branch `dev/ft01-aia-core-mocks-2026-11-06`. [EVID-44](docs/AIA-R01-EVID-44-F191-F195-CI-POSTMERGE.md) valida PRs #268–272. **Sem CRM real, clientes ou produção. NO-GO.**
 
 ## O que está implementado em laboratório
 
