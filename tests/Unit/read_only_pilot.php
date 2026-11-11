@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use ImagineAI\MockPilot\MockReadOnlyPilot;
+use ImagineAI\MockPilot\{MockReadOnlyPilot, MockQueuedReadOnlyPilot};
 use ImagineAI\Domain\TenantContext;
 use ImagineAI\MockBridge\MockCrmOwnerPolicy;
 use ImagineAI\MockAudit\MockCrmReadAuditTrail;
@@ -152,6 +152,16 @@ function f167Fixture(\Closure $onSuggest, bool $useShared = false): array
     return [new MockReadOnlyPilot($ctx, $edge, $coordinator),
         $coordinator, $mutations, $counts, $audit, $env, $owner,
         $ctx, $policy, $provider, $shared, $edge];
+}
+
+/** Offline queued pilot: independent queue, same fictional OP-01 edge. */
+function f179QueuedFixture(bool $allowed = true): array
+{
+    [$pilot, $mut, $coord, $counts, $policy, $audit, $env, $owner, $ctx] =
+        f130Fixture($allowed ? f130Grant() : new MockCrmOwnerPolicy());
+    $queue = new MockReadOnlyRunQueue($ctx);
+    return [new MockQueuedReadOnlyPilot($ctx, $queue, $pilot),
+        $queue, $mut, $coord, $counts, $audit, $env, $owner, $ctx];
 }
 
 return [
@@ -717,6 +727,141 @@ return [
             && !str_contains($visible, 'SYNTHETIC_Q78_PRIVATE_REQUEST')
             && !str_contains($visible, 'SYNTHETIC_PRINCIPAL')
             && count($q->events()) === 3);
+    },
+
+
+    'U79-01 queue to OP01 to suggestion returns only fixed fictional draft' => function (): void {
+        [$runner, $queue, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $queue->enqueue($ctx, 'SYNTHETIC_Q79_RUN_01', 'SYNTHETIC_Q79_REQ_01', 10);
+        $out = $runner->runNext($ctx, $env, $owner, ['ref'], 15, 5);
+        check($out === ['contract' => 'SYNTHETIC_QUEUED_PILOT_V1',
+            'state' => 'SUGGESTION_SYNTHETIC_ONLY',
+            'summary' => 'SYNTHETIC summary proposal only',
+            'real_authorization' => false, 'external_calls' => 0,
+            'write_calls' => 0]);
+        check($queue->counts()['CONCLUIDA'] === 1
+            && $mut->submitCount() === 0 && $mut->statusCount() === 0
+            && $counts->snapshot()['attempts'] === 1 && $audit->count() === 1);
+        check(count($coord->events()) === 4);
+    },
+    'U79-02 empty queue does not read CRM or create Run' => function (): void {
+        [$runner, $queue, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $out = $runner->runNext($ctx, $env, $owner, ['ref'], 15, 5);
+        check($out['state'] === 'EMPTY' && $out['summary'] === null
+            && $coord->events() === [] && $audit->count() === 0
+            && $counts->snapshot()['attempts'] === 0 && $mut->submitCount() === 0);
+    },
+    'U79-03 invalid field denies without claiming or consuming nonce' => function (): void {
+        [$runner, $queue, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $queue->enqueue($ctx, 'SYNTHETIC_Q79_RUN_03', 'SYNTHETIC_Q79_REQ_03', 10);
+        $out = $runner->runNext($ctx, $env, $owner, ['email'], 15, 5);
+        check($out['state'] === 'DENIED_OR_NOT_FOUND'
+            && $queue->counts()['PENDENTE'] === 1
+            && $counts->snapshot()['attempts'] === 0
+            && $audit->count() === 0 && $coord->events() === []);
+    },
+    'U79-04 duplicate queued Run cannot re-read after success' => function (): void {
+        [$runner, $queue, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $queue->enqueue($ctx, 'SYNTHETIC_Q79_RUN_04', 'SYNTHETIC_Q79_REQ_04', 10);
+        $queue->enqueue($ctx, 'SYNTHETIC_Q79_RUN_04', 'SYNTHETIC_Q79_REQ_04', 10);
+        check($runner->runNext($ctx, $env, $owner, ['ref'], 15, 5)['state']
+            === 'SUGGESTION_SYNTHETIC_ONLY');
+        check($runner->runNext($ctx, $env, $owner, ['ref'], 16, 5)['state']
+            === 'EMPTY');
+        check($counts->snapshot()['attempts'] === 1
+            && $audit->count() === 1 && $queue->counts()['CONCLUIDA'] === 1);
+    },
+    'U79-05 missing owner grant fails locally without a started Run' => function (): void {
+        [$runner, $queue, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture(false);
+        $queue->enqueue($ctx, 'SYNTHETIC_Q79_RUN_05', 'SYNTHETIC_Q79_REQ_05', 10);
+        check($runner->runNext($ctx, $env, $owner, ['ref'], 15, 5)['state']
+            === 'DENIED_OR_NOT_FOUND');
+        check($queue->counts()['FALHOU'] === 1
+            && $coord->events() === [] && $mut->submitCount() === 0);
+    },
+    'U79-06 missing trust evidence denies and settles queue as failed' => function (): void {
+        [$runner, $queue, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $queue->enqueue($ctx, 'SYNTHETIC_Q79_RUN_06', 'SYNTHETIC_Q79_REQ_06', 10);
+        check($runner->runNext($ctx, null, null, ['ref'], 15, 5)['state']
+            === 'DENIED_OR_NOT_FOUND');
+        check($queue->counts()['FALHOU'] === 1
+            && $coord->events() === [] && $mut->submitCount() === 0);
+    },
+    'U79-07 foreign tenant cannot trigger or burn a queued read' => function (): void {
+        [$runner, $queue, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $queue->enqueue($ctx, 'SYNTHETIC_Q79_RUN_07', 'SYNTHETIC_Q79_REQ_07', 10);
+        check($runner->runNext(context('SYNTHETIC_B'), $env, $owner,
+            ['ref'], 15, 5)['state'] === 'DENIED_OR_NOT_FOUND');
+        check($queue->counts()['PENDENTE'] === 1
+            && $counts->snapshot()['attempts'] === 0 && $coord->events() === []);
+    },
+    'U79-08 reused nonce cannot authorize a second pending job' => function (): void {
+        [$runner, $queue, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $queue->enqueue($ctx, 'SYNTHETIC_Q79_RUN_08A', 'SYNTHETIC_Q79_REQ_08A', 10);
+        $queue->enqueue($ctx, 'SYNTHETIC_Q79_RUN_08B', 'SYNTHETIC_Q79_REQ_08B', 10);
+        check($runner->runNext($ctx, $env, $owner, ['ref'], 15, 5)['state']
+            === 'SUGGESTION_SYNTHETIC_ONLY');
+        check($runner->runNext($ctx, $env, $owner, ['ref'], 16, 5)['state']
+            === 'DENIED_OR_NOT_FOUND');
+        check($queue->counts()['CONCLUIDA'] === 1
+            && $queue->counts()['FALHOU'] === 1
+            && $mut->submitCount() === 0 && count($coord->events()) === 4);
+    },
+    'U79-09 expired reservation never triggers automatic retry' => function (): void {
+        [$runner, $queue, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $queue->enqueue($ctx, 'SYNTHETIC_Q79_RUN_09', 'SYNTHETIC_Q79_REQ_09', 10);
+        $queue->claim($ctx, 11, 2);
+        check($runner->runNext($ctx, $env, $owner, ['ref'], 13, 5)['state']
+            === 'EMPTY');
+        check($queue->counts()['INDETERMINADO'] === 1
+            && $coord->events() === [] && $counts->snapshot()['attempts'] === 0);
+    },
+    'U79-10 cancellation before reservation prevents all read attempts' => function (): void {
+        [$runner, $queue, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $queue->enqueue($ctx, 'SYNTHETIC_Q79_RUN_10', 'SYNTHETIC_Q79_REQ_10', 10);
+        $queue->cancel($ctx, 'SYNTHETIC_Q79_RUN_10', 11);
+        check($runner->runNext($ctx, $env, $owner, ['ref'], 12, 5)['state']
+            === 'EMPTY');
+        check($coord->events() === [] && $queue->counts()['CANCELADA'] === 1
+            && $mut->submitCount() === 0 && $audit->count() === 0);
+    },
+    'U79-11 distinct valid synthetic proofs can complete two FIFO jobs' => function (): void {
+        [$runner, $queue, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $queue->enqueue($ctx, 'SYNTHETIC_Q79_RUN_11A', 'SYNTHETIC_Q79_REQ_11A', 10);
+        $queue->enqueue($ctx, 'SYNTHETIC_Q79_RUN_11B', 'SYNTHETIC_Q79_REQ_11B', 10);
+        [$envB, $ownerB] = f130Proof($ctx, 'Q79_11B');
+        check($runner->runNext($ctx, $env, $owner, ['ref'], 15, 5)['state']
+            === 'SUGGESTION_SYNTHETIC_ONLY');
+        check($runner->runNext($ctx, $envB, $ownerB, ['ref'], 16, 5)['state']
+            === 'SUGGESTION_SYNTHETIC_ONLY');
+        check($queue->counts()['CONCLUIDA'] === 2
+            && $audit->count() === 2 && $mut->submitCount() === 0
+            && count($coord->events()) === 8);
+    },
+    'U79-12 queued output exposes no tenant, resource, nonce or claim marker' => function (): void {
+        [$runner, $queue, $mut, $coord, $counts, $audit, $env, $owner, $ctx] =
+            f179QueuedFixture();
+        $queue->enqueue($ctx, 'SYNTHETIC_Q79_PRIVATE_RUN',
+            'SYNTHETIC_Q79_PRIVATE_REQ', 10);
+        $out = $runner->runNext($ctx, $env, $owner, ['ref'], 15, 5);
+        $visible = json_encode($out, JSON_THROW_ON_ERROR);
+        check(!str_contains($visible, $ctx->resource)
+            && !str_contains($visible, $ctx->principal)
+            && !str_contains($visible, $ctx->tenant)
+            && !str_contains($visible, 'SYNTHETIC_Q79_PRIVATE')
+            && !str_contains($visible, 'claim_ref')
+            && $out['write_calls'] === 0 && $out['external_calls'] === 0);
     },
 
 ];
