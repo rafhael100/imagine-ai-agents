@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## F204 — capacidade agregada da fila sem efeitos (11/11/2026)
+
+- Método PHP `MockReadOnlyRunQueue::capacityOverview` mostra capacidade de 64 tarefas, 256 eventos e 32 decisões, sem IDs; alerta NORMAL/NEAR_LIMIT/EXHAUSTED e protege orçamento de pausa de emergência. Quatorze regressões U101-01..14 cobrem saturação, isolamento e invariância sem mutações. [F204](docs/AIA-FT01-F204-CAPACIDADE-FILA-OFFLINE.md).
+- **Baseline proposto 865 testes PHP / lint 107 + Python/DOM**; diagnóstico não concede autorização de worker, IAM, uso do CRM ou retomada operacional. CRM PR #57 OPEN/DRAFT; 13 cenários reais NAO_EXECUTADO; gates R01-G01..G11/CORE/SEG/AUT NO-GO. Main, VPS, clientes, produção e custos inalterados.
+
+
 ## EVID-47 — triagem PHP F200, ensaio F201, visual F202 e ataques F203 integrados (11/11/2026)
 
 - PR #280 squash `99e0793c2b352794772d9f70db553c0728eacde1`, CI pós-merge #43086311234 success; #281 squash `3168601ddeeb8f98eae7a678c6de3fdda1038851`, CI #43087249037 success; #282 squash `d964fa0a0175ce2b1fd7030af47f2afead2a6df7`, CI #43088119546 success; #283 squash `c0cc7fa1de79c793d8bb48cb745ece50639c25d1`, CI #43088648397 success. [EVID-47](docs/AIA-R01-EVID-47-F200-F203-CI-POSTMERGE.md).
