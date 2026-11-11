@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## F181 — demonstração CLI dos estados da fila (11/11/2026)
+
+- `examples/f181-queue-observation-demo.php` demonstra em memória `EMPTY` / `IN_PROGRESS` / `REVIEW_REQUIRED`, inclusive lote parcialmente concluído: 1 processo real de leitura sintética e nenhuma operação fantasma. Saída somente com categorias e contagens, `NO_GO`, sem claims, IDs de cliente, segredos ou efeitos. [Guia](docs/AIA-FT01-F181-DEMO-ESTADOS-QUEUE.md).
+- Gate previsto: **741 testes PHP / lint 92 + Python**, seis checagens `test_f181_queue_observation_demo.py`. Não é homologação nem fila real. CRM PR #57 OPEN/DRAFT, 13 cenários `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO; `main`, VPS, deploy intocados.
+
 ## SEC-56 — request_ref única e terminal na fila local (11/11/2026)
 
 - Em `MockReadOnlyRunQueue::enqueue`, o mesmo `(run_ref,request_ref)` é idempotente, mas `request_ref` já associada a **outro** Run nega `QUEUE_REQUEST_CONFLICT`, incluindo jobs concluídos, cancelados ou incertos. Varrer no máximo 64 entradas antes de auditoria, sem evicção. [Documento](docs/AIA-FT01-SEC-56-IDEMPOTENCIA-REQUEST-REF-FILA.md).
