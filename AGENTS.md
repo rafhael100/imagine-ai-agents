@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## REV-01 — revisão sintética dupla de resultado incerto (11/11/2026)
+
+- `MockUncertaintyReviewBoard` registra até 2 observações de referências fictícias de revisores distintos sobre Runs `INDETERMINADO`, com replays idempotentes, estados `AWAITING_SECOND_REVIEW`/`REVIEWED_UNRESOLVED`/`REVIEW_CONFLICT`, limites 64 casos/128 eventos e trilha minimizada. **Nunca** altera o estado indeterminado da fila, reenvia operação, autentica revisor ou libera o CRM. [REV-01](docs/AIA-FT01-REV-01-REVISAO-DUPLA-INCERTEZA-OFFLINE.md).
+- Gate proposto: **766 PHP / lint 95 e Python**, U86-01..13. SEC-57 é pré-requisito de proteção de callback por fila vinculada. CRM PR #57 OPEN/DRAFT, 13 cenários reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT **NO-GO**. Sem `main`, VPS, produção, custos nem dados reais.
+
 ## SEC-57 — vínculo de fila e bloqueio direto no callback (11/11/2026)
 
 - Toda fila usada por `MockQueuedReadOnlyPilot` passa a ser vinculada ao mesmo `SupervisedCoordinator` do piloto. Métodos diretos `enqueue`, `claim`, `finish` e `cancel` negam reentrada durante callback de sugestão; tentativa capturada invalida resultado externo. Não permitir rebind para outro coordenador. [SEC-57](docs/AIA-FT01-SEC-57-GUARDA-FILA-DIRETA-CALLBACK.md).

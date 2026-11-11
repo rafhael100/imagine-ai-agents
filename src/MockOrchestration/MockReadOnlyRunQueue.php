@@ -55,6 +55,12 @@ final class MockReadOnlyRunQueue
         $this->admissionCoordinator?->assertProviderCallbackIdle();
     }
 
+    /** Shared gate for read-only review notebooks associated with this queue. */
+    public function assertReviewAdmissionReady(): void
+    {
+        $this->assertAdmissionIdle();
+    }
+
     /** Enqueue one synthetic OP-01 read-only Run reference, idempotently. */
     public function enqueue(TenantContext $context, string $runRef,
         string $requestRef, int $now): array
