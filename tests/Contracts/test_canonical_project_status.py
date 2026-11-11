@@ -263,6 +263,33 @@ class CanonicalProjectStatusTests(unittest.TestCase):
                     "629 testes PHP"):
             self.assertIn(old, current)
 
+    def test_evid43_pause_supervision_and_rehearsal_are_postmerge_verified(self):
+        status = STATUS.read_text(encoding="utf-8")
+        readme = README.read_text(encoding="utf-8")
+        rules = AGENT_RULES.read_text(encoding="utf-8")
+        evidence = (ROOT / "docs/AIA-R01-EVID-43-SEC61-F189-F190-CI-POSTMERGE.md").read_text(encoding="utf-8")
+        for pr, ci in ((264, 43035537495), (265, 43037555601),
+                       (266, 43038243942)):
+            self.assertIn(f"#{pr}", evidence)
+            self.assertIn(str(ci), evidence)
+        self.assertIn("768ef0b14c267d3b4c927311875fe52498812a55", evidence)
+        self.assertIn("43038243942", status)
+        self.assertIn("835 testes PHP", status)
+        self.assertIn("lint 103 + Python/DOM", status)
+        self.assertIn("835 PHP/lint 103", readme)
+        self.assertIn("EVID-43", status)
+        self.assertIn("EVID-43", readme)
+        self.assertIn("EVID-43", rules)
+        self.assertIn("EVID-42", status)
+        self.assertIn("EVID-42", readme)
+        self.assertIn("810 testes PHP", status)
+        self.assertIn("800 testes PHP", status)
+        self.assertIn("699 testes PHP", status)
+        self.assertIn("OPEN/DRAFT", evidence)
+        self.assertIn("NAO_EXECUTADO", evidence)
+        self.assertIn("NO-GO", evidence)
+        self.assertNotIn("PENDENTE_CONFIRMACAO", evidence)
+
     def test_evid42_sec60_f187_are_postmerge_verified_offline(self):
         status = STATUS.read_text(encoding="utf-8")
         readme = README.read_text(encoding="utf-8")

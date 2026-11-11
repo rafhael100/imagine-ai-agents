@@ -55,7 +55,7 @@ php tests/Unit/run.php
 EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=103 EXPECTED_CASES=835 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**OP-01:** SEC-61/#264 e F189/#265 integrados. **F190 em revisão: 835 PHP/lint 103** — [ensaio de pausa/retomada](docs/AIA-FT01-F190-ENSAIO-PAUSA-RETOMADA-OFFLINE.md); [EVID-42](docs/AIA-R01-EVID-42-SEC60-F187-CI-POSTMERGE.md). **NO-GO**.
+**OP-01:** PRs #264–266 integrados; **835 PHP/lint 103** ([CI #43038243942](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43038243942)). [EVID-43](docs/AIA-R01-EVID-43-SEC61-F189-F190-CI-POSTMERGE.md); [EVID-42](docs/AIA-R01-EVID-42-SEC60-F187-CI-POSTMERGE.md). **NO-GO**.
 
 **SEC-53 integrada (PR #237): 648 testes PHP**. [CI #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). **NO-GO**.
 
