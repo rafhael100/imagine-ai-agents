@@ -129,6 +129,11 @@ final class MockUncertaintyReviewBoard
                 'indeterminate' => $counts['INDETERMINADO'],
             ],
             'review' => $reviewed,
+            // A paused scheduler is not an empty one. Surface only its
+            // closed, redacted state; never a control decision reference.
+            'admission' => [
+                'state' => $this->queue->admissionState($context)['state'],
+            ],
             'operational_decision' => 'NO_GO',
             'real_authorization' => false,
             'external_calls' => 0,
