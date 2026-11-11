@@ -14,6 +14,37 @@ final class Run
     // a coordinator-only guard is insufficient to protect direct transitions.
     private bool $suggestionReadOnly = false;
     private bool $suggestionMutationAttempt = false;
+    // A coordinator callback can inspect other canonical Runs. Deny direct
+    // lifecycle and Step mutations of ALL Runs registered in that coordinator,
+    // not only the Run passed to the provider. Token never goes to provider.
+    private ?object $coordinatorScopeToken = null;
+    private bool $coordinatorMutationAttempt = false;
+
+    /** Enter a coordinator-managed read-only scope (process-local only). */
+    public function beginCoordinatorSuggestionScope(object $token): void
+    {
+        if ($this->coordinatorScopeToken !== null) {
+            $this->coordinatorMutationAttempt = true;
+            MockError::fail('PROVIDER_CALLBACK_DENIED');
+        }
+        $this->coordinatorScopeToken = $token;
+        $this->coordinatorMutationAttempt = false;
+    }
+
+    /** Restore local lifecycle and report swallowed mutation attempts. */
+    public function endCoordinatorSuggestionScope(object $token): bool
+    {
+        if ($this->coordinatorScopeToken !== $token) {
+            if ($this->coordinatorScopeToken !== null) {
+                $this->coordinatorMutationAttempt = true;
+            }
+            MockError::fail('PROVIDER_CALLBACK_DENIED');
+        }
+        $attempted = $this->coordinatorMutationAttempt;
+        $this->coordinatorScopeToken = null;
+        $this->coordinatorMutationAttempt = false;
+        return $attempted;
+    }
     public function __construct(public readonly string $id, public readonly TenantContext $context) {
         // Enforce the same bound even for standalone legacy domain instances.
         // Coordinator-only checks would leave this construction path unbounded.
@@ -57,8 +88,9 @@ final class Run
 
     private function assertSuggestionWritable(): void
     {
-        if ($this->suggestionReadOnly) {
-            $this->suggestionMutationAttempt = true;
+        if ($this->suggestionReadOnly || $this->coordinatorScopeToken !== null) {
+            if ($this->suggestionReadOnly) $this->suggestionMutationAttempt = true;
+            if ($this->coordinatorScopeToken !== null) $this->coordinatorMutationAttempt = true;
             MockError::fail('PROVIDER_CALLBACK_DENIED');
         }
     }
