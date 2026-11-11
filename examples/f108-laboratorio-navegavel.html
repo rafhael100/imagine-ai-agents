@@ -461,6 +461,80 @@ function clearSessionDrafts(){
  clearAgentDraft();
  drawSessionDrafts("Lista descartada; nenhum agente foi publicado.");
 }
+// F187: strict, user-mediated JSON transfer. No browser storage or network.
+// Validation is atomic: a malformed item cannot partially overwrite the list.
+const DRAFT_TRANSFER_VERSION="SYNTHETIC_AGENT_DRAFTS_V1";
+const MAX_TRANSFER_CHARS=4096;
+function writeTransferStatus(message){
+ get("agent-draft-transfer-status").textContent=message;
+}
+function exportSessionDrafts(){
+ const packet={
+  version:DRAFT_TRANSFER_VERSION,
+  drafts:sessionAgentDrafts.map(x=>({name:x.name,template:x.templateKey}))
+ };
+ const text=JSON.stringify(packet);
+ if(text.length>MAX_TRANSFER_CHARS){
+  writeTransferStatus("Exportação recusada por limite de tamanho.");
+  return;
+ }
+ get("agent-draft-transfer-json").value=text;
+ writeTransferStatus("Pacote fictício gerado. Copie o texto manualmente; nenhuma transferência ocorreu.");
+}
+function normalizedTransferName(value){
+ if(typeof value!=="string"||value.length>80)return null;
+ const name=value.normalize("NFC").trim().replace(/\s+/g," ");
+ if(name.length<3||name.length>48||!/^[\p{L}\p{N} ._-]+$/u.test(name))return null;
+ return name;
+}
+function importSessionDrafts(){
+ const raw=get("agent-draft-transfer-json").value;
+ if(typeof raw!=="string"||raw.length>MAX_TRANSFER_CHARS){
+  writeTransferStatus("Importação recusada. A lista atual não foi alterada.");
+  return;
+ }
+ let packet;
+ try {packet=JSON.parse(raw);}
+ catch {writeTransferStatus("JSON inválido. A lista atual não foi alterada.");return;}
+ if(packet===null||typeof packet!=="object"||Array.isArray(packet)||
+   Object.keys(packet).sort().join("|")!=="drafts|version"||
+   packet.version!==DRAFT_TRANSFER_VERSION||!Array.isArray(packet.drafts)||
+   packet.drafts.length>MAX_SESSION_DRAFTS){
+  writeTransferStatus("Formato ou capacidade inválida. A lista atual não foi alterada.");
+  return;
+ }
+ const staged=[];const usedNames=new Set();
+ for(const item of packet.drafts){
+  if(item===null||typeof item!=="object"||Array.isArray(item)||
+    Object.keys(item).sort().join("|")!=="name|template"||
+    typeof item.template!=="string"||
+    !Object.prototype.hasOwnProperty.call(agentDraftTemplates,item.template)){
+   writeTransferStatus("Item inválido. A lista atual não foi alterada.");
+   return;
+  }
+  const name=normalizedTransferName(item.name);
+  if(name===null||name!==item.name){
+   writeTransferStatus("Nome inválido. A lista atual não foi alterada.");
+   return;
+  }
+  const lookup=name.toLocaleLowerCase("pt-BR");
+  if(usedNames.has(lookup)){
+   writeTransferStatus("Nome duplicado. A lista atual não foi alterada.");
+   return;
+  }
+  usedNames.add(lookup);
+  staged.push(Object.freeze({name,templateKey:item.template,lookup}));
+ }
+ // All data has been checked before this single collection replacement.
+ sessionAgentDrafts.splice(0,sessionAgentDrafts.length,...staged);
+ clearAgentDraft();
+ drawSessionDrafts("Pacote validado e importado apenas nesta sessão.");
+ writeTransferStatus("Importação local concluída: "+String(staged.length)+" rascunho(s), não publicados.");
+}
+function clearTransferText(){
+ get("agent-draft-transfer-json").value="";
+ writeTransferStatus("Campo JSON limpo; lista de rascunhos preservada.");
+}
 let chosen="allow",runs=0,denials=0,conflicts=0,sequence=0,logs=[];
 function page(name){for(const p of ["overview","agents","lab","supervision","audit"]){get("page-"+p).hidden=p!==name;}for(const b of document.querySelectorAll("[data-page-button]")){if(b.dataset.pageButton===name)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");}window.scrollTo(0,0);if(name==="audit")drawAudit();}
 function choose(id){if(!Object.prototype.hasOwnProperty.call(scenarios,id))return;chosen=id;const s=scenarios[id];get("case-id").textContent=s.id;get("case-title").textContent=s.title;get("case-subtitle").textContent=s.desc;get("fixture-product").textContent=s.product;get("fixture-tenant").textContent=s.tenant;get("fixture-source").textContent=s.source;get("fixture-grant").textContent=s.grant;for(const b of document.querySelectorAll("[data-scenario]")){const selected=b.dataset.scenario===id;b.classList.toggle("selected",selected);b.setAttribute("aria-pressed",String(selected));}clearResult();}
@@ -486,6 +560,9 @@ get("agent-draft-reset").addEventListener("click",clearAgentDraft);
 get("agent-draft-test").addEventListener("click",exploreAgentDraft);
 get("agent-draft-save").addEventListener("click",saveDraftToSession);
 get("agent-draft-clear-all").addEventListener("click",clearSessionDrafts);
+get("agent-draft-export").addEventListener("click",exportSessionDrafts);
+get("agent-draft-import").addEventListener("click",importSessionDrafts);
+get("agent-draft-clear-json").addEventListener("click",clearTransferText);
 drawSupervision();choose("allow");drawAudit();page("overview");drawReviewSimulation();drawAgentDraft("Nenhum rascunho configurado.");
 })();
 </script>
