@@ -37,12 +37,10 @@ final class MockQueuedBatchRunner
         int $leaseTicks,
     ): array {
         try {
-            $this->boundContext->assertSame($context);
-            // A provider may call this batch while its outer suggestion is
-            // active. Reject BEFORE consuming even the first queued job.
-            // The shared coordinator also taints the outer suggestion if the
-            // provider catches and suppresses this denial.
+            // Check callback state first; even a forged foreign context
+            // must not let a nested batch attempt escape sticky denial.
             $this->pilot->assertQueueAdmissionReady();
+            $this->boundContext->assertSame($context);
             if (!array_is_list($pairs) || count($pairs) < 1
                 || count($pairs) > self::MAX_BATCH
                 || $now < 0 || $leaseTicks < 1 || $leaseTicks > 300
