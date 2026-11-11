@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## SEC-54 — admissão de fila proibida durante callback de sugestão (11/11/2026)
+
+- `MockReadOnlyPilot::assertQueueAdmissionReady` aplica a guarda *sticky* do coordenador **antes** de qualquer reserva no `MockQueuedReadOnlyPilot` e `MockQueuedBatchRunner`. Uma reentrada capturada pelo provedor invalida o resultado externo e não consome outro job. [Documento SEC-54](docs/AIA-FT01-SEC-54-QUEUE-ADMISSION-CALLBACK-REENTRY.md).
+- Gate solicitado: **721 testes PHP / lint 90 e Python**, U82-01..10. Não é lock distribuído, autenticação, ACL/CRM real ou autorização de produção. R01-G01..G11 / CORE/SEG/AUT: NO-GO, 13 casos reais `NAO_EXECUTADO`; `main` intacta.
+
 ## DEMO F180 — lote read-only executável (10/11/2026)
 
 - `examples/f180-queued-batch-demo.php` demonstra dois pedidos fictícios autorizados e um negado, com JSON de contagens sem IDs, segredos ou tráfego; cinco testes Python no gate offline. [Guia](docs/AIA-FT01-DEMO-LOTE-OP01-F180.md).
