@@ -5,7 +5,7 @@ namespace ImagineAI\MockTooling;
 
 use ImagineAI\Domain\{Approval, Intent, MockError, Run, TenantContext};
 use ImagineAI\MockOrchestration\SupervisedCoordinator;
-use ImagineAI\MockBridge\{MockCrmReadRequest, MockReadProjectionInvariant};
+use ImagineAI\MockBridge\{MockCrmReadRequest, MockCrmPublicResponseContract};
 use ImagineAI\MockTelemetry\MockCrmReadEdgeBoundary;
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence};
 
@@ -208,16 +208,8 @@ final class MockToolDispatcher
             $this->catalog->validate('READ', ['fields' => $request->fields]);
 
             $out = $this->readEdge->handle($wire, $envelope, $owner, $context, $now);
-            if (array_keys($out) !== [
-                    'contract', 'state', 'projection', 'real_authorization', 'external_calls'
-                ]
-                || $out['contract'] !== 'SYNTHETIC_CRM_AIA_PUBLIC_V1'
-                || $out['state'] !== 'READ_SYNTHETIC_ONLY'
-                || $out['real_authorization'] !== false
-                || $out['external_calls'] !== 0
-                || !is_array($out['projection'])
-                || !MockReadProjectionInvariant::isCanonical(
-                    $out['projection'], $request->fields, $context)) {
+            if (!MockCrmPublicResponseContract::isAcceptedRead(
+                $out, $request, $context)) {
                 MockError::fail('READ_DENIED');
             }
             // The reader can revoke the independent tool capability
