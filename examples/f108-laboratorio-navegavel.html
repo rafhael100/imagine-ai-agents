@@ -329,6 +329,7 @@ function drawAgentDraft(message){
  get("agent-draft-preview-purpose").textContent=agentDraft===null?"—":agentDraft.template.purpose;
  get("agent-draft-preview-state").textContent=agentDraft===null?"NÃO PUBLICADO · NO-GO":"RASCUNHO LOCAL · SEM APROVAÇÃO";
  get("agent-draft-test").disabled=agentDraft===null;
+ get("agent-draft-save").disabled=agentDraft===null;
  get("agent-draft-status").textContent=message;
 }
 function invalidateAgentDraft(){
@@ -352,7 +353,7 @@ function clearAgentDraft(){
  agentDraft=null;
  get("agent-draft-name").value="";
  get("agent-draft-template").value="crm";
- drawAgentDraft("Nenhum rascunho configurado.");
+ drawAgentDraft("Nenhum rascunho configurado.");drawSessionDrafts("Nenhum rascunho adicionado nesta sessão.");
 }
 function exploreAgentDraft(){
  if(agentDraft===null)return;
@@ -360,6 +361,87 @@ function exploreAgentDraft(){
  if(!["allow","dynamic","injection"].includes(scenario))return;
  choose(scenario);
  page("lab");
+}
+// F186: at most five names of synthetic, untrusted, transient drafts.
+// A list entry cannot grant a role, create an agent, or start a Run.
+const sessionAgentDrafts=[];
+const MAX_SESSION_DRAFTS=5;
+function drawSessionDrafts(message){
+ const root=get("agent-draft-collection");
+ root.replaceChildren();
+ get("agent-draft-count").textContent=String(sessionAgentDrafts.length)+" / 5";
+ get("agent-draft-collection-status").textContent=message;
+ if(sessionAgentDrafts.length===0){
+  const note=document.createElement("p");
+  note.className="muted";
+  note.textContent="Lista vazia. Nada foi salvo fora deste navegador.";
+  root.append(note);
+  return;
+ }
+ for(const record of sessionAgentDrafts){
+  const row=document.createElement("div");
+  row.className="draft-saved-row";
+  const label=document.createElement("span");
+  label.textContent=record.name+" · "+agentDraftTemplates[record.templateKey].title;
+  const restore=document.createElement("button");
+  restore.type="button";restore.className="secondary";restore.textContent="Retomar";
+  restore.addEventListener("click",()=>resumeSessionDraft(record));
+  const remove=document.createElement("button");
+  remove.type="button";remove.className="secondary";remove.textContent="Excluir";
+  remove.addEventListener("click",()=>removeSessionDraft(record));
+  row.append(label,restore,remove);
+  root.append(row);
+ }
+}
+function saveDraftToSession(){
+ if(agentDraft===null){drawSessionDrafts("Pré-visualize um rascunho antes de adicioná-lo.");return;}
+ const key=String(get("agent-draft-template").value??"");
+ const raw=String(get("agent-draft-name").value??"");
+ const name=raw.length>80?"":raw.normalize("NFC").trim().replace(/\s+/g," ");
+ if(!Object.prototype.hasOwnProperty.call(agentDraftTemplates,key)||
+   agentDraft.template!==agentDraftTemplates[key]||name!==agentDraft.name){
+  agentDraft=null;
+  drawAgentDraft("Prévia desatualizada; valide os campos novamente.");
+  drawSessionDrafts("Nenhum item foi adicionado.");
+  return;
+ }
+ const lookup=agentDraft.name.toLocaleLowerCase("pt-BR");
+ const existing=sessionAgentDrafts.find(x=>x.lookup===lookup);
+ if(existing!==undefined){
+  drawSessionDrafts(existing.templateKey===key?
+   "Este rascunho já está na lista (sem duplicar).":
+   "Nome já utilizado por outro modelo nesta sessão.");
+  return;
+ }
+ if(sessionAgentDrafts.length>=MAX_SESSION_DRAFTS){
+  drawSessionDrafts("Limite local de cinco rascunhos atingido; nenhum foi substituído.");
+  return;
+ }
+ sessionAgentDrafts.push(Object.freeze({name:agentDraft.name,templateKey:key,lookup}));
+ drawSessionDrafts("Rascunho adicionado apenas à memória desta aba.");
+}
+function resumeSessionDraft(record){
+ if(!sessionAgentDrafts.includes(record))return;
+ const template=agentDraftTemplates[record.templateKey];
+ if(template===undefined)return;
+ get("agent-draft-name").value=record.name;
+ get("agent-draft-template").value=record.templateKey;
+ agentDraft=Object.freeze({name:record.name,template});
+ drawAgentDraft("Rascunho retomado; não publicado.");
+ drawSessionDrafts("Configuração recuperada apenas da sessão atual.");
+}
+function removeSessionDraft(record){
+ const index=sessionAgentDrafts.indexOf(record);
+ if(index<0)return;
+ sessionAgentDrafts.splice(index,1);
+ if(agentDraft!==null&&agentDraft.name.toLocaleLowerCase("pt-BR")===record.lookup&&
+    agentDraft.template===agentDraftTemplates[record.templateKey])clearAgentDraft();
+ drawSessionDrafts("Rascunho removido apenas da lista local.");
+}
+function clearSessionDrafts(){
+ sessionAgentDrafts.splice(0);
+ clearAgentDraft();
+ drawSessionDrafts("Lista descartada; nenhum agente foi publicado.");
 }
 let chosen="allow",runs=0,denials=0,conflicts=0,sequence=0,logs=[];
 function page(name){for(const p of ["overview","agents","lab","supervision","audit"]){get("page-"+p).hidden=p!==name;}for(const b of document.querySelectorAll("[data-page-button]")){if(b.dataset.pageButton===name)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");}window.scrollTo(0,0);if(name==="audit")drawAudit();}
@@ -384,6 +466,8 @@ get("agent-draft-name").addEventListener("input",invalidateAgentDraft);
 get("agent-draft-generate").addEventListener("click",generateAgentDraft);
 get("agent-draft-reset").addEventListener("click",clearAgentDraft);
 get("agent-draft-test").addEventListener("click",exploreAgentDraft);
+get("agent-draft-save").addEventListener("click",saveDraftToSession);
+get("agent-draft-clear-all").addEventListener("click",clearSessionDrafts);
 drawSupervision();choose("allow");drawAudit();page("overview");drawReviewSimulation();drawAgentDraft("Nenhum rascunho configurado.");
 })();
 </script>
