@@ -1,6 +1,6 @@
 # Imagine AI Agents — estado atual
 
-**Consolidado em 10/11/2026.** Fonte prioritária: estado da branch e dos PRs no GitHub; os SHAs abaixo representam apenas verificações realizadas nesta data. **Sem aprovação de produção.**
+**Consolidado em 10/11/2026.** Fontes: GitHub e CIs verificadas. **Produção: NO-GO.**
 
 ## Estado executivo
 
@@ -12,7 +12,7 @@
 
 **SEC-53 integrada à dev (PR #237):** bloqueia mutação direta de Run por provedor; oito U75-01..08, [SEC-53](docs/AIA-FT01-SEC-53-RUN-LIFECYCLE-READONLY-CALLBACK.md), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
 
-**SEC-52 integrada à dev (PR #235):** baseline **640 testes PHP**; guarda compartilhada de callback entre despachantes; sete U74-01..07, [SEC-52](docs/AIA-FT01-SEC-52-GUARDA-COORDENADOR-CALLBACK.md), [EVID-37](docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
+**SEC-52 integrada à dev (PR #235):** baseline **640 testes PHP**; [CI #42943113650](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42943113650), guarda compartilhada; sete U74-01..07, [SEC-52](docs/AIA-FT01-SEC-52-GUARDA-COORDENADOR-CALLBACK.md), [EVID-37](docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-51 integrada à dev (PR #233):** baseline **633 testes PHP**, [CI #42940604581](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42940604581); reentrada de SUGGEST/MUTATE/READ durante callback de sugestão bloqueada; quatro regressões U73-01..04. [SEC-51](docs/AIA-FT01-SEC-51-REENTRADA-FERRAMENTAS-CALLBACK.md), [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
 
