@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## PILOT — composição fila read-only → OP01 → sugestão (10/11/2026)
+
+- `MockQueuedReadOnlyPilot` usa fila, builder de request, piloto supervisionado. Valida campos antes de claim, executa somente leitura sintética, finaliza sucesso/negação; falha incerta não reenvia. Nenhuma mutação/credencial/rede; saída pública não revela IDs. [Documento](docs/AIA-FT01-QUEUE-PILOTO-OP01-COMPOSICAO-OFFLINE.md).
+- Gate previsto: **699 PHP / lint 87 + Python**, U79-01..12. CRM PR #57 OPEN/DRAFT, 13 testes reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO; `main` e VPS intocadas.
+
 ## QUEUE — admissão read-only sem retries (10/11/2026)
 
 - `MockReadOnlyRunQueue` é FIFO em memória de empresa única: enqueue idempotente, claim com lease, settle/cancel controlados, limite 64 e trilha 256; expiração permanece `INDETERMINADO`, **nunca reenvia automaticamente**. [Documento](docs/AIA-FT01-QUEUE-LEITURA-SUPERVISIONADA-OFFLINE.md).
