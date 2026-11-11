@@ -301,7 +301,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("776 PHP / lint 97", evidence)
         self.assertIn("776 PHP / lint 97", evidence)
         self.assertIn("F108_SMOKE_PASS", evidence)
-        self.assertIn("EVID-40", readme)
+        self.assertIn("EVID-40", current)
         self.assertIn("EVID-40", rules)
         self.assertIn("0a40ab2f3ba2fe24f0c449484fbd2280396f82ca", evidence)
         self.assertIn("NO-GO", current)
