@@ -22,6 +22,15 @@ final class MockQueuedReadOnlyPilot
     ) {}
 
     /**
+     * Preflight for callers that may schedule more than one queued job.
+     * Must happen before any queue claim or allocation of audit/nonce.
+     */
+    public function assertQueueAdmissionReady(): void
+    {
+        $this->pilot->assertQueueAdmissionReady();
+    }
+
+    /**
      * The job supplies only a synthetic request reference and Run reference.
      * The request wire is constructed from the bound context, never from
      * tenant/resource identifiers supplied by a caller or model.
@@ -38,6 +47,10 @@ final class MockQueuedReadOnlyPilot
     ): array {
         try {
             $this->boundContext->assertSame($context);
+            // A nested pilot call from an injected suggestion provider must
+            // not reserve another FIFO job or consume a second trust proof.
+            // This call marks the coordinator callback as contaminated.
+            $this->assertQueueAdmissionReady();
             // Validate fields BEFORE claiming a queued job, so invalid user
             // input does not burn a legitimate pending job or CRM nonce.
             MockCrmReadRequestBuilder::fromContext(
