@@ -141,6 +141,16 @@ final class MockUncertaintyReviewBoard
         ];
     }
 
+    /**
+     * Same bound queue as overview(), no separate client-supplied queue.
+     * No writes, no control decisions, no Run/reviewer identifiers.
+     */
+    public function capacityOverview(TenantContext $context): array
+    {
+        $this->context->assertSame($context);
+        return $this->queue->capacityOverview($context);
+    }
+
     public function events(): array { return $this->events; }
 
     private static function view(array $votes): array
