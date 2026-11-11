@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## SEC-58 — relógio transacional da fila sintética (11/11/2026)
+
+- Em `MockReadOnlyRunQueue`, substituir o antigo `clock()` que **gravava horário antes da validação** por `assertClock()` (sem mutação) e `commitClock()` somente após checagens completas e capacidade de auditoria. Enqueue/cancel/finish recusados ou idempotentes e polls sem trabalho não envenenam `observedAt`; expiração em `claim` ou `finish` **altera estado** e confirma o relógio. [SEC-58](docs/AIA-FT01-SEC-58-RELOGIO-TRANSACIONAL-FILA.md).
+- Gate solicitado **792 testes PHP/lint 98 + Python/Node offline**, U89-01..16. Sem relógio real confiável, fila distribuída ou CRM conectado. CRM PR #57 OPEN/DRAFT, 13 casos reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO; `main`, VPS, produção, clientes e despesas intactos.
+
 ## F186 — coleção transitória de até cinco rascunhos (11/11/2026)
 
 - No F108, um rascunho F185 válido pode ser adicionado a uma lista **apenas da sessão** (até 5); o mesmo nome `pt-BR` + modelo é idempotente, nome conflitante é negado, sem evicção no limite. Retomar um item deriva escopo do catálogo fechado; remover invalida prévia correspondente; botão de item removido não revive rascunho; zerar lista descarta tudo. Só `textContent`, sem storage, SQL, IAM ou rede. [Guia F186](docs/AIA-FT01-F186-COLECAO-RASCUNHOS-SESSION.md).
