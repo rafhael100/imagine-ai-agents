@@ -202,6 +202,9 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("42940604581", evidence)
         self.assertIn("872597580bf93261cbb858a8c9eb6f2fe342e9d7", evidence)
         self.assertIn("633 testes PHP", readme)
+        # Historic SEC-50 evidence must remain visible after advancing to SEC-51.
+        self.assertIn("629 testes PHP", current)
+        self.assertIn("42938703131", current)
         self.assertIn("NO-GO", current)
         self.assertIn("NAO_EXECUTADO", evidence)
 
