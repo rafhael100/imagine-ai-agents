@@ -84,6 +84,60 @@ class F191Tests(unittest.TestCase):
         with self.assertRaises(ValueError):
             module.verify(obj)
 
+    def test_extra_queue_counter_denied(self):
+        obj = fixture()
+        obj["resumed"]["queue"]["unknown"] = 9
+        with self.assertRaises(ValueError):
+            module.verify(obj)
+
+    def test_extra_review_field_denied(self):
+        obj = fixture()
+        obj["paused"]["review"]["reviewer_name"] = "SYNTHETIC"
+        with self.assertRaises(ValueError):
+            module.verify(obj)
+
+    def test_reserved_job_during_rehearsal_denied(self):
+        obj = fixture()
+        obj["paused"]["queue"]["reserved"] = 1
+        with self.assertRaises(ValueError):
+            module.verify(obj)
+
+    def test_failed_job_injected_denied(self):
+        obj = fixture()
+        obj["resumed"]["queue"]["failed"] = 1
+        with self.assertRaises(ValueError):
+            module.verify(obj)
+
+    def test_conflict_count_not_hidden(self):
+        obj = fixture()
+        obj["paused"]["review"]["conflict"] = 1
+        with self.assertRaises(ValueError):
+            module.verify(obj)
+
+    def test_boolean_count_cannot_pass_as_integer(self):
+        obj = fixture()
+        obj["paused"]["queue"]["reserved"] = False
+        with self.assertRaises(ValueError):
+            module.verify(obj)
+
+    def test_per_snapshot_go_flag_denied(self):
+        obj = fixture()
+        obj["paused"]["operational_decision"] = "GO"
+        with self.assertRaises(ValueError):
+            module.verify(obj)
+
+    def test_per_snapshot_external_call_denied(self):
+        obj = fixture()
+        obj["resumed"]["external_calls"] = 1
+        with self.assertRaises(ValueError):
+            module.verify(obj)
+
+    def test_per_snapshot_real_auth_denied(self):
+        obj = fixture()
+        obj["resumed"]["real_authorization"] = True
+        with self.assertRaises(ValueError):
+            module.verify(obj)
+
     @unittest.skipUnless(shutil.which("php"), "PHP missing")
     def test_real_offline_rehearsal(self):
         run = subprocess.run(
