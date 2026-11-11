@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## EVID-44 — F191 a F195 com CI pós-merge aprovada (11/11/2026)
+
+- F191 #268 CI #43047660682 (verificador determinístico); F192 #269 CI #43048120334 (contratos estritos); F193 #270 CI #43049412790 (HTML estático); F194 #271 CI #43049695153 (baseline visual 835/103); F195 #272 CI #43050336317 (deltas de supervisão). Todas integradas na dev; [EVID-44](docs/AIA-R01-EVID-44-F191-F195-CI-POSTMERGE.md).
+- **835 testes PHP / lint 103 + Python/DOM, 37 testes Python novos nesta sequência**. Sem CRM real, IAM, cliente, deploy, VPS, segredos, produção ou custos. CRM PR #57 OPEN/DRAFT, 13 casos reais NAO_EXECUTADO e gates R01-G01..G11/CORE/SEG/AUT NO-GO.
+
+
 ## EVID-43 — SEC-61, F189 e F190 pós-merge validados (11/11/2026)
 
 - SEC-61 PR #264 squash `91381e2eb6d242461a472e79bc6568d35a8bdd8b` CI pós-merge #43035537495 `success` (827 PHP/lint 101); F189 #265 squash `4c4bcea504a6375f1497d1ff9d1b0dbad780849f` CI #43037555601 `success` (835/102); F190 #266 squash `768ef0b14c267d3b4c927311875fe52498812a55` CI #43038243942 `success` (835/103). [EVID-43](docs/AIA-R01-EVID-43-SEC61-F189-F190-CI-POSTMERGE.md).
