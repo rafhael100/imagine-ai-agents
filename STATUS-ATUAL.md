@@ -6,7 +6,7 @@
 
 **Fase:** offline. **NO-GO**.
 
-**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **835 testes PHP / lint 103 + Python/DOM**; PRs #264–278, EVID-44,EVID-45,EVID-46; CI 43038243942; [CI #43076603247](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43076603247) `success`, [EVID-43](docs/AIA-R01-EVID-43-SEC61-F189-F190-CI-POSTMERGE.md). **NO-GO**.
+**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **851 testes PHP / lint 105 + Python/DOM**; PRs #264–278, EVID-44,EVID-45,EVID-46; CI 43038243942; [CI #43076603247](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43076603247) `success`, [EVID-43](docs/AIA-R01-EVID-43-SEC61-F189-F190-CI-POSTMERGE.md). **NO-GO**.
 
 ## Últimas entregas verificadas
 
@@ -90,7 +90,7 @@ A [SEC-20 / PR #182](https://github.com/rafhael100/imagine-ai-agents/pull/182) c
 
 ```bash
 php examples/f127-read-only-pilot-demo.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=103 EXPECTED_CASES=835 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=105 EXPECTED_CASES=851 bash tools/run_r01_offline_quality_gate.sh
 ```
 
 O comando acima exige PHP e Python já instalados, não emite credenciais e não acessa CRM real. O sucesso não abre gates operacionais.
