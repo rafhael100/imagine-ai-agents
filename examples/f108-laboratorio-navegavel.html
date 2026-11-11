@@ -161,6 +161,7 @@ h1{font-size:clamp(26px,3vw,35px);letter-spacing:-1.2px;line-height:1.15;margin:
 </main>
 </div>
 </div>
+<script type="application/json" id="f183-supervision-data">{"contract":"SYNTHETIC_QUEUE_SUPERVISION_V1","queue":{"pending":0,"reserved":0,"completed":1,"failed":0,"cancelled":0,"indeterminate":3},"review":{"awaiting_first":0,"awaiting_second":1,"reviewed_unresolved":1,"conflict":1},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0}</script>
 <script>
 (function(){
 "use strict";
@@ -173,8 +174,31 @@ const scenarios=Object.freeze({
  injection:{id:"U07-09",title:"Injeção em documento",desc:"Uma passagem tenta ordenar a execução de uma ferramenta.",product:"SYNTHETIC_UNIVERSIDADE",tenant:"SYNTHETIC_A",source:"SYNTHETIC_UNTRUSTED_DOC / V1",grant:"Válida (fictícia)",state:"READY · UNTRUSTED_DATA",kind:"good",message:"O texto hostil é mantido apenas como dado. Nenhuma ferramenta, política ou privilégio é alterado.",events:["SYNTHETIC_SELECTED","SYNTHETIC_UNTRUSTED_DATA","SYNTHETIC_DELIVERED"]}
 });
 const get=id=>document.getElementById(id);
+function drawSupervision(){
+ const data=JSON.parse(get("f183-supervision-data").textContent);
+ if(data.contract!=="SYNTHETIC_QUEUE_SUPERVISION_V1"||data.operational_decision!=="NO_GO"||data.real_authorization!==false||data.external_calls!==0||data.write_calls!==0)throw Error("SYNTHETIC_F183_CONTRACT_DENIED");
+ const metrics=[
+  ["supervision-completed",data.queue.completed],
+  ["supervision-indeterminate",data.queue.indeterminate],
+  ["supervision-pending-review",data.review.awaiting_first+data.review.awaiting_second],
+  ["supervision-conflict",data.review.conflict],
+  ["supervision-pending",data.queue.pending],
+  ["supervision-reserved",data.queue.reserved],
+  ["supervision-completed-row",data.queue.completed],
+  ["supervision-failed",data.queue.failed],
+  ["supervision-cancelled",data.queue.cancelled],
+  ["supervision-indeterminate-row",data.queue.indeterminate],
+  ["supervision-first",data.review.awaiting_first],
+  ["supervision-second",data.review.awaiting_second],
+  ["supervision-unresolved",data.review.reviewed_unresolved],
+  ["supervision-conflict-row",data.review.conflict]
+ ];
+ for(const [id,value] of metrics)get(id).textContent=String(value);
+ get("supervision-decision").textContent="NO-GO";
+}
+
 let chosen="allow",runs=0,denials=0,conflicts=0,sequence=0,logs=[];
-function page(name){for(const p of ["overview","agents","lab","audit"]){get("page-"+p).hidden=p!==name;}for(const b of document.querySelectorAll("[data-page-button]")){if(b.dataset.pageButton===name)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");}window.scrollTo(0,0);if(name==="audit")drawAudit();}
+function page(name){for(const p of ["overview","agents","lab","supervision","audit"]){get("page-"+p).hidden=p!==name;}for(const b of document.querySelectorAll("[data-page-button]")){if(b.dataset.pageButton===name)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");}window.scrollTo(0,0);if(name==="audit")drawAudit();}
 function choose(id){if(!Object.prototype.hasOwnProperty.call(scenarios,id))return;chosen=id;const s=scenarios[id];get("case-id").textContent=s.id;get("case-title").textContent=s.title;get("case-subtitle").textContent=s.desc;get("fixture-product").textContent=s.product;get("fixture-tenant").textContent=s.tenant;get("fixture-source").textContent=s.source;get("fixture-grant").textContent=s.grant;for(const b of document.querySelectorAll("[data-scenario]")){const selected=b.dataset.scenario===id;b.classList.toggle("selected",selected);b.setAttribute("aria-pressed",String(selected));}clearResult();}
 function clearResult(){const el=get("result");el.replaceChildren();const t=document.createElement("span");t.className="status";t.textContent="AINDA NÃO EXECUTADO";const p=document.createElement("p");p.className="placeholder";p.textContent="Clique em Executar cenário para visualizar a decisão.";el.append(t,p);}
 function run(){const s=scenarios[chosen];runs++;if(s.kind==="blocked")denials++;if(s.state==="CONFLICT")conflicts++;for(const code of s.events){logs.push({seq:++sequence,code:code,caseId:s.id});}
@@ -188,7 +212,7 @@ for(const b of document.querySelectorAll("[data-agent-scenario]"))b.addEventList
 get("run-button").addEventListener("click",run);
 get("clear-result").addEventListener("click",clearResult);
 get("reset-audit").addEventListener("click",reset);
-choose("allow");drawAudit();page("overview");
+drawSupervision();choose("allow");drawAudit();page("overview");
 })();
 </script>
 </body></html>
