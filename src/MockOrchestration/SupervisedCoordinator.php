@@ -24,12 +24,27 @@ final class SupervisedCoordinator
     private array $startedRuns = [];
     /** @var array<string, array<string, Step>> Canonical steps for started runs. */
     private array $startedSteps = [];
+    // Shared within this coordinator: blocks callbacks trying another tool
+    // dispatcher or the coordinator directly. NOT a distributed lock.
+    private bool $providerCallbackActive = false;
+    private bool $providerCallbackReentryObserved = false;
 
     public function __construct(
         private readonly TenantContext $context,
         private readonly CrmEffectGateway $gateway,
         private readonly AiSuggestionProvider $ai,
     ) {}
+
+    /** Guard exposed to mock tool boundaries that share this coordinator. */
+    public function assertProviderCallbackIdle(): void
+    {
+        if ($this->providerCallbackActive) {
+            // Sticky until the outer callback returns; caught nested errors
+            // must still invalidate the outer suggestion.
+            $this->providerCallbackReentryObserved = true;
+            MockError::fail('PROVIDER_CALLBACK_DENIED');
+        }
+    }
 
     /**
      * Side-effect-free readiness probe for the exactly four trace events
@@ -39,6 +54,7 @@ final class SupervisedCoordinator
      */
     public function assertPilotRunReady(string $id, TenantContext $context): void
     {
+        $this->assertProviderCallbackIdle();
         $this->context->assertSame($context);
         if (preg_match('/^SYNTHETIC_[A-Z0-9_]{1,70}$/D', $id) !== 1) {
             MockError::fail('INVALID_SYNTHETIC_REF');
@@ -54,6 +70,7 @@ final class SupervisedCoordinator
      */
     public function assertToolSuggestionReady(Run $run): void
     {
+        $this->assertProviderCallbackIdle();
         $this->assertRunCompatible($run);
         // Legacy standalone Runs remain accepted by the internal mock
         // coordinator for old tests, but must never enter the tool surface.
@@ -69,6 +86,7 @@ final class SupervisedCoordinator
      */
     public function assertToolIntentReady(Intent $intent): void
     {
+        $this->assertProviderCallbackIdle();
         $this->assertRunCompatible($intent->step->run);
         $this->assertToolRunOwned($intent->step->run);
         if (($this->startedSteps[$intent->step->run->id][$intent->step->id] ?? null)
@@ -87,6 +105,7 @@ final class SupervisedCoordinator
 
     public function start(string $id): Run
     {
+        $this->assertProviderCallbackIdle();
         self::assertBoundedCoordinatorRef($id, self::MAX_RUN_REF_BYTES);
         if (isset($this->startedRuns[$id])) MockError::fail('RUN_ID_CONFLICT');
         $this->assertTraceCapacity(1);
@@ -100,6 +119,7 @@ final class SupervisedCoordinator
 
     public function step(Run $run, string $id): Step
     {
+        $this->assertProviderCallbackIdle();
         $this->assertRunCompatible($run);
         self::assertBoundedCoordinatorRef($id, self::MAX_STEP_REF_BYTES);
         if (isset($this->startedSteps[$run->id][$id])) MockError::fail('STEP_ID_CONFLICT');
@@ -114,6 +134,7 @@ final class SupervisedCoordinator
 
     public function suggest(Run $run, array $fields): array
     {
+        $this->assertProviderCallbackIdle();
         $this->assertRunCompatible($run);
         $run->assertActive();
         // A coordinator is public to any AiSuggestionProvider adapter, not
@@ -128,13 +149,26 @@ final class SupervisedCoordinator
             }
         }
         $this->assertTraceCapacity(1); // Do not call a provider without space to record the event.
-        $suggestion = $this->ai->suggest($run, $fields);
+        $this->providerCallbackActive = true;
+        $this->providerCallbackReentryObserved = false;
+        try {
+            $suggestion = $this->ai->suggest($run, $fields);
+            // A callback can swallow a denied nested operation; never treat
+            // that provider response as an approved suggestion.
+            if ($this->providerCallbackReentryObserved) {
+                MockError::fail('PROVIDER_CALLBACK_DENIED');
+            }
+        } finally {
+            $this->providerCallbackActive = false;
+            $this->providerCallbackReentryObserved = false;
+        }
         $this->trace($run, 'SUGGESTED');
         return $suggestion; // Never dispatch a mutation based on model output.
     }
 
     public function execute(Intent $intent, ?Approval $approval, int $now): Effect
     {
+        $this->assertProviderCallbackIdle();
         $this->bind($intent);
         $intent->step->run->assertActive();
         if ($approval === null) {
@@ -177,6 +211,7 @@ final class SupervisedCoordinator
 
     public function afterTimeout(Intent $intent, Attempt $attempt): Effect
     {
+        $this->assertProviderCallbackIdle();
         $this->bind($intent);
         if ($attempt->state !== 'TIMEOUT' || $attempt->intent->signature() !== $intent->signature()
             || $attempt->intent->key() !== $intent->key()) MockError::fail('ATTEMPT_CONFLICT');
@@ -191,6 +226,7 @@ final class SupervisedCoordinator
 
     public function reconcile(Intent $intent): Effect
     {
+        $this->assertProviderCallbackIdle();
         $this->bind($intent);
         if (!isset($this->submitted[$intent->key()])) MockError::fail('INTENT_NOT_SUBMITTED');
         // STATUS_REQUESTED + at most one observed status result.
@@ -217,6 +253,7 @@ final class SupervisedCoordinator
 
     public function transition(Run $run, string $state): void
     {
+        $this->assertProviderCallbackIdle();
         $this->assertRunCompatible($run);
         $this->assertTraceCapacity(1); // Do not mutate lifecycle without space for its trace.
         $run->transition($state);
