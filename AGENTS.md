@@ -3,7 +3,7 @@
 ## F183 — supervisão integrada à prévia visual F108 (11/11/2026)
 
 - `examples/f108-laboratorio-navegavel.html` tem quinta aba `supervision` com métricas fechadas de fila/revisão e JSON fixo `SYNTHETIC_QUEUE_SUPERVISION_V1`, **idêntico à saída de F182**. Integração no navegador é local, sem fetch, storage ou backend; `NO_GO` permanece evidente. [Guia F183](docs/AIA-FT01-F183-SUPERVISAO-VISUAL-OFFLINE.md).
-- Gate atual proposto: **776 testes PHP / lint 97 + Python**, seis testes F183 obrigatórios e smoke Node F108 quando runtime já estiver disponível. Nenhum teste visual autoriza CRM, IAM, aprovação real, requeue, mudança em `main` ou deploy; CRM PR #57 OPEN/DRAFT, 13 cenários `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO.
+- Gate pós-merge verificado: **776 testes PHP / lint 97 + Python**, seis testes F183 e smoke Node F108, [CI #42981975813](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42981975813), [EVID-40](docs/AIA-R01-EVID-40-SEC57-REV02-F183-POSTMERGE.md). Nenhum teste visual autoriza CRM, IAM, aprovação real, requeue, mudança em `main` ou deploy; CRM PR #57 OPEN/DRAFT, 13 cenários `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO.
 
 ## REV-02/F182 — overview de supervisão sem identificadores (11/11/2026)
 
