@@ -77,5 +77,21 @@ final class Run
     {
         if ($this->state !== 'EXECUTANDO') MockError::fail('RUN_NOT_ACTIVE');
     }
-    public function step(string $id): Step { $this->assertSuggestionWritable(); $this->assertActive(); return new Step($id, $this); }
+
+    /**
+     * Validate even detached Step constructors that receive this same Run.
+     * A provider must not bypass Run::step() by invoking new Step directly.
+     * Calls during the suggestion callback leave a sticky denial mark.
+     */
+    public function assertStepCreationReady(): void
+    {
+        $this->assertSuggestionWritable();
+        $this->assertActive();
+    }
+
+    public function step(string $id): Step
+    {
+        $this->assertStepCreationReady();
+        return new Step($id, $this);
+    }
 }

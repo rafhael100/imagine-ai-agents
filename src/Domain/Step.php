@@ -8,7 +8,9 @@ final class Step
     private const MAX_REF_BYTES = 96;
     public readonly TenantContext $context;
     public function __construct(public readonly string $id, public readonly Run $run) {
-        $run->assertActive();
+        // The Run guard is sticky during an untrusted suggestion callback.
+        // This must execute before checking the caller-controlled Step ref.
+        $run->assertStepCreationReady();
         // Direct Run::step / new Step must not bypass coordinator limits.
         if (!str_starts_with($id, 'SYNTHETIC_')
             || strlen($id) <= strlen('SYNTHETIC_')
