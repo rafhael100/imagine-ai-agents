@@ -44,13 +44,15 @@ final class MockCrmPublicResponseContract
             || $body['external_calls'] !== 0) {
             return false;
         }
+        // A safe uniform denial is independent of a caller's tenant claim:
+        // cross-tenant attempts are still DENIED, never INTERNAL_DENIED.
+        if ($body['state'] === 'DENIED_OR_NOT_FOUND') {
+            return $body['projection'] === null;
+        }
         try {
             $request->assertMatches($context);
         } catch (\Throwable) {
             return false;
-        }
-        if ($body['state'] === 'DENIED_OR_NOT_FOUND') {
-            return $body['projection'] === null;
         }
         if ($body['state'] !== 'READ_SYNTHETIC_ONLY'
             || !is_array($body['projection'])) {
