@@ -22,7 +22,7 @@ HEAD = """<!doctype html>
 :root { color-scheme: light; font-family: system-ui, sans-serif; background: #f4f6f9; color: #15243b; }
 body { margin: 0; padding: 2rem 1rem; }
 main { max-width: 820px; margin: auto; }
-header, section, footer { background: white; border: 1px solid #d8e0ea; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+header, section, aside, footer { background: white; border: 1px solid #d8e0ea; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
 h1 { margin: .25rem 0; font-size: 1.6rem; }
 h2 { margin: 0 0 .75rem; font-size: 1.15rem; }
 p { line-height: 1.5; }
@@ -31,7 +31,7 @@ p { line-height: 1.5; }
 table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th, td { padding: .65rem .4rem; border-bottom: 1px solid #e0e5ed; text-align: left; }
 td { text-align: right; }
-@media(max-width:480px) { body { padding: .65rem; } header, section, footer { padding: .75rem; } }
+@media(max-width:480px) { body { padding: .65rem; } header, section, aside, footer { padding: .75rem; } }
 </style>
 </head>
 <body><main>
@@ -90,6 +90,29 @@ def render(payload):
                 '</th><td>' + str(snapshot["review"][key]) + '</td></tr>'
             )
         output.append('</tbody></table></section>')
+    before = payload["paused"]["queue"]
+    after = payload["resumed"]["queue"]
+    output.append(
+        '<aside aria-labelledby="transition-title"><h2 id="transition-title">'
+        'Diferenças entre os dois estados</h2>'
+        '<p>A retomada concluiu apenas o pedido ainda pendente. '
+        'O resultado incerto permanece sem resolução.</p>'
+        '<table><caption>Variação sintética</caption><thead><tr>'
+        '<th scope="col">Estado</th><th scope="col">Variação</th>'
+        '</tr></thead><tbody>'
+    )
+    for name, key in METRICS:
+        delta = after[key] - before[key]
+        change = "+" + str(delta) if delta > 0 else (
+            "−" + str(-delta) if delta < 0 else "0"
+        )
+        output.append(
+            '<tr><th scope="row">' + html.escape(name) +
+            '</th><td>' + change + '</td></tr>'
+        )
+    output.append('</tbody></table><p class="warn">'
+                  'INDETERMINADO: 1 antes e depois. Revisão não concede GO.'
+                  '</p></aside>')
     output.append(FOOT)
     return "\n".join(output)
 
