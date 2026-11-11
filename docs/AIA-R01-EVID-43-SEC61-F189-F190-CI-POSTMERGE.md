@@ -8,9 +8,9 @@
 | --- | --- | --- | --- | --- | --- |
 | SEC-61 — pausas de admissão, preservação de leases, controle idempotente | [#264](https://github.com/rafhael100/imagine-ai-agents/pull/264) | `91381e2eb6d242461a472e79bc6568d35a8bdd8b` | [#43035421839](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43035421839) **success** | [#43035537495](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43035537495) **success** | 827 PHP / lint 101 + Python/DOM |
 | F189 — `admission: {state: OPEN|PAUSED}` no overview e na tela | [#265](https://github.com/rafhael100/imagine-ai-agents/pull/265) | `4c4bcea504a6375f1497d1ff9d1b0dbad780849f` | [#43037196533](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43037196533) **success** | [#43037555601](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43037555601) **success** | 835 PHP / lint 102 + Python/DOM |
-| F190 — CLI PHP pausa, expira, revisa sem resolver, retoma | [#266](https://github.com/rafhael100/imagine-ai-agents/pull/266) | `768ef0b14c267d3b4c927311875fe52498812a55` | [#43038088806](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43038088806) **success** | [#43038243942](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43038243942) **PENDENTE_CONFIRMACAO** | 835 PHP / lint 103 + Python/DOM |
+| F190 — CLI PHP pausa, expira, revisa sem resolver, retoma | [#266](https://github.com/rafhael100/imagine-ai-agents/pull/266) | `768ef0b14c267d3b4c927311875fe52498812a55` | [#43038088806](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43038088806) **success** | [#43038243942](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43038243942) **success** | 835 PHP / lint 103 + Python/DOM |
 
-**A CI pós-merge #43038243942 precisa constar como `success` no SHA exato `768ef0b14c267d3b4c927311875fe52498812a55` antes de marcar F190 como pós-merge verificado.** A aprovação pré-merge isolada é insuficiente.
+**CI pós-merge #43038243942 verificada com `success` no SHA exato `768ef0b14c267d3b4c927311875fe52498812a55`.** A aprovação pré-merge isolada jamais seria suficiente para esta evidência.
 
 ## Avanço técnico
 
