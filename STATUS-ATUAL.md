@@ -6,13 +6,13 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` inalterada. **SEC-49 em revisão:** **621 testes PHP / lint de 83 arquivos PHP e Python**; última CI aprovada: [SEC-48 #42924834951](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42924834951), [EVID-33](docs/AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md). O número de testes não é percentual de conclusão do produto.
+**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` inalterada. **SEC-49 integrada à dev (PR #228): 621 testes PHP / lint de 83 arquivos PHP e Python**. [CI #42933553917](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42933553917) `success` no SHA `fd795c74d78c8c790ca1efa3d2c05da85b0cf858`; [EVID-34](docs/AIA-R01-EVID-34-SEC49-CI-POSTMERGE.md). O número de testes não é percentual de conclusão do produto.
 
 ## Últimas entregas verificadas
 
-**SEC-49 em revisão:** epoch monotônico do estado de confiança detecta indisponibilidade/recuperação dentro de uma leitura ou sugestão. Oito U71-01..08, [SEC-49](docs/AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
+**SEC-49 integrada à dev (PR #228):** epoch monotônico do estado de confiança detecta indisponibilidade/recuperação dentro de uma leitura ou sugestão. Oito U71-01..08, [SEC-49](docs/AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
 
-**SEC-48 integrada à dev (PR #226):** leitura aninhada da mesma fachada é negada antes do leitor/nonce; o guard interno impede auditoria de sucesso na chamada externa. Oito U70-01..08, [SEC-48](docs/AIA-FT01-SEC-48-REENTRADA-LEITURA-OP01.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
+**SEC-48 integrada à dev (PR #226):** leitura aninhada da mesma fachada é negada antes do leitor/nonce; o guard interno impede auditoria de sucesso na chamada externa. Oito U70-01..08, [SEC-48](docs/AIA-FT01-SEC-48-REENTRADA-LEITURA-OP01.md); [EVID-33](docs/AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md), [CI #42924834951](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42924834951). CRM real `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-47 integrada à dev (PR #224):** recheck monotônico por recibo bloqueia retrocesso e restauração artificial de provas expiradas. Oito regressões U69-01..08; [SEC-47](docs/AIA-FT01-SEC-47-RECHECK-TEMPO-MONOTONICO.md); [EVID-32](docs/AIA-R01-EVID-32-SEC47-CI-POSTMERGE.md), [CI #42923158871](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42923158871). Relógio ainda sintético; CRM real `NAO_EXECUTADO` / **NO-GO**.
 
@@ -30,7 +30,7 @@
 
 **F163 / EVID-25 integrado à dev (PR #211):** os **13 cenários OP-01** ganharam testes de ensaio sintético 1:1 (U63-OP01-N01..N11, P01..P02), com cobertura Python para conferir a matriz. Os 13 casos **continuam `NAO_EXECUTADO` para homologação real**, e todos os gates continuam **NO-GO**. [EVID-25](docs/AIA-R01-EVID-25-ENSAIOS-OP01-13-CENARIOS.md). Evidência da execução pós-merge: [EVID-26](docs/AIA-R01-EVID-26-F163-CI-POSTMERGE.md).
 
-[EVID-24](docs/AIA-R01-EVID-24-CONSOLIDACAO-SEC39-40.md) preserva SEC-39/40: [CI #42889307984](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42889307984) aprovada com 533 testes PHP na dev; [CI SEC-39 #42888473719](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42888473719). Histórico, sem liberação CRM.
+[EVID-24](docs/AIA-R01-EVID-24-CONSOLIDACAO-SEC39-40.md): SEC-39/40; [CI #42889307984](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42889307984) aprovada, 533 testes PHP. Não autoriza CRM.
 
 **SEC-40 integrada à dev (PR #209):** manifesta versões fictícias apenas com 5 chaves e limita referências sintéticas comuns a 110 bytes antes de regex; preserva ordem indiferente e checks anteriores. Sete regressões U62-01..07. [SEC-40](docs/AIA-FT01-SEC-40-MANIFESTO-LIMITADO.md). Sem registro real de agentes.
 

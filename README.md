@@ -55,7 +55,7 @@ php tests/Unit/run.php
 EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=621 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**SEC-49 em revisão:** **621 testes PHP / lint 83 + Python**; [SEC-49](docs/AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md) nega recuperação silenciosa do estado compartilhado. Última CI pós-merge: [SEC-48 #42924834951](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42924834951), [EVID-33](docs/AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**SEC-49 integrada:** **621 testes PHP / lint 83 + Python**; [CI pós-merge #42933553917](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42933553917) aprovada. [EVID-34](docs/AIA-R01-EVID-34-SEC49-CI-POSTMERGE.md) registra limites. Anterior: [SEC-48 #42924834951](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42924834951). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
 
 ## Pacote de aceite bilateral — revisão pendente
 
