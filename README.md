@@ -52,7 +52,7 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=101 EXPECTED_CASES=827 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=102 EXPECTED_CASES=835 bash tools/run_r01_offline_quality_gate.sh
 ```
 
 **OP-01:** histórico **699 testes PHP**; SEC-60/#261 e F187/#262 integrados (810). **SEC-61 em CI: 827 PHP/lint 101**, [pausa da fila](docs/AIA-FT01-SEC-61-PAUSA-ADMISSAO-FILA.md), [EVID-42](docs/AIA-R01-EVID-42-SEC60-F187-CI-POSTMERGE.md), **NO-GO**.
