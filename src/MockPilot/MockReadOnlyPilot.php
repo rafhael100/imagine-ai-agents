@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace ImagineAI\MockPilot;
 
 use ImagineAI\Domain\TenantContext;
-use ImagineAI\MockBridge\{MockCrmReadRequest, MockReadProjectionInvariant};
+use ImagineAI\MockBridge\{MockCrmReadRequest, MockCrmPublicResponseContract};
 use ImagineAI\MockOrchestration\SupervisedCoordinator;
 use ImagineAI\MockTelemetry\MockCrmReadEdgeBoundary;
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence};
@@ -51,23 +51,12 @@ final class MockReadOnlyPilot
             $read = $this->edge->handle(
                 $wire, $envelope, $owner, $trustedContext, $now
             );
-            if (array_keys($read) !== ['contract', 'state', 'projection',
-                    'real_authorization', 'external_calls']
-                || $read['contract'] !== 'SYNTHETIC_CRM_AIA_PUBLIC_V1'
-                || $read['state'] !== 'READ_SYNTHETIC_ONLY'
-                || $read['real_authorization'] !== false
-                || $read['external_calls'] !== 0
-                || !is_array($read['projection'])) {
-                return self::denial();
-            }
-
-            // Revalidate the returned projection at the final pilot boundary.
-            // Even if a future edge adapter drifts, never send unauthorized
-            // data to a suggestion provider.
+            // Reuse the one closed public-response contract; the requested
+            // fields, trusted tenant/resource and denial envelope are verified
+            // together before any provider or Run can start.
             $request = new MockCrmReadRequest($wire);
-            $request->assertMatches($trustedContext);
-            if (!MockReadProjectionInvariant::isCanonical(
-                $read['projection'], $request->fields, $trustedContext)) {
+            if (!MockCrmPublicResponseContract::isAcceptedRead(
+                $read, $request, $trustedContext)) {
                 return self::denial();
             }
 

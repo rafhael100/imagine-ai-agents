@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## OP-01 — resposta pública compartilhada (10/11/2026)
+
+- `MockCrmPublicResponseContract` é a única validação do envelope sintético no edge, READ e piloto. **12 regressões U76-01..12**; gate esperado 660 PHP / lint 84 + Python. Ver [projeto](docs/AIA-FT01-OP01-RESPOSTA-COMPARTILHADA-2026-11-10.md).
+- O contrato proposto pelo CRM PR #57 continua OPEN/DRAFT, 13 casos reais `NAO_EXECUTADO`, e R01-G01..G11/CORE/SEG/AUT seguem NO-GO. Não há IAM, API, CRM real, SQL ou produção; manter `main` intacta.
+
 ## SEC-53 — Run read-only no callback de sugestão (10/11/2026)
 
 - `Run::withReadOnlySuggestion` bloqueia `Run::transition` e `Run::step` diretos enquanto um provedor `AiSuggestionProvider` recebe esse Run. Tentativa capturada pelo provedor invalida toda a sugestão externa; limpeza em `finally` permite terminalizar Run `FALHOU` e criar novo Run depois. [SEC-53](docs/AIA-FT01-SEC-53-RUN-LIFECYCLE-READONLY-CALLBACK.md).
