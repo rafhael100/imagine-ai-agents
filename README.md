@@ -55,7 +55,9 @@ php tests/Unit/run.php
 EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=648 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**SEC-52 integrada (PR #235): 640 testes PHP**, [CI #42943113650](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42943113650), [EVID-37](docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md). Guarda de callback no coordenador; CRM **NO-GO**.
+**SEC-53 em revisão:** 648 testes PHP esperados. [Guarda read-only de Run](docs/AIA-FT01-SEC-53-RUN-LIFECYCLE-READONLY-CALLBACK.md). **NO-GO**.
+
+**SEC-52 integrada (PR #235): 640 testes PHP**, [CI #42943113650](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42943113650), [EVID-37](docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md).
 
 **SEC-51 integrada (PR #233): 633 testes PHP**, [CI #42940604581](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42940604581), [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md).
 
