@@ -20,8 +20,8 @@ def fixture():
         return {
             "contract": "SYNTHETIC_QUEUE_SUPERVISION_V1",
             "admission": {"state": state},
-            "queue": {"pending": pending, "completed": completed, "indeterminate": 1},
-            "review": {"reviewed_unresolved": 1},
+            "queue": {"pending": pending, "reserved": 0, "completed": completed,\n                      "failed": 0, "cancelled": 0, "indeterminate": 1},
+            "review": {"awaiting_first": 0, "awaiting_second": 0,\n                       "reviewed_unresolved": 1, "conflict": 0},\n            "operational_decision": "NO_GO", "real_authorization": False,\n            "external_calls": 0, "write_calls": 0,
         }
     return {
         "contract": "SYNTHETIC_QUEUE_PAUSE_REHEARSAL_V1",
