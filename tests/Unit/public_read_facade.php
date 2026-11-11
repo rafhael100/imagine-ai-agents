@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 use ImagineAI\Domain\TenantContext;
-use ImagineAI\MockBridge\{MockCrmOwnerPolicy, MockCrmReadPublicFacade};
+use ImagineAI\MockBridge\{MockCrmOwnerPolicy, MockCrmReadPublicFacade, MockCrmReadRequest, MockCrmPublicResponseContract};
 use ImagineAI\MockTrust\{MockTrustGateway, MockSharedTrustState, MockTrustEnvelope, MockOwnerScopeEvidence};
 use ImagineAI\MockAudit\MockCrmReadAuditTrail;
 use ImagineAI\Mocks\MockCrmReader;
@@ -665,4 +665,120 @@ return [
         check(!$facade->recheck($wire, $env, $owner, $ctx, 17));
         check($state->countConsumed() === 2 && $audit->count() === 2);
     },
+
+    'U76-01 shared contract accepts owned one-field public response' => function (): void {
+        $ctx = context();
+        $req = new MockCrmReadRequest(f112Wire($ctx));
+        $valid = ['contract' => 'SYNTHETIC_CRM_AIA_PUBLIC_V1',
+            'state' => 'READ_SYNTHETIC_ONLY',
+            'projection' => ['ref' => $ctx->resource],
+            'real_authorization' => false, 'external_calls' => 0];
+        check(MockCrmPublicResponseContract::isAcceptedRead($valid, $req, $ctx));
+        check(MockCrmPublicResponseContract::isSafe($valid, $req, $ctx));
+    },
+    'U76-02 shared contract preserves requested two-field order' => function (): void {
+        $ctx = context(); $wire = f112Wire($ctx);
+        $wire['fields'] = ['stage', 'ref'];
+        $req = new MockCrmReadRequest($wire);
+        $valid = ['contract' => 'SYNTHETIC_CRM_AIA_PUBLIC_V1',
+            'state' => 'READ_SYNTHETIC_ONLY',
+            'projection' => ['stage' => 'SYNTHETIC_NEW', 'ref' => $ctx->resource],
+            'real_authorization' => false, 'external_calls' => 0];
+        check(MockCrmPublicResponseContract::isAcceptedRead($valid, $req, $ctx));
+        $swapped = $valid; $swapped['projection'] = [
+            'ref' => $ctx->resource, 'stage' => 'SYNTHETIC_NEW'];
+        check(!MockCrmPublicResponseContract::isSafe($swapped, $req, $ctx));
+    },
+    'U76-03 uniform denial is safe but never an accepted read' => function (): void {
+        $ctx = context(); $req = new MockCrmReadRequest(f112Wire($ctx));
+        $denial = MockCrmPublicResponseContract::denial();
+        check(MockCrmPublicResponseContract::isSafe($denial, $req, $ctx));
+        check(!MockCrmPublicResponseContract::isAcceptedRead($denial, $req, $ctx));
+        check(array_keys($denial) === [
+            'contract', 'state', 'projection', 'real_authorization', 'external_calls']);
+    },
+    'U76-04 denial with leaked projection is rejected' => function (): void {
+        $ctx = context(); $req = new MockCrmReadRequest(f112Wire($ctx));
+        $out = MockCrmPublicResponseContract::denial();
+        $out['projection'] = ['ref' => 'SYNTHETIC_B_LEAD'];
+        check(!MockCrmPublicResponseContract::isSafe($out, $req, $ctx));
+    },
+    'U76-05 extra owner response fields are not silently discarded' => function (): void {
+        $ctx = context(); $req = new MockCrmReadRequest(f112Wire($ctx));
+        $out = MockCrmPublicResponseContract::denial();
+        $out['access_token'] = 'SYNTHETIC_SECRET';
+        check(!MockCrmPublicResponseContract::isSafe($out, $req, $ctx));
+        $missing = MockCrmPublicResponseContract::denial();
+        unset($missing['external_calls']);
+        check(!MockCrmPublicResponseContract::isSafe($missing, $req, $ctx));
+    },
+    'U76-06 public envelope key order and exact types are mandatory' => function (): void {
+        $ctx = context(); $req = new MockCrmReadRequest(f112Wire($ctx));
+        $out = MockCrmPublicResponseContract::denial();
+        $out['real_authorization'] = 0;
+        check(!MockCrmPublicResponseContract::isSafe($out, $req, $ctx));
+        $out = MockCrmPublicResponseContract::denial();
+        $out['external_calls'] = false;
+        check(!MockCrmPublicResponseContract::isSafe($out, $req, $ctx));
+        $out = MockCrmPublicResponseContract::denial();
+        $reversed = array_reverse($out, true);
+        check(!MockCrmPublicResponseContract::isSafe($reversed, $req, $ctx));
+    },
+    'U76-07 unknown response version and state fail closed' => function (): void {
+        $ctx = context(); $req = new MockCrmReadRequest(f112Wire($ctx));
+        $out = MockCrmPublicResponseContract::denial();
+        $out['contract'] = 'SYNTHETIC_CRM_AIA_PUBLIC_V2';
+        check(!MockCrmPublicResponseContract::isSafe($out, $req, $ctx));
+        $out = MockCrmPublicResponseContract::denial();
+        $out['state'] = 'ALLOW';
+        check(!MockCrmPublicResponseContract::isSafe($out, $req, $ctx));
+    },
+    'U76-08 cross-tenant request cannot validate even uniform denial' => function (): void {
+        $ctx = context(); $other = context('SYNTHETIC_B');
+        $req = new MockCrmReadRequest(f112Wire($ctx));
+        check(!MockCrmPublicResponseContract::isSafe(
+            MockCrmPublicResponseContract::denial(), $req, $other));
+    },
+    'U76-09 foreign resource and wrong stage cannot pass as public read' => function (): void {
+        $ctx = context(); $req = new MockCrmReadRequest(f112Wire($ctx));
+        $out = ['contract' => 'SYNTHETIC_CRM_AIA_PUBLIC_V1',
+            'state' => 'READ_SYNTHETIC_ONLY',
+            'projection' => ['ref' => 'SYNTHETIC_B_LEAD'],
+            'real_authorization' => false, 'external_calls' => 0];
+        check(!MockCrmPublicResponseContract::isAcceptedRead($out, $req, $ctx));
+        $wire = f112Wire($ctx); $wire['fields'] = ['stage'];
+        $reqStage = new MockCrmReadRequest($wire);
+        $out['projection'] = ['stage' => 'SYNTHETIC_PRIVATE'];
+        check(!MockCrmPublicResponseContract::isAcceptedRead($out, $reqStage, $ctx));
+    },
+    'U76-10 untrusted large projection is rejected without exposing payload' => function (): void {
+        $ctx = context(); $req = new MockCrmReadRequest(f112Wire($ctx));
+        $out = ['contract' => 'SYNTHETIC_CRM_AIA_PUBLIC_V1',
+            'state' => 'READ_SYNTHETIC_ONLY',
+            'projection' => ['ref' => str_repeat('X', 1024 * 1024)],
+            'real_authorization' => false, 'external_calls' => 0];
+        check(!MockCrmPublicResponseContract::isAcceptedRead($out, $req, $ctx));
+        check(!MockCrmPublicResponseContract::isSafe($out, $req, $ctx));
+    },
+    'U76-11 shape-closed projection forbids hidden extra fields' => function (): void {
+        $ctx = context(); $req = new MockCrmReadRequest(f112Wire($ctx));
+        $out = ['contract' => 'SYNTHETIC_CRM_AIA_PUBLIC_V1',
+            'state' => 'READ_SYNTHETIC_ONLY',
+            'projection' => ['ref' => $ctx->resource, 'email' => 'SYNTHETIC_FAKE'],
+            'real_authorization' => false, 'external_calls' => 0];
+        check(!MockCrmPublicResponseContract::isAcceptedRead($out, $req, $ctx));
+    },
+    'U76-12 edge and one consumer share same success and denial contract' => function (): void {
+        $ctx = context(); $policy = new MockCrmOwnerPolicy();
+        $policy->grantFixture($ctx, ['ref']);
+        [$facade, , , $env, $owner] = f117Fixture($policy);
+        $req = new MockCrmReadRequest(f112Wire($ctx));
+        $result = $facade->handle(f112Wire($ctx), $env, $owner, $ctx, 15);
+        check(MockCrmPublicResponseContract::isAcceptedRead($result, $req, $ctx));
+        $again = $facade->handle(f112Wire($ctx), $env, $owner, $ctx, 15);
+        check($again === MockCrmPublicResponseContract::denial());
+        check(MockCrmPublicResponseContract::isSafe($again, $req, $ctx)
+            && !MockCrmPublicResponseContract::isAcceptedRead($again, $req, $ctx));
+    },
+
 ];
