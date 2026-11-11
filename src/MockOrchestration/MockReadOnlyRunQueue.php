@@ -22,6 +22,10 @@ final class MockReadOnlyRunQueue
     private array $jobs = [];
     private array $trace = [];
     private ?int $observedAt = null;
+    private bool $admissionPaused = false;
+    private const MAX_CONTROL_DECISIONS = 32;
+    /** @var array<string,string> */
+    private array $controlDecisions = [];
     // Optional while this queue is used as a standalone laboratory fixture.
     // A queue consumed by a supervised pilot must bind exactly once to its
     // coordinator; a provider callback can otherwise bypass the pilot guard
@@ -61,12 +65,90 @@ final class MockReadOnlyRunQueue
         $this->assertAdmissionIdle();
     }
 
+    /**
+     * Local emergency brake for new synthetic queue admissions.
+     * No operational identity or CRM permission is provided by this API.
+     */
+    public function pauseAdmission(TenantContext $context, string $decisionRef): array
+    {
+        $this->assertAdmissionIdle();
+        $this->boundContext->assertSame($context);
+        self::reference($decisionRef, 80);
+        if (isset($this->controlDecisions[$decisionRef])) {
+            if ($this->controlDecisions[$decisionRef] !== 'PAUSE'
+                || !$this->admissionPaused) {
+                MockError::fail('QUEUE_CONTROL_CONFLICT');
+            }
+            return $this->admissionView();
+        }
+        if ($this->admissionPaused) MockError::fail('QUEUE_CONTROL_STATE_DENIED');
+        if (count($this->controlDecisions) >= self::MAX_CONTROL_DECISIONS) {
+            MockError::fail('QUEUE_CONTROL_CAPACITY_DENIED');
+        }
+        // A saturated audit must not leave admissions open in an emergency.
+        // Enter fail-closed pause even if it cannot append an event, and
+        // explicitly report that the trace capacity was exhausted.
+        if (count($this->trace) >= self::MAX_TRACE) {
+            $this->admissionPaused = true;
+            MockError::fail('QUEUE_AUDIT_CAPACITY_DENIED');
+        }
+        $this->admissionPaused = true;
+        $this->controlDecisions[$decisionRef] = 'PAUSE';
+        $this->record('ADMISSION_PAUSED', 'SYNTHETIC_QUEUE_CONTROL');
+        return $this->admissionView();
+    }
+
+    /** Resume requires a new, bounded synthetic decision and audit slot. */
+    public function resumeAdmission(TenantContext $context, string $decisionRef): array
+    {
+        $this->assertAdmissionIdle();
+        $this->boundContext->assertSame($context);
+        self::reference($decisionRef, 80);
+        if (isset($this->controlDecisions[$decisionRef])) {
+            if ($this->controlDecisions[$decisionRef] !== 'RESUME'
+                || $this->admissionPaused) {
+                MockError::fail('QUEUE_CONTROL_CONFLICT');
+            }
+            return $this->admissionView();
+        }
+        if (!$this->admissionPaused) MockError::fail('QUEUE_CONTROL_STATE_DENIED');
+        if (count($this->controlDecisions) >= self::MAX_CONTROL_DECISIONS) {
+            MockError::fail('QUEUE_CONTROL_CAPACITY_DENIED');
+        }
+        // Never reopen a queue that cannot record the resume event.
+        $this->assertTraceRoom(1);
+        $this->admissionPaused = false;
+        $this->controlDecisions[$decisionRef] = 'RESUME';
+        $this->record('ADMISSION_RESUMED', 'SYNTHETIC_QUEUE_CONTROL');
+        return $this->admissionView();
+    }
+
+    /** Redacted aggregate, never an authorization or a worker command. */
+    public function admissionState(TenantContext $context): array
+    {
+        $this->boundContext->assertSame($context);
+        return $this->admissionView();
+    }
+
+    private function admissionView(): array
+    {
+        return [
+            'contract' => 'SYNTHETIC_QUEUE_CONTROL_V1',
+            'state' => $this->admissionPaused ? 'PAUSED' : 'OPEN',
+            'operational_decision' => 'NO_GO',
+            'real_authorization' => false,
+            'external_calls' => 0,
+            'write_calls' => 0,
+        ];
+    }
+
     /** Enqueue one synthetic OP-01 read-only Run reference, idempotently. */
     public function enqueue(TenantContext $context, string $runRef,
         string $requestRef, int $now): array
     {
         $this->assertAdmissionIdle();
         $this->boundContext->assertSame($context);
+        if ($this->admissionPaused) MockError::fail('QUEUE_ADMISSION_PAUSED');
         self::reference($runRef, 80);
         self::reference($requestRef, 90);
         $this->assertClock($now);
@@ -118,7 +200,8 @@ final class MockReadOnlyRunQueue
         foreach ($this->jobs as $runRef => $job) {
             if ($job['state'] === 'RESERVADA' && $now >= $job['until']) {
                 $expiring[] = $runRef;
-            } elseif ($pending === null && $job['state'] === 'PENDENTE') {
+            } elseif (!$this->admissionPaused && $pending === null
+                && $job['state'] === 'PENDENTE') {
                 $pending = $runRef;
             }
         }
