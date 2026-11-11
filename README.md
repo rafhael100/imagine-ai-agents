@@ -52,7 +52,7 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=89 EXPECTED_CASES=711 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=90 EXPECTED_CASES=721 bash tools/run_r01_offline_quality_gate.sh
 ```
 
 **OP-01 integrado:** PRs #239–#242 (**699 testes PHP**/lint87), [EVID-39](docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md). **Lote PR #244 integrado:** 711 PHP/lint88. **Demo F180 em revisão:** [guia](docs/AIA-FT01-DEMO-LOTE-OP01-F180.md). **NO-GO**.
