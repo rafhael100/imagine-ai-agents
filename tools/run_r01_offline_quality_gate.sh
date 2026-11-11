@@ -44,6 +44,7 @@ for name in \
   test_f195_transition_delta.py \
   test_f196_transition_tab.py \
   test_f197_visual_delta.py \
+  test_f198_tamper_gate.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
@@ -59,6 +60,7 @@ done
 # The mandatory Python F183 parity suite still runs where Node is absent.
 if command -v node >/dev/null 2>&1; then
   node tests/Browser/f108_smoke.cjs
+  node tests/Browser/f196_tamper_smoke.cjs
 else
   echo 'NODE_VISUAL_SMOKE_SKIPPED: Node not installed (no install attempted)'
 fi
