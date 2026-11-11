@@ -246,6 +246,25 @@ button:disabled{cursor:not-allowed;opacity:.53}
    <p class="muted" style="margin-top:12px"><strong>Sem autorização:</strong> estes botões não verificam a identidade de um revisor, não gravam histórico operacional, não alteram o relatório PHP e não enviam dados. Recarregar a página descarta o ensaio.</p>
   </div>
  </div>
+ <div class="panel" id="queue-transition-panel" style="margin-top:18px">
+  <div class="panelhead"><h2>Ensaio F190: pausa e retomada</h2><span class="tag warn">100% fictício · NO-GO</span></div>
+  <div class="panelbody">
+   <p class="muted">Compare as duas fotografias geradas pelo PHP offline. Os controles apenas alternam a visualização: não pausam filas reais, não registram votos e não enviam solicitações.</p>
+   <div class="actions" style="margin:16px 0">
+    <button type="button" class="secondary" id="queue-transition-paused" aria-pressed="true">Ver fila pausada</button>
+    <button type="button" class="secondary" id="queue-transition-resumed" aria-pressed="false">Ver fila retomada</button>
+   </div>
+   <p class="muted" role="status" aria-live="polite">Estado selecionado: <strong id="queue-transition-state">—</strong></p>
+   <div class="metrics review-sim-grid" aria-label="Contagens do ensaio F190">
+    <div class="panel metric"><small>Pendentes</small><strong id="queue-transition-pending">—</strong></div>
+    <div class="panel metric"><small>Concluídas</small><strong id="queue-transition-completed">—</strong></div>
+    <div class="panel metric"><small>Indeterminadas</small><strong id="queue-transition-unknown">—</strong></div>
+    <div class="panel metric"><small>Revisadas sem conclusão</small><strong id="queue-transition-unresolved">—</strong></div>
+   </div>
+   <p class="muted" id="queue-transition-explanation">A incerteza permanece mesmo após duas observações concordantes. Nenhuma autorização operacional é concedida.</p>
+   <p class="muted" style="margin-top:12px"><strong>Limite:</strong> o snapshot F182 e o ensaio F184 acima permanecem imutáveis.</p>
+  </div>
+ </div>
  <div class="panel" style="margin-top:18px"><div class="panelbody"><strong>Limites da prévia</strong><p class="muted" style="margin-top:8px">Contagens de um único JSON sintético incorporado à página. Sem atualização ao vivo, dados de clientes, autenticação, CRM, worker ou acesso de revisão real. Os 13 cenários de homologação OP-01 continuam não executados.</p></div></div>
 </section>
 <section class="page" id="page-audit" hidden>
@@ -262,6 +281,7 @@ button:disabled{cursor:not-allowed;opacity:.53}
 </div>
 </div>
 <script type="application/json" id="f183-supervision-data">{"contract":"SYNTHETIC_QUEUE_SUPERVISION_V1","queue":{"pending":0,"reserved":0,"completed":1,"failed":0,"cancelled":0,"indeterminate":3},"review":{"awaiting_first":0,"awaiting_second":1,"reviewed_unresolved":1,"conflict":1},"admission":{"state":"OPEN"},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0}</script>
+<script type="application/json" id="f196-transition-data">{"contract":"SYNTHETIC_QUEUE_PAUSE_REHEARSAL_V1","paused":{"contract":"SYNTHETIC_QUEUE_SUPERVISION_V1","queue":{"pending":1,"reserved":0,"completed":0,"failed":0,"cancelled":0,"indeterminate":1},"review":{"awaiting_first":0,"awaiting_second":0,"reviewed_unresolved":1,"conflict":0},"admission":{"state":"PAUSED"},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0},"resumed":{"contract":"SYNTHETIC_QUEUE_SUPERVISION_V1","queue":{"pending":0,"reserved":0,"completed":1,"failed":0,"cancelled":0,"indeterminate":1},"review":{"awaiting_first":0,"awaiting_second":0,"reviewed_unresolved":1,"conflict":0},"admission":{"state":"OPEN"},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0}</script>
 <script>
 (function(){
 "use strict";
@@ -297,6 +317,53 @@ function drawSupervision(){
  ];
  for(const [id,value] of metrics)get(id).textContent=String(value);
  get("supervision-decision").textContent="NO-GO";
+}
+
+// F196: a self-contained, strictly validated view of the F190 PHP fixture.
+// Switching snapshots is a local display action, never an admission command.
+const transitionRaw=JSON.parse(get("f196-transition-data").textContent);
+function transitionKeys(value,keys){
+ return value!==null && typeof value==="object" && !Array.isArray(value) &&
+  Object.keys(value).sort().join("|")===keys.slice().sort().join("|");
+}
+function validateTransitionSnapshot(entry,state,pending,completed){
+ if(!transitionKeys(entry,["contract","queue","review","admission","operational_decision","real_authorization","external_calls","write_calls"])||
+    entry.contract!=="SYNTHETIC_QUEUE_SUPERVISION_V1"||
+    !transitionKeys(entry.admission,["state"])||entry.admission.state!==state||
+    !transitionKeys(entry.queue,["pending","reserved","completed","failed","cancelled","indeterminate"])||
+    !transitionKeys(entry.review,["awaiting_first","awaiting_second","reviewed_unresolved","conflict"]))throw Error("F196_INVALID_SNAPSHOT_SCHEMA");
+ const queue={pending, reserved:0, completed, failed:0, cancelled:0, indeterminate:1};
+ const review={awaiting_first:0,awaiting_second:0,reviewed_unresolved:1,conflict:0};
+ for(const [key,value] of Object.entries(queue)){
+  if(!Number.isInteger(entry.queue[key])||entry.queue[key]!==value)throw Error("F196_INVALID_QUEUE");
+ }
+ for(const [key,value] of Object.entries(review)){
+  if(!Number.isInteger(entry.review[key])||entry.review[key]!==value)throw Error("F196_INVALID_REVIEW");
+ }
+ if(entry.operational_decision!=="NO_GO"||entry.real_authorization!==false||
+    entry.external_calls!==0||entry.write_calls!==0)throw Error("F196_UNSAFE_FLAGS");
+}
+if(!transitionKeys(transitionRaw,["contract","paused","resumed","operational_decision","real_authorization","external_calls","write_calls"])||
+ transitionRaw.contract!=="SYNTHETIC_QUEUE_PAUSE_REHEARSAL_V1"||
+ transitionRaw.operational_decision!=="NO_GO"||transitionRaw.real_authorization!==false||
+ transitionRaw.external_calls!==0||transitionRaw.write_calls!==0)throw Error("F196_INVALID_ENVELOPE");
+validateTransitionSnapshot(transitionRaw.paused,"PAUSED",1,0);
+validateTransitionSnapshot(transitionRaw.resumed,"OPEN",0,1);
+let transitionSelection="paused";
+function drawTransition(){
+ const view=transitionRaw[transitionSelection];
+ get("queue-transition-state").textContent=transitionSelection==="paused"?"PAUSADA · SIMULADA":"RETOMADA · SIMULADA";
+ get("queue-transition-pending").textContent=String(view.queue.pending);
+ get("queue-transition-completed").textContent=String(view.queue.completed);
+ get("queue-transition-unknown").textContent=String(view.queue.indeterminate);
+ get("queue-transition-unresolved").textContent=String(view.review.reviewed_unresolved);
+ get("queue-transition-paused").setAttribute("aria-pressed",String(transitionSelection==="paused"));
+ get("queue-transition-resumed").setAttribute("aria-pressed",String(transitionSelection==="resumed"));
+}
+function selectTransition(next){
+ if(next!=="paused"&&next!=="resumed")return;
+ transitionSelection=next;
+ drawTransition();
 }
 
 // F184: local UI projection only; the F182 PHP snapshot stays immutable.
@@ -565,7 +632,9 @@ get("agent-draft-clear-all").addEventListener("click",clearSessionDrafts);
 get("agent-draft-export").addEventListener("click",exportSessionDrafts);
 get("agent-draft-import").addEventListener("click",importSessionDrafts);
 get("agent-draft-clear-json").addEventListener("click",clearTransferText);
-drawSupervision();choose("allow");drawAudit();page("overview");drawReviewSimulation();drawAgentDraft("Nenhum rascunho configurado.");
+get("queue-transition-paused").addEventListener("click",()=>selectTransition("paused"));
+get("queue-transition-resumed").addEventListener("click",()=>selectTransition("resumed"));
+drawSupervision();choose("allow");drawAudit();page("overview");drawReviewSimulation();drawAgentDraft("Nenhum rascunho configurado.");drawTransition();
 })();
 </script>
 </body></html>
