@@ -35,6 +35,7 @@ for name in \
   test_f183_supervision_tab.py \
   test_f184_review_sandbox.py \
   test_f185_agent_draft_workbench.py \
+  test_f186_draft_collection.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \

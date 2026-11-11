@@ -174,4 +174,62 @@ assert.equal(byId("agent-draft-test").disabled, true, "reset revokes local scena
 assert.equal(byId("agent-draft-name").value, "", "reset clears user name");
 assert.equal(byId("agent-draft-template").value, "crm", "reset restores safe template");
 assert.equal(byId("audit-runs").textContent, "0", "no accidental test execution");
-console.log("F108_SMOKE_PASS: 5 pages, 6 scenarios, 14 synthetic events, review sandbox, reset, agent shortcut, agent drafts, offline CSP");
+// F186: a bounded, deduplicated collection lives in memory only.
+assert.equal(byId("agent-draft-count").textContent, "0 / 5", "initial collection empty");
+assert.equal(byId("agent-draft-save").disabled, true, "cannot save unvalidated preview");
+byId("agent-draft-template").value="crm";
+byId("agent-draft-name").value="Agente Um";
+byId("agent-draft-generate").click();
+byId("agent-draft-save").click();
+assert.equal(byId("agent-draft-count").textContent, "1 / 5", "first saved in session");
+assert.equal(byId("agent-draft-collection").children.length, 1, "one row only");
+byId("agent-draft-save").click();
+assert.equal(byId("agent-draft-count").textContent, "1 / 5", "exact duplicate idempotent");
+byId("agent-draft-template").value="performance";
+byId("agent-draft-name").value="AGENTE UM";
+byId("agent-draft-generate").click();
+byId("agent-draft-save").click();
+assert.equal(byId("agent-draft-count").textContent, "1 / 5", "conflicting case-folded name denied");
+assert.equal(byId("agent-draft-collection-status").textContent.includes("Nome já utilizado"), true, "conflict visible");
+for(const [name,template] of [
+ ["Agente Dois","performance"],["Agente Três","universidade"],
+ ["Agente Quatro","crm"],["Agente Cinco","performance"]
+]){
+ byId("agent-draft-template").value=template;
+ byId("agent-draft-name").value=name;
+ byId("agent-draft-generate").click();
+ byId("agent-draft-save").click();
+}
+assert.equal(byId("agent-draft-count").textContent, "5 / 5", "capacity limited to five");
+assert.equal(byId("agent-draft-collection").children.length, 5, "five rows");
+byId("agent-draft-template").value="crm";
+byId("agent-draft-name").value="Agente Seis";
+byId("agent-draft-generate").click();
+byId("agent-draft-save").click();
+assert.equal(byId("agent-draft-count").textContent, "5 / 5", "sixth denied with no eviction");
+assert.equal(byId("agent-draft-collection-status").textContent.includes("Limite local"), true);
+byId("agent-draft-name").value="Nome Alterado Sem Evento";
+byId("agent-draft-save").click();
+assert.equal(byId("agent-draft-count").textContent, "5 / 5", "silent field mutation not saved");
+assert.equal(byId("agent-draft-test").disabled, true, "invalidated stale preview");
+const savedFirst=byId("agent-draft-collection").children[0];
+assert.equal(savedFirst.children[0].textContent, "Agente Um · Qualificação CRM");
+savedFirst.children[1].click();
+assert.equal(byId("agent-draft-preview-name").textContent, "Agente Um", "restore a bounded existing draft");
+assert.equal(byId("agent-draft-test").disabled, false, "restored preview can open closed scenario");
+savedFirst.children[2].click();
+assert.equal(byId("agent-draft-count").textContent, "4 / 5", "deleting frees a slot");
+assert.equal(byId("agent-draft-test").disabled, true, "deleting active draft clears preview");
+savedFirst.children[1].click();
+assert.equal(byId("agent-draft-test").disabled, true, "stale detached row cannot resurrect deleted draft");
+byId("agent-draft-name").value="Agente Seis";
+byId("agent-draft-template").value="crm";
+byId("agent-draft-generate").click();
+byId("agent-draft-save").click();
+assert.equal(byId("agent-draft-count").textContent, "5 / 5", "released slot reusable");
+byId("agent-draft-clear-all").click();
+assert.equal(byId("agent-draft-count").textContent, "0 / 5", "clear all destroys transient data");
+assert.equal(byId("agent-draft-collection").children.length, 1, "empty placeholder only");
+assert.equal(byId("agent-draft-test").disabled, true, "clear all revokes current preview");
+assert.equal(byId("audit-runs").textContent, "0", "draft collection did not execute scenarios");
+console.log("F108_SMOKE_PASS: 5 pages, 6 scenarios, 14 synthetic events, review sandbox, reset, agent shortcut, agent drafts, bounded draft collection, offline CSP");
