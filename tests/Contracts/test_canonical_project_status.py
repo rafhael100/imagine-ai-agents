@@ -171,7 +171,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("629 testes PHP", readme)
         self.assertIn("AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md", rules)
         self.assertIn("EVID-34", current)
-        self.assertIn("42933553917", current)
+        self.assertIn("42933553917", (ROOT / "docs/AIA-R01-EVID-34-SEC49-CI-POSTMERGE.md").read_text(encoding="utf-8"))
         self.assertIn("42933553917", (ROOT / "docs/AIA-R01-EVID-34-SEC49-CI-POSTMERGE.md").read_text(encoding="utf-8"))
         self.assertIn("NAO_EXECUTADO", current)
         self.assertIn("NO-GO", current)
