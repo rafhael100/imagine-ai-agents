@@ -3,21 +3,21 @@
 ## PILOT — composição fila read-only → OP01 → sugestão (10/11/2026)
 
 - `MockQueuedReadOnlyPilot` usa fila, builder de request, piloto supervisionado. Valida campos antes de claim, executa somente leitura sintética, finaliza sucesso/negação; falha incerta não reenvia. Nenhuma mutação/credencial/rede; saída pública não revela IDs. [Documento](docs/AIA-FT01-QUEUE-PILOTO-OP01-COMPOSICAO-OFFLINE.md).
-- Gate previsto: **699 PHP / lint 87 + Python**, U79-01..12. CRM PR #57 OPEN/DRAFT, 13 testes reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO; `main` e VPS intocadas.
+- Gate pós-merge **699 PHP / lint 87 + Python**, U79-01..12, [CI #42951498940](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42951498940), [EVID-39](docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md). CRM PR #57 OPEN/DRAFT, 13 testes reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO; `main` e VPS intocadas.
 
 ## QUEUE — admissão read-only sem retries (10/11/2026)
 
 - `MockReadOnlyRunQueue` é FIFO em memória de empresa única: enqueue idempotente, claim com lease, settle/cancel controlados, limite 64 e trilha 256; expiração permanece `INDETERMINADO`, **nunca reenvia automaticamente**. [Documento](docs/AIA-FT01-QUEUE-LEITURA-SUPERVISIONADA-OFFLINE.md).
-- Gate esperado: **687 testes PHP / lint 86 e Python**, U78-01..15. Não é worker, queue distribuída, nem usa CRM real. R01-G01..G11, CORE/SEG/AUT, CRM PR #57 OPEN/DRAFT: NO-GO; 13 cenários `NAO_EXECUTADO`. Não tocar `main`/VPS/produção.
+- Gate pós-merge **687 testes PHP / lint 86 e Python**, U78-01..15, CI #42950862393. Não é worker, queue distribuída, nem usa CRM real. R01-G01..G11, CORE/SEG/AUT, CRM PR #57 OPEN/DRAFT: NO-GO; 13 cenários `NAO_EXECUTADO`. Não tocar `main`/VPS/produção.
 
 ## OP-01 — request builder vinculado ao contexto (10/11/2026)
 
 - `MockCrmReadRequestBuilder` cria pedido sintético a partir do `TenantContext` já vinculado e dos únicos campos autorizados pelo parser; não copia claims arbitrários, nem gera identidade ou nonce. Demo f127 já usa o builder. [Documentação](docs/AIA-FT01-OP01-CONSTRUCAO-REQUEST-CONTEXTO-VINCULADO.md).
-- Gate esperado: **672 PHP / lint 85 + Python** (U77-01..12). Propostas de resposta OP-01 compartilhada e builder NÃO ratificam CRM PR #57 OPEN/DRAFT, 13 casos `NAO_EXECUTADO`, gates NO-GO. `main`/VPS/produção intocadas.
+- Gate pós-merge **672 PHP / lint 85 + Python** (U77-01..12), CI #42949959755. Propostas de resposta OP-01 compartilhada e builder NÃO ratificam CRM PR #57 OPEN/DRAFT, 13 casos `NAO_EXECUTADO`, gates NO-GO. `main`/VPS/produção intocadas.
 
 ## OP-01 — resposta pública compartilhada (10/11/2026)
 
-- `MockCrmPublicResponseContract` é a única validação do envelope sintético no edge, READ e piloto. **12 regressões U76-01..12**; gate esperado 660 PHP / lint 84 + Python. Ver [projeto](docs/AIA-FT01-OP01-RESPOSTA-COMPARTILHADA-2026-11-10.md).
+- `MockCrmPublicResponseContract` é a única validação do envelope sintético no edge, READ e piloto. **12 regressões U76-01..12**; gate pós-merge 660 PHP / lint 84 + Python, CI #42949459592. Ver [projeto](docs/AIA-FT01-OP01-RESPOSTA-COMPARTILHADA-2026-11-10.md).
 - O contrato proposto pelo CRM PR #57 continua OPEN/DRAFT, 13 casos reais `NAO_EXECUTADO`, e R01-G01..G11/CORE/SEG/AUT seguem NO-GO. Não há IAM, API, CRM real, SQL ou produção; manter `main` intacta.
 
 ## SEC-53 — Run read-only no callback de sugestão (10/11/2026)
