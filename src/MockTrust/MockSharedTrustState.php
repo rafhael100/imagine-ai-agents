@@ -16,13 +16,38 @@ final class MockSharedTrustState
     private bool $available = true;
     // A failed revocation cannot be quietly forgotten by restoring availability.
     private bool $revocationOverflowed = false;
+    // Global local epoch: an outage/recovery or fresh revocation must not
+    // restore a receipt issued before the intervening change.
+    private int $revision = 0;
+
+    public function revision(): int { return $this->revision; }
+
+    public function assertRevision(int $expected): void
+    {
+        if ($this->revision !== $expected) MockError::fail('TRUST_STATE_UNAVAILABLE');
+    }
+
+    private function touch(): void
+    {
+        if ($this->revision === PHP_INT_MAX) {
+            $this->revocationOverflowed = true;
+            MockError::fail('TRUST_STATE_CAPACITY_DENIED');
+        }
+        ++$this->revision;
+    }
 
     public function __construct(private readonly int $capacity = 1024)
     {
         if ($capacity < 1 || $capacity > 4096) MockError::fail('TRUST_STATE_SCHEMA_DENIED');
     }
 
-    public function setAvailable(bool $available): void { $this->available = $available; }
+    public function setAvailable(bool $available): void
+    {
+        // Even an idempotent state assignment invalidates older receipts.
+        // No change to nonce consumption and no rollback of this epoch.
+        $this->touch();
+        $this->available = $available;
+    }
 
     public function revokeDigest(string $digest): void
     {
@@ -37,7 +62,10 @@ final class MockSharedTrustState
             $this->revocationOverflowed = true;
             MockError::fail('TRUST_STATE_CAPACITY_DENIED');
         }
-        $this->revokedDigests[$digest] = true;
+        if (!isset($this->revokedDigests[$digest])) {
+            $this->touch();
+            $this->revokedDigests[$digest] = true;
+        }
     }
 
     /**
