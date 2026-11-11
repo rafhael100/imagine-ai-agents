@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## QUEUE — admissão read-only sem retries (10/11/2026)
+
+- `MockReadOnlyRunQueue` é FIFO em memória de empresa única: enqueue idempotente, claim com lease, settle/cancel controlados, limite 64 e trilha 256; expiração permanece `INDETERMINADO`, **nunca reenvia automaticamente**. [Documento](docs/AIA-FT01-QUEUE-LEITURA-SUPERVISIONADA-OFFLINE.md).
+- Gate esperado: **687 testes PHP / lint 86 e Python**, U78-01..15. Não é worker, queue distribuída, nem usa CRM real. R01-G01..G11, CORE/SEG/AUT, CRM PR #57 OPEN/DRAFT: NO-GO; 13 cenários `NAO_EXECUTADO`. Não tocar `main`/VPS/produção.
+
 ## OP-01 — request builder vinculado ao contexto (10/11/2026)
 
 - `MockCrmReadRequestBuilder` cria pedido sintético a partir do `TenantContext` já vinculado e dos únicos campos autorizados pelo parser; não copia claims arbitrários, nem gera identidade ou nonce. Demo f127 já usa o builder. [Documentação](docs/AIA-FT01-OP01-CONSTRUCAO-REQUEST-CONTEXTO-VINCULADO.md).
