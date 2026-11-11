@@ -20,6 +20,9 @@ final class MockReadOnlyRunQueue
 
     /** @var array<string,array{request:string,state:string,claim:?string,until:?int,attempts:int}> */
     private array $jobs = [];
+    // One review reference can acknowledge one uncertain job only.
+    // Synthetic IDs are not proof of real reviewers or IAM.
+    private array $reviewRefs = [];
     private array $trace = [];
     private ?int $observedAt = null;
 
@@ -147,6 +150,50 @@ final class MockReadOnlyRunQueue
         return self::view($runRef, $this->jobs[$runRef]);
     }
 
+    /**
+     * Explicit two-reviewer acknowledgment of local uncertainty; this is
+     * NOT a business outcome, effect confirmation, retry or CRM approval.
+     * An indeterminate lease can never be resurrected into PENDENTE.
+     */
+    public function acknowledgeIndeterminate(
+        TenantContext $context,
+        string $runRef,
+        string $reviewRef,
+        string $reviewerA,
+        string $reviewerB,
+        int $now,
+    ): array {
+        $this->boundContext->assertSame($context);
+        self::reference($runRef, 80);
+        self::reference($reviewRef, 90);
+        self::reference($reviewerA, 90);
+        self::reference($reviewerB, 90);
+        if ($reviewerA === $reviewerB) MockError::fail('QUEUE_REVIEW_DENIED');
+        $this->clock($now);
+        $job = $this->jobs[$runRef] ?? null;
+        if ($job === null) MockError::fail('QUEUE_NOT_FOUND');
+        $digest = hash('sha256', $reviewerA . ':' . $reviewerB);
+        $prior = $job['review'] ?? null;
+        if ($prior !== null) {
+            if ($job['state'] === 'REVISADA_SEM_PROVA'
+                && $prior['ref'] === $reviewRef
+                && hash_equals($prior['digest'], $digest)) {
+                return self::view($runRef, $job);
+            }
+            MockError::fail('QUEUE_REVIEW_CONFLICT');
+        }
+        // A review is never a substitute for an observed CRM status. It only
+        // closes local queue triage for a lease already marked indeterminate.
+        if ($job['state'] !== 'INDETERMINADO') MockError::fail('QUEUE_REVIEW_DENIED');
+        if (isset($this->reviewRefs[$reviewRef])) MockError::fail('QUEUE_REVIEW_CONFLICT');
+        $this->assertTraceRoom(1);
+        $this->jobs[$runRef]['review'] = ['ref' => $reviewRef, 'digest' => $digest];
+        $this->jobs[$runRef]['state'] = 'REVISADA_SEM_PROVA';
+        $this->reviewRefs[$reviewRef] = $runRef;
+        $this->record('UNCERTAINTY_ACKNOWLEDGED', $runRef);
+        return self::view($runRef, $this->jobs[$runRef]);
+    }
+
     public function status(TenantContext $context, string $runRef): array
     {
         $this->boundContext->assertSame($context);
@@ -161,7 +208,8 @@ final class MockReadOnlyRunQueue
     public function counts(): array
     {
         $states = ['PENDENTE' => 0, 'RESERVADA' => 0, 'CONCLUIDA' => 0,
-            'FALHOU' => 0, 'CANCELADA' => 0, 'INDETERMINADO' => 0];
+            'FALHOU' => 0, 'CANCELADA' => 0, 'INDETERMINADO' => 0,
+            'REVISADA_SEM_PROVA' => 0];
         foreach ($this->jobs as $job) ++$states[$job['state']];
         return $states;
     }
