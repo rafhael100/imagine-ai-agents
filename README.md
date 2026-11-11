@@ -52,7 +52,7 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=84 EXPECTED_CASES=660 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=85 EXPECTED_CASES=672 bash tools/run_r01_offline_quality_gate.sh
 ```
 
 **OP-01 resposta compartilhada em revisão:** 660 testes PHP / lint 84 esperados. [Contrato sintético](docs/AIA-FT01-OP01-RESPOSTA-COMPARTILHADA-2026-11-10.md). **NO-GO**.
