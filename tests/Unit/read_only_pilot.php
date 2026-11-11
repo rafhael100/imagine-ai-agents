@@ -530,4 +530,35 @@ return [
         check($mut->submitCount() === 0 && $counts->snapshot()['attempts'] === 1
             && $audit->count() === 1);
     },
+
+    'U71-07 shared trust outage and recovery during provider fails the draft' => function (): void {
+        [$pilot, $coord, $mut, $counts, $audit, $env, $owner, $ctx, ,
+            $provider, $state] = f167Fixture(
+                function ($policy, $envelope, $owner, $ctx, $state): void {
+                    $state->setAvailable(false);
+                    $state->setAvailable(true);
+                }, true);
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC49_TRUST_ABA') === f130Denial());
+        check($state->revision() === 2 && $state->countConsumed() === 1);
+        check($provider->calls === 1
+            && $coord->events()[3]['run_state'] === 'SYNTHETIC_FALHOU');
+        check($counts->snapshot()['attempts'] === 1 && $audit->count() === 1
+            && $mut->submitCount() === 0);
+    },
+    'U71-08 fresh unrelated trust revocation during provider denies the draft' => function (): void {
+        [$pilot, $coord, $mut, $counts, $audit, $env, $owner, $ctx, ,
+            $provider, $state] = f167Fixture(
+                function ($policy, $envelope, $owner, $ctx, $state): void {
+                    $state->revokeDigest(str_repeat('c', 64));
+                }, true);
+        check($pilot->suggest(f112Wire($ctx), $env, $owner, $ctx,
+            15, 'SYNTHETIC_SEC49_REVISION') === f130Denial());
+        check($state->revision() === 1 && $state->countRevoked() === 1
+            && $state->countConsumed() === 1);
+        check($provider->calls === 1
+            && $coord->events()[3]['run_state'] === 'SYNTHETIC_FALHOU');
+        check($mut->submitCount() === 0 && $counts->snapshot()['attempts'] === 1
+            && $audit->count() === 1);
+    },
 ];
