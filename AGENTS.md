@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## BATCH — lote read-only supervisionado (10/11/2026)
+
+- `MockQueuedBatchRunner` processa até 8 provas fictícias por chamada explícita, validadas integralmente antes do primeiro claim. Sem retry, IAM ou escrita. Saída de contagens agregadas. [Especificação](docs/AIA-FT01-QUEUE-LOTE-SUPERVISIONADO-OFFLINE.md).
+- Gate previsto: **711 PHP / lint 88 + Python**, U80-01..12. CRM PR #57 OPEN/DRAFT, 13 casos reais `NAO_EXECUTADO`, R01/CORE/SEG/AUT NO-GO; sem `main`, VPS, segredos ou produção.
+
 ## PILOT — composição fila read-only → OP01 → sugestão (10/11/2026)
 
 - `MockQueuedReadOnlyPilot` usa fila, builder de request, piloto supervisionado. Valida campos antes de claim, executa somente leitura sintética, finaliza sucesso/negação; falha incerta não reenvia. Nenhuma mutação/credencial/rede; saída pública não revela IDs. [Documento](docs/AIA-FT01-QUEUE-PILOTO-OP01-COMPOSICAO-OFFLINE.md).
