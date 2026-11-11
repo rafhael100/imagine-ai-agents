@@ -50,13 +50,32 @@ def verify(payload):
         queue, review = entry.get("queue"), entry.get("review")
         if type(queue) is not dict or type(review) is not dict:
             raise ValueError("INVALID_COUNTS")
-        for key, value in (("pending", pending), ("completed", completed),
-                           ("indeterminate", 1)):
-            if type(queue.get(key)) is not int or queue[key] != value:
+        # No extra fields, credentials or unverified counters can be published.
+        expected_queue = {
+            "pending": pending, "reserved": 0, "completed": completed,
+            "failed": 0, "cancelled": 0, "indeterminate": 1,
+        }
+        expected_review = {
+            "awaiting_first": 0, "awaiting_second": 0,
+            "reviewed_unresolved": 1, "conflict": 0,
+        }
+        if queue.keys() != expected_queue.keys():
+            raise ValueError("INVALID_QUEUE_SCHEMA")
+        if review.keys() != expected_review.keys():
+            raise ValueError("INVALID_REVIEW_SCHEMA")
+        for name, expected in expected_queue.items():
+            if type(queue[name]) is not int or queue[name] != expected:
                 raise ValueError("INVALID_QUEUE_COUNTS")
-        if (type(review.get("reviewed_unresolved")) is not int
-                or review["reviewed_unresolved"] != 1):
-            raise ValueError("UNCERTAINTY_WAS_LOST")
+        for name, expected in expected_review.items():
+            if type(review[name]) is not int or review[name] != expected:
+                raise ValueError("INVALID_REVIEW_COUNTS")
+        if (entry["operational_decision"] != "NO_GO"
+                or entry["real_authorization"] is not False
+                or type(entry["external_calls"]) is not int
+                or entry["external_calls"] != 0
+                or type(entry["write_calls"]) is not int
+                or entry["write_calls"] != 0):
+            raise ValueError("INVALID_SUPERVISION_FLAGS")
     def scan(obj):
         if type(obj) is dict:
             for key, value in obj.items():
