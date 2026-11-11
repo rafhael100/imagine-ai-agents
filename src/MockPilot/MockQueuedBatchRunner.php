@@ -38,6 +38,11 @@ final class MockQueuedBatchRunner
     ): array {
         try {
             $this->boundContext->assertSame($context);
+            // A provider may call this batch while its outer suggestion is
+            // active. Reject BEFORE consuming even the first queued job.
+            // The shared coordinator also taints the outer suggestion if the
+            // provider catches and suppresses this denial.
+            $this->pilot->assertQueueAdmissionReady();
             if (!array_is_list($pairs) || count($pairs) < 1
                 || count($pairs) > self::MAX_BATCH
                 || $now < 0 || $leaseTicks < 1 || $leaseTicks > 300
