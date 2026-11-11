@@ -6,11 +6,13 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` inalterada. **SEC-49 integrada à dev (PR #228): 621 testes PHP / lint de 83 arquivos PHP e Python**. [CI #42933553917](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42933553917) `success` no SHA `fd795c74d78c8c790ca1efa3d2c05da85b0cf858`; [EVID-34](docs/AIA-R01-EVID-34-SEC49-CI-POSTMERGE.md). O número de testes não é percentual de conclusão do produto.
+**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **SEC-50 em revisão: 629 testes PHP / lint de 83 arquivos PHP e Python**. Última CI pós-merge: [SEC-49 #42933553917](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42933553917), [EVID-34](docs/AIA-R01-EVID-34-SEC49-CI-POSTMERGE.md). O número de testes não é percentual de conclusão do produto.
 
 ## Últimas entregas verificadas
 
-**SEC-49 integrada à dev (PR #228):** epoch monotônico do estado de confiança detecta indisponibilidade/recuperação dentro de uma leitura ou sugestão. Oito U71-01..08, [SEC-49](docs/AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
+**SEC-50 em revisão:** capability grant revogada durante leitor/provedor nega o resultado da ferramenta; sugestão fecha Run como `FALHOU`. Oito U72-01..08, [SEC-50](docs/AIA-FT01-SEC-50-CAPABILITY-RECHECK-POS-FERRAMENTA.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
+
+**SEC-49 integrada à dev (PR #228):** epoch do trust compartilhado; oito U71-01..08, [SEC-49](docs/AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md), [EVID-34](docs/AIA-R01-EVID-34-SEC49-CI-POSTMERGE.md).
 
 **SEC-48 integrada à dev (PR #226):** leitura aninhada da mesma fachada é negada antes do leitor/nonce; o guard interno impede auditoria de sucesso na chamada externa. Oito U70-01..08, [SEC-48](docs/AIA-FT01-SEC-48-REENTRADA-LEITURA-OP01.md); [EVID-33](docs/AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md), [CI #42924834951](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42924834951). CRM real `NAO_EXECUTADO` / **NO-GO**.
 

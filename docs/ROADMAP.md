@@ -64,7 +64,9 @@ A [SEC-46](AIA-FT01-SEC-46-RECIBO-REVISAO-OWNER-ABA.md) foi integrada à dev, bl
 
 SEC-48: 613 PHP, [EVID-33](AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md) e CI #42924834951.
 
-[SEC-49](AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md) integrada à dev: 621 PHP / 83 lint, oito U71. [CI #42933553917](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42933553917), [EVID-34](AIA-R01-EVID-34-SEC49-CI-POSTMERGE.md). Só mock.
+[SEC-49](AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md): [EVID-34](AIA-R01-EVID-34-SEC49-CI-POSTMERGE.md), CI #42933553917 (621 PHP).
+
+[SEC-50](AIA-FT01-SEC-50-CAPABILITY-RECHECK-POS-FERRAMENTA.md): 629 PHP / 83 lint; revogação pós READ/SUGGEST, U72-01..08. Gate em revisão/NO-GO.
 
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 
