@@ -85,5 +85,46 @@ class F206StaticTests(unittest.TestCase):
         self.assertIn("operational_decision=NO_GO", gate)
 
 
+    @unittest.skipUnless(shutil.which("php"), "PHP CLI missing")
+    def test_static_report_contains_only_eight_verified_states(self):
+        import render_f206_health as renderer
+        page = renderer.render(verifier.fixture())
+        self.assertEqual(page.count("<tr>"), 9)
+        self.assertIn("Decisão operacional: NO-GO", page)
+        self.assertIn("CAPACITY_EXHAUSTED", page)
+        self.assertIn("REVIEW_REQUIRED", page)
+        self.assertIn("script-src 'none'", page)
+        self.assertNotIn("<script", page)
+        self.assertNotIn("SYNTHETIC_F206_RUN_", page)
+
+    @unittest.skipUnless(shutil.which("php"), "PHP CLI missing")
+    def test_static_report_denies_false_go_before_rendering(self):
+        import render_f206_health as renderer
+        bad = verifier.fixture()
+        bad["stages"]["paused"]["operational_decision"] = "GO"
+        with self.assertRaises(ValueError):
+            renderer.render(bad)
+
+    @unittest.skipUnless(shutil.which("php"), "PHP CLI missing")
+    def test_static_renderer_is_deterministic_cli(self):
+        path = str(ROOT / "tools/render_f206_health.py")
+        a = subprocess.run([sys.executable, path], cwd=ROOT,
+                           capture_output=True, text=True, timeout=25)
+        b = subprocess.run([sys.executable, path], cwd=ROOT,
+                           capture_output=True, text=True, timeout=25)
+        self.assertEqual(a.returncode, 0, a.stderr)
+        self.assertEqual(a.stdout, b.stdout)
+        self.assertTrue(a.stdout.startswith("<!doctype html>"))
+
+    def test_static_renderer_has_no_network_or_persistent_write(self):
+        code = (ROOT / "tools/render_f206_health.py").read_text(encoding="utf-8")
+        self.assertIn("verify(data)", code)
+        self.assertIn("escape(str(cell), quote=True)", code)
+        self.assertIn("script-src 'none'", code)
+        for forbidden in ("fetch(", "requests.", "urllib.", "open(",
+                          "write_text(", "FileIO(", "subprocess.run("):
+            self.assertNotIn(forbidden, code)
+
+
 if __name__ == "__main__":
     unittest.main()
