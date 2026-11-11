@@ -6,7 +6,7 @@
 
 **Fase:** laboratório offline. **Sem CRM real, VPS ou clientes. Produção: NO-GO**.
 
-**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **810 testes PHP / lint 100 + Python/DOM**; [CI #43020983307](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43020983307) `success`, [EVID-42](docs/AIA-R01-EVID-42-SEC60-F187-CI-POSTMERGE.md). **NO-GO**.
+**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **827 testes PHP / lint 101 + Python/DOM**; [CI #43020983307](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43020983307) `success`, [EVID-42](docs/AIA-R01-EVID-42-SEC60-F187-CI-POSTMERGE.md). **NO-GO**.
 
 ## Últimas entregas verificadas
 
