@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## F205 — visão de saúde agregada da fila sintética (11/11/2026)
+
+- `MockQueueHealthSnapshot` combina, via `MockUncertaintyReviewBoard`, triagem F200 e capacidade F204 da **mesma fila**. Sinaliza PAUSED/REVIEW_REQUIRED/CAPACITY_EXHAUSTED/CAPACITY_NEAR_LIMIT/LEASE_IN_PROGRESS/PENDING/QUIET sem comando operacional, sem IDs e com invariantes de contagens.
+- 14 regressões U102 elevam o baseline proposto a **879 PHP / lint 109 + Python/DOM**. [F205](docs/AIA-FT01-F205-SAÚDE-UNIFICADA-FILA.md). CRM PR #57 OPEN/DRAFT, 13 cenários reais NAO_EXECUTADO, R01-G01..G11/CORE/SEG/AUT NO-GO; main, VPS, segredos, clientes, produção e custos intocados.
+
+
 ## EVID-48 — capacidade da fila F204 integrada, CI pós-merge aprovada (11/11/2026)
 
 - F204 PR #285 squash `e6eee470f6b49d45488b2f93122cf5c452626695`, CI pós-merge #43090143368 `success`, 14 testes PHP U101 novos e inventário **865 PHP / lint 107 + Python/DOM**. [EVID-48](docs/AIA-R01-EVID-48-F204-CI-POSTMERGE.md).
