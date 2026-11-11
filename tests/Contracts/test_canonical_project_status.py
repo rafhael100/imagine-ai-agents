@@ -253,7 +253,7 @@ class CanonicalProjectStatusTests(unittest.TestCase):
             self.assertIn(str(ci), evidence)
             self.assertIn(str(ci), current)
         self.assertIn("699 testes PHP", current)
-        self.assertIn("699 testes PHP", readme)
+        self.assertIn("699 testes PHP", evidence)
         self.assertIn("699 PHP / lint 87", rules)
         self.assertIn("f453ebbb99a45416398e0cebed0b404bc00f2dc7", evidence)
         self.assertIn("NO-GO", current)
