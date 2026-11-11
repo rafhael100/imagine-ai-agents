@@ -52,7 +52,7 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=633 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=640 bash tools/run_r01_offline_quality_gate.sh
 ```
 
 **SEC-51 integrada à dev (PR #233): 633 testes PHP / lint 83 + Python**. Reentrada de ferramentas negada na sugestão. [CI #42940604581](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42940604581), [SEC-51](docs/AIA-FT01-SEC-51-REENTRADA-FERRAMENTAS-CALLBACK.md), [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md). Sem CRM real.
