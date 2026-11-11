@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## F206 — ensaio de saúde da fila com 8 estados (11/11/2026)
+
+- `examples/f206-queue-health-demo.php` demonstra 8 snapshots determinísticos, incluindo pausa, incerteza e saturação de 60/64; `tools/verify_f206_health.py` valida esquema, tipos, contadores, sinais e NO_GO. [F206](docs/AIA-FT01-F206-ENSAIO-SAUDE-FILA.md).
+- 14 contratos Python de paridade e mutação, adicionados ao gate offline. Baseline proposto **879 testes PHP / lint 110 + Python/DOM**, sem IAM real, worker, CRM, deploy ou autorização. CRM PR #57 OPEN/DRAFT, 13 casos reais NAO_EXECUTADO, R01-G01..G11/CORE/SEG/AUT NO-GO. Main/VPS/custos sem alteração.
+
+
 ## F205 — visão de saúde agregada da fila sintética (11/11/2026)
 
 - `MockQueueHealthSnapshot` combina, via `MockUncertaintyReviewBoard`, triagem F200 e capacidade F204 da **mesma fila**. Sinaliza PAUSED/REVIEW_REQUIRED/CAPACITY_EXHAUSTED/CAPACITY_NEAR_LIMIT/LEASE_IN_PROGRESS/PENDING/QUIET sem comando operacional, sem IDs e com invariantes de contagens.
