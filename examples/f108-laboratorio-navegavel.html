@@ -221,6 +221,42 @@ function drawSupervision(){
  get("supervision-decision").textContent="NO-GO";
 }
 
+// F184: local UI projection only; the F182 PHP snapshot stays immutable.
+let reviewSimulationDecision=null;
+function drawReviewSimulation(){
+ const source=JSON.parse(get("f183-supervision-data").textContent);
+ if(source.contract!=="SYNTHETIC_QUEUE_SUPERVISION_V1"||source.operational_decision!=="NO_GO"||source.real_authorization!==false||source.external_calls!==0||source.write_calls!==0)throw Error("SYNTHETIC_F184_CONTRACT_DENIED");
+ const result={...source.review};
+ if(reviewSimulationDecision!==null){
+  if(result.awaiting_second<1)throw Error("SYNTHETIC_F184_REVIEW_DENIED");
+  result.awaiting_second-=1;
+  if(reviewSimulationDecision==="AGREE")result.reviewed_unresolved+=1;
+  else if(reviewSimulationDecision==="DISAGREE")result.conflict+=1;
+  else throw Error("SYNTHETIC_F184_INVALID_DECISION");
+ }
+ const total=result.awaiting_first+result.awaiting_second+result.reviewed_unresolved+result.conflict;
+ if(total!==source.queue.indeterminate)throw Error("SYNTHETIC_F184_UNCERTAINTY_DENIED");
+ get("review-sim-second").textContent=String(result.awaiting_second);
+ get("review-sim-unresolved").textContent=String(result.reviewed_unresolved);
+ get("review-sim-conflict").textContent=String(result.conflict);
+ get("review-sim-indeterminate").textContent=String(source.queue.indeterminate);
+ get("review-sim-message").textContent=reviewSimulationDecision==="AGREE"?
+  "Observação concordante simulada. O resultado continua indeterminado.":
+  reviewSimulationDecision==="DISAGREE"?
+  "Divergência simulada. A incerteza permanece e não há aprovação.":
+  "Nenhuma segunda observação simulada.";
+ get("review-sim-events").textContent=reviewSimulationDecision===null?
+  "0 observações fictícias adicionadas nesta sessão.":
+  "1 observação fictícia nesta sessão; nenhum evento persistido.";
+ get("review-sim-agree").disabled=reviewSimulationDecision!==null;
+ get("review-sim-disagree").disabled=reviewSimulationDecision!==null;
+}
+function applyReviewSimulation(decision){
+ if(reviewSimulationDecision!==null||!["AGREE","DISAGREE"].includes(decision))return;
+ reviewSimulationDecision=decision;
+ drawReviewSimulation();
+}
+function resetReviewSimulation(){reviewSimulationDecision=null;drawReviewSimulation();}
 let chosen="allow",runs=0,denials=0,conflicts=0,sequence=0,logs=[];
 function page(name){for(const p of ["overview","agents","lab","supervision","audit"]){get("page-"+p).hidden=p!==name;}for(const b of document.querySelectorAll("[data-page-button]")){if(b.dataset.pageButton===name)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");}window.scrollTo(0,0);if(name==="audit")drawAudit();}
 function choose(id){if(!Object.prototype.hasOwnProperty.call(scenarios,id))return;chosen=id;const s=scenarios[id];get("case-id").textContent=s.id;get("case-title").textContent=s.title;get("case-subtitle").textContent=s.desc;get("fixture-product").textContent=s.product;get("fixture-tenant").textContent=s.tenant;get("fixture-source").textContent=s.source;get("fixture-grant").textContent=s.grant;for(const b of document.querySelectorAll("[data-scenario]")){const selected=b.dataset.scenario===id;b.classList.toggle("selected",selected);b.setAttribute("aria-pressed",String(selected));}clearResult();}
@@ -236,7 +272,10 @@ for(const b of document.querySelectorAll("[data-agent-scenario]"))b.addEventList
 get("run-button").addEventListener("click",run);
 get("clear-result").addEventListener("click",clearResult);
 get("reset-audit").addEventListener("click",reset);
-drawSupervision();choose("allow");drawAudit();page("overview");
+get("review-sim-agree").addEventListener("click",()=>applyReviewSimulation("AGREE"));
+get("review-sim-disagree").addEventListener("click",()=>applyReviewSimulation("DISAGREE"));
+get("review-sim-reset").addEventListener("click",resetReviewSimulation);
+drawSupervision();choose("allow");drawAudit();page("overview");drawReviewSimulation();
 })();
 </script>
 </body></html>
