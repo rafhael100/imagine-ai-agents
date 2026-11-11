@@ -49,6 +49,7 @@ for name in \
   test_f201_triage_rehearsal.py \
   test_f202_triage_tab.py \
   test_f203_triage_adversarial.py \
+  test_f206_health_rehearsal.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
@@ -76,6 +77,7 @@ fi
 
 python3 tools/verify_f190_rehearsal.py
 python3 tools/verify_f201_triage.py
+python3 tools/verify_f206_health.py
 # Inert HTML rendering must succeed; the preview is not persisted.
 python3 tools/render_f190_supervision.py >/dev/null
 
