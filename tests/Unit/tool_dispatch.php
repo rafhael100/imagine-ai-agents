@@ -1127,4 +1127,88 @@ return [
             ['SYNTHETIC_DENIED', 'SYNTHETIC_SUGGESTED']);
         check($mut->submitCount() === 0);
     },
+
+    'U73-01 suggestion callback reentry denied even when provider swallows error' => function (): void {
+        $tool = null; $grant = null; $ctx = null; $run = null; $nested = '';
+        [$tool, $grant, $ctx, $run, $coord, $mut, $provider] =
+            f172SuggestionFixture(function () use (&$tool, &$grant, &$ctx, &$run, &$nested): void {
+                try {
+                    $tool->dispatch(MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+                        $ctx, $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run);
+                } catch (MockError $error) { $nested = $error->getMessage(); }
+            });
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+            $ctx, $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($nested === 'TOOL_SUGGESTION_DENIED' && $provider->calls === 1
+            && $run->state() === 'FALHOU' && $mut->submitCount() === 0);
+        check(array_column($tool->events(), 'code') === ['SYNTHETIC_DENIED']);
+    },
+    'U73-02 approved fake mutation cannot run inside suggestion callback' => function (): void {
+        $tool = null; $ctx = null; $intent = null; $approval = null; $writeGrant = null;
+        $nested = '';
+        [$tool, $grant, $ctx, $run, $coord, $mut, $provider] =
+            f172SuggestionFixture(function () use (&$tool, &$ctx, &$intent, &$approval,
+                &$writeGrant, &$nested): void {
+                try {
+                    $tool->dispatch(MockToolCatalog::MUTATE, MockToolCatalog::VERSION,
+                        $ctx, $writeGrant, ['material' => 'SYNTHETIC_MATERIAL'],
+                        15, null, $intent, $approval);
+                } catch (MockError $error) { $nested = $error->getMessage(); }
+            });
+        $step = $coord->step($run, 'SYNTHETIC_SEC51_STEP');
+        $intent = new Intent('SYNTHETIC_SEC51_INTENT', $step,
+            'SYNTHETIC_SEC51_KEY', 'mock.task.create', 'SYNTHETIC_MATERIAL');
+        $approval = new Approval('SYNTHETIC_SEC51_APPROVAL', $intent,
+            'SYNTHETIC_REVIEWER', 10, 20, 'APROVADA');
+        $writeGrant = new MockCapabilityGrant('SYNTHETIC_SEC51_WRITE_GRANT',
+            MockToolCatalog::MUTATE, $ctx, 10, 20);
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+            $ctx, $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($nested === 'TOOL_SUGGESTION_DENIED' && $run->state() === 'FALHOU'
+            && $provider->calls === 1 && $mut->submitCount() === 0);
+        check(array_column($tool->events(), 'code') === ['SYNTHETIC_DENIED']);
+    },
+    'U73-03 nested OP01 read denied without edge call and outer run fails' => function (): void {
+        $tool = null; $ctx = null; $readGrant = null; $nested = null;
+        [$tool, $grant, $ctx, $run, $coord, $mut, $provider] =
+            f172SuggestionFixture(function () use (&$tool, &$ctx, &$readGrant, &$nested): void {
+                $nested = $tool->readThroughBoundary(
+                    MockToolCatalog::READ, MockToolCatalog::VERSION,
+                    $ctx, $readGrant, [], null, null, 15);
+            });
+        $readGrant = new MockCapabilityGrant('SYNTHETIC_SEC51_READ_GRANT',
+            MockToolCatalog::READ, $ctx, 10, 20);
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+            $ctx, $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($nested === f136Denied() && $provider->calls === 1
+            && $run->state() === 'FALHOU' && $mut->submitCount() === 0);
+        check(array_column($tool->events(), 'code') === ['SYNTHETIC_DENIED']);
+    },
+    'U73-04 fresh suggestion after denied reentry works normally' => function (): void {
+        $tool = null; $grant = null; $ctx = null; $run = null; $first = true;
+        [$tool, $grant, $ctx, $run, $coord, $mut, $provider] =
+            f172SuggestionFixture(function () use (&$tool, &$grant, &$ctx, &$run, &$first): void {
+                if (!$first) return;
+                $first = false;
+                try {
+                    $tool->dispatch(MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+                        $ctx, $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run);
+                } catch (MockError) { /* the outer suggestion must still fail */ }
+            });
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+            $ctx, $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        $fresh = $coord->start('SYNTHETIC_SEC51_FRESH_RUN');
+        $result = $tool->dispatch(MockToolCatalog::SUGGEST, MockToolCatalog::VERSION,
+            $ctx, $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $fresh);
+        check($result['state'] === 'SYNTHETIC_OK' && $run->state() === 'FALHOU'
+            && $fresh->state() === 'EXECUTANDO' && $provider->calls === 2
+            && $mut->submitCount() === 0);
+        check(array_column($tool->events(), 'code') ===
+            ['SYNTHETIC_DENIED', 'SYNTHETIC_SUGGESTED']);
+    },
+
 ];
