@@ -69,7 +69,7 @@ final class MockReadOnlyRunQueue
         $this->boundContext->assertSame($context);
         self::reference($runRef, 80);
         self::reference($requestRef, 90);
-        $this->clock($now);
+        $this->assertClock($now);
         $old = $this->jobs[$runRef] ?? null;
         if ($old !== null) {
             if ($old['request'] !== $requestRef) MockError::fail('QUEUE_IDEMPOTENCY_CONFLICT');
@@ -87,6 +87,9 @@ final class MockReadOnlyRunQueue
         }
         if (count($this->jobs) >= self::MAX_JOBS) MockError::fail('QUEUE_CAPACITY_DENIED');
         $this->assertTraceRoom(1);
+        // Commit observed time only after the operation can change state.
+        // Rejected/conflicting/idempotent calls must not poison the queue.
+        $this->commitClock($now);
         $this->jobs[$runRef] = [
             'request' => $requestRef, 'state' => 'PENDENTE',
             'claim' => null, 'until' => null, 'attempts' => 0,
@@ -107,7 +110,7 @@ final class MockReadOnlyRunQueue
             || $now > PHP_INT_MAX - $leaseTicks) {
             MockError::fail('QUEUE_LEASE_DENIED');
         }
-        $this->clock($now);
+        $this->assertClock($now);
         // Compute the whole audit demand BEFORE modifying any job. Both
         // expiry and a new reservation must fit or neither takes effect.
         $expiring = [];
@@ -120,7 +123,10 @@ final class MockReadOnlyRunQueue
             }
         }
         $needed = count($expiring) + ($pending === null ? 0 : 1);
-        if ($needed > 0) $this->assertTraceRoom($needed);
+        if ($needed > 0) {
+            $this->assertTraceRoom($needed);
+            $this->commitClock($now);
+        }
         foreach ($expiring as $runRef) {
             $this->jobs[$runRef]['state'] = 'INDETERMINADO';
             $this->record('LEASE_EXPIRED', $runRef);
@@ -158,7 +164,7 @@ final class MockReadOnlyRunQueue
             || preg_match('/^SYNTHETIC_[a-f0-9]{64}$/D', $claimRef) !== 1) {
             MockError::fail('QUEUE_CLAIM_DENIED');
         }
-        $this->clock($now);
+        $this->assertClock($now);
         if (!in_array($result, ['CONCLUIDA', 'FALHOU'], true)) {
             MockError::fail('QUEUE_STATE_DENIED');
         }
@@ -170,6 +176,9 @@ final class MockReadOnlyRunQueue
         if ($job['state'] === $result) return self::view($runRef, $job);
         if ($job['state'] !== 'RESERVADA') MockError::fail('QUEUE_STATE_DENIED');
         $this->assertTraceRoom(1);
+        // Expiration is a real state transition (INDETERMINADO), even when
+        // finish throws to its caller; advance clock in both outcome paths.
+        $this->commitClock($now);
         if ($now >= $job['until']) {
             $this->jobs[$runRef]['state'] = 'INDETERMINADO';
             $this->record('LEASE_EXPIRED', $runRef);
@@ -186,12 +195,13 @@ final class MockReadOnlyRunQueue
         $this->assertAdmissionIdle();
         $this->boundContext->assertSame($context);
         self::reference($runRef, 80);
-        $this->clock($now);
+        $this->assertClock($now);
         $job = $this->jobs[$runRef] ?? null;
         if ($job === null) MockError::fail('QUEUE_NOT_FOUND');
         if ($job['state'] === 'CANCELADA') return self::view($runRef, $job);
         if ($job['state'] !== 'PENDENTE') MockError::fail('QUEUE_STATE_DENIED');
         $this->assertTraceRoom(1);
+        $this->commitClock($now);
         $this->jobs[$runRef]['state'] = 'CANCELADA';
         $this->record('CANCELLED', $runRef);
         return self::view($runRef, $this->jobs[$runRef]);
@@ -254,11 +264,17 @@ final class MockReadOnlyRunQueue
         }
     }
 
-    private function clock(int $now): void
+    /** Validate supplied synthetic time without modifying queue state. */
+    private function assertClock(int $now): void
     {
         if ($now < 0 || ($this->observedAt !== null && $now < $this->observedAt)) {
             MockError::fail('QUEUE_TIME_DENIED');
         }
+    }
+
+    /** Only a committed queue mutation advances the local monotonic clock. */
+    private function commitClock(int $now): void
+    {
         $this->observedAt = $now;
     }
 
