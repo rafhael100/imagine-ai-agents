@@ -6,17 +6,19 @@
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **SEC-53 integrada à dev (PR #237): 648 testes PHP / lint de 83 arquivos PHP e Python**. [CI pós-merge #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088) `success` no SHA `ad7fc7b718235e0b5e6befaaaf7976adca15bc2a`; [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). **NO-GO**.
+**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **Piloto em fila OP-01 integrado (PR #242): 699 testes PHP / lint 87 + Python**. [CI pós-merge #42951498940](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42951498940) `success`; [EVID-39](docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md). **NO-GO**.
 
 ## Últimas entregas verificadas
 
-**SEC-53 integrada à dev (PR #237):** bloqueia mutação direta de Run por provedor; oito U75-01..08, [SEC-53](docs/AIA-FT01-SEC-53-RUN-LIFECYCLE-READONLY-CALLBACK.md), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
+**OP-01 integrado:** PR #239 resposta única (660 PHP, CI #42949459592); #240 builder (672 PHP, CI #42949959755); #241 fila FIFO (687 PHP, CI #42950862393); #242 piloto em fila (699 PHP, CI #42951498940). [EVID-39](docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md). CRM real **NO-GO**.
+
+**SEC-53 integrada à dev (PR #237):** baseline **648 testes PHP**, [CI #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088); bloqueia alteração de Run, U75-01..08, [SEC-53](docs/AIA-FT01-SEC-53-RUN-LIFECYCLE-READONLY-CALLBACK.md), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-52 integrada à dev (PR #235):** baseline **640 testes PHP**; [CI #42943113650](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42943113650), guarda compartilhada; sete U74-01..07, [SEC-52](docs/AIA-FT01-SEC-52-GUARDA-COORDENADOR-CALLBACK.md), [EVID-37](docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
 
-**SEC-51 integrada à dev (PR #233):** baseline **633 testes PHP**, [CI #42940604581](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42940604581); reentrada de SUGGEST/MUTATE/READ durante callback de sugestão bloqueada; quatro regressões U73-01..04. [SEC-51](docs/AIA-FT01-SEC-51-REENTRADA-FERRAMENTAS-CALLBACK.md), [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
+**SEC-51 integrada à dev (PR #233):** **633 testes PHP**, [CI #42940604581](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42940604581); reentrada negada, U73-01..04, [SEC-51](docs/AIA-FT01-SEC-51-REENTRADA-FERRAMENTAS-CALLBACK.md), [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md). **NO-GO**.
 
-**SEC-50 integrada à dev (PR #230):** capability grant revogada durante leitor/provedor nega o resultado da ferramenta; sugestão fecha Run como `FALHOU`. Baseline **629 testes PHP**, U72-01..08, [CI #42938703131](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42938703131), [SEC-50](docs/AIA-FT01-SEC-50-CAPABILITY-RECHECK-POS-FERRAMENTA.md), [EVID-35](docs/AIA-R01-EVID-35-SEC50-CI-POSTMERGE.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
+**SEC-50 integrada à dev (PR #230):** baseline **629 testes PHP**, U72-01..08, [CI #42938703131](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42938703131), [SEC-50](docs/AIA-FT01-SEC-50-CAPABILITY-RECHECK-POS-FERRAMENTA.md), [EVID-35](docs/AIA-R01-EVID-35-SEC50-CI-POSTMERGE.md). Revogação pós-tool; CRM **NO-GO**.
 
 **SEC-49 integrada à dev (PR #228):** epoch do trust compartilhado; oito U71-01..08, [SEC-49](docs/AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md), [EVID-34](docs/AIA-R01-EVID-34-SEC49-CI-POSTMERGE.md).
 
@@ -36,7 +38,7 @@
 
 **SEC-41 integrada à dev (PR #213):** a projeção OP-01 usa o mesmo contrato de validação na borda, resposta pública e telemetria. Leitores fictícios inconsistentes (inclusive valores de 1 MiB) não podem gerar auditoria de sucesso; nove novos testes U64-01..09. [SEC-41](docs/AIA-FT01-SEC-41-PROJECAO-OP01-UNIFICADA.md). Homologação CRM ainda `NAO_EXECUTADO` / **NO-GO**.
 
-**F163 / EVID-25 integrado à dev (PR #211):** os **13 cenários OP-01** ganharam testes de ensaio sintético 1:1 (U63-OP01-N01..N11, P01..P02), com cobertura Python para conferir a matriz. Os 13 casos **continuam `NAO_EXECUTADO` para homologação real**, e todos os gates continuam **NO-GO**. [EVID-25](docs/AIA-R01-EVID-25-ENSAIOS-OP01-13-CENARIOS.md). Evidência da execução pós-merge: [EVID-26](docs/AIA-R01-EVID-26-F163-CI-POSTMERGE.md).
+**F163 / EVID-25 integrado à dev (PR #211):** 13 cenários OP-01 ensaiados offline (U63-OP01-N01..N11/P01..P02), [EVID-25](docs/AIA-R01-EVID-25-ENSAIOS-OP01-13-CENARIOS.md), [EVID-26](docs/AIA-R01-EVID-26-F163-CI-POSTMERGE.md). Homologação real `NAO_EXECUTADO` / **NO-GO**.
 
 [EVID-24](docs/AIA-R01-EVID-24-CONSOLIDACAO-SEC39-40.md): SEC-39/40; [CI #42889307984](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42889307984) aprovada, 533 testes PHP. Não autoriza CRM.
 
