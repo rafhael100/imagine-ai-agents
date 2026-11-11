@@ -25,7 +25,7 @@ As leituras locais `status`, `counts`, `events`, `needsReview` e `hasActiveReser
 11. Segunda fila com mesmo coordenador também nega mutação direta.
 12. A fila desacoplada permanece operável como fixture sintética isolada.
 
-**Gate planejado:** 753 testes PHP, lint 92 arquivos PHP e validadores Python. CI no SHA exato do PR e pós-merge exigidas antes de registrar evidência final.
+**Gate planejado:** 753 testes PHP, lint 93 arquivos PHP e validadores Python. CI no SHA exato do PR e pós-merge exigidas antes de registrar evidência final.
 
 ## Limites e bloqueios
 
