@@ -44,6 +44,7 @@ for name in \
   test_f195_transition_delta.py \
   test_f196_transition_tab.py \
   test_f197_visual_delta.py \
+  test_f198_tamper_gate.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
