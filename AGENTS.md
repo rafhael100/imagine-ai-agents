@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## SEC-52 — guarda compartilhada no coordenador durante callback (10/11/2026)
+
+- `SupervisedCoordinator` bloqueia reentrância durante `AiSuggestionProvider::suggest`, mesmo via outra instância `MockToolDispatcher` que compartilhe o mesmo coordenador; chamadas diretas para `execute`, `suggest`, `start`, `step`, `transition`, `reconcile`, `afterTimeout` e preflight negam com código fixo. Tentativa engolida pelo provedor invalida a sugestão externa.
+- **Gate esperado: 640 testes PHP / lint 83 + Python**, sete regressões U74-01..07. [SEC-52](docs/AIA-FT01-SEC-52-GUARDA-COORDENADOR-CALLBACK.md). Revisão/CI no SHA do PR e pós-merge obrigatórias.
+- Apenas um coordenador no processo; não é IAM/ACL/lock distribuído. CRM PR #57 OPEN/DRAFT, 13 casos reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO. Sem `main`, VPS, produção, clientes, segredos ou gastos.
+
 ## SEC-51 — impedir reentrada da ferramenta durante callback (10/11/2026)
 
 - `MockToolDispatcher` bloqueia SUGGEST/MUTATE/READ aninhados pela mesma instância durante callback de sugestão; mesmo que o provedor engula a negação, a sugestão externa falha e encerra o Run como `FALHOU`. Guarda em memória com limpeza garantida, não uma trava distribuída.
