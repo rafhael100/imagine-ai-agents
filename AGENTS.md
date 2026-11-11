@@ -3,7 +3,7 @@
 ## SEC-53 — Run read-only no callback de sugestão (10/11/2026)
 
 - `Run::withReadOnlySuggestion` bloqueia `Run::transition` e `Run::step` diretos enquanto um provedor `AiSuggestionProvider` recebe esse Run. Tentativa capturada pelo provedor invalida toda a sugestão externa; limpeza em `finally` permite terminalizar Run `FALHOU` e criar novo Run depois. [SEC-53](docs/AIA-FT01-SEC-53-RUN-LIFECYCLE-READONLY-CALLBACK.md).
-- Gate solicitado: **648 testes PHP, lint 83, validadores Python**, U75-01..08; CI no SHA exato do PR e pós-merge. Preservar EVID-35/36/37 e decisões NO-GO.
+- Gate pós-merge aprovado: **648 testes PHP, lint 83, validadores Python**, U75-01..08. [CI #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). Preservar EVID-35/36/37 e decisões NO-GO.
 - Guarda local não é sandbox, IAM, RLS nem integração real. CRM PR #57 OPEN/DRAFT, 13 cenários `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO; sem `main`, VPS, deploy, dados reais, clientes, segredos nem gastos.
 
 ## SEC-52 — guarda compartilhada no coordenador durante callback (10/11/2026)

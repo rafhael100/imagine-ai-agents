@@ -1,16 +1,18 @@
 # Imagine AI Agents — estado atual
 
-**Consolidado em 10/11/2026.** Fonte prioritária: estado da branch e dos PRs no GitHub; os SHAs abaixo representam apenas verificações realizadas nesta data. **Sem aprovação de produção.**
+**Consolidado em 10/11/2026.** Fontes: GitHub e CIs verificadas. **Produção: NO-GO.**
 
 ## Estado executivo
 
 **Fase:** laboratório técnico PHP inteiramente sintético, com execução offline e integrações fictícias. O fluxo de leitura mínima OP-01 e a ferramenta de sugestão são demonstráveis localmente, mas **o produto operacional não está finalizado**. Não existe integração autenticada com o Imagine CRM, execução em VPS ou acesso a clientes. **Decisão: NO-GO** para piloto real e produção.
 
-**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **SEC-52 integrada à dev (PR #235): 640 testes PHP / lint de 83 arquivos PHP e Python**. [CI pós-merge #42943113650](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42943113650) `success` no SHA `c74eabb82c0e69b9a1bbd5ed320a8ac5f247e7e0`; [EVID-37](docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md). CRM **NO-GO**.
+**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **SEC-53 integrada à dev (PR #237): 648 testes PHP / lint de 83 arquivos PHP e Python**. [CI pós-merge #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088) `success` no SHA `ad7fc7b718235e0b5e6befaaaf7976adca15bc2a`; [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). **NO-GO**.
 
 ## Últimas entregas verificadas
 
-**SEC-52 integrada à dev (PR #235):** guarda compartilhada de callback entre despachantes; sete U74-01..07, [SEC-52](docs/AIA-FT01-SEC-52-GUARDA-COORDENADOR-CALLBACK.md), [EVID-37](docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
+**SEC-53 integrada à dev (PR #237):** bloqueia mutação direta de Run por provedor; oito U75-01..08, [SEC-53](docs/AIA-FT01-SEC-53-RUN-LIFECYCLE-READONLY-CALLBACK.md), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
+
+**SEC-52 integrada à dev (PR #235):** baseline **640 testes PHP**; [CI #42943113650](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42943113650), guarda compartilhada; sete U74-01..07, [SEC-52](docs/AIA-FT01-SEC-52-GUARDA-COORDENADOR-CALLBACK.md), [EVID-37](docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md). CRM `NAO_EXECUTADO` / **NO-GO**.
 
 **SEC-51 integrada à dev (PR #233):** baseline **633 testes PHP**, [CI #42940604581](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42940604581); reentrada de SUGGEST/MUTATE/READ durante callback de sugestão bloqueada; quatro regressões U73-01..04. [SEC-51](docs/AIA-FT01-SEC-51-REENTRADA-FERRAMENTAS-CALLBACK.md), [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md). CRM real `NAO_EXECUTADO` / **NO-GO**.
 
@@ -80,7 +82,7 @@ A [SEC-20 / PR #182](https://github.com/rafhael100/imagine-ai-agents/pull/182) c
 
 ```bash
 php examples/f127-read-only-pilot-demo.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=605 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=648 bash tools/run_r01_offline_quality_gate.sh
 ```
 
 O comando acima exige PHP e Python já instalados, não emite credenciais e não acessa CRM real. O sucesso não abre gates operacionais.

@@ -55,13 +55,13 @@ php tests/Unit/run.php
 EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=648 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**SEC-53 em revisão:** 648 testes PHP esperados. [Guarda read-only de Run](docs/AIA-FT01-SEC-53-RUN-LIFECYCLE-READONLY-CALLBACK.md). **NO-GO**.
+**SEC-53 integrada (PR #237): 648 testes PHP**. [CI #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). **NO-GO**.
 
-**SEC-52 integrada (PR #235): 640 testes PHP**, [CI #42943113650](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42943113650), [EVID-37](docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md).
+**SEC-52 integrada (PR #235): 640 testes PHP**. [EVID-37](docs/AIA-R01-EVID-37-SEC52-CI-POSTMERGE.md).
 
-**SEC-51 integrada (PR #233): 633 testes PHP**, [CI #42940604581](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42940604581), [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md).
+**SEC-51 integrada (PR #233): 633 testes PHP**. [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md).
 
-**SEC-50 integrada (PR #230): 629 testes PHP**, [CI #42938703131](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42938703131), [EVID-35](docs/AIA-R01-EVID-35-SEC50-CI-POSTMERGE.md). **Sem IAM ou CRM real.**
+**SEC-50 integrada (PR #230): 629 testes PHP**. [EVID-35](docs/AIA-R01-EVID-35-SEC50-CI-POSTMERGE.md). **Sem CRM real.**
 
 ## Pacote de aceite bilateral — revisão pendente
 
