@@ -52,7 +52,7 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=86 EXPECTED_CASES=687 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=87 EXPECTED_CASES=699 bash tools/run_r01_offline_quality_gate.sh
 ```
 
 **OP-01 integrada:** resposta PR #239 (660 PHP), builder PR #240 (672 PHP). [Contrato](docs/AIA-FT01-OP01-RESPOSTA-COMPARTILHADA-2026-11-10.md), [Builder](docs/AIA-FT01-OP01-CONSTRUCAO-REQUEST-CONTEXTO-VINCULADO.md). **Fila read-only em revisão:** 687 PHP / 86 lint. [Detalhes](docs/AIA-FT01-QUEUE-LEITURA-SUPERVISIONADA-OFFLINE.md). **NO-GO**.
