@@ -32,7 +32,7 @@ class Element {
 const ids = [...beforeScript.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
 assert.equal(new Set(ids).size, ids.length, "unique IDs");
 const elements = new Map(ids.map(id => [id, new Element(id)]));
-const fixture = beforeScript.match(/<script type="application\\/json" id="f183-supervision-data">([^<]+)<\\/script>/);
+const fixture = beforeScript.match(/<script type="application\/json" id="f183-supervision-data">([^<]+)<\/script>/);
 assert(fixture, "embedded F183 static JSON exists");
 elements.get("f183-supervision-data").textContent = fixture[1];
 const selectors = {
