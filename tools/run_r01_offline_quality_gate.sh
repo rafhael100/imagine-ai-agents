@@ -48,6 +48,7 @@ for name in \
   test_f199_agent_scope_preview.py \
   test_f201_triage_rehearsal.py \
   test_f202_triage_tab.py \
+  test_f203_triage_adversarial.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
@@ -66,6 +67,7 @@ done
 if command -v node >/dev/null 2>&1; then
   node tests/Browser/f108_smoke.cjs
   node tests/Browser/f196_tamper_smoke.cjs
+  node tests/Browser/f202_triage_tamper_smoke.cjs
 else
   echo 'NODE_VISUAL_SMOKE_SKIPPED: Node not installed (no install attempted)'
 fi
