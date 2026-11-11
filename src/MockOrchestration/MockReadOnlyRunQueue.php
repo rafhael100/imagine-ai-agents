@@ -170,6 +170,16 @@ final class MockReadOnlyRunQueue
         return false;
     }
 
+    /** Another local claim is still active; this is not an empty queue. */
+    public function hasActiveReservation(TenantContext $context): bool
+    {
+        $this->boundContext->assertSame($context);
+        foreach ($this->jobs as $job) {
+            if ($job['state'] === 'RESERVADA') return true;
+        }
+        return false;
+    }
+
     public function events(): array { return $this->trace; }
 
     public function counts(): array
