@@ -1,5 +1,10 @@
 # AGENTS.md — Imagine AI Agents
 
+## SEC-59 — vedar construção direta de Step dentro de callback (11/11/2026)
+
+- A SEC-53 protegia `Run::step` mas o provedor podia usar `new Step(...,$run)` porque o construtor chamava apenas `assertActive`. Agora `Step::__construct` exige `Run::assertStepCreationReady`, validação sticky de callback antes do ID, e `Run::step` usa a mesma verificação. Tentativa capturada ainda falha externamente, sem STEP_CREATED/SUGGESTED. Inspeção de Step existente e criação fora do callback continuam válidas. [SEC-59](docs/AIA-FT01-SEC-59-CONSTRUTOR-STEP-GUARDADO.md).
+- Gate proposto **800 testes PHP / lint 99 + Python/Node offline**, oito U90-01..08. Proteção é local, sem sandbox. CRM PR #57 OPEN/DRAFT, 13 casos reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO; manter `main`, VPS, produção e segredos intocados.
+
 ## SEC-58 — relógio transacional da fila sintética (11/11/2026)
 
 - Em `MockReadOnlyRunQueue`, substituir o antigo `clock()` que **gravava horário antes da validação** por `assertClock()` (sem mutação) e `commitClock()` somente após checagens completas e capacidade de auditoria. Enqueue/cancel/finish recusados ou idempotentes e polls sem trabalho não envenenam `observedAt`; expiração em `claim` ou `finish` **altera estado** e confirma o relógio. [SEC-58](docs/AIA-FT01-SEC-58-RELOGIO-TRANSACIONAL-FILA.md).
