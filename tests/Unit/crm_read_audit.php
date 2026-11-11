@@ -503,4 +503,31 @@ return [
             && $audit->entries()[0]['reason'] === 'RESOURCE'
             && $audit->entries()[0]['outcome'] === 'DENIED');
     },
+
+    'U71-01 shared trust outage and recovery inside reader is still denied' => function (): void {
+        $state = new MockSharedTrustState();
+        [$boundary, $audit, $env, $owner, $ctx, , $reader] =
+            f165Fixture(function ($policy, $env, $owner, $ctx, $state): void {
+                $state->setAvailable(false);
+                $state->setAvailable(true);
+            }, $state);
+        denied('TRUST_STATE_UNAVAILABLE', fn () => $boundary->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15));
+        check($state->revision() === 2 && $state->countConsumed() === 1);
+        check($reader->calls === 1 && $audit->count() === 1
+            && $audit->entries()[0]['reason'] === 'TRUST'
+            && $audit->entries()[0]['outcome'] === 'DENIED');
+    },
+    'U71-02 unrelated shared revocation during reader cannot preserve earlier trust epoch' => function (): void {
+        $state = new MockSharedTrustState();
+        [$boundary, $audit, $env, $owner, $ctx, , $reader] =
+            f165Fixture(function ($policy, $env, $owner, $ctx, $state): void {
+                $state->revokeDigest(str_repeat('a', 64));
+            }, $state);
+        denied('TRUST_STATE_UNAVAILABLE', fn () => $boundary->evaluate(
+            new MockCrmReadRequest(f112Wire($ctx)), $env, $owner, $ctx, 15));
+        check($state->revision() === 1 && $state->countRevoked() === 1
+            && $state->countConsumed() === 1);
+        check($reader->calls === 1 && $audit->entries()[0]['reason'] === 'TRUST');
+    },
 ];
