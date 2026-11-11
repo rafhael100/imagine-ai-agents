@@ -38,6 +38,9 @@ elements.get("f183-supervision-data").textContent = fixture[1];
 const f196 = beforeScript.match(/<script type="application\/json" id="f196-transition-data">([^<]+)<\/script>/);
 assert(f196, "embedded F196 synthetic PHP fixture exists");
 elements.get("f196-transition-data").textContent = f196[1];
+const triageFixture = beforeScript.match(/<script type="application\/json" id="f202-triage-data">([^<]+)<\/script>/);
+assert(triageFixture, "F202 embedded triage fixture exists");
+elements.get("f202-triage-data").textContent = triageFixture[1];
 const selectors = {
     "[data-page-button]": [], "[data-goto]": [], "[data-scenario]": [],
     "[data-agent-scenario]": []
@@ -109,6 +112,32 @@ assert.equal(byId("supervision-decision").textContent, "NO-GO");
 byId("queue-transition-paused").click();
 assert.equal(byId("queue-transition-completed").textContent, "0");
 assert.equal(byId("queue-transition-pending").textContent, "1");
+// F202: closed triage is visual only. Six stages cannot change F182 or grant GO.
+assert.equal(byId("triage-view-state").textContent, "QUIET");
+assert.equal(byId("triage-view-next").textContent, "NO_LOCAL_WORK");
+assert.equal(byId("triage-stage-empty").attributes.get("aria-pressed"), "true");
+byId("triage-stage-pending").click();
+assert.equal(byId("triage-view-state").textContent, "PENDING");
+assert.equal(byId("triage-view-pending").textContent, "2");
+byId("triage-stage-leased").click();
+assert.equal(byId("triage-view-state").textContent, "LEASE_IN_PROGRESS");
+assert.equal(byId("triage-view-reserved").textContent, "1");
+byId("triage-stage-uncertain").click();
+assert.equal(byId("triage-view-state").textContent, "REVIEW_REQUIRED");
+assert.equal(byId("triage-view-unknown").textContent, "1");
+byId("triage-stage-paused").click();
+assert.equal(byId("triage-view-state").textContent, "PAUSED");
+assert.equal(byId("triage-view-admission").textContent, "PAUSED · SIMULADA");
+byId("triage-stage-resumed").click();
+assert.equal(byId("triage-view-state").textContent, "REVIEW_REQUIRED");
+assert.equal(byId("triage-view-admission").textContent, "OPEN · SIMULADA");
+assert.equal(byId("triage-view-completed").textContent, "1");
+assert.equal(byId("triage-view-unknown").textContent, "1");
+assert.equal(byId("triage-view-unresolved").textContent, "1");
+assert.equal(byId("triage-stage-resumed").attributes.get("aria-pressed"), "true");
+assert.equal(byId("triage-stage-empty").attributes.get("aria-pressed"), "false");
+assert.equal(byId("supervision-indeterminate").textContent, "3", "F182 unchanged after triage");
+assert.equal(byId("supervision-decision").textContent, "NO-GO", "triage cannot authorize");
 // F184: reviewing is a disposable browser-only *hypothesis*, not a vote
 // recorded by the PHP notebook or a change to the official F182 snapshot.
 assert.equal(byId("review-sim-second").textContent, "1", "initial second review pending");
