@@ -77,6 +77,22 @@ function f170Fixture(\Closure $onReader, ?MockSharedTrustState $state = null): a
     return [$facade, $policy, $audit, $env, $owner, $ctx, $reader, $state];
 }
 
+
+/** In-memory shared-state receipt fixture; no HTTP, real session or IAM. */
+function f171SharedFacadeFixture(): array
+{
+    [, $env, $owner, $ctx] = f112Fixture();
+    $state = new MockSharedTrustState();
+    $policy = new MockCrmOwnerPolicy();
+    $policy->grantFixture($ctx, ['ref', 'stage']);
+    $audit = new MockCrmReadAuditTrail();
+    $facade = new MockCrmReadPublicFacade(
+        new MockTrustGateway('SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API',
+            ['SYNTHETIC_LEAD_READ'], $state),
+        new MockCrmReader(), $policy, $audit);
+    return [$facade, $state, $policy, $audit, $env, $owner, $ctx];
+}
+
 return [
     'U17-01 permitted fake minimal read gets fixed public response' => function (): void {
         $policy = new MockCrmOwnerPolicy();
@@ -588,5 +604,65 @@ return [
         check(!$facade->recheck($wire, $env, $owner, $ctx, 20));
         check($state->countConsumed() === 1 && $audit->count() === 1
             && $reader->calls === 1);
+    },
+
+    'U71-03 shared outage then recovery does not reauthorize an old receipt' => function (): void {
+        [$facade, $state, , $audit, $env, $owner, $ctx] =
+            f171SharedFacadeFixture();
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check($facade->recheck($wire, $env, $owner, $ctx, 16));
+        $state->setAvailable(false);
+        $state->setAvailable(true);
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 17));
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 18));
+        check($state->revision() === 2 && $state->countConsumed() === 1
+            && $audit->count() === 1);
+    },
+    'U71-04 another revoked digest invalidates old receipt without modifying the nonce' => function (): void {
+        [$facade, $state, , $audit, $env, $owner, $ctx] =
+            f171SharedFacadeFixture();
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        $state->revokeDigest(str_repeat('b', 64));
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 16));
+        check($state->revision() === 1 && $state->countConsumed() === 1
+            && $state->countRevoked() === 1 && $audit->count() === 1);
+    },
+    'U71-05 healthy shared state keeps one receipt and a single consumed nonce' => function (): void {
+        [$facade, $state, , $audit, $env, $owner, $ctx] =
+            f171SharedFacadeFixture();
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        foreach ([15, 16, 19] as $clock) {
+            check($facade->recheck($wire, $env, $owner, $ctx, $clock));
+        }
+        check($state->revision() === 0 && $state->countConsumed() === 1
+            && $audit->count() === 1);
+        $state->setAvailable(true); // conservative, even idempotent mutation
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 20));
+    },
+    'U71-06 fresh proof after recovered outage can start a new isolated read' => function (): void {
+        [$facade, $state, , $audit, $env, $owner, $ctx] =
+            f171SharedFacadeFixture();
+        $wire = f112Wire($ctx);
+        check($facade->handle($wire, $env, $owner, $ctx, 15)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        $state->setAvailable(false);
+        $state->setAvailable(true);
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 15));
+        $fresh = new MockTrustEnvelope('SYNTHETIC_SEC49_FRESH_ENV',
+            'SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API', $ctx,
+            'SYNTHETIC_SEC49_FRESH_NONCE', ['SYNTHETIC_LEAD_READ'], 10, 40);
+        $freshOwner = new MockOwnerScopeEvidence('SYNTHETIC_SEC49_FRESH_OWNER',
+            $fresh->digest, $ctx, 'SYNTHETIC_LEAD_READ', 10, 40, true);
+        check($facade->handle($wire, $fresh, $freshOwner, $ctx, 16)['state']
+            === 'READ_SYNTHETIC_ONLY');
+        check($facade->recheck($wire, $fresh, $freshOwner, $ctx, 17));
+        check(!$facade->recheck($wire, $env, $owner, $ctx, 17));
+        check($state->countConsumed() === 2 && $audit->count() === 2);
     },
 ];
