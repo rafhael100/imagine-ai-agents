@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## EVID-46 — matriz de alcance dos agentes F199 validada (11/11/2026)
+
+- EVID-45 PR #277 squash `c6fd19ee9b4fa9b847cd8b0801959624534aeeac`, CI pós-merge #43077639745 success. F199 PR #278 squash `c355bd5ae7044ee17db90ffffdcb5006f64cb2a9`, CI pós-merge #43078227186 success. [EVID-46](docs/AIA-R01-EVID-46-F199-CI-POSTMERGE.md).
+- O F199 adicionou escopos **somente demonstrativos** CRM, Performance e Universidade, com ações recusadas e gates visíveis; cinco testes Python e smoke DOM, PHP 835/lint103 inalterados. CRM #57 OPEN/DRAFT, 13 homologações reais NAO_EXECUTADO, R01-G01..G11/CORE/SEG/AUT NO-GO. Sem main, deploy, IAM real, clientes, segredos, VPS ou custos.
+
+
 ## EVID-45 — F196/F197/F198 pós-merge (11/11/2026)
 
 - F196 PR #274 (CI #43075578789, SHA dc9a0b71ff970f7594e210d157f480bdcc84587a) adiciona painel PAUSED/OPEN com paridade PHP/HTML; F197 #275 (CI #43076103326, SHA 808dd778c208a59220dad9c1897148d689ca3132) exibe deltas sem alterar a fila; F198 #276 (CI #43076603247, SHA fa5046e0bce0e343e7f645f9b91de6ddb4467470) acrescenta 16 ataques ao validador do navegador. Todos integrados na dev com CI pós-merge success. [EVID-45](docs/AIA-R01-EVID-45-F196-F198-CI-POSTMERGE.md).
