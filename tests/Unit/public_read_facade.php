@@ -733,10 +733,12 @@ return [
         $out['state'] = 'ALLOW';
         check(!MockCrmPublicResponseContract::isSafe($out, $req, $ctx));
     },
-    'U76-08 cross-tenant request cannot validate even uniform denial' => function (): void {
+    'U76-08 cross-tenant response remains safe denial but never accepted' => function (): void {
         $ctx = context(); $other = context('SYNTHETIC_B');
         $req = new MockCrmReadRequest(f112Wire($ctx));
-        check(!MockCrmPublicResponseContract::isSafe(
+        check(MockCrmPublicResponseContract::isSafe(
+            MockCrmPublicResponseContract::denial(), $req, $other));
+        check(!MockCrmPublicResponseContract::isAcceptedRead(
             MockCrmPublicResponseContract::denial(), $req, $other));
     },
     'U76-09 foreign resource and wrong stage cannot pass as public read' => function (): void {
