@@ -8,7 +8,7 @@ As proteções SEC-51 (instância de ferramenta) e SEC-52 (coordenador compartil
 
 ## Implementação
 
-- `Run::withReadOnlySuggestion(callable)` ativa e encerra em `finally` uma guarda **em memória por objeto** enquanto o provedor gera a sugestão. É uma zona de leitura, não permissão real.
+- `Run::withReadOnlySuggestion(AiSuggestionProvider, array)` executa uma chamada tipada e explícita a `suggest()`; ativa e encerra em `finally` uma guarda **em memória por objeto** enquanto o provedor gera a sugestão. É uma zona de leitura, não permissão real.
 - `Run::transition()` e `Run::step()` negam imediatamente com `PROVIDER_CALLBACK_DENIED` enquanto a guarda está ativa, **antes** de qualquer transição ou criação de Step.
 - A tentativa de mutação permanece marcada até sair do callback. Mesmo se o provedor capturar uma exceção e retornar uma proposta aparentemente correta, a sugestão externa será rejeitada; nenhuma trilha `SUGGESTED` é registrada.
 - `SupervisedCoordinator::suggest` chama o provedor dentro de `Run::withReadOnlySuggestion`, além de manter a guarda SEC-52 contra reentrada nas suas próprias APIs.
