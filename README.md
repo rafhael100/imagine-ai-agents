@@ -55,11 +55,11 @@ php tests/Unit/run.php
 EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=83 EXPECTED_CASES=640 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**SEC-52 em revisão:** gate solicitado de 640 testes PHP, lint 83 + Python. Bloqueio de reentrada no coordenador compartilhado, inclusive entre despachantes e nas chamadas diretas. [SEC-52](docs/AIA-FT01-SEC-52-GUARDA-COORDENADOR-CALLBACK.md). **Sem CRM real.**
+**SEC-52 em revisão:** 640 testes PHP / 83 lint + Python previstos. Guarda de callback no coordenador, inclusive entre despachantes. [Detalhes](docs/AIA-FT01-SEC-52-GUARDA-COORDENADOR-CALLBACK.md). **NO-GO**.
 
-**SEC-51 integrada à dev (PR #233): 633 testes PHP / lint 83 + Python**. Reentrada de ferramentas negada na sugestão. [CI #42940604581](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42940604581), [SEC-51](docs/AIA-FT01-SEC-51-REENTRADA-FERRAMENTAS-CALLBACK.md), [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md). Sem CRM real.
+**SEC-51 integrada (PR #233): 633 testes PHP**, [CI #42940604581](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42940604581), [EVID-36](docs/AIA-R01-EVID-36-SEC51-CI-POSTMERGE.md).
 
-**SEC-50 integrada à dev (PR #230): 629 testes PHP / lint 83 + Python**; [SEC-50](docs/AIA-FT01-SEC-50-CAPABILITY-RECHECK-POS-FERRAMENTA.md) revalida grant após leitura/sugestão. [CI pós-merge #42938703131](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42938703131) e [EVID-35](docs/AIA-R01-EVID-35-SEC50-CI-POSTMERGE.md). Essas provas **não** equivalem a IAM, ACL multiempresa, privacidade ou homologação operacional.
+**SEC-50 integrada (PR #230): 629 testes PHP**, [CI #42938703131](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42938703131), [EVID-35](docs/AIA-R01-EVID-35-SEC50-CI-POSTMERGE.md). **Sem IAM ou CRM real.**
 
 ## Pacote de aceite bilateral — revisão pendente
 
