@@ -3,7 +3,7 @@
 ## SEC-57 — vínculo de fila e bloqueio direto no callback (11/11/2026)
 
 - Toda fila usada por `MockQueuedReadOnlyPilot` passa a ser vinculada ao mesmo `SupervisedCoordinator` do piloto. Métodos diretos `enqueue`, `claim`, `finish` e `cancel` negam reentrada durante callback de sugestão; tentativa capturada invalida resultado externo. Não permitir rebind para outro coordenador. [SEC-57](docs/AIA-FT01-SEC-57-GUARDA-FILA-DIRETA-CALLBACK.md).
-- Gate planejado: **753 testes PHP / lint 92 e Python** (U85-01..12). Proteção local não equivale a sandbox, IAM nem trava distribuída; CRM PR #57 OPEN/DRAFT, 13 OP-01 reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT **NO-GO**. Não tocar `main`, VPS, clientes, produção, custos.
+- Gate planejado: **753 testes PHP / lint 93 e Python** (U85-01..12). Proteção local não equivale a sandbox, IAM nem trava distribuída; CRM PR #57 OPEN/DRAFT, 13 OP-01 reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT **NO-GO**. Não tocar `main`, VPS, clientes, produção, custos.
 
 ## F181 — demonstração CLI dos estados da fila (11/11/2026)
 
