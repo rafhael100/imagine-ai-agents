@@ -132,6 +132,49 @@ final class MockReadOnlyRunQueue
         return $this->admissionView();
     }
 
+    /**
+     * Bounded, redacted capacity telemetry. These numbers are NOT a worker
+     * readiness check, authorization, or permission to resume an admission.
+     * Terminal/uncertain jobs still consume one of 64 in-memory job slots.
+     */
+    public function capacityOverview(TenantContext $context): array
+    {
+        $this->boundContext->assertSame($context);
+        $jobs = count($this->jobs);
+        $trace = count($this->trace);
+        $decisions = count($this->controlDecisions);
+        $jobsLeft = self::MAX_JOBS - $jobs;
+        $traceLeft = self::MAX_TRACE - $trace;
+        $decisionsLeft = self::MAX_CONTROL_DECISIONS - $decisions;
+        $alert = 'NORMAL';
+        if ($jobsLeft === 0 || $traceLeft === 0 || $decisionsLeft === 0) {
+            $alert = 'EXHAUSTED';
+        } elseif ($jobsLeft <= 4 || $traceLeft <= 16 || $decisionsLeft <= 2) {
+            $alert = 'NEAR_LIMIT';
+        }
+        return [
+            'contract' => 'SYNTHETIC_QUEUE_CAPACITY_V1',
+            'alert' => $alert,
+            'jobs' => ['used' => $jobs, 'limit' => self::MAX_JOBS,
+                'remaining' => $jobsLeft],
+            'audit' => ['used' => $trace, 'limit' => self::MAX_TRACE,
+                'remaining' => $traceLeft],
+            'decisions' => ['used' => $decisions,
+                'limit' => self::MAX_CONTROL_DECISIONS,
+                'remaining' => $decisionsLeft],
+            // Budget observation only. Real IAM or an operational control
+            // decision is never granted by a Boolean in this report.
+            'resume_budget_available' => $this->admissionPaused
+                && $decisions < self::MAX_CONTROL_DECISIONS - 1
+                && $trace < self::MAX_TRACE,
+            'admission' => ['state' => $this->admissionPaused ? 'PAUSED' : 'OPEN'],
+            'operational_decision' => 'NO_GO',
+            'real_authorization' => false,
+            'external_calls' => 0,
+            'write_calls' => 0,
+        ];
+    }
+
     private function admissionView(): array
     {
         return [
