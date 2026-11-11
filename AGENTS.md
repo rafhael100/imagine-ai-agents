@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## EVID-42 — SEC-60 e F187 integradas na dev (11/11/2026)
+
+- SEC-60 PR #261 integrado, SHA `8a9a280bef3766c9d8b45e4b556ad3ad13ab2ffc`, CI pós-merge #43019868566 `success`: protege Runs irmãos canônicos no callback do mesmo coordenador; não é sandbox.
+- F187 PR #262 integrado, SHA `6351c9e8ac657e9e72be7830b591679c33d63910`, CI pós-merge #43020983307 `success`: transferência JSON fechada e atômica, só em browser, sem persistência nem serviços externos. [EVID-42](docs/AIA-R01-EVID-42-SEC60-F187-CI-POSTMERGE.md).
+- Gate atual verificado: **810 testes PHP / lint 100 + Python/DOM**. CRM PR #57 OPEN/DRAFT, 13 homologações reais `NAO_EXECUTADO`, R01-G01..G11/CORE/SEG/AUT NO-GO; main, VPS, produção, clientes e custos intocados.
+
 ## F187 — export/import manual de JSON de rascunhos fictícios (11/11/2026)
 
 - Coleção F186 no navegador agora gera JSON `SYNTHETIC_AGENT_DRAFTS_V1` com `{name,template}` e permite colar para importar. Esquema estrito, versões/propriedades fechadas, limite de 4096 caracteres / 5 itens, nomes NFC e únicos em `pt-BR`, modelo apenas CRM/Performance/Universidade. Validação de **todos** os itens antes de uma única substituição atômica; qualquer erro preserva coleção. Sem storage, download/upload automático, IAM, API, CRM ou publicação. [F187](docs/AIA-FT01-F187-TRANSFERENCIA-MANUAL-RASCUNHOS-JSON.md).
