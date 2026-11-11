@@ -35,7 +35,7 @@ const elements = new Map(ids.map(id => [id, new Element(id)]));
 const fixture = beforeScript.match(/<script type="application\/json" id="f183-supervision-data">([^<]+)<\/script>/);
 assert(fixture, "embedded F183 static JSON exists");
 elements.get("f183-supervision-data").textContent = fixture[1];
-const f196 = beforeScript.match(/<script type="application\\/json" id="f196-transition-data">([^<]+)<\\/script>/);
+const f196 = beforeScript.match(/<script type="application\/json" id="f196-transition-data">([^<]+)<\/script>/);
 assert(f196, "embedded F196 synthetic PHP fixture exists");
 elements.get("f196-transition-data").textContent = f196[1];
 const selectors = {
