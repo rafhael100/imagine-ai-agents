@@ -86,7 +86,7 @@ class F186DraftCollectionTests(unittest.TestCase):
     def test_no_go_and_unpublished_preview_are_preserved(self):
         self.assertIn('NÃO PUBLICADO · NO-GO', self.html)
         self.assertIn('RASCUNHO LOCAL · SEM APROVAÇÃO', self.html)
-        self.assertIn('Nenhum agente foi publicado', self.html) if 'Nenhum agente foi publicado' in self.html else self.assertIn('nenhum agente foi publicado', self.html)
+        self.assertIn('nenhum agente foi publicado', self.html)
         self.assertIn('id="supervision-decision"', self.html)
         self.assertIn('operational_decision!=="NO_GO"', self.html)
 
