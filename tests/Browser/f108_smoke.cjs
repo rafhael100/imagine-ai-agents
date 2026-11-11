@@ -78,6 +78,8 @@ assert.equal(byId("supervision-pending-review").textContent, "1", "second review
 assert.equal(byId("supervision-conflict").textContent, "1", "conflict visible");
 assert.equal(byId("supervision-unresolved").textContent, "1", "matching votes do not resolve uncertainty");
 assert.equal(byId("supervision-decision").textContent, "NO-GO", "never authorized");
+assert.equal(byId("supervision-admission").textContent, "ABERTA · SIMULADA",
+ "F189 open admission shown as offline fixture, not as actual availability");
 // F184: reviewing is a disposable browser-only *hypothesis*, not a vote
 // recorded by the PHP notebook or a change to the official F182 snapshot.
 assert.equal(byId("review-sim-second").textContent, "1", "initial second review pending");
