@@ -14,7 +14,7 @@ const rest = html.slice(start + marker.length);
 const jsonText = rest.split("</script>", 1)[0];
 const fixture = JSON.parse(jsonText);
 const jsStart = html.indexOf("// F196: a self-contained, strictly validated view");
-const jsEnd = html.indexOf("// F184: local UI projection only", jsStart);
+const jsEnd = html.indexOf("// F202: view-only replay of the six-stage PHP F201 assessment.", jsStart);
 assert(jsStart >= 0 && jsEnd > jsStart, "real browser verifier source located");
 const productionVerifier = html.slice(jsStart, jsEnd);
 assert(productionVerifier.includes("validateTransitionSnapshot"), "real validation reused");
