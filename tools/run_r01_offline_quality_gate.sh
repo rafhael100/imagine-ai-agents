@@ -78,6 +78,7 @@ fi
 python3 tools/verify_f190_rehearsal.py
 python3 tools/verify_f201_triage.py
 python3 tools/verify_f206_health.py
+python3 tools/render_f206_health.py >/dev/null
 # Inert HTML rendering must succeed; the preview is not persisted.
 python3 tools/render_f190_supervision.py >/dev/null
 
