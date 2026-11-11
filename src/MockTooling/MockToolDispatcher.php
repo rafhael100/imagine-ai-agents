@@ -55,6 +55,13 @@ final class MockToolDispatcher
             $this->suggestionCallbackReentryObserved = true;
             MockError::fail('TOOL_SUGGESTION_DENIED');
         }
+        // A second dispatcher sharing this coordinator must not bypass the
+        // local guard by entering through another tool instance.
+        try {
+            $this->coordinator->assertProviderCallbackIdle();
+        } catch (\Throwable) {
+            MockError::fail('TOOL_SUGGESTION_DENIED');
+        }
         // Reserve one local audit event before any tool, suggestion or
         // synthetic effect executes. No event capacity means no operation.
         $this->assertTraceRoom();
@@ -171,6 +178,13 @@ final class MockToolDispatcher
     ): array {
         if ($this->suggestionCallbackActive) {
             $this->suggestionCallbackReentryObserved = true;
+            return self::deniedRead();
+        }
+        // Guard against an independent dispatcher with the same coordinator:
+        // do not invoke OP-01 while a provider callback is running.
+        try {
+            $this->coordinator->assertProviderCallbackIdle();
+        } catch (\Throwable) {
             return self::deniedRead();
         }
         // If no trace can be written, refuse before consuming a nonce.
