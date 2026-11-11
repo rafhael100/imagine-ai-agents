@@ -1040,4 +1040,159 @@ return [
         }
     },
 
+
+    'U81-01 two fictional reviewers acknowledge expiry without confirming effect' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U81_RUN_01', 'SYNTHETIC_U81_REQ_01', 10);
+        $claim = $q->claim(context(), 11, 2);
+        denied('QUEUE_CLAIM_EXPIRED', fn () => $q->finish(
+            context(), $claim['run_ref'], $claim['claim_ref'], 'CONCLUIDA', 13));
+        $out = $q->acknowledgeIndeterminate(context(), 'SYNTHETIC_U81_RUN_01',
+            'SYNTHETIC_U81_REVIEW_01', 'SYNTHETIC_REVIEWER_A',
+            'SYNTHETIC_REVIEWER_B', 14);
+        check($out['state'] === 'REVISADA_SEM_PROVA'
+            && $q->counts()['REVISADA_SEM_PROVA'] === 1
+            && $q->counts()['CONCLUIDA'] === 0
+            && $q->counts()['INDETERMINADO'] === 0
+            && count($q->events()) === 4);
+    },
+    'U81-02 identical review replay is idempotent without another event' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U81_RUN_02', 'SYNTHETIC_U81_REQ_02', 10);
+        $q->claim(context(), 11, 2);
+        check($q->claim(context(), 13, 2) === null);
+        $first = $q->acknowledgeIndeterminate(context(), 'SYNTHETIC_U81_RUN_02',
+            'SYNTHETIC_U81_REVIEW_02', 'SYNTHETIC_REVIEWER_A',
+            'SYNTHETIC_REVIEWER_B', 14);
+        $before = $q->events();
+        $again = $q->acknowledgeIndeterminate(context(), 'SYNTHETIC_U81_RUN_02',
+            'SYNTHETIC_U81_REVIEW_02', 'SYNTHETIC_REVIEWER_A',
+            'SYNTHETIC_REVIEWER_B', 15);
+        check($again === $first && $q->events() === $before);
+    },
+    'U81-03 same reviewer in both slots denies and does not finalize' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U81_RUN_03', 'SYNTHETIC_U81_REQ_03', 10);
+        $q->claim(context(), 11, 2);
+        $q->claim(context(), 13, 2);
+        $before = $q->events();
+        denied('QUEUE_REVIEW_DENIED', fn () => $q->acknowledgeIndeterminate(
+            context(), 'SYNTHETIC_U81_RUN_03', 'SYNTHETIC_U81_REVIEW_03',
+            'SYNTHETIC_REVIEWER_A', 'SYNTHETIC_REVIEWER_A', 14));
+        check($q->counts()['INDETERMINADO'] === 1 && $q->events() === $before);
+    },
+    'U81-04 incompatible review ref or reviewer pair cannot overwrite evidence' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U81_RUN_04', 'SYNTHETIC_U81_REQ_04', 10);
+        $q->claim(context(), 11, 1);
+        $q->claim(context(), 12, 1);
+        $q->acknowledgeIndeterminate(context(), 'SYNTHETIC_U81_RUN_04',
+            'SYNTHETIC_U81_REVIEW_04', 'SYNTHETIC_REVIEWER_A',
+            'SYNTHETIC_REVIEWER_B', 13);
+        $before = $q->events();
+        denied('QUEUE_REVIEW_CONFLICT', fn () => $q->acknowledgeIndeterminate(
+            context(), 'SYNTHETIC_U81_RUN_04', 'SYNTHETIC_U81_REVIEW_OTHER',
+            'SYNTHETIC_REVIEWER_A', 'SYNTHETIC_REVIEWER_B', 14));
+        denied('QUEUE_REVIEW_CONFLICT', fn () => $q->acknowledgeIndeterminate(
+            context(), 'SYNTHETIC_U81_RUN_04', 'SYNTHETIC_U81_REVIEW_04',
+            'SYNTHETIC_REVIEWER_B', 'SYNTHETIC_REVIEWER_A', 15));
+        check($q->counts()['REVISADA_SEM_PROVA'] === 1 && $q->events() === $before);
+    },
+    'U81-05 review reference is unique across two expired jobs' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U81_RUN_05A', 'SYNTHETIC_U81_REQ_05A', 10);
+        $q->enqueue(context(), 'SYNTHETIC_U81_RUN_05B', 'SYNTHETIC_U81_REQ_05B', 10);
+        $q->claim(context(), 11, 1);
+        $q->claim(context(), 11, 1);
+        check($q->claim(context(), 12, 1) === null);
+        $q->acknowledgeIndeterminate(context(), 'SYNTHETIC_U81_RUN_05A',
+            'SYNTHETIC_U81_REVIEW_05', 'SYNTHETIC_REVIEWER_A',
+            'SYNTHETIC_REVIEWER_B', 13);
+        denied('QUEUE_REVIEW_CONFLICT', fn () => $q->acknowledgeIndeterminate(
+            context(), 'SYNTHETIC_U81_RUN_05B', 'SYNTHETIC_U81_REVIEW_05',
+            'SYNTHETIC_REVIEWER_A', 'SYNTHETIC_REVIEWER_C', 14));
+        check($q->counts()['INDETERMINADO'] === 1
+            && $q->counts()['REVISADA_SEM_PROVA'] === 1);
+    },
+    'U81-06 pending and active jobs cannot be acknowledged as uncertain' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U81_RUN_06', 'SYNTHETIC_U81_REQ_06', 10);
+        denied('QUEUE_REVIEW_DENIED', fn () => $q->acknowledgeIndeterminate(
+            context(), 'SYNTHETIC_U81_RUN_06', 'SYNTHETIC_U81_REVIEW_06',
+            'SYNTHETIC_REVIEWER_A', 'SYNTHETIC_REVIEWER_B', 10));
+        $claim = $q->claim(context(), 11, 5);
+        denied('QUEUE_REVIEW_DENIED', fn () => $q->acknowledgeIndeterminate(
+            context(), 'SYNTHETIC_U81_RUN_06', 'SYNTHETIC_U81_REVIEW_06',
+            'SYNTHETIC_REVIEWER_A', 'SYNTHETIC_REVIEWER_B', 12));
+        $q->finish(context(), $claim['run_ref'],
+            $claim['claim_ref'], 'CONCLUIDA', 13);
+        denied('QUEUE_REVIEW_DENIED', fn () => $q->acknowledgeIndeterminate(
+            context(), 'SYNTHETIC_U81_RUN_06', 'SYNTHETIC_U81_REVIEW_06',
+            'SYNTHETIC_REVIEWER_A', 'SYNTHETIC_REVIEWER_B', 14));
+        check($q->counts()['CONCLUIDA'] === 1);
+    },
+    'U81-07 context isolation denies a foreign review without changing evidence' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U81_RUN_07', 'SYNTHETIC_U81_REQ_07', 10);
+        $q->claim(context(), 11, 1);
+        $q->claim(context(), 12, 1);
+        $before = $q->events();
+        denied('CONTEXT_DENIED', fn () => $q->acknowledgeIndeterminate(
+            context('SYNTHETIC_B'), 'SYNTHETIC_U81_RUN_07',
+            'SYNTHETIC_U81_REVIEW_07', 'SYNTHETIC_REVIEWER_A',
+            'SYNTHETIC_REVIEWER_B', 13));
+        check($q->events() === $before && $q->counts()['INDETERMINADO'] === 1);
+    },
+    'U81-08 invalid or huge review reference denies before state change' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U81_RUN_08', 'SYNTHETIC_U81_REQ_08', 10);
+        $q->claim(context(), 11, 1);
+        $q->claim(context(), 12, 1);
+        $before = $q->events();
+        foreach (['BAD', 'SYNTHETIC_', 'SYNTHETIC_a',
+                  'SYNTHETIC_' . str_repeat('A', 1024 * 1024)] as $ref) {
+            denied('QUEUE_REF_DENIED', fn () => $q->acknowledgeIndeterminate(
+                context(), 'SYNTHETIC_U81_RUN_08', $ref,
+                'SYNTHETIC_REVIEWER_A', 'SYNTHETIC_REVIEWER_B', 13));
+        }
+        check($q->events() === $before && $q->counts()['INDETERMINADO'] === 1);
+    },
+    'U81-09 reviewed uncertain job cannot be claimed cancelled or finished' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U81_RUN_09', 'SYNTHETIC_U81_REQ_09', 10);
+        $claim = $q->claim(context(), 11, 1);
+        $q->claim(context(), 12, 1);
+        $q->acknowledgeIndeterminate(context(), 'SYNTHETIC_U81_RUN_09',
+            'SYNTHETIC_U81_REVIEW_09', 'SYNTHETIC_REVIEWER_A',
+            'SYNTHETIC_REVIEWER_B', 13);
+        check($q->claim(context(), 14, 2) === null);
+        denied('QUEUE_STATE_DENIED', fn () => $q->cancel(
+            context(), 'SYNTHETIC_U81_RUN_09', 15));
+        denied('QUEUE_STATE_DENIED', fn () => $q->finish(
+            context(), 'SYNTHETIC_U81_RUN_09', $claim['claim_ref'],
+            'CONCLUIDA', 16));
+        check($q->counts()['REVISADA_SEM_PROVA'] === 1
+            && $q->counts()['CONCLUIDA'] === 0);
+    },
+    'U81-10 review audit hashes all identities and never asserts a CRM success' => function (): void {
+        $q = new MockReadOnlyRunQueue(context());
+        $q->enqueue(context(), 'SYNTHETIC_U81_PRIVATE_RUN',
+            'SYNTHETIC_U81_PRIVATE_REQ', 10);
+        $q->claim(context(), 11, 1);
+        $q->claim(context(), 12, 1);
+        $q->acknowledgeIndeterminate(context(), 'SYNTHETIC_U81_PRIVATE_RUN',
+            'SYNTHETIC_U81_PRIVATE_REVIEW', 'SYNTHETIC_REVIEWER_SECRET_A',
+            'SYNTHETIC_REVIEWER_SECRET_B', 13);
+        $visible = json_encode($q->events(), JSON_THROW_ON_ERROR);
+        check(str_contains($visible, 'SYNTHETIC_UNCERTAINTY_ACKNOWLEDGED'));
+        foreach (['SYNTHETIC_U81_PRIVATE_RUN', 'SYNTHETIC_U81_PRIVATE_REQ',
+                  'SYNTHETIC_U81_PRIVATE_REVIEW', 'SYNTHETIC_REVIEWER_SECRET',
+                  'SYNTHETIC_A_LEAD', 'SYNTHETIC_PRINCIPAL',
+                  'SYNTHETIC_CONFIRMADO'] as $marker) {
+            check(!str_contains($visible, $marker));
+        }
+        check($q->counts()['REVISADA_SEM_PROVA'] === 1
+            && $q->counts()['CONCLUIDA'] === 0);
+    },
+
 ];
