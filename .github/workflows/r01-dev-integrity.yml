@@ -53,6 +53,6 @@ jobs:
         env:
           EXPECTED_SHA: ${{ github.sha }}
           EXPECTED_PHP: '91'
-          EXPECTED_CASES: '733'
+          EXPECTED_CASES: '741'
         run: |
           bash tools/run_r01_offline_quality_gate.sh
