@@ -279,6 +279,30 @@ button:disabled{cursor:not-allowed;opacity:.53}
    <p class="muted" style="margin-top:12px"><strong>Limite:</strong> o snapshot F182 e o ensaio F184 acima permanecem imutáveis.</p>
   </div>
  </div>
+
+ <div class="panel" id="f202-triage-panel" style="margin-top:18px">
+  <div class="panelhead"><h2>Jornada de triagem dos agentes</h2><span class="tag warn">F202 · Somente simulação</span></div>
+  <div class="panelbody">
+   <p class="muted">Selecione um dos seis estágios gerados no ensaio PHP F201. Os botões mudam somente esta prévia; não pausam, retomam ou concluem tarefas reais.</p>
+   <div class="actions" role="group" aria-label="Etapas da triagem fictícia" style="margin:16px 0">
+    <button id="triage-stage-empty" type="button" class="secondary" aria-pressed="true">Vazia</button>
+    <button id="triage-stage-pending" type="button" class="secondary" aria-pressed="false">Pendentes</button>
+    <button id="triage-stage-leased" type="button" class="secondary" aria-pressed="false">Em andamento</button>
+    <button id="triage-stage-uncertain" type="button" class="secondary" aria-pressed="false">Incerteza</button>
+    <button id="triage-stage-paused" type="button" class="secondary" aria-pressed="false">Pausada</button>
+    <button id="triage-stage-resumed" type="button" class="secondary" aria-pressed="false">Retomada</button>
+   </div>
+   <p class="muted" role="status" aria-live="polite">Estado: <strong id="triage-view-state">—</strong> · Observação: <strong id="triage-view-next">—</strong></p>
+   <div class="metrics review-sim-grid" aria-label="Contagens agregadas da triagem fictícia">
+    <div class="panel metric"><small>Pendentes</small><strong id="triage-view-pending">—</strong></div>
+    <div class="panel metric"><small>Reservadas</small><strong id="triage-view-reserved">—</strong></div>
+    <div class="panel metric"><small>Concluídas</small><strong id="triage-view-completed">—</strong></div>
+    <div class="panel metric"><small>Indeterminadas</small><strong id="triage-view-unknown">—</strong></div>
+   </div>
+   <p class="muted">Admissão: <strong id="triage-view-admission">—</strong> · Revisadas sem conclusão: <strong id="triage-view-unresolved">—</strong></p>
+   <p class="muted" style="margin-top:10px"><strong>NO-GO:</strong> nenhuma etapa equivale à autorização, execução, identificação ou integração com o CRM.</p>
+  </div>
+ </div>
  <div class="panel" style="margin-top:18px"><div class="panelbody"><strong>Limites da prévia</strong><p class="muted" style="margin-top:8px">Contagens de um único JSON sintético incorporado à página. Sem atualização ao vivo, dados de clientes, autenticação, CRM, worker ou acesso de revisão real. Os 13 cenários de homologação OP-01 continuam não executados.</p></div></div>
 </section>
 <section class="page" id="page-audit" hidden>
@@ -296,6 +320,7 @@ button:disabled{cursor:not-allowed;opacity:.53}
 </div>
 <script type="application/json" id="f183-supervision-data">{"contract":"SYNTHETIC_QUEUE_SUPERVISION_V1","queue":{"pending":0,"reserved":0,"completed":1,"failed":0,"cancelled":0,"indeterminate":3},"review":{"awaiting_first":0,"awaiting_second":1,"reviewed_unresolved":1,"conflict":1},"admission":{"state":"OPEN"},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0}</script>
 <script type="application/json" id="f196-transition-data">{"contract":"SYNTHETIC_QUEUE_PAUSE_REHEARSAL_V1","paused":{"contract":"SYNTHETIC_QUEUE_SUPERVISION_V1","queue":{"pending":1,"reserved":0,"completed":0,"failed":0,"cancelled":0,"indeterminate":1},"review":{"awaiting_first":0,"awaiting_second":0,"reviewed_unresolved":1,"conflict":0},"admission":{"state":"PAUSED"},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0},"resumed":{"contract":"SYNTHETIC_QUEUE_SUPERVISION_V1","queue":{"pending":0,"reserved":0,"completed":1,"failed":0,"cancelled":0,"indeterminate":1},"review":{"awaiting_first":0,"awaiting_second":0,"reviewed_unresolved":1,"conflict":0},"admission":{"state":"OPEN"},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0}</script>
+<script type="application/json" id="f202-triage-data">{"contract":"SYNTHETIC_QUEUE_TRIAGE_REHEARSAL_V1","stages":{"empty":{"contract":"SYNTHETIC_QUEUE_TRIAGE_V1","state":"QUIET","next_step":"NO_LOCAL_WORK","queue":{"pending":0,"reserved":0,"completed":0,"failed":0,"cancelled":0,"indeterminate":0},"review":{"awaiting_first":0,"awaiting_second":0,"reviewed_unresolved":0,"conflict":0},"admission":{"state":"OPEN"},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0},"pending":{"contract":"SYNTHETIC_QUEUE_TRIAGE_V1","state":"PENDING","next_step":"OBSERVE_PENDING","queue":{"pending":2,"reserved":0,"completed":0,"failed":0,"cancelled":0,"indeterminate":0},"review":{"awaiting_first":0,"awaiting_second":0,"reviewed_unresolved":0,"conflict":0},"admission":{"state":"OPEN"},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0},"leased":{"contract":"SYNTHETIC_QUEUE_TRIAGE_V1","state":"LEASE_IN_PROGRESS","next_step":"OBSERVE_LEASE","queue":{"pending":1,"reserved":1,"completed":0,"failed":0,"cancelled":0,"indeterminate":0},"review":{"awaiting_first":0,"awaiting_second":0,"reviewed_unresolved":0,"conflict":0},"admission":{"state":"OPEN"},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0},"uncertain":{"contract":"SYNTHETIC_QUEUE_TRIAGE_V1","state":"REVIEW_REQUIRED","next_step":"INSPECT_UNCERTAINTY","queue":{"pending":0,"reserved":1,"completed":0,"failed":0,"cancelled":0,"indeterminate":1},"review":{"awaiting_first":1,"awaiting_second":0,"reviewed_unresolved":0,"conflict":0},"admission":{"state":"OPEN"},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0},"paused":{"contract":"SYNTHETIC_QUEUE_TRIAGE_V1","state":"PAUSED","next_step":"INSPECT_PAUSE","queue":{"pending":0,"reserved":1,"completed":0,"failed":0,"cancelled":0,"indeterminate":1},"review":{"awaiting_first":1,"awaiting_second":0,"reviewed_unresolved":0,"conflict":0},"admission":{"state":"PAUSED"},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0},"resumed":{"contract":"SYNTHETIC_QUEUE_TRIAGE_V1","state":"REVIEW_REQUIRED","next_step":"INSPECT_UNCERTAINTY","queue":{"pending":0,"reserved":0,"completed":1,"failed":0,"cancelled":0,"indeterminate":1},"review":{"awaiting_first":0,"awaiting_second":0,"reviewed_unresolved":1,"conflict":0},"admission":{"state":"OPEN"},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0}},"operational_decision":"NO_GO","real_authorization":false,"external_calls":0,"write_calls":0}</script>
 <script>
 (function(){
 "use strict";
@@ -383,6 +408,55 @@ function selectTransition(next){
  if(next!=="paused"&&next!=="resumed")return;
  transitionSelection=next;
  drawTransition();
+}
+
+// F202: view-only replay of the six-stage PHP F201 assessment.
+const triageStages=Object.freeze({"empty":["QUIET","NO_LOCAL_WORK","OPEN",[0,0,0,0,0,0],[0,0,0,0]],"pending":["PENDING","OBSERVE_PENDING","OPEN",[2,0,0,0,0,0],[0,0,0,0]],"leased":["LEASE_IN_PROGRESS","OBSERVE_LEASE","OPEN",[1,1,0,0,0,0],[0,0,0,0]],"uncertain":["REVIEW_REQUIRED","INSPECT_UNCERTAINTY","OPEN",[0,1,0,0,0,1],[1,0,0,0]],"paused":["PAUSED","INSPECT_PAUSE","PAUSED",[0,1,0,0,0,1],[1,0,0,0]],"resumed":["REVIEW_REQUIRED","INSPECT_UNCERTAINTY","OPEN",[0,0,1,0,0,1],[0,0,1,0]]});
+const triageQueueKeys=Object.freeze(["pending","reserved","completed","failed","cancelled","indeterminate"]);
+const triageReviewKeys=Object.freeze(["awaiting_first","awaiting_second","reviewed_unresolved","conflict"]);
+const triageData=JSON.parse(get("f202-triage-data").textContent);
+const triageClosed=(obj,keys)=>obj!==null&&typeof obj==="object"&&!Array.isArray(obj)&&
+ Object.keys(obj).sort().join("|")===keys.slice().sort().join("|");
+const triageFlags=(obj)=>obj.operational_decision==="NO_GO"&&obj.real_authorization===false&&
+ obj.external_calls===0&&obj.write_calls===0;
+if(!triageClosed(triageData,["contract","stages","operational_decision","real_authorization","external_calls","write_calls"])||
+ triageData.contract!=="SYNTHETIC_QUEUE_TRIAGE_REHEARSAL_V1"||!triageFlags(triageData)||
+ !triageClosed(triageData.stages,Object.keys(triageStages)))throw Error("F202_TRIAGE_CONTRACT_DENIED");
+for(const [stage,details] of Object.entries(triageStages)){
+ const info=triageData.stages[stage];
+ if(!triageClosed(info,["contract","state","next_step","queue","review","admission",
+  "operational_decision","real_authorization","external_calls","write_calls"])||
+  !triageClosed(info.queue,triageQueueKeys)||!triageClosed(info.review,triageReviewKeys)||
+  !triageClosed(info.admission,["state"])||
+  info.contract!=="SYNTHETIC_QUEUE_TRIAGE_V1"||info.state!==details[0]||
+  info.next_step!==details[1]||info.admission.state!==details[2]||
+  !triageFlags(info))throw Error("F202_TRIAGE_STAGE_DENIED");
+ for(const [keys,values] of [[triageQueueKeys,details[3]],[triageReviewKeys,details[4]]]){
+  for(let i=0;i<keys.length;i++){
+   const count=keys===triageQueueKeys?info.queue[keys[i]]:info.review[keys[i]];
+   if(!Number.isInteger(count)||count!==values[i])throw Error("F202_TRIAGE_COUNTER_DENIED");
+  }
+ }
+}
+let selectedTriage="empty";
+function drawTriageStage(){
+ const info=triageData.stages[selectedTriage];
+ get("triage-view-state").textContent=info.state;
+ get("triage-view-next").textContent=info.next_step;
+ get("triage-view-pending").textContent=String(info.queue.pending);
+ get("triage-view-reserved").textContent=String(info.queue.reserved);
+ get("triage-view-completed").textContent=String(info.queue.completed);
+ get("triage-view-unknown").textContent=String(info.queue.indeterminate);
+ get("triage-view-admission").textContent=info.admission.state+" · SIMULADA";
+ get("triage-view-unresolved").textContent=String(info.review.reviewed_unresolved);
+ for(const stage of Object.keys(triageStages)){
+  get("triage-stage-"+stage).setAttribute("aria-pressed",String(stage===selectedTriage));
+ }
+}
+function selectTriageStage(stage){
+ if(!Object.prototype.hasOwnProperty.call(triageStages,stage))return;
+ selectedTriage=stage;
+ drawTriageStage();
 }
 
 // F184: local UI projection only; the F182 PHP snapshot stays immutable.
@@ -656,7 +730,10 @@ get("agent-draft-import").addEventListener("click",importSessionDrafts);
 get("agent-draft-clear-json").addEventListener("click",clearTransferText);
 get("queue-transition-paused").addEventListener("click",()=>selectTransition("paused"));
 get("queue-transition-resumed").addEventListener("click",()=>selectTransition("resumed"));
-drawSupervision();choose("allow");drawAudit();page("overview");drawReviewSimulation();drawAgentDraft("Nenhum rascunho configurado.");drawTransition();
+for(const stage of Object.keys(triageStages)){
+ get("triage-stage-"+stage).addEventListener("click",()=>selectTriageStage(stage));
+}
+drawSupervision();choose("allow");drawAudit();page("overview");drawReviewSimulation();drawAgentDraft("Nenhum rascunho configurado.");drawTransition();drawTriageStage();
 })();
 </script>
 </body></html>

@@ -1,5 +1,11 @@
 # AGENTS.md — Imagine AI Agents
 
+## F202 — jornada de triagem em seis estados na prévia F108 (11/11/2026)
+
+- O laboratório de agentes oferece agora seis seleções `QUIET/PENDING/LEASE_IN_PROGRESS/REVIEW_REQUIRED/PAUSED/REVIEW_REQUIRED`, somente para visualização de snapshots offline F201. [F202](docs/AIA-FT01-F202-JORNADA-TRIAGEM-VISUAL.md).
+- Sete regressões Python de paridade PHP→HTML e smoke DOM com seis transições. Baseline **851 PHP / lint 106**. Não cria comando de fila, API, CRM real, identidade, autorização ou publicação. CRM #57 OPEN/DRAFT, 13 casos OP-01 reais NAO_EXECUTADO, gates R01-G01..G11/CORE/SEG/AUT NO-GO; main, VPS, produção e custos intactos.
+
+
 ## F201 — ensaio executável da triagem F200, apenas offline (11/11/2026)
 
 - `examples/f201-queue-triage-demo.php` exercita seis fases sintéticas da fila e emite envelope fechado sem IDs; `tools/verify_f201_triage.py` valida esquema, determinismo e contagens, com 12 regressões Python. [F201](docs/AIA-FT01-F201-ENSAIO-TRIAGEM-OFFLINE.md).
