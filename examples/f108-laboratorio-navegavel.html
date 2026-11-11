@@ -146,6 +146,9 @@ button:disabled{cursor:not-allowed;opacity:.53}
      <div><dt>Modelo</dt><dd id="agent-draft-preview-template">—</dd></div>
      <div><dt>Objetivo fechado</dt><dd id="agent-draft-preview-purpose">—</dd></div>
      <div><dt>Estado</dt><dd id="agent-draft-preview-state">NÃO PUBLICADO · NO-GO</dd></div>
+     <div><dt>Fonte sintética permitida</dt><dd id="agent-draft-preview-source">—</dd></div>
+     <div><dt>Operações não permitidas</dt><dd id="agent-draft-preview-denied">—</dd></div>
+     <div><dt>Liberação operacional pendente</dt><dd id="agent-draft-preview-gate">—</dd></div>
     </dl>
    </div>
    <div class="draft-session" aria-label="Rascunhos desta sessão local">
@@ -421,9 +424,9 @@ function resetReviewSimulation(){reviewSimulationDecision=null;drawReviewSimulat
 // F185: browser-only draft configuration. Only fixed scenario keys can be
 // selected; user-provided names are never used as executable instructions.
 const agentDraftTemplates=Object.freeze({
- crm:Object.freeze({title:"Qualificação CRM",purpose:"Resumir apenas campos fictícios autorizados.",scenario:"allow"}),
- performance:Object.freeze({title:"Análise de Performance",purpose:"Negar dados de campanha sem fonte dinâmica oficial.",scenario:"dynamic"}),
- universidade:Object.freeze({title:"Tutor de Conhecimento",purpose:"Tratar texto potencialmente malicioso como dado não confiável.",scenario:"injection"})
+ crm:Object.freeze({title:"Qualificação CRM",purpose:"Resumir apenas campos fictícios autorizados.",scenario:"allow",source:"Lead fictício: referência e resumo mínimo",denied:"Alterar leads, consultar outra empresa ou enviar dados reais",gate:"CRM CORE/SEG/AUT e aceite R01-G01..G11"}),
+ performance:Object.freeze({title:"Análise de Performance",purpose:"Negar dados de campanha sem fonte dinâmica oficial.",scenario:"dynamic",source:"Cenário de campanha fictícia, sem contas conectadas",denied:"Ler saldos reais, criar ou editar anúncios",gate:"Autorização e integração real do Imagine Performance"}),
+ universidade:Object.freeze({title:"Tutor de Conhecimento",purpose:"Tratar texto potencialmente malicioso como dado não confiável.",scenario:"injection",source:"Documento de demonstração rotulado UNTRUSTED_DATA",denied:"Executar ferramentas ou instruções enviadas pelo documento",gate:"Revisão de proveniência, permissões e conteúdo"})
 });
 let agentDraft=null;
 function drawAgentDraft(message){
@@ -431,6 +434,9 @@ function drawAgentDraft(message){
  get("agent-draft-preview-template").textContent=agentDraft===null?"—":agentDraft.template.title;
  get("agent-draft-preview-purpose").textContent=agentDraft===null?"—":agentDraft.template.purpose;
  get("agent-draft-preview-state").textContent=agentDraft===null?"NÃO PUBLICADO · NO-GO":"RASCUNHO LOCAL · SEM APROVAÇÃO";
+ get("agent-draft-preview-source").textContent=agentDraft===null?"—":agentDraft.template.source;
+ get("agent-draft-preview-denied").textContent=agentDraft===null?"—":agentDraft.template.denied;
+ get("agent-draft-preview-gate").textContent=agentDraft===null?"—":agentDraft.template.gate;
  get("agent-draft-test").disabled=agentDraft===null;
  get("agent-draft-save").disabled=agentDraft===null;
  get("agent-draft-status").textContent=message;
