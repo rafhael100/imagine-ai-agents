@@ -242,6 +242,27 @@ class CanonicalProjectStatusTests(unittest.TestCase):
         self.assertIn("NO-GO", current)
         self.assertIn("NAO_EXECUTADO", evidence)
 
+    def test_evid39_four_op01_deliveries_are_postmerge_offline(self):
+        current = STATUS.read_text(encoding="utf-8")
+        readme = README.read_text(encoding="utf-8")
+        rules = AGENT_RULES.read_text(encoding="utf-8")
+        evidence = (ROOT / "docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md").read_text(encoding="utf-8")
+        for pr, ci in ((239, 42949459592), (240, 42949959755),
+                       (241, 42950862393), (242, 42951498940)):
+            self.assertIn(f"#{pr}", evidence)
+            self.assertIn(str(ci), evidence)
+            self.assertIn(str(ci), current)
+        self.assertIn("699 testes PHP", current)
+        self.assertIn("699 testes PHP", readme)
+        self.assertIn("699 PHP / lint 87", rules)
+        self.assertIn("f453ebbb99a45416398e0cebed0b404bc00f2dc7", evidence)
+        self.assertIn("NO-GO", current)
+        self.assertIn("OPEN/DRAFT", evidence)
+        self.assertIn("NAO_EXECUTADO", evidence)
+        for old in ("648 testes PHP", "640 testes PHP", "633 testes PHP",
+                    "629 testes PHP"):
+            self.assertIn(old, current)
+
     def test_history_preserved_without_overwriting_evidence(self):
         previous = ARCHIVE.read_text(encoding="utf-8")
         prior_roadmap = ARCHIVED_ROADMAP.read_text(encoding="utf-8")
