@@ -32,6 +32,9 @@ class Element {
 const ids = [...beforeScript.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
 assert.equal(new Set(ids).size, ids.length, "unique IDs");
 const elements = new Map(ids.map(id => [id, new Element(id)]));
+const fixture = beforeScript.match(/<script type="application\/json" id="f183-supervision-data">([^<]+)<\/script>/);
+assert(fixture, "embedded F183 static JSON exists");
+elements.get("f183-supervision-data").textContent = fixture[1];
 const selectors = {
     "[data-page-button]": [], "[data-goto]": [], "[data-scenario]": [],
     "[data-agent-scenario]": []
@@ -66,6 +69,15 @@ for (const [id, result] of expected) {
     assert.equal(byId("result").children[0].textContent, result, "case " + id);
     assert.equal(selectors["[data-scenario]"].find(x => x.dataset.scenario === id).attributes.get("aria-pressed"), "true", "selected aria-pressed " + id);
 }
+selectors["[data-page-button]"].find(x => x.dataset.pageButton === "supervision").click();
+assert.equal(byId("page-supervision").hidden, false, "new supervision tab is navigable");
+assert.equal(byId("page-overview").hidden, true, "overview hidden under supervision");
+assert.equal(byId("supervision-completed").textContent, "1", "completed count from fixture");
+assert.equal(byId("supervision-indeterminate").textContent, "3", "unknown outcome remains visible");
+assert.equal(byId("supervision-pending-review").textContent, "1", "second review still pending");
+assert.equal(byId("supervision-conflict").textContent, "1", "conflict visible");
+assert.equal(byId("supervision-unresolved").textContent, "1", "matching votes do not resolve uncertainty");
+assert.equal(byId("supervision-decision").textContent, "NO-GO", "never authorized");
 selectors["[data-page-button]"].find(x => x.dataset.pageButton === "audit").click();
 assert.equal(byId("page-audit").hidden, false, "audit navigation");
 assert.equal(byId("audit-runs").textContent, "6", "six runs");
@@ -78,4 +90,4 @@ assert.equal(byId("audit-list").children.length, 1, "reset trace");
 selectors["[data-agent-scenario]"].find(x => x.dataset.agentScenario === "dynamic").click();
 assert.equal(byId("page-lab").hidden, false, "agent opens lab");
 assert.equal(byId("case-id").textContent, "U07-08", "agent selected correct case");
-console.log("F108_SMOKE_PASS: 4 pages, 6 scenarios, 14 synthetic events, reset, agent shortcut, offline CSP");
+console.log("F108_SMOKE_PASS: 5 pages, 6 scenarios, 14 synthetic events, reset, agent shortcut, offline CSP");
