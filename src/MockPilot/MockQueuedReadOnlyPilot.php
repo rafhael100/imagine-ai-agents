@@ -61,7 +61,15 @@ final class MockQueuedReadOnlyPilot
         $claim = null;
         try {
             $claim = $this->queue->claim($context, $now, $leaseTicks);
-            if ($claim === null) return self::empty();
+            if ($claim === null) {
+                // No pending work is not the same as no unresolved work.
+                // Claim() first marks expired local leases INDETERMINADO.
+                if ($this->queue->needsReview($context)) {
+                    return self::reviewRequired();
+                }
+                return $this->queue->hasActiveReservation($context)
+                    ? self::inProgress() : self::empty();
+            }
             $wire = MockCrmReadRequestBuilder::fromContext(
                 $context, $claim['request_ref'], $fields);
             $result = $this->pilot->suggest(
@@ -108,6 +116,23 @@ final class MockQueuedReadOnlyPilot
     {
         return ['contract' => 'SYNTHETIC_QUEUED_PILOT_V1',
             'state' => 'DENIED_OR_NOT_FOUND', 'summary' => null,
+            'real_authorization' => false, 'external_calls' => 0,
+            'write_calls' => 0];
+    }
+
+    private static function reviewRequired(): array
+    {
+        // Never call this a successful or empty delivery. Exposes no job ID.
+        return ['contract' => 'SYNTHETIC_QUEUED_PILOT_V1',
+            'state' => 'REVIEW_REQUIRED', 'summary' => null,
+            'real_authorization' => false, 'external_calls' => 0,
+            'write_calls' => 0];
+    }
+
+    private static function inProgress(): array
+    {
+        return ['contract' => 'SYNTHETIC_QUEUED_PILOT_V1',
+            'state' => 'IN_PROGRESS', 'summary' => null,
             'real_authorization' => false, 'external_calls' => 0,
             'write_calls' => 0];
     }

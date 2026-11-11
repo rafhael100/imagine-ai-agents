@@ -156,6 +156,30 @@ final class MockReadOnlyRunQueue
             : self::view($runRef, $job);
     }
 
+    /**
+     * An expired local claim has unknown outcome. Reporting an empty queue
+     * while such a job remains would misleadingly imply no work needs review.
+     * This is only a redacted bit; never release run/claim/nonce material.
+     */
+    public function needsReview(TenantContext $context): bool
+    {
+        $this->boundContext->assertSame($context);
+        foreach ($this->jobs as $job) {
+            if ($job['state'] === 'INDETERMINADO') return true;
+        }
+        return false;
+    }
+
+    /** Another local claim is still active; this is not an empty queue. */
+    public function hasActiveReservation(TenantContext $context): bool
+    {
+        $this->boundContext->assertSame($context);
+        foreach ($this->jobs as $job) {
+            if ($job['state'] === 'RESERVADA') return true;
+        }
+        return false;
+    }
+
     public function events(): array { return $this->trace; }
 
     public function counts(): array
