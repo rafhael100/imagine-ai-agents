@@ -169,6 +169,36 @@ function f166ToolReadFixture(\Closure $duringRead): array
         $counters, $reader, $shared, $mutations];
 }
 
+
+/** A local mock provider able to revoke its injected tool grant mid-suggestion. */
+final class F172MutatingSuggestionProvider implements AiSuggestionProvider
+{
+    public int $calls = 0;
+    public function __construct(private readonly \Closure $duringSuggestion) {}
+
+    public function suggest(Run $run, array $fields): array
+    {
+        ++$this->calls;
+        ($this->duringSuggestion)();
+        return (new MockAiSuggestionProvider())->suggest($run, $fields);
+    }
+}
+
+/** @return array{0:MockToolDispatcher,1:MockCapabilityGrant,2:TenantContext,
+ * 3:Run,4:SupervisedCoordinator,5:MockSupervisedGateway,6:F172MutatingSuggestionProvider} */
+function f172SuggestionFixture(\Closure $duringSuggestion): array
+{
+    $ctx = context();
+    $gateway = new MockSupervisedGateway();
+    $provider = new F172MutatingSuggestionProvider($duringSuggestion);
+    $coordinator = new SupervisedCoordinator($ctx, $gateway, $provider);
+    $run = $coordinator->start('SYNTHETIC_F172_RUN');
+    $dispatcher = new MockToolDispatcher(new MockToolCatalog(), $coordinator);
+    $grant = new MockCapabilityGrant('SYNTHETIC_F172_GRANT',
+        MockToolCatalog::SUGGEST, $ctx, 10, 20);
+    return [$dispatcher, $grant, $ctx, $run, $coordinator, $gateway, $provider];
+}
+
 return [
     'U04-01 legacy synthetic read requires CRM-owner OP-01 boundary' => function (): void {
         [$ctx, $gw, , $d, , , , $grant] = toolFixture();
@@ -966,5 +996,135 @@ return [
         check(f136Read($tool, $grant, $env, $owner, $ctx)['state'] === 'SYNTHETIC_OK');
         check($reader->calls === 1 && $store->countConsumed() === 1
             && $audit->count() === 1);
+    },
+
+    'U72-01 tool grant revoked inside reader denies data despite successful CRM read' => function (): void {
+        $toRevoke = null;
+        [$tool, $toRevoke, $env, $owner, $ctx, , $audit, $counts, $reader, $store, $mut] =
+            f166ToolReadFixture(function () use (&$toRevoke): void {
+                $toRevoke->revoke();
+            });
+        $out = f136Read($tool, $toRevoke, $env, $owner, $ctx);
+        check($out === f136Denied());
+        check($reader->calls === 1 && $store->countConsumed() === 1
+            && $mut->submitCount() === 0);
+        check($audit->count() === 1
+            && $audit->entries()[0]['outcome'] === 'READ_SYNTHETIC_ONLY');
+        check($counts->snapshot()['attempts'] === 1
+            && $counts->snapshot()['outcomes']['READ_SYNTHETIC_ONLY'] === 1);
+        check(array_column($tool->events(), 'code') === ['SYNTHETIC_DENIED']);
+        check(!str_contains(json_encode($out, JSON_THROW_ON_ERROR), $ctx->resource));
+    },
+    'U72-02 revoked read tool cannot attempt another read with the same grant' => function (): void {
+        $toRevoke = null;
+        [$tool, $toRevoke, $env, $owner, $ctx, , $audit, $counts, $reader, $store] =
+            f166ToolReadFixture(function () use (&$toRevoke): void {
+                $toRevoke->revoke();
+            });
+        check(f136Read($tool, $toRevoke, $env, $owner, $ctx) === f136Denied());
+        check(f136Read($tool, $toRevoke, $env, $owner, $ctx) === f136Denied());
+        check($reader->calls === 1 && $store->countConsumed() === 1
+            && $counts->snapshot()['attempts'] === 1 && $audit->count() === 1);
+        check(array_column($tool->events(), 'code') ===
+            ['SYNTHETIC_DENIED', 'SYNTHETIC_DENIED']);
+    },
+    'U72-03 tool can read with fresh grant and proof after a revoked former grant' => function (): void {
+        $toRevoke = null; $once = true;
+        [$tool, $toRevoke, $env, $owner, $ctx, , $audit, $counts, $reader, $store] =
+            f166ToolReadFixture(function () use (&$toRevoke, &$once): void {
+                if ($once) { $once = false; $toRevoke->revoke(); }
+            });
+        check(f136Read($tool, $toRevoke, $env, $owner, $ctx) === f136Denied());
+        $newGrant = new MockCapabilityGrant('SYNTHETIC_SEC50_FRESH_READ',
+            MockToolCatalog::READ, $ctx, 10, 20);
+        $newEnv = new \ImagineAI\MockTrust\MockTrustEnvelope(
+            'SYNTHETIC_SEC50_NEW_ENV', 'SYNTHETIC_AGENT_SERVICE',
+            'SYNTHETIC_CRM_API', $ctx, 'SYNTHETIC_SEC50_NEW_NONCE',
+            ['SYNTHETIC_LEAD_READ'], 10, 40);
+        $newOwner = new \ImagineAI\MockTrust\MockOwnerScopeEvidence(
+            'SYNTHETIC_SEC50_NEW_OWNER', $newEnv->digest, $ctx,
+            'SYNTHETIC_LEAD_READ', 10, 40, true);
+        check(f136Read($tool, $newGrant, $newEnv, $newOwner, $ctx)['state'] === 'SYNTHETIC_OK');
+        check($reader->calls === 2 && $store->countConsumed() === 2
+            && $audit->count() === 2 && $counts->snapshot()['attempts'] === 2);
+        check(array_column($tool->events(), 'code') ===
+            ['SYNTHETIC_DENIED', 'SYNTHETIC_READ']);
+    },
+    'U72-04 healthy capability stays valid through post-read recheck' => function (): void {
+        [$tool, $grant, $env, $owner, $ctx, , $audit, $counts, $reader, $store, $mut] =
+            f166ToolReadFixture(function (): void {});
+        $wire = f112Wire($ctx); $wire['fields'] = ['stage', 'ref'];
+        $result = f136Read($tool, $grant, $env, $owner, $ctx, $wire);
+        check($result['data'] === ['stage' => 'SYNTHETIC_NEW', 'ref' => 'SYNTHETIC_A_LEAD']);
+        check($reader->calls === 1 && $store->countConsumed() === 1
+            && $audit->count() === 1 && $counts->snapshot()['attempts'] === 1);
+        check($mut->submitCount() === 0 && $tool->events()[0]['code'] === 'SYNTHETIC_READ');
+    },
+    'U72-05 suggestion grant revoked by provider is denied and closes its run' => function (): void {
+        $toRevoke = null;
+        [$tool, $toRevoke, $ctx, $run, $coord, $mut, $provider] =
+            f172SuggestionFixture(function () use (&$toRevoke): void {
+                $toRevoke->revoke();
+            });
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $toRevoke, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($provider->calls === 1 && $run->state() === 'FALHOU'
+            && $mut->submitCount() === 0);
+        check(array_column($coord->events(), 'code') === [
+            'SYNTHETIC_STARTED', 'SYNTHETIC_SUGGESTED',
+            'SYNTHETIC_RUN_CHANGED']);
+        check($tool->events()[0]['code'] === 'SYNTHETIC_DENIED');
+    },
+    'U72-06 revoked suggestion grant blocks later attempts without provider calls' => function (): void {
+        $toRevoke = null;
+        [$tool, $toRevoke, $ctx, $run, $coord, $mut, $provider] =
+            f172SuggestionFixture(function () use (&$toRevoke): void {
+                $toRevoke->revoke();
+            });
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $toRevoke, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        denied('CAPABILITY_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $toRevoke, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        check($provider->calls === 1 && $run->state() === 'FALHOU'
+            && $mut->submitCount() === 0);
+        check(array_column($tool->events(), 'code') ===
+            ['SYNTHETIC_DENIED', 'SYNTHETIC_DENIED']);
+    },
+    'U72-07 unchanged suggestion grant still returns only fixed synthetic draft' => function (): void {
+        [$tool, $grant, $ctx, $run, $coord, $mut, $provider] =
+            f172SuggestionFixture(function (): void {});
+        $result = $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $grant, ['text' => 'SYNTHETIC_DRAFT'], 15, $run);
+        check($result['kind'] === 'SUGGEST' && $result['state'] === 'SYNTHETIC_OK');
+        check($result['data']['text'] === 'SYNTHETIC summary proposal only');
+        check($provider->calls === 1 && $run->state() === 'EXECUTANDO');
+        check(array_column($coord->events(), 'code') ===
+            ['SYNTHETIC_STARTED', 'SYNTHETIC_SUGGESTED']);
+        check($mut->submitCount() === 0 && $tool->events()[0]['code'] === 'SYNTHETIC_SUGGESTED');
+    },
+    'U72-08 fresh suggestion grant and new run recover after provider revocation' => function (): void {
+        $toRevoke = null; $once = true;
+        [$tool, $toRevoke, $ctx, $run, $coord, $mut, $provider] =
+            f172SuggestionFixture(function () use (&$toRevoke, &$once): void {
+                if ($once) { $once = false; $toRevoke->revoke(); }
+            });
+        denied('TOOL_SUGGESTION_DENIED', fn () => $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $toRevoke, ['text' => 'SYNTHETIC_DRAFT'], 15, $run));
+        $freshRun = $coord->start('SYNTHETIC_SEC50_NEW_SUGGEST_RUN');
+        $freshGrant = new MockCapabilityGrant('SYNTHETIC_SEC50_NEW_SUGGEST_GRANT',
+            MockToolCatalog::SUGGEST, $ctx, 10, 20);
+        $result = $tool->dispatch(
+            MockToolCatalog::SUGGEST, MockToolCatalog::VERSION, $ctx,
+            $freshGrant, ['text' => 'SYNTHETIC_DRAFT'], 15, $freshRun);
+        check($result['state'] === 'SYNTHETIC_OK' && $provider->calls === 2
+            && $run->state() === 'FALHOU' && $freshRun->state() === 'EXECUTANDO');
+        check(array_column($tool->events(), 'code') ===
+            ['SYNTHETIC_DENIED', 'SYNTHETIC_SUGGESTED']);
+        check($mut->submitCount() === 0);
     },
 ];
