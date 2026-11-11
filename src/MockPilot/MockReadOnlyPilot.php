@@ -5,7 +5,7 @@ namespace ImagineAI\MockPilot;
 
 use ImagineAI\Domain\TenantContext;
 use ImagineAI\MockBridge\{MockCrmReadRequest, MockCrmPublicResponseContract};
-use ImagineAI\MockOrchestration\SupervisedCoordinator;
+use ImagineAI\MockOrchestration\{SupervisedCoordinator, MockReadOnlyRunQueue};
 use ImagineAI\MockTelemetry\MockCrmReadEdgeBoundary;
 use ImagineAI\MockTrust\{MockTrustEnvelope, MockOwnerScopeEvidence};
 
@@ -31,6 +31,16 @@ final class MockReadOnlyPilot
     public function assertQueueAdmissionReady(): void
     {
         $this->coordinator->assertProviderCallbackIdle();
+    }
+
+    /**
+     * Tie any queue used by this pilot to its coordinator at construction.
+     * Prevent direct queue mutation by a provider holding the queue object.
+     */
+    public function bindQueueAdmissionGuard(MockReadOnlyRunQueue $queue): void
+    {
+        $this->coordinator->assertProviderCallbackIdle();
+        $queue->bindAdmissionCoordinator($this->coordinator);
     }
 
     /**
