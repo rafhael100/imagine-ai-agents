@@ -52,10 +52,10 @@ Requisitos: checkout Git completo com PHP 8.1+ e Python 3 já presentes, sem ins
 ```bash
 php examples/f127-read-only-pilot-demo.php
 php tests/Unit/run.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=93 EXPECTED_CASES=753 bash tools/run_r01_offline_quality_gate.sh
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=95 EXPECTED_CASES=766 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-**OP-01:** base **699 testes PHP**; SEC-54/55/56 e F181 integrados (741). **SEC-57 em revisão: 753 PHP/lint 93.** [Guarda direta da fila](docs/AIA-FT01-SEC-57-GUARDA-FILA-DIRETA-CALLBACK.md), [EVID-39](docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md). **NO-GO**.
+**OP-01:** base **699 testes PHP**, SEC-57 em CI (753). **Revisão dupla REV-01 em CI: 766 PHP/lint 95.** [Revisão de incertezas](docs/AIA-FT01-REV-01-REVISAO-DUPLA-INCERTEZA-OFFLINE.md), [EVID-39](docs/AIA-R01-EVID-39-OP01-QUEUE-PILOT-POSTMERGE.md). **NO-GO**.
 
 **SEC-53 integrada (PR #237): 648 testes PHP**. [CI #42945854088](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42945854088), [EVID-38](docs/AIA-R01-EVID-38-SEC53-CI-POSTMERGE.md). **NO-GO**.
 
