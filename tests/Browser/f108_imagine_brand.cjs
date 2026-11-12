@@ -1,0 +1,21 @@
+"use strict";
+const assert=require("node:assert/strict");
+const {readFileSync}=require("node:fs");
+const {createHash}=require("node:crypto");
+const {resolve}=require("node:path");
+const root=resolve(__dirname,"../..");
+const html=readFileSync(resolve(root,"examples/f108-laboratorio-navegavel.html"),"utf8");
+const logo=readFileSync(resolve(root,"examples/assets/logo-imagine.png"));
+const gitBlob=createHash("sha1").update("blob "+logo.length).update(Buffer.from([0])).update(logo).digest("hex");
+assert.equal(gitBlob,"678adeceb3a8ecdaeb6b576b9ee18d1bf0396f77","Logo Imagine original byte a byte");
+const matches=[...html.matchAll(/<img class="brandlogo" src="data:image\\/png;base64,([A-Za-z0-9+/=]+)" alt="Imagine Comunicação Digital"/g)];
+assert.equal(matches.length,1,"exatamente uma logomarca oficial");
+assert.deepEqual(Buffer.from(matches[0][1],"base64"),logo,"PNG exibido deve ser o original");
+for(const token of ["--imagine-orange:#f9941d","--imagine-ink:#171b19","--imagine-surface:#f7f7f8","--imagine-orange-soft:#fff1e0","--imagine-focus:#b75c00"]){assert.ok(html.includes(token),token);}
+for(const selector of ['.sidebar{background:var(--imagine-white)', '.nav button[aria-current="page"]{color:var(--imagine-orange-text)', '.hero{background:var(--imagine-ink)', '@media(max-width:850px)', 'scroll-snap-type:x proximity','prefers-reduced-motion:reduce'])assert.ok(html.includes(selector),selector);
+assert.ok(html.includes("connect-src 'none'"),"sem rede");
+assert.ok(html.includes("form-action 'none'"),"sem envio");
+assert.ok(html.includes("img-src data:"),"CSP da imagem original embutida");
+assert.ok(!/https?:\\/\\/|<iframe\\b|<form\\b|<script\\s+src\\b/i.test(html),"sem recursos externos ou formularios");
+assert.equal([...html.matchAll(/data-page-button=/g)].length,5,"navegacao original preservada");
+console.log("PASS Imagine AI Agents: PNG original, paleta, UX mobile, navegacao e sem rede");
