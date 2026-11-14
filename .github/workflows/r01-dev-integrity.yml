@@ -8,6 +8,7 @@ on:
   pull_request:
     branches:
       - dev/ft01-aia-core-mocks-2026-11-06
+      - main
 
 permissions:
   contents: read
@@ -21,6 +22,12 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 6
     steps:
+      - name: Block main promotion while OP-01 has no independent release approval
+        if: ${{ github.event_name == 'pull_request' && github.base_ref == 'main' }}
+        shell: bash
+        run: |
+          echo "::error::OP01_MAIN_PROMOTION_NO_GO; 14 gates and 13 operational scenarios pending"
+          exit 1
       - name: Fail closed when private cross-repository checkout is unreviewed
         if: ${{ github.event.repository.private == true }}
         shell: bash
