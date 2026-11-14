@@ -16,6 +16,63 @@ final class MockCrmReadRequest
     public readonly string $purposeRef;
     public readonly array $fields;
 
+    /**
+     * F219: byte-exact canonical JSON for a synthetic-only eight-key request.
+     * Not an HTTP decoder, interoperable JSON format, authentication or CRM API.
+     * Comparing raw bytes to a canonical re-encoding rejects duplicate names
+     * and alternative escapes before they can acquire a second interpretation.
+     */
+    public static function decodeCanonicalJson(string $body): array
+    {
+        if ($body === '' || strlen($body) > 1024) {
+            MockError::fail('BRIDGE_SCHEMA_DENIED');
+        }
+        try {
+            $wire = json_decode($body, true, 4, JSON_THROW_ON_ERROR);
+            if (!is_array($wire) || array_keys($wire) !== [
+                'contract', 'request_ref', 'operation', 'tenant_ref',
+                'principal_ref', 'resource_ref', 'purpose_ref', 'fields',
+            ]) {
+                MockError::fail('BRIDGE_SCHEMA_DENIED');
+            }
+            new self($wire);
+            $canonical = json_encode(
+                $wire, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                    | JSON_THROW_ON_ERROR
+            );
+            if (!hash_equals($canonical, $body)) {
+                MockError::fail('BRIDGE_SCHEMA_DENIED');
+            }
+            return $wire;
+        } catch (\Throwable) {
+            MockError::fail('BRIDGE_SCHEMA_DENIED');
+        }
+    }
+
+    /** Only known ordered mock values; never a general serialization service. */
+    public static function encodeCanonicalJson(array $wire): string
+    {
+        new self($wire);
+        if (array_keys($wire) !== [
+            'contract', 'request_ref', 'operation', 'tenant_ref',
+            'principal_ref', 'resource_ref', 'purpose_ref', 'fields',
+        ]) {
+            MockError::fail('BRIDGE_SCHEMA_DENIED');
+        }
+        try {
+            $encoded = json_encode(
+                $wire, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                    | JSON_THROW_ON_ERROR
+            );
+            if (strlen($encoded) > 1024) {
+                MockError::fail('BRIDGE_SCHEMA_DENIED');
+            }
+            return $encoded;
+        } catch (\Throwable) {
+            MockError::fail('BRIDGE_SCHEMA_DENIED');
+        }
+    }
+
     /** Strict, closed mock structure; no permissive coercion or unknown keys. */
     public function __construct(array $wire)
     {
