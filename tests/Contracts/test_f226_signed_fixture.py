@@ -45,7 +45,7 @@ class F226HmacFixture(unittest.TestCase):
 
     def test_no_secret_or_go(self):
         for s in ("NO-GO","14 gates","13 cenários","879","110",
-                  "CRM #57","main","synthetic"):
+                  "CRM #57","main","sintética"):
             self.assertIn(s.lower(),self.doc.lower())
         for banned in ("curl_init(","PDO(","Bearer ","Authorization:",
                        "file_get_contents('http","getenv(","shell_exec("):
