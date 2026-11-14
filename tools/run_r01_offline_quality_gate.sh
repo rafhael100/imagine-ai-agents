@@ -18,6 +18,7 @@ python3 tools/check_r01_readiness.py
 python3 tools/check_op01_contract_parity.py
 python3 tools/generate_op01_bilateral_packet.py --check
 python3 tools/plan_op01_release.py --check
+python3 tools/build_op01_testbook.py --check
 python3 tools/check_f213_op01_view.py
 python3 tools/check_op01_public_response_parity.py
 python3 tools/generate_op01_dashboard.py --check
@@ -62,6 +63,7 @@ for name in \
   test_f213_op01_view.py \
   test_f214_github_summary.py \
   test_evid51_postmerge.py \
+  test_f215_op01_testbook.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
