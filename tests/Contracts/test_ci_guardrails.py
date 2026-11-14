@@ -18,11 +18,23 @@ class WorkflowGuardrails(unittest.TestCase):
 
     def test_checkout_is_exact_reviewed_release(self):
         uses = re.findall(r"(?m)^\s*uses:\s*(\S+)", self.workflow)
-        self.assertEqual(uses, [f"actions/checkout@{CHECKOUT_SHA}"])
+        # Exactly two pinned sources: Agents HEAD + an immutable public CRM SHA.
+        self.assertEqual(uses, [f"actions/checkout@{CHECKOUT_SHA}"] * 2)
         self.assertIn("# v7.0.1 Node24 SHA pinned", self.workflow)
+        self.assertEqual(self.workflow.count("repository: rafhael100/imagine-crm"), 1)
+        self.assertEqual(self.workflow.count(
+            "ref: 7999b1e34a6cbd0ee1c5e2351067ad172e01bbad"), 1)
+        self.assertEqual(self.workflow.count("path: _synthetic_crm_fixture"), 1)
+        self.assertIn(
+            'test "$(git -C _synthetic_crm_fixture rev-parse HEAD)" = '
+            '"7999b1e34a6cbd0ee1c5e2351067ad172e01bbad"',
+            self.workflow,
+        )
 
     def test_checkout_does_not_persist_credentials(self):
-        self.assertRegex(self.workflow, r"persist-credentials:\s*false")
+        self.assertEqual(
+            len(re.findall(r"persist-credentials:\s*false", self.workflow)), 2)
+        self.assertNotIn("persist-credentials: true", self.workflow)
 
     def test_root_permissions_read_only(self):
         self.assertRegex(self.workflow, r"(?m)^permissions:\s*\n\s+contents:\s+read\b")
