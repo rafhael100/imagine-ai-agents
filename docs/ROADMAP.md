@@ -1,6 +1,6 @@
 # Imagine AI Agents — roadmap operacional
 
-**Versão consolidada em 10/11/2026.** O histórico integral continua disponível em [ROADMAP-ANTES-CONSOLIDACAO-2026-11-10](historico/ROADMAP-ANTES-CONSOLIDACAO-2026-11-10.md); ele descreve decisões e fases anteriores, não a liberação atual. Fonte de estado: [STATUS-ATUAL.md](../STATUS-ATUAL.md).
+**Versão consolidada em 10/11/2026.** O histórico integral continua disponível em [ROADMAP-ANTES-CONSOLIDACAO-2026-11-10](historico/ROADMAP-ANTES-CONSOLIDACAO-2026-11-10.md); ele descreve decisões e fases anteriores, não a liberação atual. Estado: [STATUS-ATUAL.md](../STATUS-ATUAL.md); [EVID-49](AIA-R01-EVID-49-CRM-AGENTS-POSTMERGE.md).
 
 ## Fase A — base de demonstração offline
 
@@ -67,10 +67,6 @@ SEC-48: 613 PHP, [EVID-33](AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md) e CI #42924834
 [SEC-49](AIA-FT01-SEC-49-REVISAO-TRUST-COMPARTILHADO.md): [EVID-34](AIA-R01-EVID-34-SEC49-CI-POSTMERGE.md), CI #42933553917 (621 PHP).
 
 [SEC-50](AIA-FT01-SEC-50-CAPABILITY-RECHECK-POS-FERRAMENTA.md): 629 PHP / 83 lint; revogação pós READ/SUGGEST, U72-01..08. Gate em revisão/NO-GO.
-
-## Evidência recíproca de código sintético — EVID-49 (14/11/2026)
-
-A [F208 / PR #293](https://github.com/rafhael100/imagine-ai-agents/pull/293) e a [F209 / PR #294](https://github.com/rafhael100/imagine-ai-agents/pull/294) foram integradas **somente à dev**, com CI pós-merge verificadas. O CI dos Agents agora executa classes PHP sintéticas do **CRM pinado**, testa negativas uniformes e compara a matriz OP-01 de 13 casos com o pacote de aceite existente. [EVID-49](AIA-R01-EVID-49-CRM-AGENTS-POSTMERGE.md) contém as SHAs e as provas. **Resultado de conformidade sintática não é homologação:** 13 casos reais NAO_EXECUTADO, CRM #57 OPEN/DRAFT, nenhum IAM/ACL real, pilotagem, API, VPS ou produção, todos gates NO-GO.
 
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 
