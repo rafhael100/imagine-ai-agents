@@ -76,3 +76,5 @@ jobs:
           php tools/check_crm_aia_cross_source.php
           set -euo pipefail
           php tools/check_crm_aia_scenario_matrix.php | python3 tools/verify_f209_matrix.py
+          php -l tools/check_crm_aia_real_facade_core.php
+          php tools/check_crm_aia_real_facade_core.php
