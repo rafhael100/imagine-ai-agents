@@ -72,6 +72,7 @@ for name in \
   test_f221_exchange.py \
   test_f222_integrity_triggers.py \
   test_f223_main_guard.py \
+  test_f224_reciprocal_pins.py \
   test_evid52_postmerge.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
