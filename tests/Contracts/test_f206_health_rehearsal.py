@@ -68,6 +68,52 @@ class F206Tests(unittest.TestCase):
         self.changed(lambda x: x["stages"].update(unexpected=x["stages"]["idle"]))
 
 
+
+class F207StrictJsonTests(unittest.TestCase):
+    """Untrusted synthetic CLI JSON must be unambiguous and bounded."""
+
+    def test_valid_json_remains_accepted(self):
+        self.assertEqual(verifier.decode_fixture_json('{"state":"NO_GO","count":8}'),
+                         {"state": "NO_GO", "count": 8})
+
+    def test_duplicate_top_level_key_rejected(self):
+        with self.assertRaisesRegex(ValueError, "DUPLICATE"):
+            verifier.decode_fixture_json('{"state":"NO_GO","state":"GO"}')
+
+    def test_duplicate_nested_key_rejected(self):
+        with self.assertRaisesRegex(ValueError, "DUPLICATE"):
+            verifier.decode_fixture_json('{"stages":{"paused":{"state":"PAUSED","state":"OPEN"}}}')
+
+    def test_nonfinite_nan_rejected(self):
+        with self.assertRaisesRegex(ValueError, "NONFINITE"):
+            verifier.decode_fixture_json('{"count":NaN}')
+
+    def test_nonfinite_infinities_rejected(self):
+        for token in ("Infinity", "-Infinity"):
+            with self.subTest(token=token), self.assertRaisesRegex(ValueError, "NONFINITE"):
+                verifier.decode_fixture_json('{"count":' + token + '}')
+
+    def test_oversize_payload_rejected(self):
+        with self.assertRaisesRegex(ValueError, "SIZE"):
+            verifier.decode_fixture_json('{"state":"NO_GO"}' + " " * verifier.MAX_FIXTURE_BYTES)
+
+    def test_trailing_second_document_rejected(self):
+        with self.assertRaisesRegex(ValueError, "SYNTAX"):
+            verifier.decode_fixture_json('{"state":"NO_GO"} {"state":"GO"}')
+
+    def test_non_object_root_rejected(self):
+        with self.assertRaisesRegex(ValueError, "ROOT"):
+            verifier.decode_fixture_json('["GO"]')
+
+    def test_invalid_unicode_surrogate_rejected(self):
+        with self.assertRaisesRegex(ValueError, "ENCODING"):
+            verifier.decode_fixture_json('{"value":"' + chr(0xd800) + '"}')
+
+    def test_non_string_payload_rejected(self):
+        with self.assertRaisesRegex(ValueError, "INPUT"):
+            verifier.decode_fixture_json(b'{"state":"NO_GO"}')
+
+
 class F206StaticTests(unittest.TestCase):
     def test_cli_never_mentions_network_or_real_authorization(self):
         php = (ROOT / "examples/f206-queue-health-demo.php").read_text(encoding="utf-8")
