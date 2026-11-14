@@ -23,7 +23,7 @@ class F208SourceParity(unittest.TestCase):
 
     def test_existing_offline_gate_not_bypassed(self):
         self.assertIn("bash tools/run_r01_offline_quality_gate.sh", self.workflow)
-        self.assertIn("EXPECTED_PHP: '110'", self.workflow)
+        self.assertIn("EXPECTED_PHP: '112'", self.workflow)
         self.assertIn("EXPECTED_CASES: '879'", self.workflow)
         self.assertIn("test_f208_crm_cross_source.py", self.gate)
         self.assertIn("test_f206_health_rehearsal.py", self.gate)
