@@ -50,6 +50,22 @@ final class MockCrmReadPublicFacade
     }
 
     /**
+     * F216: a new edge attempt invalidates the previous local read receipt,
+     * even when rejected before handle() (schema, telemetry or capacity).
+     *
+     * If a reader itself re-enters the edge, taint the enclosing read so it
+     * cannot return a successful result after the nested attempt was denied.
+     * This only reduces an ephemeral mock capability. No CRM IAM or token.
+     */
+    public function discardReadReceipt(): void
+    {
+        $this->lastReadReceipt = null;
+        if ($this->handlingRead) {
+            $this->nestedReadObserved = true;
+        }
+    }
+
+    /**
      * Same in-memory owner/trust authority used by the audited read. Returns
      * a single denial bit, not policy detail. No new read, audit or nonce.
      * Not an operational CRM permission-check endpoint.
