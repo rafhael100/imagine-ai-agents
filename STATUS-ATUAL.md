@@ -1,12 +1,12 @@
 # Imagine AI Agents — estado atual
 
-**11/11/2026.** GitHub. **Produção: NO-GO.**
+**14/11/2026.** GitHub. **Produção: NO-GO.**
 
 ## Estado executivo
 
 **Fase:** offline. **NO-GO**.
 
-**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **879 testes PHP / lint 110 + Python/DOM**; #280–285; EVID-44,EVID-45,EVID-46,EVID-47,EVID-48; CI 43038243942; [CI #43088648397](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43088648397) `success`, [EVID-43](docs/AIA-R01-EVID-43-SEC61-F189-F190-CI-POSTMERGE.md). **NO-GO**.
+**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **879 testes PHP / lint 110 + Python/DOM**; #280–285; EVID-43,EVID-44,EVID-45,EVID-46,EVID-47,EVID-48,EVID-49; CIs 43038243942, 43088648397, 43605185307, 43605619299. F208 #293 e F209 #294 integradas apenas à dev; CRM PR #57 OPEN/DRAFT e 13 casos reais NAO_EXECUTADO. **NO-GO**.
 
 ## Últimas entregas verificadas
 

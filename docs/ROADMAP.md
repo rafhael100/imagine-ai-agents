@@ -1,6 +1,6 @@
 # Imagine AI Agents — roadmap operacional
 
-**Versão consolidada em 10/11/2026.** O histórico integral continua disponível em [ROADMAP-ANTES-CONSOLIDACAO-2026-11-10](historico/ROADMAP-ANTES-CONSOLIDACAO-2026-11-10.md); ele descreve decisões e fases anteriores, não a liberação atual. Fonte de estado: [STATUS-ATUAL.md](../STATUS-ATUAL.md).
+**Versão consolidada em 10/11/2026.** O histórico integral continua disponível em [ROADMAP-ANTES-CONSOLIDACAO-2026-11-10](historico/ROADMAP-ANTES-CONSOLIDACAO-2026-11-10.md); ele descreve decisões e fases anteriores, não a liberação atual. Estado: [STATUS-ATUAL.md](../STATUS-ATUAL.md); [EVID-49](AIA-R01-EVID-49-CRM-AGENTS-POSTMERGE.md).
 
 ## Fase A — base de demonstração offline
 
