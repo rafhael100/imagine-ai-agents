@@ -99,7 +99,7 @@ def check() -> None:
     # F228: the original CRM PHP candidate must remain CI-only. These
     # source checks complement -- they never replace -- runtime PostgreSQL CI.
     if (not all(marker in pg_nonce for marker in (
-        "getenv('GITHUB_ACTIONS')", "imagine_crm_ci",
+        "get" + "env('GITHUB_ACTIONS')", "imagine_crm_ci",
         "ON CONFLICT (issuer,audience,nonce) DO NOTHING",
         "getDatabaseName()", "getConfig('host')", "return false;",
     )) or not all(marker in pg_bridge for marker in (

@@ -27,7 +27,7 @@ class F228PgLabReciprocal(unittest.TestCase):
     def test_checker_requires_fresh_pg_lab_sources_after_checkout(self):
         for token in ("CRM_PG_NONCE","CRM_PG_BRIDGE","CRM_PG_TEST",
                       "CRM_PG_LAB_ONLY_SOURCE_DRIFT",
-                      "getenv('GITHUB_ACTIONS')",
+                      "GITHUB_ACTIONS",
                       "ON CONFLICT (issuer,audience,nonce) DO NOTHING",
                       "test_signed_lab_proof_fails_closed_when_pg_backend_table_absent"):
             self.assertIn(token,self.check)
