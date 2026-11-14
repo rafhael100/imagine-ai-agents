@@ -23,6 +23,15 @@ final class MockReadOnlyPilot
     ) {}
 
     /**
+     * F218: queued adapters may abandon a previously accepted synthetic read
+     * before entering suggest(). This operation only reduces local authority.
+     */
+    public function discardReadReceipt(): void
+    {
+        $this->edge->discardReadReceipt();
+    }
+
+    /**
      * Queue/batch adapters must check this before claiming local work.
      * Coordinator also taints a swallowed provider reentry attempt so the
      * outer suggestion fails rather than succeeding after a denied callback.

@@ -26,6 +26,12 @@ final class MockQueuedReadOnlyPilot
         $this->pilot->bindQueueAdmissionGuard($this->queue);
     }
 
+    /** Discard only local proof after an abandoned queue or batch attempt. */
+    public function discardReadReceipt(): void
+    {
+        $this->pilot->discardReadReceipt();
+    }
+
     /**
      * Preflight for callers that may schedule more than one queued job.
      * Must happen before any queue claim or allocation of audit/nonce.
@@ -50,6 +56,9 @@ final class MockQueuedReadOnlyPilot
         int $now,
         int $leaseTicks,
     ): array {
+        // A new queue dispatch supersedes any old read receipt even if
+        // preflight fails, no job exists, or the queue refuses a claim.
+        $this->discardReadReceipt();
         try {
             // Check before even inspecting caller context/fields. A caught
             // nested attempt must poison the outer provider callback.
@@ -95,7 +104,10 @@ final class MockQueuedReadOnlyPilot
             ];
             $this->queue->finish($context, $claim['run_ref'],
                 $claim['claim_ref'], $ok ? 'CONCLUIDA' : 'FALHOU', $now);
-            if (!$ok) return self::denial();
+            if (!$ok) {
+                $this->discardReadReceipt();
+                return self::denial();
+            }
             return [
                 'contract' => 'SYNTHETIC_QUEUED_PILOT_V1',
                 'state' => 'SUGGESTION_SYNTHETIC_ONLY',
@@ -105,6 +117,9 @@ final class MockQueuedReadOnlyPilot
                 'write_calls' => 0,
             ];
         } catch (\Throwable) {
+            // The pilot may have returned success while queue completion
+            // failed. That outcome is DENIED, never a reusable read receipt.
+            $this->discardReadReceipt();
             // A claim might be indeterminate/expired; NEVER requeue or
             // dispatch a second read as recovery. Try to close locally only
             // if the queue still considers that exact lease valid.

@@ -66,6 +66,7 @@ for name in \
   test_f215_op01_testbook.py \
   test_f216_edge_receipt.py \
   test_f217_pilot_receipt.py \
+  test_f218_queue_receipt.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
@@ -106,6 +107,8 @@ php -l tools/check_f216_edge_receipt.php
 php tools/check_f216_edge_receipt.php
 php -l tools/check_f217_pilot_receipt.php
 php tools/check_f217_pilot_receipt.php
+php -l tools/check_f218_queue_receipt.php
+php tools/check_f218_queue_receipt.php
 bash tools/validate_ft01_offline.sh
 
 echo 'R01_OFFLINE_GATE_PASS operational_decision=NO_GO'
