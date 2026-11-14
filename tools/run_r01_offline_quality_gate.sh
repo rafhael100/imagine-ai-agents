@@ -131,6 +131,8 @@ php -l tools/check_f221_canonical_exchange.php
 php tools/check_f221_canonical_exchange.php
 php -l tools/check_f227_signed_fixture.php
 php tools/check_f227_signed_fixture.php
+php -l tools/check_f231_ed25519_preflight.php
+php tools/check_f231_ed25519_preflight.php
 bash tools/validate_ft01_offline.sh
 
 echo 'R01_OFFLINE_GATE_PASS operational_decision=NO_GO'
