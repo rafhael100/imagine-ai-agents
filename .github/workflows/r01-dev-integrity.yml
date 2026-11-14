@@ -5,25 +5,9 @@ on:
     branches:
       - dev/ft01-aia-core-mocks-2026-11-06
       - dev/r01-evid-06-unified-dev-ci-2026-11-09
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'tools/**'
-      - 'contracts/**'
-      - 'docs/evidencias/**'
-      - 'examples/**'
-      - '.github/workflows/r01-dev-integrity.yml'
   pull_request:
     branches:
       - dev/ft01-aia-core-mocks-2026-11-06
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'tools/**'
-      - 'contracts/**'
-      - 'docs/evidencias/**'
-      - 'examples/**'
-      - '.github/workflows/r01-dev-integrity.yml'
 
 permissions:
   contents: read
@@ -34,10 +18,15 @@ concurrency:
 
 jobs:
   integrity:
-    if: ${{ github.event.repository.private == false }}
     runs-on: ubuntu-24.04
     timeout-minutes: 6
     steps:
+      - name: Fail closed when private cross-repository checkout is unreviewed
+        if: ${{ github.event.repository.private == true }}
+        shell: bash
+        run: |
+          echo "::error::PRIVATE_CROSS_REPOSITORY_SOURCE_NOT_VERIFIED; operational_decision=NO_GO"
+          exit 1
       - name: Read-only checkout of reviewed SHA
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 Node24 SHA pinned
         with:

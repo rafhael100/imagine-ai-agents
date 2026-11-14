@@ -70,6 +70,7 @@ for name in \
   test_f219_canonical_json.py \
   test_f220_canonical_response.py \
   test_f221_exchange.py \
+  test_f222_integrity_triggers.py \
   test_evid52_postmerge.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
