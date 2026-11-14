@@ -5,10 +5,12 @@ on:
     branches:
       - dev/ft01-aia-core-mocks-2026-11-06
       - dev/r01-evid-06-unified-dev-ci-2026-11-09
+      - dev/f230-signed-crm-denial-response-2026-11-14
   pull_request:
     branches:
       - dev/ft01-aia-core-mocks-2026-11-06
       - main
+      - dev/f229-tenant-hmac-replay-matrix-2026-11-14
 
 permissions:
   contents: read
@@ -48,7 +50,7 @@ jobs:
         shell: bash
         env:
           EXPECTED_SHA: ${{ github.sha }}
-          EXPECTED_PHP: '110'
+          EXPECTED_PHP: '111'
           EXPECTED_CASES: '879'
         run: |
           bash tools/run_r01_offline_quality_gate.sh
@@ -88,4 +90,6 @@ jobs:
           php -l _synthetic_crm_fixture/app/Support/Synthetic/AiaPgHmacLabBridge.php
           php -l tools/check_f229_tenant_replay_matrix.php
           php tools/check_f229_tenant_replay_matrix.php
+          php -l tools/check_f230_signed_denial.php
+          php tools/check_f230_signed_denial.php
           python3 tools/check_f224_reciprocal_pins.py
