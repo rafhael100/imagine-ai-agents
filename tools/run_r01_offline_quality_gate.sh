@@ -78,6 +78,7 @@ for name in \
   test_f227_signed_fixture.py \
   test_f228_pg_lab_reciprocal.py \
   test_f229_tenant_replay_matrix.py \
+  test_f230_response_seal.py \
   test_evid52_postmerge.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
