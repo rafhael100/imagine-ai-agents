@@ -116,6 +116,34 @@ try {
         f210Assert($assessment->isSyntheticFormatConsistent());
         f210NoRights($assessment);
 
+        // F220: prove the actual Agents facade response remains safe after
+        // byte-exact JSON serialization and deserialization. CRM Core still
+        // refuses all operational rights; no API is contacted or enabled.
+        $syntheticContext = new \ImagineAI\Domain\TenantContext(
+            'SYNTHETIC_CRM', 'SYNTHETIC_A', 'SYNTHETIC_PRINCIPAL',
+            'SYNTHETIC_SUMMARY', 'SYNTHETIC_A_LEAD'
+        );
+        $safeRequestedFields = $state === 'READ_SYNTHETIC_ONLY'
+            ? $fields : ['ref'];
+        $syntheticWire = \ImagineAI\MockBridge\MockCrmReadRequestBuilder::fromContext(
+            $syntheticContext, 'SYNTHETIC_F220_INSPECTION',
+            $safeRequestedFields
+        );
+        $syntheticRequest = new \ImagineAI\MockBridge\MockCrmReadRequest(
+            $syntheticWire
+        );
+        $encoded = \ImagineAI\MockBridge\MockCrmPublicResponseContract::encodeCanonicalJson(
+            $out, $syntheticRequest, $syntheticContext
+        );
+        f210Assert(is_string($encoded) && strlen($encoded) <= 512);
+        $decoded = \ImagineAI\MockBridge\MockCrmPublicResponseContract::decodeCanonicalJson(
+            $encoded, $syntheticRequest, $syntheticContext
+        );
+        f210Assert($decoded === $out);
+        $roundtripAssessment = $inspector->inspect($decoded, $fields);
+        f210Assert($roundtripAssessment->reasonCode === $assessment->reasonCode);
+        f210NoRights($roundtripAssessment);
+
         // Even an actual fictional positive reply must never grant access
         // when supplied as an untrusted request to the CRM mock boundary.
         f210Assert(AiaReadOnlyMockBoundary::inspect($out) === $denial);
