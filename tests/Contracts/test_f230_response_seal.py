@@ -67,7 +67,7 @@ class F230ResponseSeal(unittest.TestCase):
         self.assertIn("contents: read", self.wf)
 
     def test_explicit_no_go(self):
-        for marker in ("NO-GO", "54", "3 tenants", "879", "110",
+        for marker in ("NO-GO", "54", "3 tenants", "879", "111",
                        "CRM #57", "14 gates", "13 cenários", "main"):
             self.assertIn(marker, self.doc)
         self.assertIn("real_authorization=false external_calls=0", self.php)
