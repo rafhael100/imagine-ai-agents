@@ -18,9 +18,12 @@ CRM_CHECK = CRM_ROOT / "scripts/ci/check-aia-op01-json-exchange.php"
 CRM_OWNER = CRM_ROOT / "app/Support/Synthetic/AiaReadOnlyMockBoundary.php"
 CRM_HMAC = CRM_ROOT / "app/Support/Synthetic/AiaHmacFixturePreflight.php"
 CRM_NONCES = CRM_ROOT / "app/Support/Synthetic/AiaFixtureNonceLedger.php"
+CRM_PG_NONCE = CRM_ROOT / "app/Support/Synthetic/AiaPgNonceCandidateLedger.php"
+CRM_PG_BRIDGE = CRM_ROOT / "app/Support/Synthetic/AiaPgHmacLabBridge.php"
+CRM_PG_TEST = CRM_ROOT / "tests/Feature/AiaPostgresAtomicNonceCandidateTest.php"
 
-PINNED_CRM = "f44fe65745037d39f57e894ef32a25a9efa07bc4"
-REVIEWED_AGENTS_BASE = "a18ad19ad8a24f9a04f1f4bce789ff4af6316d55"
+PINNED_CRM = "d7c7aacc766c7ade4c65dcd211ed4569442144a9"
+REVIEWED_AGENTS_BASE = "5a2c8af18448aeebfe8eda0d7570f34ffbe24611"
 
 
 class ReciprocalPinError(Exception):
@@ -35,6 +38,9 @@ def check() -> None:
         owner = CRM_OWNER.read_text(encoding="utf-8")
         hmac = CRM_HMAC.read_text(encoding="utf-8")
         nonces = CRM_NONCES.read_text(encoding="utf-8")
+        pg_nonce = CRM_PG_NONCE.read_text(encoding="utf-8")
+        pg_bridge = CRM_PG_BRIDGE.read_text(encoding="utf-8")
+        pg_test = CRM_PG_TEST.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as exc:
         raise ReciprocalPinError("SOURCE_UNAVAILABLE") from exc
 
@@ -89,6 +95,25 @@ def check() -> None:
         "return false;",
     ))):
         raise ReciprocalPinError("CRM_HMAC_LAB_ONLY_DRIFT")
+
+    # F228: the original CRM PHP candidate must remain CI-only. These
+    # source checks complement -- they never replace -- runtime PostgreSQL CI.
+    if (not all(marker in pg_nonce for marker in (
+        "getenv('GITHUB_ACTIONS')", "imagine_crm_ci",
+        "ON CONFLICT (issuer,audience,nonce) DO NOTHING",
+        "getDatabaseName()", "getConfig('host')", "return false;",
+    )) or not all(marker in pg_bridge for marker in (
+        "AiaHmacFixturePreflight::matchesFixture(",
+        "$ledger->claim(", "AiaReadOnlyMockBoundary::inspectCanonicalJson($canonicalBody)",
+        "return false;",
+    )) or not all(marker in pg_test for marker in (
+        "test_concurrent_insert_only_one_commits_across_two_live_sessions",
+        "test_concurrent_insert_can_recover_after_first_transaction_rolls_back",
+        "test_signed_mock_proof_claims_once_across_two_pg_connections",
+        "test_invalid_mock_signature_never_claims_pg_nonce",
+        "test_signed_lab_proof_fails_closed_when_pg_backend_table_absent",
+    ))):
+        raise ReciprocalPinError("CRM_PG_LAB_ONLY_SOURCE_DRIFT")
 
     if ("contents: read" not in agents or "contents: read" not in crm
         or agents.count("persist-credentials: false") != 2

@@ -15,7 +15,7 @@ class F226HmacFixture(unittest.TestCase):
         cls.doc=(ROOT/"docs/AIA-FT01-F226-PROVA-HMAC-BILATERAL.md").read_text()
 
     def test_immutable_crm_ref_and_workflow_executes_actual_php(self):
-        sha="f44fe65745037d39f57e894ef32a25a9efa07bc4"
+        sha="d7c7aacc766c7ade4c65dcd211ed4569442144a9"
         self.assertIn("ref: "+sha,self.wf)
         self.assertIn('"'+sha+'"',self.wf)
         self.assertIn("PINNED_CRM = \""+sha+"\"",self.check)
