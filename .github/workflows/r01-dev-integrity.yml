@@ -67,13 +67,13 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: rafhael100/imagine-crm
-          ref: 5eca65403a4e3707e1fd7145ec13073a762d26f6
+          ref: bbb4228a27028070a9561cb649a86224aaebde48
           path: _synthetic_crm_fixture
           persist-credentials: false
       - name: Verify exact CRM source SHA and execute reciprocal PHP denial contract
         shell: bash
         run: |
-          test "$(git -C _synthetic_crm_fixture rev-parse HEAD)" = "5eca65403a4e3707e1fd7145ec13073a762d26f6"
+          test "$(git -C _synthetic_crm_fixture rev-parse HEAD)" = "bbb4228a27028070a9561cb649a86224aaebde48"
           php -l tools/check_crm_aia_cross_source.php
           php tools/check_crm_aia_cross_source.php
           set -euo pipefail

@@ -43,7 +43,7 @@ class F222Integrity(unittest.TestCase):
             "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"),2)
         self.assertEqual(self.workflow.count("persist-credentials: false"),2)
         self.assertIn("contents: read",self.workflow)
-        self.assertIn("5eca65403a4e3707e1fd7145ec13073a762d26f6",self.workflow)
+        self.assertIn("bbb4228a27028070a9561cb649a86224aaebde48",self.workflow)
         self.assertIn("EXPECTED_CASES: '879'",self.workflow)
         self.assertIn("EXPECTED_PHP: '110'",self.workflow)
         self.assertIn("test_f222_integrity_triggers.py",self.gate)
