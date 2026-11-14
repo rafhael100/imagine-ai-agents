@@ -45,12 +45,13 @@ class WorkflowGuardrails(unittest.TestCase):
         for trigger in ("pull_request_target:", "workflow_run:", "workflow_dispatch:"):
             self.assertNotIn(trigger, self.workflow)
 
-    def test_demo_artifacts_trigger_both_push_and_pr_checks(self):
-        # An examples-only change must not evade the unified offline CI.
-        self.assertEqual(self.workflow.count("      - 'examples/**'"), 2)
-        self.assertNotIn("examples/r01-op01-readiness-offline*.html", self.workflow)
+    def test_every_push_and_pr_runs_without_path_filter_bypass(self):
+        # README, AGENTS, status and docs-only changes must trigger offline CI.
         self.assertIn("  push:\n", self.workflow)
         self.assertIn("  pull_request:\n", self.workflow)
+        self.assertNotIn("\n    paths:", self.workflow)
+        self.assertNotIn("\n    paths-ignore:", self.workflow)
+        self.assertNotIn("examples/r01-op01-readiness-offline*.html", self.workflow)
 
     def test_legacy_read_tool_cannot_bypass_owner_policy(self):
         dispatcher = (ROOT / "src/MockTooling/MockToolDispatcher.php").read_text(
@@ -65,8 +66,15 @@ class WorkflowGuardrails(unittest.TestCase):
         )
         self.assertIn("$this->edge->handle(", pilot)
 
-    def test_public_repository_only(self):
-        self.assertIn("github.event.repository.private == false", self.workflow)
+    def test_private_repository_fails_explicitly_not_skipped_green(self):
+        self.assertNotIn("if: " + "$" + "{{ github.event.repository.private == false }}",
+                         self.workflow)
+        self.assertIn("if: " + "$" + "{{ github.event.repository.private == true }}",
+                      self.workflow)
+        self.assertIn("PRIVATE_CROSS_REPOSITORY_SOURCE_NOT_VERIFIED", self.workflow)
+        self.assertLess(
+            self.workflow.index("Fail closed when private"),
+            self.workflow.index("Read-only checkout of reviewed SHA"))
 
     def test_bounded_runner_and_concurrency(self):
         self.assertRegex(self.workflow, r"timeout-minutes:\s*6\b")
