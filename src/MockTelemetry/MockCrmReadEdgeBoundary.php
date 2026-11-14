@@ -43,6 +43,10 @@ final class MockCrmReadEdgeBoundary
         TenantContext $trustedContext,
         int $now,
     ): array {
+        // The edge owns admission: even a malformed or capacity-denied new
+        // attempt must not leave an earlier positive facade receipt reusable.
+        // Also taints an in-flight reader if it re-enters this edge.
+        $this->facade->discardReadReceipt();
         try {
             $ticket = $this->counters->begin();
         } catch (\Throwable) {
@@ -67,6 +71,9 @@ final class MockCrmReadEdgeBoundary
             $this->counters->finish($ticket, $outcome);
             return $result;
         } catch (\Throwable) {
+            // A facade success is not a successful edge read if counters fail
+            // after it. Revoke the temporary receipt before returning denial.
+            $this->facade->discardReadReceipt();
             // Never return potentially unsafe data if telemetry cannot be completed.
             try { $this->counters->finish($ticket, 'INTERNAL_DENIED'); } catch (\Throwable) {}
             return MockCrmPublicResponseContract::denial();
