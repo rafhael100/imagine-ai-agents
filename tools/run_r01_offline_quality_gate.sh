@@ -17,6 +17,7 @@ echo 'R01_OFFLINE_GATE_START operational_decision=NO_GO'
 python3 tools/check_r01_readiness.py
 python3 tools/check_op01_contract_parity.py
 python3 tools/generate_op01_bilateral_packet.py --check
+python3 tools/plan_op01_release.py --check
 python3 tools/check_op01_public_response_parity.py
 python3 tools/generate_op01_dashboard.py --check
 python3 tools/check_op01_readiness_dashboard.py
@@ -56,6 +57,7 @@ for name in \
   test_f211_crm_owner_failclosed.py \
   test_evid49_postmerge.py \
   test_evid50_postmerge.py \
+  test_f212_op01_critical_path.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
