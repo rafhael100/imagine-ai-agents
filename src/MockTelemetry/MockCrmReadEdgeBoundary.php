@@ -19,6 +19,15 @@ final class MockCrmReadEdgeBoundary
     ) {}
 
     /**
+     * F217: discard the only local read receipt after an abandoned pilot.
+     * No new read, audit, nonce, side effect, or real authorization.
+     */
+    public function discardReadReceipt(): void
+    {
+        $this->facade->discardReadReceipt();
+    }
+
+    /**
      * Recheck current synthetic permission without consuming a second nonce
      * or a new edge/audit slot; never re-read or reveal policy detail.
      * Only valid for the proof that the caller already used in a read.

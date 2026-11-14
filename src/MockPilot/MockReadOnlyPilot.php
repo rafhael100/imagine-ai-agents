@@ -60,6 +60,9 @@ final class MockReadOnlyPilot
         // Track only a run started by this very invocation, so a provider
         // failure cannot leave a fictional execution indefinitely active.
         $run = null;
+        // A new pilot invocation supersedes any earlier synthetic receipt,
+        // even when rejected by context/Run preflight before reaching edge.
+        $this->edge->discardReadReceipt();
         try {
             // The coordinator and read edge must operate for the same bound
             // mock context. Never trust caller-supplied tenant substitutions.
@@ -78,6 +81,7 @@ final class MockReadOnlyPilot
             $request = new MockCrmReadRequest($wire);
             if (!MockCrmPublicResponseContract::isAcceptedRead(
                 $read, $request, $trustedContext)) {
+                $this->edge->discardReadReceipt();
                 return self::denial();
             }
 
@@ -111,6 +115,9 @@ final class MockReadOnlyPilot
                 'write_calls' => 0,
             ];
         } catch (\Throwable) {
+            // A former successful fake read is not a valid receipt of a
+            // failed suggestion, coordinator transition or provider callback.
+            $this->edge->discardReadReceipt();
             // If a mock provider failed after starting a run, record the
             // terminal FAILED state using the room reserved by preflight.
             // Never overwrite a terminal state or issue a CRM write.
