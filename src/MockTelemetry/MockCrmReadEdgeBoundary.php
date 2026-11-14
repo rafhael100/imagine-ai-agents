@@ -44,6 +44,27 @@ final class MockCrmReadEdgeBoundary
             $wire, $envelope, $owner, $trustedContext, $now);
     }
 
+    /**
+     * Offline JSON-byte adapter for the fictional OP-01 contract. No HTTP.
+     * Failures consume the ordinary bounded SCHEMA_DENIED edge slot; an
+     * invalid new attempt must also discard every prior local read receipt.
+     */
+    public function handleCanonicalJson(
+        string $body,
+        ?MockTrustEnvelope $envelope,
+        ?MockOwnerScopeEvidence $owner,
+        TenantContext $trustedContext,
+        int $now,
+    ): array {
+        $this->discardReadReceipt();
+        try {
+            $wire = MockCrmReadRequest::decodeCanonicalJson($body);
+        } catch (\Throwable) {
+            return $this->handle([], $envelope, $owner, $trustedContext, $now);
+        }
+        return $this->handle($wire, $envelope, $owner, $trustedContext, $now);
+    }
+
     /** @param array<string,mixed> $wire Fake local values only. */
     public function handle(
         array $wire,
