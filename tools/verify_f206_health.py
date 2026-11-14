@@ -122,12 +122,48 @@ def verify(data):
     return True
 
 
+
+# F207: reject ambiguous or excessive JSON before interpreting supervision data.
+MAX_FIXTURE_BYTES = 262_144
+
+
+def decode_fixture_json(payload):
+    if type(payload) is not str:
+        raise ValueError("F207_JSON_INPUT_DENIED")
+    try:
+        byte_size = len(payload.encode("utf-8"))
+    except UnicodeError as exc:
+        raise ValueError("F207_JSON_ENCODING_DENIED") from exc
+    if byte_size == 0 or byte_size > MAX_FIXTURE_BYTES:
+        raise ValueError("F207_JSON_SIZE_DENIED")
+
+    def unique_keys(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("F207_JSON_DUPLICATE_KEY_DENIED")
+            result[key] = value
+        return result
+
+    def deny_nonfinite(value):
+        raise ValueError("F207_JSON_NONFINITE_DENIED")
+
+    try:
+        data = json.loads(
+            payload, object_pairs_hook=unique_keys, parse_constant=deny_nonfinite
+        )
+    except json.JSONDecodeError as exc:
+        raise ValueError("F207_JSON_SYNTAX_DENIED") from exc
+    if type(data) is not dict:
+        raise ValueError("F207_JSON_ROOT_DENIED")
+    return data
+
 def fixture():
     out = subprocess.run(["php", "examples/f206-queue-health-demo.php"],
                          cwd=ROOT, capture_output=True, text=True, timeout=25)
     if out.returncode != 0:
         raise ValueError("F206_PHP_FAILED")
-    return json.loads(out.stdout)
+    return decode_fixture_json(out.stdout)
 
 
 def main():
