@@ -16,8 +16,10 @@ CRM_ROOT = ROOT / "_synthetic_crm_fixture"
 CRM_WORKFLOW = CRM_ROOT / ".github/workflows/ci-crm-aia-synthetic-parity.yml"
 CRM_CHECK = CRM_ROOT / "scripts/ci/check-aia-op01-json-exchange.php"
 CRM_OWNER = CRM_ROOT / "app/Support/Synthetic/AiaReadOnlyMockBoundary.php"
+CRM_HMAC = CRM_ROOT / "app/Support/Synthetic/AiaHmacFixturePreflight.php"
+CRM_NONCES = CRM_ROOT / "app/Support/Synthetic/AiaFixtureNonceLedger.php"
 
-PINNED_CRM = "bbb4228a27028070a9561cb649a86224aaebde48"
+PINNED_CRM = "f44fe65745037d39f57e894ef32a25a9efa07bc4"
 REVIEWED_AGENTS_BASE = "a18ad19ad8a24f9a04f1f4bce789ff4af6316d55"
 
 
@@ -31,6 +33,8 @@ def check() -> None:
         crm = CRM_WORKFLOW.read_text(encoding="utf-8")
         check_script = CRM_CHECK.read_text(encoding="utf-8")
         owner = CRM_OWNER.read_text(encoding="utf-8")
+        hmac = CRM_HMAC.read_text(encoding="utf-8")
+        nonces = CRM_NONCES.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as exc:
         raise ReciprocalPinError("SOURCE_UNAVAILABLE") from exc
 
@@ -74,6 +78,17 @@ def check() -> None:
         or "real_authorization' => false" not in owner
         or "DENIED_OR_NOT_FOUND" not in owner):
         raise ReciprocalPinError("CRM_OWNER_BOUNDARY_DRIFT")
+
+    # Even the exact source must remain synthetic-only and deny-only.
+    if (not all(token in hmac for token in (
+        "SYNTHETIC_PUBLIC_TEST_ONLY_", "hash_hmac(", "hash_equals(",
+        "AiaReadOnlyMockBoundary::inspectCanonicalJson($json)",
+        "AiaFixtureNonceLedger", "return false;",
+    )) or not all(token in nonces for token in (
+        "private array $consumed", "count($this->consumed)",
+        "return false;",
+    ))):
+        raise ReciprocalPinError("CRM_HMAC_LAB_ONLY_DRIFT")
 
     if ("contents: read" not in agents or "contents: read" not in crm
         or agents.count("persist-credentials: false") != 2

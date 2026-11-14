@@ -23,11 +23,11 @@ class WorkflowGuardrails(unittest.TestCase):
         self.assertIn("# v7.0.1 Node24 SHA pinned", self.workflow)
         self.assertEqual(self.workflow.count("repository: rafhael100/imagine-crm"), 1)
         self.assertEqual(self.workflow.count(
-            "ref: bbb4228a27028070a9561cb649a86224aaebde48"), 1)
+            "ref: f44fe65745037d39f57e894ef32a25a9efa07bc4"), 1)
         self.assertEqual(self.workflow.count("path: _synthetic_crm_fixture"), 1)
         self.assertIn(
             'test "$(git -C _synthetic_crm_fixture rev-parse HEAD)" = '
-            '"bbb4228a27028070a9561cb649a86224aaebde48"',
+            '"f44fe65745037d39f57e894ef32a25a9efa07bc4"',
             self.workflow,
         )
 
