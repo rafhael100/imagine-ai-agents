@@ -61,6 +61,7 @@ for name in \
   test_f212_op01_critical_path.py \
   test_f213_op01_view.py \
   test_f214_github_summary.py \
+  test_evid51_postmerge.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
