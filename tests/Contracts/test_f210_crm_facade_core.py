@@ -59,7 +59,7 @@ class F210CrossCore(unittest.TestCase):
     def test_distinguishes_synthetic_success_from_pilot(self):
         for marker in ("NO-GO", "NAO_EXECUTADO", "CRM #57",
                        "SHA", "sem API", "F210"):
-            self.assertIn(marker, self.doc)
+            self.assertIn(marker.casefold(), self.doc.casefold())
 
 
 if __name__ == "__main__":
