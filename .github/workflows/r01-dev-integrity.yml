@@ -56,3 +56,8 @@ jobs:
           EXPECTED_CASES: '879'
         run: |
           bash tools/run_r01_offline_quality_gate.sh
+      - name: Validar logomarca oficial Imagine e navegação do laboratório F108
+        shell: bash
+        run: |
+          node --check tests/Browser/f108_imagine_brand.cjs
+          node tests/Browser/f108_imagine_brand.cjs
