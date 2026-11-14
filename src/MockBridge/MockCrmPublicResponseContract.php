@@ -30,6 +30,52 @@ final class MockCrmPublicResponseContract
     }
 
     /**
+     * F220: decode only byte-exact canonical synthetic response JSON.
+     * A consistent mock denial is NOT an accepted read or real access.
+     * No HTTP, tokens, transport, CRM service or production authorization.
+     *
+     * @return ?array<string,mixed> Null when unsafe or ambiguous.
+     */
+    public static function decodeCanonicalJson(
+        string $bytes,
+        MockCrmReadRequest $request,
+        TenantContext $context
+    ): ?array {
+        if ($bytes === '' || strlen($bytes) > 512) return null;
+        try {
+            $body = json_decode($bytes, true, 4, JSON_THROW_ON_ERROR);
+            if (!is_array($body) || !self::isSafe($body, $request, $context)) {
+                return null;
+            }
+            $canonical = json_encode(
+                $body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                    | JSON_THROW_ON_ERROR
+            );
+            return hash_equals($canonical, $bytes) ? $body : null;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /** Serialize only a prevalidated synthetic response; otherwise deny. */
+    public static function encodeCanonicalJson(
+        array $body,
+        MockCrmReadRequest $request,
+        TenantContext $context
+    ): ?string {
+        if (!self::isSafe($body, $request, $context)) return null;
+        try {
+            $bytes = json_encode(
+                $body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                    | JSON_THROW_ON_ERROR
+            );
+            return strlen($bytes) <= 512 ? $bytes : null;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
      * Closed validator for an in-process, PHP-array CRM-owner-like response.
      * Distinguishes a safe uniform denial from a successful fictional read.
      * A safe denial is NEVER permission for the caller to use its projection.

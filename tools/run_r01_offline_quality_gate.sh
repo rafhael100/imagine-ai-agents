@@ -68,6 +68,7 @@ for name in \
   test_f217_pilot_receipt.py \
   test_f218_queue_receipt.py \
   test_f219_canonical_json.py \
+  test_f220_canonical_response.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
@@ -112,6 +113,8 @@ php -l tools/check_f218_queue_receipt.php
 php tools/check_f218_queue_receipt.php
 php -l tools/check_f219_canonical_json.php
 php tools/check_f219_canonical_json.php
+php -l tools/check_f220_canonical_response.php
+php tools/check_f220_canonical_response.php
 bash tools/validate_ft01_offline.sh
 
 echo 'R01_OFFLINE_GATE_PASS operational_decision=NO_GO'
