@@ -15,8 +15,8 @@ class F225BilateralJSON(unittest.TestCase):
         cls.doc=(ROOT/"docs/AIA-FT01-F225-CRM-JSON-RECIPROCO.md").read_text()
 
     def test_new_immutable_crm_pin_and_contract_are_gated(self):
-        self.assertIn("bbb4228a27028070a9561cb649a86224aaebde48",self.workflow)
-        self.assertIn("bbb4228a27028070a9561cb649a86224aaebde48",self.reciprocal)
+        self.assertIn("f44fe65745037d39f57e894ef32a25a9efa07bc4",self.workflow)
+        self.assertIn("f44fe65745037d39f57e894ef32a25a9efa07bc4",self.reciprocal)
         self.assertNotIn("ref: 5eca65403a4e3707e1fd7145ec13073a762d26f6",
                          self.workflow)
         self.assertIn("python3 tools/check_f224_reciprocal_pins.py",self.workflow)

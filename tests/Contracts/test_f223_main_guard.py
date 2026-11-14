@@ -40,7 +40,7 @@ class F223MainGuard(unittest.TestCase):
                      "EXPECTED_PHP: '110'",
                      "contents: read",
                      "repository: rafhael100/imagine-crm",
-                     "ref: bbb4228a27028070a9561cb649a86224aaebde48"):
+                     "ref: f44fe65745037d39f57e894ef32a25a9efa07bc4"):
             self.assertIn(item,self.workflow)
         self.assertIn("test_f223_main_guard.py",self.gate)
         self.assertEqual(len(re.findall(r"persist-credentials:\s*false",
