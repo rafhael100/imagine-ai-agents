@@ -53,6 +53,7 @@ for name in \
   test_f208_crm_cross_source.py \
   test_f209_op01_source_matrix.py \
   test_f210_crm_facade_core.py \
+  test_f211_crm_owner_failclosed.py \
   test_evid49_postmerge.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
