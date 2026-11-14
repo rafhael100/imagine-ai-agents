@@ -31,7 +31,7 @@ class F221Exchange(unittest.TestCase):
 
     def test_real_php_read_replay_and_denials(self):
         for scenario in ("GOOD","RECOVER","OWNER","NO_TRUST","CAPACITY",
-                         "DUPLICATE", "F221_CANONICAL_EXCHANGE_PASS",
+                         "duplicate", "F221_CANONICAL_EXCHANGE_PASS",
                          "cases=6","operational_decision=NO_GO","write_calls=0"):
             # DUPLICATE is the name of the negative byte attack in docs.
             self.assertIn(scenario,self.fixture+self.doc)
