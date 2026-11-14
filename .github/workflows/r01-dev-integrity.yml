@@ -61,3 +61,16 @@ jobs:
         run: |
           node --check tests/Browser/f108_imagine_brand.cjs
           node tests/Browser/f108_imagine_brand.cjs
+      - name: Checkout pinned CRM public mock source for reciprocal OP-01 conformance
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: rafhael100/imagine-crm
+          ref: 7999b1e34a6cbd0ee1c5e2351067ad172e01bbad
+          path: _synthetic_crm_fixture
+          persist-credentials: false
+      - name: Verify exact CRM source SHA and execute reciprocal PHP denial contract
+        shell: bash
+        run: |
+          test "$(git -C _synthetic_crm_fixture rev-parse HEAD)" = "7999b1e34a6cbd0ee1c5e2351067ad172e01bbad"
+          php -l tools/check_crm_aia_cross_source.php
+          php tools/check_crm_aia_cross_source.php
