@@ -31,7 +31,7 @@ publicamente conhecida por desenho; o registro anti-replay é somente um
 objeto local de memória, sem atomicidade distribuída. O código não aceita
 respostas com projeção, não abre HTTP, banco de produção nem chaves reais.
 
-Baseline preservado de **879 testes PHP / lint 110**, mais os contratos
+Baseline preservado de **879 testes PHP / lint 111**, mais os contratos
 Python e ensaios bilaterais; não há afirmação de que os cenários reais
 foram executados.
 
