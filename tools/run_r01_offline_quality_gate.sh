@@ -75,6 +75,7 @@ for name in \
   test_f224_reciprocal_pins.py \
   test_f225_bilateral_json.py \
   test_f226_signed_fixture.py \
+  test_f227_signed_fixture.py \
   test_evid52_postmerge.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
@@ -124,6 +125,8 @@ php -l tools/check_f220_canonical_response.php
 php tools/check_f220_canonical_response.php
 php -l tools/check_f221_canonical_exchange.php
 php tools/check_f221_canonical_exchange.php
+php -l tools/check_f227_signed_fixture.php
+php tools/check_f227_signed_fixture.php
 bash tools/validate_ft01_offline.sh
 
 echo 'R01_OFFLINE_GATE_PASS operational_decision=NO_GO'

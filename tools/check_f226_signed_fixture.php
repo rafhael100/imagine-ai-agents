@@ -65,7 +65,15 @@ try {
     $raw=MockCrmReadRequest::encodeCanonicalJson($wire);
     f226Check(MockCrmReadRequest::decodeCanonicalJson($raw)===$wire);
     f226Check(AiaReadOnlyMockBoundary::hasCanonicalFixtureShape($raw));
-    $proof=f226Proof($raw,'SYNTHETIC_F226_NONCE_A',$key);
+    // F227: genuine Agents method emits the canonical body and the proof
+    // together. Compare against an independent HMAC oracle.
+    $issued=MockCrmReadRequest::issueSyntheticSignedFixture(
+        $wire,'SYNTHETIC_F226_NONCE_A',1794690000,1794690025,$key
+    );
+    f226Check(array_keys($issued)===['body','proof']);
+    f226Check($issued['body']===$raw);
+    $proof=$issued['proof'];
+    f226Check($proof===f226Proof($raw,'SYNTHETIC_F226_NONCE_A',$key));
     $store=new AiaFixtureNonceLedger(2);
     $verify=static fn(string $body,array $p,AiaFixtureNonceLedger $ledger,
         int $now=1794690010,string $tenant='SYNTHETIC_TENANT_A',
@@ -83,7 +91,11 @@ try {
         && $deny['projection']===null
         && $deny['real_authorization']===false
         && $deny['external_calls']===0);
-    $newProof=f226Proof($raw,'SYNTHETIC_F226_NONCE_B',$key);
+    $freshIssued=MockCrmReadRequest::issueSyntheticSignedFixture(
+        $wire,'SYNTHETIC_F226_NONCE_B',1794690000,1794690025,$key
+    );
+    f226Check($freshIssued['body']===$raw);
+    $newProof=$freshIssued['proof'];
     f226Check(AiaHmacFixturePreflight::inspectFixture(
         $raw,$newProof,'SYNTHETIC_TENANT_A',1794690010,$key,$store
     )===$deny);
