@@ -158,6 +158,63 @@ try {
         }
     }
     f210Assert($successes === 2 && $denials === 4);
+    // F221: one complete in-process request/response byte exchange through
+    // the actual Agents synthetic read edge. The REAL pinned CRM inspector
+    // must still deny operational rights for a well-formed mock success.
+    $f221Context = new \ImagineAI\Domain\TenantContext(
+        'SYNTHETIC_CRM', 'SYNTHETIC_A', 'SYNTHETIC_PRINCIPAL',
+        'SYNTHETIC_SUMMARY', 'SYNTHETIC_A_LEAD'
+    );
+    $f221Policy = new \ImagineAI\MockBridge\MockCrmOwnerPolicy();
+    $f221Policy->grantFixture($f221Context, ['ref']);
+    $f221Audit = new \ImagineAI\MockAudit\MockCrmReadAuditTrail();
+    $f221Counters = new \ImagineAI\MockTelemetry\MockCrmReadEdgeCounters();
+    $f221Edge = new \ImagineAI\MockTelemetry\MockCrmReadEdgeBoundary(
+        new \ImagineAI\MockBridge\MockCrmReadPublicFacade(
+            new \ImagineAI\MockTrust\MockTrustGateway(
+                'SYNTHETIC_AGENT_SERVICE', 'SYNTHETIC_CRM_API',
+                ['SYNTHETIC_LEAD_READ']
+            ),
+            new \ImagineAI\Mocks\MockCrmReader(), $f221Policy, $f221Audit
+        ), $f221Counters
+    );
+    $f221Wire = \ImagineAI\MockBridge\MockCrmReadRequestBuilder::fromContext(
+        $f221Context, 'SYNTHETIC_F221_CRM_REQUEST', ['ref']
+    );
+    $f221Payload = \ImagineAI\MockBridge\MockCrmReadRequest::encodeCanonicalJson(
+        $f221Wire
+    );
+    $f221Envelope = new \ImagineAI\MockTrust\MockTrustEnvelope(
+        'SYNTHETIC_F221_CRM_ENV', 'SYNTHETIC_AGENT_SERVICE',
+        'SYNTHETIC_CRM_API', $f221Context, 'SYNTHETIC_F221_CRM_NONCE',
+        ['SYNTHETIC_LEAD_READ'], 10, 40
+    );
+    $f221Owner = new \ImagineAI\MockTrust\MockOwnerScopeEvidence(
+        'SYNTHETIC_F221_CRM_OWNER', $f221Envelope->digest,
+        $f221Context, 'SYNTHETIC_LEAD_READ', 10, 40, true
+    );
+    $f221Request = new \ImagineAI\MockBridge\MockCrmReadRequest($f221Wire);
+    $f221ReplyBytes = $f221Edge->exchangeCanonicalJson(
+        $f221Payload, $f221Envelope, $f221Owner, $f221Context, 15
+    );
+    $f221Reply = \ImagineAI\MockBridge\MockCrmPublicResponseContract::decodeCanonicalJson(
+        $f221ReplyBytes, $f221Request, $f221Context
+    );
+    f210Assert(is_array($f221Reply)
+        && $f221Reply['state'] === 'READ_SYNTHETIC_ONLY');
+    $f221Review = $inspector->inspect($f221Reply, ['ref']);
+    f210Assert($f221Review->reasonCode === 'SYNTHETIC_PROJECTION_UNTRUSTED');
+    f210NoRights($f221Review);
+    f210Assert($f221Edge->exchangeCanonicalJson(
+        $f221Payload, $f221Envelope, $f221Owner, $f221Context, 16
+    ) === json_encode($denial, JSON_UNESCAPED_UNICODE
+        | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
+    $f221Denied = $inspector->inspect($denial, ['ref']);
+    f210Assert($f221Denied->reasonCode === 'SYNTHETIC_DENIAL_ONLY');
+    f210NoRights($f221Denied);
+    f210Assert($f221Counters->snapshot()['attempts'] === 2
+        && $f221Audit->count() === 2);
+
 
     // Adversarial mutations are fed through the ACTUAL CRM Core inspector.
     $good = $record['cases'][2]['response'];  // ordered_two_fields

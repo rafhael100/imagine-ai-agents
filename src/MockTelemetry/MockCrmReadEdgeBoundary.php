@@ -65,6 +65,48 @@ final class MockCrmReadEdgeBoundary
         return $this->handle($wire, $envelope, $owner, $trustedContext, $now);
     }
 
+    /**
+     * F221: a complete in-process, byte-to-byte fictional exchange.
+     * Never an HTTP endpoint, credential verifier, IAM or real CRM transport.
+     * Every attempt traverses the existing edge before a reply is encoded.
+     *
+     * Positive responses remain READ_SYNTHETIC_ONLY with
+     * real_authorization=false and confer no operational rights.
+     */
+    public function exchangeCanonicalJson(
+        string $requestBytes,
+        ?MockTrustEnvelope $envelope,
+        ?MockOwnerScopeEvidence $owner,
+        TenantContext $trustedContext,
+        int $now,
+    ): string {
+        // Handles schema-denial counters, replay and receipt invalidation,
+        // including when the bytes cannot be decoded as a request.
+        $response = $this->handleCanonicalJson(
+            $requestBytes, $envelope, $owner, $trustedContext, $now
+        );
+        try {
+            $wire = MockCrmReadRequest::decodeCanonicalJson($requestBytes);
+            $request = new MockCrmReadRequest($wire);
+            $bytes = MockCrmPublicResponseContract::encodeCanonicalJson(
+                $response, $request, $trustedContext
+            );
+            if ($bytes === null) {
+                throw new \LogicException('UNSAFE_SYNTHETIC_EXCHANGE');
+            }
+            return $bytes;
+        } catch (\Throwable) {
+            // Failed framing must revoke even a formerly successful mock
+            // receipt; return only the fixed, privacy-minimal denial.
+            $this->discardReadReceipt();
+            return json_encode(
+                MockCrmPublicResponseContract::denial(),
+                JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                    | JSON_THROW_ON_ERROR
+            );
+        }
+    }
+
     /** @param array<string,mixed> $wire Fake local values only. */
     public function handle(
         array $wire,
