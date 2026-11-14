@@ -1,6 +1,6 @@
 # Imagine AI Agents
 
-**11/11/2026:** laboratório offline na `dev/ft01-aia-core-mocks-2026-11-06`. [EVID-44](docs/AIA-R01-EVID-44-F191-F195-CI-POSTMERGE.md) #268–272; [EVID-45](docs/AIA-R01-EVID-45-F196-F198-CI-POSTMERGE.md) #274–276; EVID-46 #278; EVID-47 #280–283; EVID-48. **CRM real e produção: NO-GO.**
+**14/11/2026:** [EVID-44](docs/AIA-R01-EVID-44-F191-F195-CI-POSTMERGE.md) #268–272; [EVID-45](docs/AIA-R01-EVID-45-F196-F198-CI-POSTMERGE.md) #274–276; EVID-46 #278; EVID-47 #280–283; EVID-48; [EVID-49](docs/AIA-R01-EVID-49-CRM-AGENTS-POSTMERGE.md) #293–294. **879 PHP/lint110; NO-GO.**
 
 ## O que está implementado em laboratório
 

@@ -68,6 +68,10 @@ SEC-48: 613 PHP, [EVID-33](AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md) e CI #42924834
 
 [SEC-50](AIA-FT01-SEC-50-CAPABILITY-RECHECK-POS-FERRAMENTA.md): 629 PHP / 83 lint; revogação pós READ/SUGGEST, U72-01..08. Gate em revisão/NO-GO.
 
+## Evidência recíproca de código sintético — EVID-49 (14/11/2026)
+
+A [F208 / PR #293](https://github.com/rafhael100/imagine-ai-agents/pull/293) e a [F209 / PR #294](https://github.com/rafhael100/imagine-ai-agents/pull/294) foram integradas **somente à dev**, com CI pós-merge verificadas. O CI dos Agents agora executa classes PHP sintéticas do **CRM pinado**, testa negativas uniformes e compara a matriz OP-01 de 13 casos com o pacote de aceite existente. [EVID-49](AIA-R01-EVID-49-CRM-AGENTS-POSTMERGE.md) contém as SHAs e as provas. **Resultado de conformidade sintática não é homologação:** 13 casos reais NAO_EXECUTADO, CRM #57 OPEN/DRAFT, nenhum IAM/ACL real, pilotagem, API, VPS ou produção, todos gates NO-GO.
+
 ## Fase B — contrato bilateral e autorização (caminho crítico)
 
 **Pacote de revisão disponível, aguardando decisões independentes:** [OP-01 JSON](evidencias/op01-pacote-aceite-bilateral.json) e [EVID-19](AIA-R01-EVID-19-PACOTE-BILATERAL-OP01.md) relacionam sete responsáveis sugeridos a 14 gates e 13 cenários ainda não homologados. [CI pós-merge #42770907072](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42770907072) success no arquivo gerado. **Este é um checklist, não um GO.** Registrar pareceres de CRM CORE/SEG/AUT, Privacidade, Infra e Direção com evidências reais; não abrir API antes da liberação.
