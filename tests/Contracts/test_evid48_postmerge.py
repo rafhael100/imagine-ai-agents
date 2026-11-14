@@ -24,7 +24,7 @@ class Evid48Tests(unittest.TestCase):
             for label in ("EVID-44", "EVID-45", "EVID-46", "EVID-47", "EVID-48"):
                 self.assertIn(label, page)
             self.assertIn("NO-GO", page)
-        self.assertIn("865 testes PHP / lint 107", status)
+        self.assertIn("879 testes PHP / lint 110", status)
         self.assertIn("43038243942", status)
         self.assertIn("43088648397", status)
 
