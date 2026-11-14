@@ -69,6 +69,7 @@ for name in \
   test_f218_queue_receipt.py \
   test_f219_canonical_json.py \
   test_f220_canonical_response.py \
+  test_evid52_postmerge.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
