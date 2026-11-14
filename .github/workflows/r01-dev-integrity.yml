@@ -5,10 +5,12 @@ on:
     branches:
       - dev/ft01-aia-core-mocks-2026-11-06
       - dev/r01-evid-06-unified-dev-ci-2026-11-09
+      - dev/f230-signed-crm-denial-response-2026-11-14
   pull_request:
     branches:
       - dev/ft01-aia-core-mocks-2026-11-06
       - main
+      - dev/f229-tenant-hmac-replay-matrix-2026-11-14
 
 permissions:
   contents: read
