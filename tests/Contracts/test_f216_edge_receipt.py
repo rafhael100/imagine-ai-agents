@@ -18,7 +18,7 @@ class F216EdgeReceipt(unittest.TestCase):
         self.assertLess(
             self.edge.index("$this->facade->discardReadReceipt();"),
             self.edge.index("$ticket = $this->counters->begin();"))
-        self.assertEqual(self.edge.split("public function handle(", 1)[1].count(\n            "$this->facade->discardReadReceipt();"), 2)
+        self.assertEqual(self.edge.split("public function handle(", 1)[1].count("$this->facade->discardReadReceipt();"), 2)
 
     def test_facade_taints_reentrant_read_without_authentication(self):
         self.assertIn("public function discardReadReceipt(): void", self.facade)
