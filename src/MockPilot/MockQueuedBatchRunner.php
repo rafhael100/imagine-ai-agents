@@ -36,6 +36,9 @@ final class MockQueuedBatchRunner
         int $now,
         int $leaseTicks,
     ): array {
+        // Even an invalid list rejected before the first claim supersedes
+        // any previous queued pilot receipt.
+        $this->pilot->discardReadReceipt();
         try {
             // Check callback state first; even a forged foreign context
             // must not let a nested batch attempt escape sticky denial.
