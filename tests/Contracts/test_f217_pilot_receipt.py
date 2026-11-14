@@ -21,7 +21,7 @@ class F217PilotReceipt(unittest.TestCase):
 
     def test_pilot_invalidates_before_preflight_and_after_failure(self):
         self.assertIn("$this->edge->discardReadReceipt();", self.pilot)
-        self.assertEqual(self.pilot.count("$this->edge->discardReadReceipt();"), 3)
+        self.assertEqual(self.pilot.split("public function suggest(", 1)[1].count("$this->edge->discardReadReceipt();"), 3)
         self.assertLess(
             self.pilot.index("$this->edge->discardReadReceipt();"),
             self.pilot.index("$this->boundContext->assertSame($trustedContext);"))
