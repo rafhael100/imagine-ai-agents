@@ -146,9 +146,9 @@ try {
         ));
     }
 
-    // Capacity failure is sticky, with no eviction; same nonce is global
-    // within the local ledger even when tenants differ.
-    $shared = new AiaFixtureNonceLedger(1);
+    // Isolate replay from capacity: a 3-slot ledger refuses cross-tenant
+    // reuse of the SAME nonce even when it has spare capacity.
+    $shared = new AiaFixtureNonceLedger(3);
     $a = MockCrmReadRequest::issueSyntheticSignedFixture(
         f229Wire($tenants[0]), 'SYNTHETIC_F229_SHARED', $issued, $expires,
         'SYNTHETIC_PUBLIC_TEST_ONLY_F229_SHARED_PUBLIC_KEY_A_123456789'
@@ -166,6 +166,22 @@ try {
         'SYNTHETIC_PUBLIC_TEST_ONLY_F229_SHARED_PUBLIC_KEY_B_123456789', $shared
     ));
     f229Check($shared->countConsumed() === 1);
+
+    // Independently prove that saturation rejects a DIFFERENT valid nonce.
+    $freshB = MockCrmReadRequest::issueSyntheticSignedFixture(
+        f229Wire($tenants[1]), 'SYNTHETIC_F229_FRESH_B', $issued, $expires,
+        'SYNTHETIC_PUBLIC_TEST_ONLY_F229_SHARED_PUBLIC_KEY_B_123456789'
+    );
+    $saturated = new AiaFixtureNonceLedger(1);
+    f229Check(AiaHmacFixturePreflight::matchesFixture(
+        $a['body'], $a['proof'], $tenants[0], $now,
+        'SYNTHETIC_PUBLIC_TEST_ONLY_F229_SHARED_PUBLIC_KEY_A_123456789', $saturated
+    ));
+    f229Check(!AiaHmacFixturePreflight::matchesFixture(
+        $freshB['body'], $freshB['proof'], $tenants[1], $now,
+        'SYNTHETIC_PUBLIC_TEST_ONLY_F229_SHARED_PUBLIC_KEY_B_123456789', $saturated
+    ));
+    f229Check($saturated->countConsumed() === 1);
     f229Check($positives === 3 && $negatives === 54);
     echo "F229_TENANT_REPLAY_MATRIX_PASS tenants=3 negatives=54 ".
         "operational_decision=NO_GO real_authorization=false external_calls=0\n";
