@@ -140,6 +140,63 @@ try {
         }
     }
 
+    // F225: compare the CRM's new byte parser with the original Agents
+    // canonical decoder, using actual PHP source from both SHA-pinned repos.
+    // A format-compatible mock request remains NO AUTHORITY on either side.
+    $canonicalWire = f208Wire();
+    $canonicalBytes = MockCrmReadRequest::encodeCanonicalJson($canonicalWire);
+    f208Check(AiaReadOnlyMockBoundary::hasCanonicalFixtureShape($canonicalBytes));
+    f208Check(
+        MockCrmReadRequest::decodeCanonicalJson($canonicalBytes)
+        === $canonicalWire
+    );
+    f208Check(
+        AiaReadOnlyMockBoundary::inspectCanonicalJson($canonicalBytes)
+        === $denied
+    );
+    $differentFields = $canonicalWire;
+    $differentFields['fields'] = ['stage', 'ref'];
+    $differentBytes = MockCrmReadRequest::encodeCanonicalJson($differentFields);
+    f208Check(AiaReadOnlyMockBoundary::hasCanonicalFixtureShape($differentBytes));
+    f208Check(AiaReadOnlyMockBoundary::inspectCanonicalJson($differentBytes) === $denied);
+
+    $withAdmin = $canonicalWire; $withAdmin['is_admin'] = true;
+    $withEmail = $canonicalWire; $withEmail['fields'] = ['email'];
+    $withDuplicateFields = $canonicalWire;
+    $withDuplicateFields['fields'] = ['ref','ref'];
+    $rawMutations = [
+        'DUPLICATE_KEY' => substr($canonicalBytes, 0, -1)
+            . ',"tenant_ref":"SYNTHETIC_TENANT_A"}',
+        'ALIAS_ESCAPE' => str_replace('SYNTHETIC_CRM_AIA_READ_V1',
+            '\u0053YNTHETIC_CRM_AIA_READ_V1', $canonicalBytes),
+        'WHITESPACE' => str_replace(',"request_ref"', ', "request_ref"', $canonicalBytes),
+        'WRONG_KEY_ORDER' => json_encode(
+            array_reverse($canonicalWire, true), JSON_THROW_ON_ERROR),
+        'INJECTED_ADMIN' => json_encode($withAdmin, JSON_THROW_ON_ERROR),
+        'PERSONAL_FIELD' => json_encode($withEmail, JSON_THROW_ON_ERROR),
+        'DUPLICATE_FIELDS' => json_encode($withDuplicateFields, JSON_THROW_ON_ERROR),
+        'TRAILING' => $canonicalBytes . '{}',
+        'INVALID_UTF8' => $canonicalBytes . "\xFF",
+        'OVER_SIZE' => str_repeat('X', 2048),
+        'ARRAY_ROOT' => '[]',
+        'NULL_ROOT' => 'null',
+        'EMPTY' => '',
+    ];
+    $rawNegative = 0;
+    foreach ($rawMutations as $label => $bytes) {
+        f208Check(!AiaReadOnlyMockBoundary::hasCanonicalFixtureShape($bytes));
+        f208Check(AiaReadOnlyMockBoundary::inspectCanonicalJson($bytes) === $denied);
+        $agentsDenied = false;
+        try {
+            MockCrmReadRequest::decodeCanonicalJson($bytes);
+        } catch (\Throwable) {
+            $agentsDenied = true;
+        }
+        f208Check($agentsDenied);
+        ++$rawNegative;
+    }
+    f208Check($rawNegative === 13);
+
     // The owner must deny a syntactically correct *other tenant* too.
     $other = f208Wire();
     $other['tenant_ref'] = 'SYNTHETIC_TENANT_B';
@@ -186,7 +243,7 @@ try {
         f208NoRights($inspector->inspect($bad, ['ref', 'stage']));
     }
     echo 'F208_CROSS_SOURCE_PASS cases=' . count($cases) .
-        ' operational_decision=NO_GO real_authorization=false external_calls=0' . PHP_EOL;
+        ' canonical_json_negatives=' . $rawNegative . ' operational_decision=NO_GO real_authorization=false external_calls=0' . PHP_EOL;
 } catch (Throwable) {
     fwrite(STDERR, "F208_CROSS_SOURCE_DENIED operational_decision=NO_GO\n");
     exit(1);

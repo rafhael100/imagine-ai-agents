@@ -17,7 +17,7 @@ CRM_WORKFLOW = CRM_ROOT / ".github/workflows/ci-crm-aia-synthetic-parity.yml"
 CRM_CHECK = CRM_ROOT / "scripts/ci/check-aia-op01-json-exchange.php"
 CRM_OWNER = CRM_ROOT / "app/Support/Synthetic/AiaReadOnlyMockBoundary.php"
 
-PINNED_CRM = "5eca65403a4e3707e1fd7145ec13073a762d26f6"
+PINNED_CRM = "bbb4228a27028070a9561cb649a86224aaebde48"
 REVIEWED_AGENTS_BASE = "a18ad19ad8a24f9a04f1f4bce789ff4af6316d55"
 
 
@@ -58,6 +58,8 @@ def check() -> None:
         raise ReciprocalPinError("CRM_RECIPROCAL_CI_NOT_VERIFIED")
 
     for token in ("exchangeCanonicalJson(", "AiaReadOnlyMockBoundary::inspect(",
+                  "AiaReadOnlyMockBoundary::hasCanonicalFixtureShape(",
+                  "AiaReadOnlyMockBoundary::inspectCanonicalJson(",
                   "AgentsReadResponseInspector", "real_authorization=false",
                   "F3_AIA_F221"):
         if token not in check_script:
@@ -65,6 +67,10 @@ def check() -> None:
 
     # The pinned CRM source stays deny-only despite syntactic compatibility.
     if ("return self::denied();" not in owner
+        or "hasCanonicalFixtureShape(string $bytes)" not in owner
+        or "inspectCanonicalJson(string $bytes)" not in owner
+        or "hash_equals($canonical, $bytes)" not in owner
+        or "strlen($bytes) > 1024" not in owner
         or "real_authorization' => false" not in owner
         or "DENIED_OR_NOT_FOUND" not in owner):
         raise ReciprocalPinError("CRM_OWNER_BOUNDARY_DRIFT")

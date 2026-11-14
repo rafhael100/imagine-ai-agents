@@ -31,7 +31,7 @@ class F210CrossCore(unittest.TestCase):
         self.assertIn("php tools/check_crm_aia_real_facade_core.php", self.workflow)
         self.assertIn("test_f210_crm_facade_core.py", self.gate)
         self.assertIn("EXPECTED_CASES: '879'", self.workflow)
-        self.assertIn("5eca65403a4e3707e1fd7145ec13073a762d26f6", self.workflow)
+        self.assertIn("bbb4228a27028070a9561cb649a86224aaebde48", self.workflow)
         self.assertLess(self.workflow.index("bash tools/run_r01_offline_quality_gate.sh"),
                         self.workflow.index("php tools/check_crm_aia_real_facade_core.php"))
         self.assertLess(self.workflow.index("git -C _synthetic_crm_fixture rev-parse HEAD"),
