@@ -3,7 +3,7 @@ from pathlib import Path
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-PIN = "f44fe65745037d39f57e894ef32a25a9efa07bc4"
+PIN = "d7c7aacc766c7ade4c65dcd211ed4569442144a9"
 HISTORICAL_PIN = "7999b1e34a6cbd0ee1c5e2351067ad172e01bbad"
 
 

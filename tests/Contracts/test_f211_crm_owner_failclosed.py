@@ -48,7 +48,7 @@ class F211CrossCore(unittest.TestCase):
         self.assertIn("php tools/check_crm_aia_owner_failclosed.php", self.workflow)
         self.assertIn("test_f211_crm_owner_failclosed.py", self.gate)
         self.assertIn("EXPECTED_CASES: '879'", self.workflow)
-        self.assertIn("f44fe65745037d39f57e894ef32a25a9efa07bc4",
+        self.assertIn("d7c7aacc766c7ade4c65dcd211ed4569442144a9",
                       self.workflow)
         self.assertLess(self.workflow.index("php tools/check_crm_aia_real_facade_core.php"),
                         self.workflow.index("php tools/check_crm_aia_owner_failclosed.php"))
