@@ -74,3 +74,5 @@ jobs:
           test "$(git -C _synthetic_crm_fixture rev-parse HEAD)" = "7999b1e34a6cbd0ee1c5e2351067ad172e01bbad"
           php -l tools/check_crm_aia_cross_source.php
           php tools/check_crm_aia_cross_source.php
+          set -euo pipefail
+          php tools/check_crm_aia_scenario_matrix.php | python3 tools/verify_f209_matrix.py

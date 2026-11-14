@@ -51,6 +51,7 @@ for name in \
   test_f203_triage_adversarial.py \
   test_f206_health_rehearsal.py \
   test_f208_crm_cross_source.py \
+  test_f209_op01_source_matrix.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
