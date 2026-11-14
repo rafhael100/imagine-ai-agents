@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'">
+<title>Imagine AI Agents | Plano de Homologação OP-01</title>
+<style>
+:root{--orange:#f9941d;--ink:#171b19;--bg:#f7f7f8;--line:#e7e6e3;--mute:#6a6e70;--card:#fff;color-scheme:light;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink)}
+.layout{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
+.sidebar{background:#fff;border-right:1px solid var(--line);padding:30px 20px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{display:flex;gap:12px;align-items:center;padding:0 8px 28px;border-bottom:1px solid var(--line)}.brand img{width:45px;height:45px;object-fit:contain}.brand strong{display:block;font-size:16px}.brand small{display:block;color:var(--mute);font-size:11px;margin-top:5px}
+.sidebar h2{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;margin:28px 10px 14px;color:#85888b}
+.sidebar nav{display:grid;gap:6px}.sidebar nav a{display:block;padding:12px;border-radius:11px;text-decoration:none;color:#363936;font-size:13px;font-weight:650}.sidebar nav a:hover,.sidebar nav a:focus-visible{background:#fff1e0;color:#bd6503;outline:0}
+.side-note{margin-top:28px;border:1px solid var(--line);border-radius:14px;padding:14px;font-size:12px;color:var(--mute);line-height:1.55}
+.main{min-width:0;padding:34px clamp(20px,5vw,76px) 90px;max-width:1420px;width:100%;margin:0 auto}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}.topline p{color:var(--mute);font-size:12px;font-weight:700}.pill{border:1px solid #e0b4a3;border-radius:999px;padding:8px 14px;font-size:12px;color:#853d28;background:#fff7f4;font-weight:800}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:1.15px;color:#a96a22}h1{font-size:clamp(30px,4vw,48px);letter-spacing:-1.8px;max-width:760px;margin:36px 0 12px;line-height:1.12}p.lead{color:#61676b;font-size:16px;line-height:1.68;max-width:830px;margin:0 0 28px}
+.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:26px 0 45px}.metric{background:#fff;border:1px solid var(--line);border-radius:16px;padding:21px;min-height:123px}.metric strong{font-size:35px;font-weight:800;letter-spacing:-1.5px}.metric p{font-size:12px;color:var(--mute);line-height:1.4;margin:7px 0 0}
+h2.section{font-size:24px;letter-spacing:-.7px;margin:0 0 8px}.intro{font-size:13px;color:var(--mute);line-height:1.7;margin:0 0 20px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.workstream{scroll-margin-top:24px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;min-width:0;box-shadow:0 6px 20px #11111105}
+.workstream:last-child{grid-column:1/-1}.workstream-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}.workstream h3{font-size:19px;margin:6px 0 0;letter-spacing:-.55px}.state{border-radius:30px;font-size:10px;font-weight:800;color:#945126;background:#fff1e0;padding:8px 10px;white-space:nowrap}
+.desc{font-size:13px;color:#62686a;line-height:1.65;min-height:42px}.owner,.dependencies{font-size:12px;line-height:1.6;margin:10px 0;color:#62686a}.owner strong,.dependencies strong{color:#242826;margin-right:7px}.dependencies a{color:#b45a00;font-weight:750;text-decoration:none}
+details{border-top:1px solid var(--line);margin-top:18px;padding-top:15px}summary{color:#a85a06;font-size:12px;font-weight:800;cursor:pointer;line-height:1.6}summary:focus-visible{outline:2px solid var(--orange);outline-offset:4px;border-radius:3px}
+h4{font-size:12px;margin:18px 0 9px}.tags{display:flex;flex-wrap:wrap;gap:6px}.tag{display:inline-flex;border:1px solid #f4d8b5;border-radius:8px;background:#fff8ef;color:#7f4b13;padding:6px 9px;font-size:10px;font-weight:750}.mutedtag{background:#f4f5f6;border-color:#e6e7e7;color:#535a60}
+ul{padding-left:20px}li{font-size:12px;line-height:1.9;color:#62686a;overflow-wrap:anywhere}
+.footer{margin-top:30px;border-top:1px solid var(--line);padding-top:18px;font-size:12px;color:#73777a;line-height:1.7}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}.workstream:last-child{grid-column:auto}.summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.layout{display:block}.sidebar{position:static;height:auto;padding:16px 18px}.brand{padding:0 0 12px}.sidebar h2{margin:14px 0 9px}.sidebar nav{display:flex;overflow-x:auto}.sidebar nav a{white-space:nowrap;padding:10px}.side-note{display:none}.main{padding:23px 17px 60px}.metric{padding:14px;min-height:104px}.metric strong{font-size:28px}h1{margin-top:22px}.workstream{padding:18px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" aria-label="Navegação da homologação">
+  <div class="brand"><img src="assets/logo-imagine.png" alt="Imagine Comunicação Digital"><div><strong>Imagine AI Agents</strong><small>Homologação OP-01 · laboratório</small></div></div>
+  <h2>Caminho crítico</h2><nav aria-label="Etapas para homologação">
+  <a href="#W01">W01 · Identidade e replay</a>
+  <a href="#W02">W02 · ACL por empresa e recurso</a>
+  <a href="#W03">W03 · Contrato e privacidade</a>
+  <a href="#W04">W04 · Infraestrutura e testes reais</a>
+  <a href="#W05">W05 · Decisão do piloto</a>
+  </nav>
+  <div class="side-note">Visualização estática, produzida de dados sintéticos e inventários pendentes. Nenhum botão autoriza integração ou piloto.</div>
+</aside>
+<main class="main" id="conteudo">
+ <div class="topline"><p>IMAGINE / AGENTES DE IA / OP-01</p><span class="pill">Produção: NO-GO</span></div>
+ <h1>O caminho seguro até a homologação</h1>
+ <p class="lead">Cinco frentes para finalizar o contrato bilateral de leitura mínima entre Imagine AI Agents e CRM. O projeto tem ensaios de código sintético, mas a integração operacional ainda depende de testes e revisões independentes.</p>
+ <div class="summary" aria-label="Indicadores de homologação">
+  <div class="metric"><strong>14</strong><p>gates de aprovação abertos</p></div>
+  <div class="metric"><strong>13</strong><p>cenários reais não executados</p></div>
+  <div class="metric"><strong>7</strong><p>decisões independentes pendentes</p></div>
+  <div class="metric"><strong>0</strong><p>autorizações operacionais concedidas</p></div>
+ </div>
+ <section aria-label="Etapas pendentes">
+  <h2 class="section">Prioridades de homologação</h2>
+  <p class="intro">As etapas têm dependências. Só avançam com a evidência e a revisão correspondente; testes fictícios não alteram seu estado.</p>
+  <div class="grid">
+  
+<article class="workstream" id="W01" data-stage="W01">
+  <div class="workstream-head"><div><span class="eyebrow">FRENTE 01</span><h3>Identidade e replay</h3></div><span class="state">Pendente · NO-GO</span></div>
+  <p class="desc">Autenticação entre serviços, identidade delegada, revogação e proteção distribuída contra replay.</p>
+  <p class="owner"><strong>Revisores</strong> CRM AUT + SEG</p>
+  <p class="dependencies"><strong>Depende de</strong> Nenhuma frente anterior</p>
+  <details><summary>Gates (3) · Cenários reais (4) · Evidências</summary>
+    <h4>Gates ainda abertos</h4><div class="tags"><span class="tag" data-gate="R01-G01">R01-G01</span><span class="tag" data-gate="R01-G03">R01-G03</span><span class="tag" data-gate="CRM-AUT">CRM-AUT</span></div>
+    <h4>Casos reais não executados</h4><div class="tags"><span class="tag mutedtag" data-case="OP01-N01">OP01-N01</span><span class="tag mutedtag" data-case="OP01-N02">OP01-N02</span><span class="tag mutedtag" data-case="OP01-N07">OP01-N07</span><span class="tag mutedtag" data-case="OP01-N08">OP01-N08</span></div>
+    <h4>Evidências pendentes</h4><ul><li class="evidence">identidade-servico-e-revogacao-verificadas</li><li class="evidence">idempotencia-replay-distribuido-reconciliacao</li><li class="evidence">identidade-membro-e-revogacao</li></ul>
+  </details>
+</article>
+  
+<article class="workstream" id="W02" data-stage="W02">
+  <div class="workstream-head"><div><span class="eyebrow">FRENTE 02</span><h3>ACL por empresa e recurso</h3></div><span class="state">Pendente · NO-GO</span></div>
+  <p class="desc">Permissão atribuída pelo CRM por empresa, lead e campo, inclusive cenários cruzados.</p>
+  <p class="owner"><strong>Revisores</strong> CRM CORE + SEG</p>
+  <p class="dependencies"><strong>Depende de</strong> <a href="#W01">W01</a></p>
+  <details><summary>Gates (3) · Cenários reais (5) · Evidências</summary>
+    <h4>Gates ainda abertos</h4><div class="tags"><span class="tag" data-gate="R01-G02">R01-G02</span><span class="tag" data-gate="CRM-CORE">CRM-CORE</span><span class="tag" data-gate="CRM-SEG">CRM-SEG</span></div>
+    <h4>Casos reais não executados</h4><div class="tags"><span class="tag mutedtag" data-case="OP01-N03">OP01-N03</span><span class="tag mutedtag" data-case="OP01-N04">OP01-N04</span><span class="tag mutedtag" data-case="OP01-N05">OP01-N05</span><span class="tag mutedtag" data-case="OP01-P01">OP01-P01</span><span class="tag mutedtag" data-case="OP01-P02">OP01-P02</span></div>
+    <h4>Evidências pendentes</h4><ul><li class="evidence">ACL-recurso-campo-e-isolamento-tenant</li><li class="evidence">propriedade-recurso-e-campos</li><li class="evidence">ACL-RLS-e-threat-model</li></ul>
+  </details>
+</article>
+  
+<article class="workstream" id="W03" data-stage="W03">
+  <div class="workstream-head"><div><span class="eyebrow">FRENTE 03</span><h3>Contrato e privacidade</h3></div><span class="state">Pendente · NO-GO</span></div>
+  <p class="desc">Contrato versionado, resposta mínima, finalidade, retenção, observabilidade e rollback.</p>
+  <p class="owner"><strong>Revisores</strong> Arquitetura + Privacidade + Jurídico</p>
+  <p class="dependencies"><strong>Depende de</strong> <a href="#W01">W01</a> · <a href="#W02">W02</a></p>
+  <details><summary>Gates (3) · Cenários reais (4) · Evidências</summary>
+    <h4>Gates ainda abertos</h4><div class="tags"><span class="tag" data-gate="R01-G05">R01-G05</span><span class="tag" data-gate="R01-G08">R01-G08</span><span class="tag" data-gate="R01-G09">R01-G09</span></div>
+    <h4>Casos reais não executados</h4><div class="tags"><span class="tag mutedtag" data-case="OP01-N05">OP01-N05</span><span class="tag mutedtag" data-case="OP01-N06">OP01-N06</span><span class="tag mutedtag" data-case="OP01-N10">OP01-N10</span><span class="tag mutedtag" data-case="OP01-P02">OP01-P02</span></div>
+    <h4>Evidências pendentes</h4><ul><li class="evidence">LGPD-finalidade-retencao-provedores</li><li class="evidence">contrato-bilateral-versao-e-rollback</li><li class="evidence">licenciamento-subprocessadores</li></ul>
+  </details>
+</article>
+  
+<article class="workstream" id="W04" data-stage="W04">
+  <div class="workstream-head"><div><span class="eyebrow">FRENTE 04</span><h3>Infraestrutura e testes reais</h3></div><span class="state">Pendente · NO-GO</span></div>
+  <p class="desc">Ambiente isolado, tratamento de incidentes e os cenários reais de homologação OP-01.</p>
+  <p class="owner"><strong>Revisores</strong> Infra + SEG + QA</p>
+  <p class="dependencies"><strong>Depende de</strong> <a href="#W01">W01</a> · <a href="#W02">W02</a> · <a href="#W03">W03</a></p>
+  <details><summary>Gates (2) · Cenários reais (3) · Evidências</summary>
+    <h4>Gates ainda abertos</h4><div class="tags"><span class="tag" data-gate="R01-G07">R01-G07</span><span class="tag" data-gate="R01-G10">R01-G10</span></div>
+    <h4>Casos reais não executados</h4><div class="tags"><span class="tag mutedtag" data-case="OP01-N09">OP01-N09</span><span class="tag mutedtag" data-case="OP01-N10">OP01-N10</span><span class="tag mutedtag" data-case="OP01-N11">OP01-N11</span></div>
+    <h4>Evidências pendentes</h4><ul><li class="evidence">aceite-seguranca-e-integração-executada</li><li class="evidence">isolamento-segredos-incidentes-recuperacao</li></ul>
+  </details>
+</article>
+  
+<article class="workstream" id="W05" data-stage="W05">
+  <div class="workstream-head"><div><span class="eyebrow">FRENTE 05</span><h3>Decisão do piloto</h3></div><span class="state">Pendente · NO-GO</span></div>
+  <p class="desc">Aprovações independentes, uso e custos reconciliados, autorização expressa de piloto.</p>
+  <p class="owner"><strong>Revisores</strong> Direção + Produto + Financeiro</p>
+  <p class="dependencies"><strong>Depende de</strong> <a href="#W01">W01</a> · <a href="#W02">W02</a> · <a href="#W03">W03</a> · <a href="#W04">W04</a></p>
+  <details><summary>Gates (3) · Cenários reais (2) · Evidências</summary>
+    <h4>Gates ainda abertos</h4><div class="tags"><span class="tag" data-gate="R01-G04">R01-G04</span><span class="tag" data-gate="R01-G06">R01-G06</span><span class="tag" data-gate="R01-G11">R01-G11</span></div>
+    <h4>Casos reais não executados</h4><div class="tags"><span class="tag mutedtag" data-case="OP01-N08">OP01-N08</span><span class="tag mutedtag" data-case="OP01-P01">OP01-P01</span></div>
+    <h4>Evidências pendentes</h4><ul><li class="evidence">aprovacoes-autenticadas-e-revogaveis</li><li class="evidence">uso-tecnico-e-creditos-reconciliados</li><li class="evidence">escopo-piloto-custos-autorizacao</li></ul>
+  </details>
+</article>
+  </div>
+ </section>
+ <footer class="footer">Fonte: pacote bilateral OP-01 e plano F212, CRM PR #57 OPEN/DRAFT. Os 13 cenários reais continuam NAO_EXECUTADO. R01-G01..G11 e CORE/SEG/AUT/LGPD permanecem NO-GO. Sem acesso a dados de clientes, credenciais, API ou deploy.</footer>
+</main></div>
+</body>
+</html>
