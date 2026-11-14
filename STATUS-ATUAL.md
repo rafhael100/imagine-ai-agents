@@ -6,7 +6,7 @@
 
 **Fase:** offline. **NO-GO**.
 
-**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **879 testes PHP / lint 110 + Python/DOM**; #280–285; EVID-43,EVID-44,EVID-45,EVID-46,EVID-47,EVID-48,EVID-49; CIs 43038243942, 43088648397, 43605185307, 43605619299. F208 #293 e F209 #294 integradas apenas à dev; CRM PR #57 OPEN/DRAFT e 13 casos reais NAO_EXECUTADO. **NO-GO**.
+**Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **879 testes PHP / lint 110 + Python/DOM**; EVID-43,EVID-44,EVID-45,EVID-46,EVID-47,EVID-48,EVID-49,EVID-50; #293/#294 (CIs 43605185307,43605619299), #296/#297 (43606939495,43607272003), 43038243942,43088648397. CRM PR #57 OPEN/DRAFT; 13 NAO_EXECUTADO. **NO-GO**.
 
 ## Últimas entregas verificadas
 

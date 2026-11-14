@@ -55,6 +55,7 @@ for name in \
   test_f210_crm_facade_core.py \
   test_f211_crm_owner_failclosed.py \
   test_evid49_postmerge.py \
+  test_evid50_postmerge.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
   test_op01_dashboard_generator.py \
