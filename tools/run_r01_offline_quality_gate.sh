@@ -133,6 +133,18 @@ php -l tools/check_f227_signed_fixture.php
 php tools/check_f227_signed_fixture.php
 php -l tools/check_f231_ed25519_preflight.php
 php tools/check_f231_ed25519_preflight.php
+php -l src/MockBridge/MockSyntheticScopePreflight.php
+php -l tools/check_f232_scope_preflight.php
+php tools/check_f232_scope_preflight.php
+php -l src/MockBridge/MockSharedNonceLedger.php
+php -l tools/check_f233_shared_nonce.php
+php tools/check_f233_shared_nonce.php
+php -l tools/labs/MockFileAtomicNonceLab.php
+php -l tools/f234_nonce_worker.php
+python3 tools/check_f234_multiprocess.py
+php -l src/MockBridge/MockSyntheticEvidenceGate.php
+php -l tools/check_f235_composed_gate.php
+php tools/check_f235_composed_gate.php
 bash tools/validate_ft01_offline.sh
 
 echo 'R01_OFFLINE_GATE_PASS operational_decision=NO_GO'
