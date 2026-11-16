@@ -3,16 +3,20 @@
 BEGIN;
 DO $$ BEGIN IF current_database()<>'imagine_agents_ci' THEN RAISE EXCEPTION 'CI_DATABASE_ONLY'; END IF; END $$;
 SET ROLE aia_lab_owner;
+CREATE TABLE auto_ia_lab.company_links(company_id uuid PRIMARY KEY,tenant text NOT NULL UNIQUE CHECK(tenant ~ '^SYNTHETIC_[A-Z0-9_]{1,48}$'),active boolean NOT NULL,revision integer NOT NULL CHECK(revision>0),UNIQUE(company_id,tenant));
 CREATE TABLE auto_ia_lab.service_company_grants(
  company_id uuid NOT NULL, fingerprint varchar(64) NOT NULL CHECK(fingerprint ~ '^[a-f0-9]{64}$'),
  tenant text NOT NULL CHECK(tenant ~ '^SYNTHETIC_[A-Z0-9_]{1,48}$'),
  operation text NOT NULL CHECK(operation='lead.ingest'), active boolean NOT NULL,
  revision integer NOT NULL CHECK(revision>0), expires_at bigint NOT NULL,
- PRIMARY KEY(company_id,fingerprint,operation));
+ PRIMARY KEY(company_id,fingerprint,operation),FOREIGN KEY(company_id,tenant) REFERENCES auto_ia_lab.company_links(company_id,tenant));
 CREATE TABLE auto_ia_lab.service_event_audit(
  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
  company_id uuid NOT NULL, event_ref text NOT NULL, outcome text NOT NULL,
  grant_revision integer, received_at timestamptz NOT NULL DEFAULT clock_timestamp());
+ALTER TABLE auto_ia_lab.company_links ENABLE ROW LEVEL SECURITY;
+ALTER TABLE auto_ia_lab.company_links FORCE ROW LEVEL SECURITY;
+CREATE POLICY owner_link ON auto_ia_lab.company_links TO aia_lab_owner USING(true) WITH CHECK(true);
 ALTER TABLE auto_ia_lab.service_company_grants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE auto_ia_lab.service_company_grants FORCE ROW LEVEL SECURITY;
 ALTER TABLE auto_ia_lab.service_event_audit ENABLE ROW LEVEL SECURITY;
@@ -36,6 +40,8 @@ BEGIN
  IF NOT FOUND OR NOT g.active OR g.expires_at<=n OR g.tenant<>e->>'tenant_ref' THEN
  INSERT INTO auto_ia_lab.service_event_audit(company_id,event_ref,outcome) VALUES(company,COALESCE(e->>'event_ref','INVALID'),'LAB_DENY_GRANT');
  RETURN 'LAB_DENY_GRANT'; END IF;
+ PERFORM 1 FROM auto_ia_lab.company_links WHERE company_id=company AND tenant=g.tenant AND active FOR SHARE;
+ IF NOT FOUND THEN RETURN 'LAB_DENY_COMPANY_LINK'; END IF;
  IF NOT EXISTS(SELECT 1 FROM auto_ia_lab.no_ai_ops WHERE product=e->>'product' AND operation=e->>'operation') THEN RETURN 'LAB_DENY_OPERATION'; END IF;
  IF e->>'event_ref' !~ '^SYNTHETIC_[A-Z0-9_]{1,48}$' OR e->>'nonce_ref' !~ '^SYNTHETIC_[A-Z0-9_]{1,48}$'
  OR e->>'request_ref' !~ '^SYNTHETIC_[A-Z0-9_]{1,48}$' OR e->>'key_id' !~ '^SYNTHETIC_[A-Z0-9_]{1,48}$'
