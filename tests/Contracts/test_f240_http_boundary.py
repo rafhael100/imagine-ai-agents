@@ -26,10 +26,13 @@ class F240HttpBoundary(unittest.TestCase):
         self.assertIn("$status !== 404",src)
         self.assertIn("MockCrmPublicResponseContract::denial()",src)
         self.assertIn("hash_equals($expected, $responseBody)",src)
-        self.assertIn("array_keys($headers) !== ['content-type', 'cache-control']",src)
+        self.assertIn("$f246 = array_keys($headers) === ['content-type', 'cache-control']",src)
+        self.assertIn("'private, no-store, max-age=0'",src)
+        self.assertIn("'x-robots-tag'",src)
+        self.assertIn("'x-content-type-options'",src)
         t=(ROOT/"tools/check_f239_denial_receipt.php").read_text()
         self.assertIn("F239_DENIAL_RECEIPT_PASS",t)
-        self.assertIn("count($cases)===40",t)
+        self.assertIn("count($cases)===46",t)
 
     def test_composed_cycle_and_main_ci_are_mandatory(self):
         gate=(ROOT/"tools/run_r01_offline_quality_gate.sh").read_text()
