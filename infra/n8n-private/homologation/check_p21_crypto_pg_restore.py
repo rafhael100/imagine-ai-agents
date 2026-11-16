@@ -124,7 +124,7 @@ def make_cert(directory:Path,name:str)->tuple[Path,Path]:
     cert=directory/(name+".crt")
     key=directory/(name+".key")
     safe_run(["openssl","req","-x509","-newkey","rsa:2048",
-       "-nodes","-days","1","-sha256",
+       "-nodes","-days","3","-sha256",
        "-subj","/CN=CENTRAL_AUTO_P21_SYNTHETIC_"+name,
        "-addext","extendedKeyUsage=emailProtection",
        "-keyout",str(key),"-out",str(cert)])
