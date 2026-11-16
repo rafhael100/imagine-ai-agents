@@ -150,20 +150,28 @@ final readonly class PgN8nOutboxLab
         }
     }
 
-    /** One ACK, only by same worker and before the lease expires. */
-    public function acknowledge(string $tenant,string $event,string $worker,int $now): bool
-    {
+    /**
+     * One ACK only by the SAME worker, for the exact currently leased
+     * attempt and before expiry. Attempt is a monotonic fencing token:
+     * a delayed receipt for an earlier lease must NEVER ACK a re-lease,
+     * including when the same logical worker ID is reused.
+     */
+    public function acknowledge(
+        string $tenant,string $event,string $worker,int $attempt,int $now
+    ): bool {
         if (!self::synthetic($tenant) || !self::synthetic($event)
-            || !self::synthetic($worker) || $now<0 || $now>4102444800) return false;
+            || !self::synthetic($worker) || $attempt<1
+            || $attempt>self::MAX_ATTEMPTS
+            || $now<0 || $now>4102444800) return false;
         try {
             $stmt=$this->db->prepare('UPDATE '.self::TABLE.'
                 SET state=\'ACKED\',lease_owner=NULL,lease_expires=NULL
                 WHERE tenant_ref=:tenant AND event_ref=:event
                   AND state=\'LEASED\' AND lease_owner=:worker
-                  AND lease_expires>:now');
+                  AND attempts=:attempt AND lease_expires>:now');
             $stmt->execute([
                 'tenant'=>$tenant,'event'=>$event,
-                'worker'=>$worker,'now'=>$now,
+                'worker'=>$worker,'attempt'=>$attempt,'now'=>$now,
             ]);
             return $stmt->rowCount()===1;
         } catch (Throwable) {
