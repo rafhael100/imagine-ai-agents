@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgDraftFingerprintLab.php';
+require_once __DIR__.'/PgDraftAuthorProvenanceLab.php';
 
 use PDO;
 use Throwable;
@@ -118,7 +119,8 @@ SQL);
     }
 
     /** @return array<string,mixed> */
-    public function submit(string $canonical,string $signatureB64,int $now):array
+    public function submit(string $canonical,string $signatureB64,int $now,
+        bool $enforceAuthor=false):array
     {
         if(!self::ciOnly()||$this->db->inTransaction()
             ||strlen($canonical)<180||strlen($canonical)>1024
@@ -140,6 +142,16 @@ SQL);
                 ||!hash_equals($draft['draft_sha256'],$v['draft_sha256'])){
                 $this->db->rollBack();
                 return self::deny('REVIEW_DRAFT_MISSING_CHANGED_OR_CROSS_TENANT');
+            }
+            // P59: synthetic author provenance is checked under the SAME
+            // proposal-level FOR UPDATE transaction as the signed vote.
+            if($enforceAuthor && !(new PgDraftAuthorProvenanceLab($this->db))
+                ->authorDistinctInsideTransaction(
+                    $v['tenant_ref'],$v['proposal_ref'],
+                    $v['draft_sha256'],$v['reviewer_ref'],true
+                )){
+                $this->db->rollBack();
+                return self::deny('REVIEW_AUTHOR_SEPARATION_DENIED');
             }
             $key=$this->reviewer($v['tenant_ref'],$v['reviewer_ref'],true);
             if(!self::validKey($key,$v)
@@ -204,7 +216,8 @@ SQL);
     }
 
     /** @return array<string,mixed> */
-    public function status(string $tenant,string $proposal,int $now):array
+    public function status(string $tenant,string $proposal,int $now,
+        bool $enforceAuthor=false):array
     {
         if(!self::ciOnly()||!self::ref($tenant)
             ||!self::proposal($proposal)
@@ -220,6 +233,13 @@ SQL);
             if($draft===null){
                 $this->db->rollBack();
                 return self::deny('REVIEW_DRAFT_NOT_FOUND_OR_INCONSISTENT');
+            }
+            if($enforceAuthor && !(new PgDraftAuthorProvenanceLab($this->db))
+                ->authorDistinctInsideTransaction(
+                    $tenant,$proposal,$draft['draft_sha256'],null,false
+                )){
+                $this->db->rollBack();
+                return self::deny('DRAFT_AUTHOR_PROVENANCE_DENIED');
             }
             $q=$this->db->prepare(<<<'SQL'
 SELECT reviewer_role,reviewer_ref,decision,draft_sha256,
@@ -247,6 +267,11 @@ SQL);
                     ||$v['reviewer_ref']!==$vote['reviewer_ref']
                     ||$v['role']!==$vote['reviewer_role']
                     ||$v['decision']!==$vote['decision']
+                    ||($enforceAuthor && !(new PgDraftAuthorProvenanceLab($this->db))
+                        ->authorDistinctInsideTransaction(
+                            $tenant,$proposal,$draft['draft_sha256'],
+                            $vote['reviewer_ref'],false
+                        ))
                     ||!self::validKey($key,$v)
                     ||!self::validSignature($key,$vote['canonical_vote'],$signature)
                     ||in_array($v['role'],$roles,true)
