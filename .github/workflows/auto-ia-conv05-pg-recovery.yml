@@ -1,0 +1,74 @@
+name: AIA-CONV-05 ephemeral PostgreSQL backup/restore and anti-replay
+on:
+  push:
+    branches:
+      - feat/auto-ia-conv05-postgres-recovery-2026-11-16
+  pull_request:
+    branches:
+      - feat/auto-ia-conv04-p12-pg-handoff-2026-11-16
+permissions:
+  contents: read
+jobs:
+  pg16-recovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      pg:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      AIA_P6_PG_LAB: 'true'
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: imagine_agents_ci
+      DB_USERNAME: postgres
+      DB_PASSWORD: ci-only-password
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: aacbfdaa9fbfd878834d3c7b46eeaf99b4b8fdd9
+          path: _p12_pinned_source
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql,pgsql,mbstring
+          coverage: none
+      - name: Verify immutable P12 source and syntax
+        run: |
+          test "$(git -C _p12_pinned_source rev-parse HEAD)" = "aacbfdaa9fbfd878834d3c7b46eeaf99b4b8fdd9"
+          php -l tools/auto_ia/convergence/check_convergence_05_seed.php
+      - name: Create disposable PostgreSQL strict RLS, inbox, synthetic MAC
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/001_auto_ia_pg_lab.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/002_no_ai_inbox.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/003_signed_ingress_lab.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/convergence/004_mock_agents_signer_key.sql
+      - name: Produce P12 outbox and AUTO-IA inbox synthetic state
+        run: |
+          php tools/auto_ia/convergence/check_convergence_05_seed.php
+      - name: Dump and restore into second database in SAME ephemeral PG service
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" pg_dump -U postgres -d imagine_agents_ci -Fc > /tmp/auto-ia-conv05.dump
+          test -s /tmp/auto-ia-conv05.dump
+          docker exec -i "${{ job.services.pg.id }}" createdb -U postgres imagine_restore_ci
+          docker exec -i "${{ job.services.pg.id }}" pg_restore -U postgres -d imagine_restore_ci --exit-on-error < /tmp/auto-ia-conv05.dump
+      - name: Revalidate restored state, tenant isolation and replay
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_restore_ci -v ON_ERROR_STOP=1 < tools/auto_ia/convergence/check_convergence_05_restore.sql
+          echo "AIA_CONV05_BACKUP_RESTORE_PASS immutable_P12_source=1 no_n8n=1 no_ai=1"
+      - name: Enforce review NO-GO invariant
+        run: |
+          python3 tools/auto_ia/check_rc02_release.py
+

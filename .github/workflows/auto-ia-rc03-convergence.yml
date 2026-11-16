@@ -1,0 +1,158 @@
+name: AUTO-IA RC03 P12/RC02 convergence and recovery (NO-GO)
+on:
+  push:
+    branches:
+      - review/auto-ia-rc03-p12-convergence-2026-11-16
+  pull_request:
+    branches:
+      - feat/auto-ia-conv02-p7-contract-adapter-2026-11-16
+permissions:
+  contents: read
+jobs:
+  handoff:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    services:
+      pg:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      AIA_P6_PG_LAB: 'true'
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: imagine_agents_ci
+      DB_USERNAME: postgres
+      DB_PASSWORD: ci-only-password
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: aacbfdaa9fbfd878834d3c7b46eeaf99b4b8fdd9
+          path: _p12_pinned_source
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql,pgsql,mbstring
+          coverage: none
+      - name: Strict checkout / synthetic lab permissions
+        run: |
+          test "$(git -C _p12_pinned_source rev-parse HEAD)" = "aacbfdaa9fbfd878834d3c7b46eeaf99b4b8fdd9"
+          test "$GITHUB_REPOSITORY" = "rafhael100/imagine-ai-agents"
+          test "$DB_DATABASE" = "imagine_agents_ci"
+      - name: Initialize synthetic DB roles and signed ingress
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/001_auto_ia_pg_lab.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/check_auto_ia_07.sql
+          bash tools/auto_ia/pg/check_parallel_07.sh "${{ job.services.pg.id }}" imagine_agents_ci
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/002_no_ai_inbox.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/check_auto_ia_08.sql
+          bash tools/auto_ia/pg/check_parallel_08.sh "${{ job.services.pg.id }}" imagine_agents_ci
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/003_signed_ingress_lab.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/convergence/004_mock_agents_signer_key.sql
+      - name: Verify original P12 claim, durable signed inbox, ACK fencing, replay, dead-letter
+        run: |
+          php -l tools/auto_ia/convergence/check_convergence_04.php
+          php tools/auto_ia/convergence/check_convergence_04.php
+          echo "RC03_HANDOFF_PASS NO_GO"
+  restore:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    services:
+      pg:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      AIA_P6_PG_LAB: 'true'
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: imagine_agents_ci
+      DB_USERNAME: postgres
+      DB_PASSWORD: ci-only-password
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: aacbfdaa9fbfd878834d3c7b46eeaf99b4b8fdd9
+          path: _p12_pinned_source
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql,pgsql,mbstring
+          coverage: none
+      - name: Strict checkout / synthetic lab permissions
+        run: |
+          test "$(git -C _p12_pinned_source rev-parse HEAD)" = "aacbfdaa9fbfd878834d3c7b46eeaf99b4b8fdd9"
+          test "$GITHUB_REPOSITORY" = "rafhael100/imagine-ai-agents"
+          test "$DB_DATABASE" = "imagine_agents_ci"
+      - name: Initialize synthetic DB roles and signed ingress
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/001_auto_ia_pg_lab.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/002_no_ai_inbox.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/003_signed_ingress_lab.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/convergence/004_mock_agents_signer_key.sql
+      - name: Seed isolated P12 outbox and signed inbox
+        run: |
+          php -l tools/auto_ia/convergence/check_convergence_05_seed.php
+          php tools/auto_ia/convergence/check_convergence_05_seed.php
+      - name: Restore database and verify RLS, signed replay and dead-letter
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" pg_dump -U postgres -d imagine_agents_ci -Fc > /tmp/aia-rc03-recovery.dump
+          test -s /tmp/aia-rc03-recovery.dump
+          docker exec -i "${{ job.services.pg.id }}" createdb -U postgres imagine_restore_ci
+          docker exec -i "${{ job.services.pg.id }}" pg_restore -U postgres -d imagine_restore_ci --exit-on-error < /tmp/aia-rc03-recovery.dump
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_restore_ci -v ON_ERROR_STOP=1 < tools/auto_ia/convergence/check_convergence_05_restore.sql
+          echo "RC03_RECOVERY_PASS NO_GO"
+  release-policy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: AUTO-IA core no-provider policy tests
+        run: |
+          php tools/auto_ia/check_auto_ia.php
+          php tools/auto_ia/check_auto_ia_02.php
+          php tools/auto_ia/check_auto_ia_05.php
+          php tools/auto_ia/check_auto_ia_09.php
+          python3 tools/auto_ia/check_auto_ia_03.py
+          python3 tools/auto_ia/check_auto_ia_04.py
+          python3 tools/auto_ia/check_auto_ia_06.py
+          node tools/auto_ia/demo/check_n8n_noai_workflow.cjs
+      - name: Validate private n8n Compose syntax WITHOUT installation
+        env:
+          N8N_IMAGE: n8nio/n8n@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          N8N_PG_IMAGE: postgres@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+          N8N_PG_PASSWORD: SYNTHETIC_CI_CONFIG_ONLY_NOT_REAL
+          N8N_ENCRYPTION_KEY: SYNTHETIC_CI_CONFIG_ONLY_NOT_REAL
+          N8N_LOOPBACK_PORT: "17990"
+        run: |
+          docker compose --profile homologation -f infra/n8n-private/docker-compose.yml config --format json > /tmp/aia-rc03-compose.json
+          python3 infra/n8n-private/check_compose_static.py < /tmp/aia-rc03-compose.json
+      - name: Explicit release NO-GO and negative source mutations
+        run: |
+          python3 tools/auto_ia/check_rc02_release.py
+          python3 tools/auto_ia/convergence/check_rc03_release.py
+          echo "RC03_NO_GO no_n8n=1 no_provider=1 no_spend=1 no_deploy=1"

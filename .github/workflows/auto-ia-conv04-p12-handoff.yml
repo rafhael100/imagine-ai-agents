@@ -1,0 +1,66 @@
+name: AIA-CONV-04 pinned P12 outbox to signed AUTO-IA PG inbox (offline)
+on:
+  push:
+    branches:
+      - feat/auto-ia-conv04-p12-pg-handoff-2026-11-16
+  pull_request:
+    branches:
+      - feat/auto-ia-conv02-p7-contract-adapter-2026-11-16
+permissions:
+  contents: read
+jobs:
+  p12-to-autoia-handoff:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      pg:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      AIA_P6_PG_LAB: 'true'
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: imagine_agents_ci
+      DB_USERNAME: postgres
+      DB_PASSWORD: ci-only-password
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: Checkout P12 review exact SHA, never latest branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: aacbfdaa9fbfd878834d3c7b46eeaf99b4b8fdd9
+          path: _p12_pinned_source
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql, pgsql, mbstring
+          coverage: none
+      - name: Pin source and run syntax checks
+        run: |
+          test "$(git -C _p12_pinned_source rev-parse HEAD)" = "aacbfdaa9fbfd878834d3c7b46eeaf99b4b8fdd9"
+          php -l tools/auto_ia/convergence/check_convergence_04.php
+          php -l _p12_pinned_source/tools/labs/PgN8nOutboxLab.php
+          php -m | grep -qi pdo_pgsql
+      - name: Prepare PostgreSQL 16 isolated RLS, inbox and synthetic HMAC
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/001_auto_ia_pg_lab.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/002_no_ai_inbox.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/003_signed_ingress_lab.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/convergence/004_mock_agents_signer_key.sql
+      - name: Exercise fenced P12 claim, signed PG admission, lost ACK, replay and dead-letter
+        run: |
+          php tools/auto_ia/convergence/check_convergence_04.php
+          python3 tools/auto_ia/check_rc02_release.py
+          echo "AIA_CONV_04_CI_PASS no_n8n=1 no_api=1 no_deploy=1" 
+
