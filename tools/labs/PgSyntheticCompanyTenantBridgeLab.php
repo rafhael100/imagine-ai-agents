@@ -61,15 +61,45 @@ SQL);
     public function inspect(string $company,string $tenant,string $request,
         string $nonce,string $digest,int $revision,int $now):array
     {
+        if($this->db->inTransaction())return self::deny('NESTED_BRIDGE_TX_DENIED');
+        try{
+            $this->db->beginTransaction();
+            $r=$this->inspectWithinTransaction(
+                $company,$tenant,$request,$nonce,$digest,$revision,$now
+            );
+            if($r['decision']!=='LAB_BOUND_UNCOMMITTED_NO_EFFECT'){
+                $this->db->rollBack();
+                return $r;
+            }
+            $this->db->commit();
+            return [
+                'decision'=>'LAB_MATCHED_BOUNDARY_NO_EXECUTION',
+                'reason'=>'NO_REAL_BRIDGE_IAM_OR_ATOMIC_STAGE',
+                'ai_calls'=>0,'service_effects'=>0,
+            ];
+        }catch(Throwable){
+            if($this->db->inTransaction())$this->db->rollBack();
+            return self::deny('BRIDGE_DATABASE_UNAVAILABLE');
+        }
+    }
+
+    /**
+     * P42: Caller owns the transaction. FOR SHARE locks on mapping and
+     * P7 mTLS nonce persist UNTIL caller commits P16+P6+proof-consumption.
+     * On error, caller MUST rollback. No effect is performed here.
+     * @return array{decision:string,reason:string,ai_calls:int,service_effects:int}
+     */
+    public function inspectWithinTransaction(string $company,string $tenant,
+        string $request,string $nonce,string $digest,int $revision,int $now):array
+    {
         if(!self::company($company)||!self::ref($tenant)
             ||!self::p7ref($request)||!self::p7ref($nonce)
             ||preg_match('/\A[a-f0-9]{64}\z/D',$digest)!==1
             ||$revision<1||$now<0||$now>4_102_444_800
-            ||$this->db->inTransaction()){
-            return self::deny('UNTRUSTED_BRIDGE_PARAMETERS');
+            ||!$this->db->inTransaction()){
+            return self::deny('UNTRUSTED_BRIDGE_PARAMETERS_OR_NO_TX');
         }
         try{
-            $this->db->beginTransaction();
             $binding=$this->db->prepare(<<<'SQL'
 SELECT tenant_ref,active,revision
 FROM aia_p41_lab.company_tenant_links
@@ -80,12 +110,8 @@ SQL);
             if(!is_array($r)||$r['tenant_ref']!==$tenant
                 ||!in_array($r['active'],[true,1,'1','t'],true)
                 ||(int)$r['revision']!==$revision){
-                $this->db->rollBack();
                 return self::deny('COMPANY_TENANT_LINK_MISSING_REVOKED_OR_STALE');
             }
-            // Read P7 ledger as an additional independent proof source.
-            // It was written by the original synthetic mTLS fixture; the
-            // ledger row ALONE cannot prove a live caller or consent.
             $proof=$this->db->prepare(<<<'SQL'
 SELECT issued_at FROM central_auto_lab.mtls_nonce_ledger
 WHERE issuer='portal-automation-admin'
@@ -100,17 +126,14 @@ SQL);
             ]);
             $issued=$proof->fetchColumn();
             if($issued===false || (int)$issued<$now-120 || (int)$issued>$now+5){
-                $this->db->rollBack();
                 return self::deny('MTLS_LEDGER_PROOF_MISSING_OR_STALE');
             }
-            $this->db->commit();
             return [
-                'decision'=>'LAB_MATCHED_BOUNDARY_NO_EXECUTION',
-                'reason'=>'NO_REAL_BRIDGE_IAM_OR_ATOMIC_STAGE',
+                'decision'=>'LAB_BOUND_UNCOMMITTED_NO_EFFECT',
+                'reason'=>'CALLER_MUST_COMMIT_ATOMIC_STAGE',
                 'ai_calls'=>0,'service_effects'=>0,
             ];
         }catch(Throwable){
-            if($this->db->inTransaction())$this->db->rollBack();
             return self::deny('BRIDGE_DATABASE_UNAVAILABLE');
         }
     }
