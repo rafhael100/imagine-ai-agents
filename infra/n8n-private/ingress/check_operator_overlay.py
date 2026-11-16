@@ -7,6 +7,8 @@ An allowed lab configuration NEVER implies MFA or production approval.
 """
 from __future__ import annotations
 import json,os,sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from check_noai_egress_policy import check_compose,Rejected as BaseRejected
 
 class Denied(ValueError):pass
