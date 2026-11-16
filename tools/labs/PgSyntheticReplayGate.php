@@ -16,7 +16,30 @@ use Throwable;
  */
 final class PgSyntheticReplayGate
 {
-    public function __construct(private PDO $db) {}
+    public function __construct(private PDO $db)
+    {
+        // Never instantiate the SQL-writing lab against an unexpected database,
+        // even when the environment variables were accidentally copied.
+        if (!self::labOnly()) {
+            throw new \RuntimeException('P16_NON_CI_ENVIRONMENT_DENIED');
+        }
+        try {
+            if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) !== 'pgsql') {
+                throw new \RuntimeException('P16_WRONG_DATABASE_DRIVER');
+            }
+            $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $identity = $db->query(
+                'SELECT current_database() AS db, current_user AS username'
+            )->fetch(PDO::FETCH_ASSOC);
+            if (!is_array($identity)
+                || $identity['db'] !== 'imagine_agents_ci'
+                || $identity['username'] !== 'postgres') {
+                throw new \RuntimeException('P16_WRONG_DATABASE_IDENTITY');
+            }
+        } catch (Throwable $e) {
+            throw new \RuntimeException('P16_DATABASE_IDENTITY_DENIED', 0, $e);
+        }
+    }
 
     private static function labOnly(): bool
     {
