@@ -94,7 +94,7 @@ final readonly class PgAiCreditReservationLab
         try {
             $this->db->beginTransaction();
             $account=$this->accountForUpdate($tenant);
-            if (!$account || $account['frozen']) {
+            if (!$account || self::isFrozen($account)) {
                 $this->db->rollBack();
                 return null;
             }
@@ -152,7 +152,7 @@ final readonly class PgAiCreditReservationLab
             $this->db->beginTransaction();
             $account=$this->accountForUpdate($tenant);
             $item=$this->requestForUpdate($tenant,$request);
-            if (!$account || $account['frozen'] || !$item
+            if (!$account || self::isFrozen($account) || !$item
                 || $item['state']!=='RESERVED') {
                 $this->db->rollBack();
                 return false;
@@ -183,7 +183,7 @@ final readonly class PgAiCreditReservationLab
             $this->db->beginTransaction();
             $account=$this->accountForUpdate($tenant);
             $item=$this->requestForUpdate($tenant,$request);
-            if (!$account || !$item || $account['frozen']) {
+            if (!$account || !$item || self::isFrozen($account)) {
                 $this->db->rollBack();
                 return false;
             }
@@ -257,7 +257,7 @@ final readonly class PgAiCreditReservationLab
             $this->db->beginTransaction();
             $account=$this->accountForUpdate($tenant);
             $item=$this->requestForUpdate($tenant,$request);
-            if (!$account || $account['frozen'] || !$item
+            if (!$account || self::isFrozen($account) || !$item
                 || $item['state']!==$expected) {
                 $this->db->rollBack();
                 return false;
@@ -300,6 +300,12 @@ final readonly class PgAiCreditReservationLab
             WHERE tenant_ref=:tenant AND request_ref=:request FOR UPDATE');
         $stmt->execute(['tenant'=>$tenant,'request'=>$request]);
         return is_array($row=$stmt->fetch(PDO::FETCH_ASSOC))?$row:null;
+    }
+
+    /** PDO PostgreSQL normally returns a literal 't' or 'f' string. */
+    private static function isFrozen(array $account): bool
+    {
+        return in_array($account['frozen'],[true,1,'1','t'],true);
     }
 
     private static function ref(string $id): bool
