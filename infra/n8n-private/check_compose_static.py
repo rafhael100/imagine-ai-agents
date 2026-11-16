@@ -37,3 +37,9 @@ assert svcs["n8n"]["environment"]["DB_POSTGRESDB_USER"]=="n8n_runtime"
 assert svcs["n8n"]["environment"]["N8N_BLOCK_ENV_ACCESS_IN_NODE"]=="true"
 assert set(svcs["n8n-db"].get("secrets",[])[i]["source"] for i in range(2))=={"n8n_pg_admin_password","n8n_pg_password"}
 print("P4_SECRET_FILES_AND_NON_SUPERUSER_CONFIG_PASS runtime_probe_required=1")
+
+# Enforce the closed NO_AI surface even when an older CI job calls only
+# this original Compose verifier. Deployment policy remains NO-GO.
+from check_noai_egress_policy import check_compose
+check_compose(data)
+print('CENTRAL_AUTO_P13_STATIC_EGRESS_PASS no_external_nodes=1 no_public_api=1 ssrf=1')
