@@ -10,7 +10,7 @@ import json
 import re
 from pathlib import Path
 
-ROOT=Path(__file__).resolve().parents[2]
+ROOT=Path(__file__).resolve().parents[3]
 P12_SHA="aacbfdaa9fbfd878834d3c7b46eeaf99b4b8fdd9"
 FILES=(
     "tools/auto_ia/convergence/MockP7ToAutoIaAdapter.php",
