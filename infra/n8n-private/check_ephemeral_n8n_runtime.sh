@@ -7,7 +7,7 @@ if [[ "${GITHUB_ACTIONS:-}" != "true" ||
   echo "AUTO_IA_14_DENY_NON_CI_RUN" >&2
   exit 1
 fi
-image="ghcr.io/n8n-io/n8n:2.47.7"
+image="ghcr.io/n8n-io/n8n@sha256:b4b90747b81fcda7e76550c0d3aa7f0f64917a1e9573cff40d6834eaf2e0f8ea"
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 workflow="$root/tools/auto_ia/demo/n8n-noai-demo.workflow.json"
 python3 "$root/tools/auto_ia/policy/check_n8n_zero_ai.py"
@@ -29,13 +29,14 @@ grep -Eq '^ghcr.io/n8n-io/n8n@sha256:[a-f0-9]{64}$' "$work/digest.txt"
 # The container is isolated with --network none and NO published ports.
 container="$(docker run -d --rm --network none \
   --name "imagine-auto-ia-14-$GITHUB_RUN_ID" \
-  --security-opt no-new-privileges --cap-drop ALL --pids-limit 128 \
-  --cpus 2 --memory 1536m \
+  --security-opt no-new-privileges --cap-drop ALL --pids-limit 256 \
+  --cpus 3 --memory 4096m \
   --mount "type=bind,source=$workflow,target=/tmp/noai.workflow.json,readonly" \
   -e N8N_ENCRYPTION_KEY=SYNTHETIC_CI_ONLY_NOT_FOR_PRODUCTION \
   -e N8N_DIAGNOSTICS_ENABLED=false \
   -e N8N_PERSONALIZATION_ENABLED=false \
   -e N8N_COMMUNITY_PACKAGES_ENABLED=false \
+  -e NODE_OPTIONS=--max-old-space-size=3072 \
   -e N8N_RUNNERS_ENABLED=true \
   -e N8N_RUNNERS_MODE=internal \
   "$image" /bin/sh -c 'sleep 1200')"
