@@ -95,15 +95,22 @@ def check(data:object)->dict:
     } or len(sec)!=3:
         raise Denied("PROXY_CERT_SOURCE")
     vols=proxy.get("volumes")
-    if not isinstance(vols,list) or len(vols)!=1 or not isinstance(vols[0],dict):
-        raise Denied("PROXY_CONFIG_SINGLE_BIND")
-    v=vols[0]
-    if v.get("type")!="bind" or not str(v.get("source","")).endswith(
+    if (not isinstance(vols,list) or len(vols)!=2
+        or any(not isinstance(v,dict) or v.get("type")!="bind"
+               or v.get("read_only") is not True for v in vols)):
+        raise Denied("PROXY_ONLY_READ_ONLY_BINDS")
+    by_target={v.get("target"):v.get("source") for v in vols}
+    if len(by_target)!=2 or set(by_target)!={
+        "/etc/nginx/conf.d/default.conf",
+        "/etc/nginx/operator-fingerprints.conf"
+    }:
+        raise Denied("PROXY_CERT_PIN_MOUNT_TARGETS")
+    if not str(by_target["/etc/nginx/conf.d/default.conf"]).endswith(
         "/infra/n8n-private/ingress/nginx-operator.conf"
-    ) or v.get("target")!="/etc/nginx/conf.d/default.conf" or (
-        v.get("read_only") is not True
+    ) or not str(by_target["/etc/nginx/operator-fingerprints.conf"]).endswith(
+        "/operator-fingerprints.conf"
     ):
-        raise Denied("PROXY_CONFIG_READ_ONLY")
+        raise Denied("PROXY_CERT_PIN_UNREVIEWED_SOURCE")
     return {
         "schema":"CENTRAL_AUTO_P15_OPERATOR_MTLS_V1",
         "decision":"LAB_ONLY_NO_GO",
