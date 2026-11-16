@@ -23,8 +23,8 @@ jobs:
           GITHUB_ACTIONS: 'true'
         run: |
           set -euo pipefail
-          python3 -m py_compile tools/auto_ia/central_transport/check_crosslane_merge_tree.py
           export PYTHONPYCACHEPREFIX="$RUNNER_TEMP/central-auto-p18-pycache"
+          python3 -m py_compile tools/auto_ia/central_transport/check_crosslane_merge_tree.py
           before="$(git rev-parse HEAD)"
           python3 tools/auto_ia/central_transport/check_crosslane_merge_tree.py
           test "$(git rev-parse HEAD)" = "$before"
