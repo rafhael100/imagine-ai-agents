@@ -20,6 +20,8 @@ $db=new PDO('pgsql:host=127.0.0.1;port=5432;dbname=imagine_agents_ci',
     'postgres','ci-only-password',[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
 $stager=new PgSyntheticAtomicStager($db);
 $stager->createTables();
+// P26 regression runs in this same disposable database, so isolate P27 fixtures.
+$db->exec('TRUNCATE TABLE aia_p16_lab.event_replay');
 $outbox=new PgN8nOutboxLab($db);
 $checks=0;
 function p27Assert(bool $condition,string $label):void {
