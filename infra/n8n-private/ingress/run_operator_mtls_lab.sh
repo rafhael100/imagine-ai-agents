@@ -46,6 +46,12 @@ openssl x509 -req -sha256 -days 1 -in "$work/untrusted.csr" \
   -CA "$work/rogue-ca.crt" -CAkey "$work/rogue-ca.key" \
   -CAcreateserial -extfile "$work/ext" \
   -out "$work/untrusted.crt" >/dev/null 2>&1
+# Local-file Compose secrets preserve ownership and mode of the source.
+# Root in this container has CAP_DAC_OVERRIDE removed: public certificates
+# are world-readable, but the ephemeral server key is root-owned 0400.
+chmod 0444 "$work/server.crt" "$work/client-ca.crt"
+sudo chown 0:0 "$work/server.key"
+sudo chmod 0400 "$work/server.key"
 export N8N_OPERATOR_CERT_FILE="$work/server.crt"
 export N8N_OPERATOR_KEY_FILE="$work/server.key"
 export N8N_OPERATOR_CLIENT_CA_FILE="$work/client-ca.crt"
