@@ -98,9 +98,17 @@ def main()->None:
         assert path in changed,("P62_SUBSYSTEM_NOT_IN_REVIEW_DIFF",path)
     for item in ["main",".env","vendor",".github/workflows/deploy.yml"]:
         assert item not in changed,("P62_UNEXPECTED_RELEASE_SIDE_EFFECT",item)
-    assert "NO_GO" in (ROOT/"docs/reviews/AIA-P61-HISTORICAL-SIGNED-REVIEWS.md").read_text()
-    assert "NO_GO" in (ROOT/"docs/reviews/AIA-P57-SIGNED-REVIEW-OBSERVATIONS.md").read_text()
-    assert "NO_GO" in (ROOT/"docs/reviews/AIA-P47-OFFICIAL-N8N-PG17.md").read_text()
+    # Both Brazilian review notations denote the same explicit hard stop.
+    # Do not accept GO, "ready", or omission as a release signal.
+    for path in [
+        "docs/reviews/AIA-P61-HISTORICAL-SIGNED-REVIEWS.md",
+        "docs/reviews/AIA-P57-SIGNED-REVIEW-OBSERVATIONS.md",
+        "docs/reviews/AIA-P47-OFFICIAL-N8N-PG17.md",
+    ]:
+        body=(ROOT/path).read_text(encoding="utf-8")
+        assert "NO_GO" in body or "NO-GO" in body,(
+            "P62_REVIEW_DOCUMENT_HARD_STOP_MISSING",path
+        )
     print(json.dumps({
         "schema":"AIA_RC62_REVIEW_CHECK_RESULT_V1",
         "base":BASE,"includes_p61":True,
