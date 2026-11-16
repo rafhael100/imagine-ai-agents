@@ -34,6 +34,9 @@ try {
     ];
     f239Assert(MockSyntheticHttpDenialReceipt::matches(404,$f248Headers,$body));
 
+    f239Assert(MockSyntheticHttpDenialReceipt::matches(
+        404,array_replace($f248Headers,['cache-control'=>'max-age=0, no-store, private']),$body
+    ));
     $cases=[];
     foreach([200,201,202,204,301,302,307,308,400,401,403,405,409,422,429,500,503,0] as $status) {
         $cases[]=[$status,$headers,$body];
@@ -71,7 +74,7 @@ try {
     foreach ($cases as [$status,$meta,$response]) {
         f239Assert(!MockSyntheticHttpDenialReceipt::matches($status,$meta,$response));
     }
-    echo "F239_DENIAL_RECEIPT_PASS positive=3 negatives=46 accepted_read=false operational_decision=NO_GO\n";
+    echo "F239_DENIAL_RECEIPT_PASS positive=4 negatives=46 accepted_read=false operational_decision=NO_GO\n";
 } catch (Throwable) {
     fwrite(STDERR,"F239_DENIAL_RECEIPT_DENIED operational_decision=NO_GO\n");
     exit(1);
