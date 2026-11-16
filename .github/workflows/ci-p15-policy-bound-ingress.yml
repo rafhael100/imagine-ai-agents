@@ -1,0 +1,42 @@
+name: Agents P15 - policy bound synthetic ingress
+
+on:
+  push:
+    branches:
+      - review/aia-p15-policy-bound-ingress-2026-11-16
+  pull_request:
+    branches:
+      - review/aia-p14-convergence-gates-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  p15-policy-bound:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 8b04d0e936168c77db028160b5aeb1758db497c4
+          path: _auto_ia_pinned_source
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, sodium
+          coverage: none
+      - name: Verify immutable source and previous gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _auto_ia_pinned_source rev-parse HEAD)" = "8b04d0e936168c77db028160b5aeb1758db497c4"
+          python3 tools/check_p14_convergence_gates.py
+          php -l tools/labs/MockPolicyBoundIngress.php
+          php -l tools/check_p15_policy_bound_ingress.php
+      - name: Test cross-source tenant and policy binding
+        run: php tools/check_p15_policy_bound_ingress.php
