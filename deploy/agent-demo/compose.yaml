@@ -1,0 +1,37 @@
+name: imagine-aia-offline-demo-p3
+
+services:
+  preview:
+    build:
+      context: ../..
+      dockerfile: deploy/agent-demo/Dockerfile
+    read_only: true
+    init: true
+    user: "10001:10001"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    mem_limit: 96m
+    cpus: 0.50
+    restart: "no"
+    tmpfs:
+      - /tmp:size=8m,mode=1777
+    networks:
+      - preview_private
+    ports:
+      # No fixed host port, no public IP: avoid collision with CRM/Sites.
+      - target: 8080
+        host_ip: 127.0.0.1
+        protocol: tcp
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; assert urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=2).read() == b'SIMULATED_READY_NO_GO\\n'"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
+      start_period: 4s
+
+networks:
+  preview_private:
+    internal: true
