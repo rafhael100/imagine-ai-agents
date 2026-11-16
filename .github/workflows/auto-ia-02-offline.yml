@@ -1,0 +1,29 @@
+name: AUTO-IA-02 synthetic budget preflight (offline)
+
+on:
+  push:
+    branches:
+      - feat/auto-ia-02-offline-budget-gate-2026-11-16
+  pull_request:
+    branches:
+      - feat/auto-ia-01-deterministic-router-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  zero-provider-budget-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify deterministic routing and synthetic budget limits
+        run: |
+          php -l tools/auto_ia/AutoIaRouter.php
+          php -l tools/auto_ia/check_auto_ia.php
+          php -l tools/auto_ia/MockAiBudgetGate.php
+          php -l tools/auto_ia/check_auto_ia_02.php
+          php tools/auto_ia/check_auto_ia.php
+          php tools/auto_ia/check_auto_ia_02.php
