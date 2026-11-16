@@ -22,7 +22,8 @@ assert "LAB_DENY_SERVICE_TENANT" in sql
 assert "LAB_DENY_AI_OR_UNKNOWN_OPERATION" in (ROOT/"tools/auto_ia/pg/002_no_ai_inbox.sql").read_text()
 assert "FOR UPDATE" in (ROOT/"tools/auto_ia/pg/001_auto_ia_pg_lab.sql").read_text()
 compose=(ROOT/"infra/n8n-private/docker-compose.yml").read_text()
-assert "127.0.0.1:" in compose
+assert "\n    ports:" not in compose, "n8n must not publish host ports"
+assert 'expose:\n      - "5678"' in compose, "internal n8n UI exposure missing"
 assert compose.count("internal: true")==2
 assert "POSTGRES_PASSWORD" in compose
 assert "N8N_ENCRYPTION_KEY" in compose
