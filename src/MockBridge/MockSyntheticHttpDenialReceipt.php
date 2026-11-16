@@ -22,17 +22,30 @@ final class MockSyntheticHttpDenialReceipt
         string $responseBody
     ): bool {
         try {
-            if ($status !== 404
-                || array_keys($headers) !== ['content-type', 'cache-control']
-                || !is_string($headers['content-type'])
+            if ($status !== 404 || !is_string($headers['content-type'] ?? null)
                 || !in_array(
                     $headers['content-type'],
                     ['application/json', 'application/json; charset=utf-8'],
                     true
                 )
-                || $headers['cache-control'] !== 'no-store, private'
                 || $responseBody === ''
                 || strlen($responseBody) > 512) {
+                return false;
+            }
+
+            // Two CLOSED, known denial profiles from the original CRM:
+            // F246 laboratory and F248 private functional candidate.
+            // No arbitrary extra response headers are tolerated.
+            $f246 = array_keys($headers) === ['content-type', 'cache-control']
+                && $headers['cache-control'] === 'no-store, private';
+            $f248 = array_keys($headers) === [
+                'content-type', 'cache-control', 'x-robots-tag',
+                'x-content-type-options',
+            ]
+                && $headers['cache-control'] === 'private, no-store, max-age=0'
+                && $headers['x-robots-tag'] === 'noindex, nofollow, noarchive'
+                && $headers['x-content-type-options'] === 'nosniff';
+            if (!$f246 && !$f248) {
                 return false;
             }
             // Byte exact, ordered, canonical denial. A purported positive,
