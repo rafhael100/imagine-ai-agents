@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /** F234 — CLI test harness; synthetic data and temporary local paths only. */
-require dirname(__DIR__) . '/src/MockBridge/MockFileAtomicNonceLab.php';
+require dirname(__DIR__) . '/tools/labs/MockFileAtomicNonceLab.php';
 
 use ImagineAI\MockBridge\MockFileAtomicNonceLab;
 
