@@ -1,0 +1,94 @@
+name: Agents P12 - unified credit proof, fenced n8n and product acceptance
+
+on:
+  push:
+    branches:
+      - review/aia-p8-p12-secure-credit-automation-2026-11-16
+  pull_request:
+    branches:
+      - review/aia-p4-p7-core-integrated-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  p12-verified-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      AIA_P4_PG_LAB: 'true'
+      AIA_P6_PG_LAB: 'true'
+      AIA_P8_PG_LAB: 'true'
+      AIA_P11_SIGNED_PROOFS: 'true'
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: imagine_agents_ci
+      DB_USERNAME: postgres
+      DB_PASSWORD: ci-only-password
+    steps:
+      - name: Read-only exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: PHP 8.4 with sodium and PostgreSQL16
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: sodium, mbstring, pdo_pgsql, pgsql
+          coverage: none
+      - name: Verify CI target and signed-proof validator
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "rafhael100/imagine-ai-agents"
+          test "$DB_HOST" = "127.0.0.1"
+          test "$DB_DATABASE" = "imagine_agents_ci"
+          php -l tools/labs/PgSalesWorkbenchLab.php
+          php -l tools/labs/PgN8nOutboxLab.php
+          php -l tools/labs/PgAiCreditReservationLab.php
+          php -l tools/labs/SyntheticUsageReceipt.php
+          php -l src/MockOrchestration/MockAiOrAutomationRouter.php
+          php -l src/MockOrchestration/MockN8nOutboxContract.php
+          php -r 'if (!function_exists("sodium_crypto_sign_verify_detached")) exit(1);'
+      - name: P4 durable quota and terminal approval race
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p4_pg_workbench.php
+      - name: P5 zero-model-credit routing
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p5_ai_routing.php
+      - name: P6 and P9 locked n8n outbox with stale ACK fencing
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p6_n8n_outbox.php
+      - name: P8 P10 P11 signed provider proof and debit consistency
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p8_credit_reservation.php
+      - name: Original offline product demo and PHP domain regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/check_p0_sales_demo.py
+          node tools/check_p1_sales_workbench.js
+          php tools/check_p2_sales_domain.php
+          node tools/check_p2_sales_parity.js
+          echo 'P12_UNIFIED_ACCEPTANCE_PASS offline_product=true pg16_quota=true n8n_fenced_ack=true model_zero_if_deterministic=true signed_usage=true real_authorization=false NO_GO' >> "$GITHUB_STEP_SUMMARY"

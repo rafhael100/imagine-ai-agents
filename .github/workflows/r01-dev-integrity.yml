@@ -12,6 +12,7 @@ on:
       - dev/f240-http-contract-integrated-r01-2026-11-15
       - review/agents-f229-f251-integrated-2026-11-15
       - review/aia-p4-p7-core-integrated-2026-11-16
+      - review/aia-p8-p12-secure-credit-automation-2026-11-16
   pull_request:
     branches:
       - dev/ft01-aia-core-mocks-2026-11-06
