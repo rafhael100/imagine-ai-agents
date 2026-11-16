@@ -58,6 +58,9 @@ CREATE TABLE IF NOT EXISTS aia_p44_lab.consumed_owner_grants(
  signed_decision_sha256 CHAR(64) NOT NULL
    CHECK(signed_decision_sha256 ~ '^[a-f0-9]{64}$'),
  signer_key_id VARCHAR(64) NOT NULL,
+ owner_revision INTEGER NOT NULL CHECK(owner_revision BETWEEN 1 AND 1000000),
+ canonical_decision VARCHAR(1024) NOT NULL,
+ signature_b64 VARCHAR(88) NOT NULL CHECK(length(signature_b64)=88),
  observed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
  PRIMARY KEY(company_id,grant_ref),
  UNIQUE(tenant_ref,event_ref)
@@ -182,8 +185,8 @@ SQL);
             $insert=$this->db->prepare(<<<'SQL'
 INSERT INTO aia_p44_lab.consumed_owner_grants
 (company_id,grant_ref,tenant_ref,event_ref,payload_hash,
- signed_decision_sha256,signer_key_id)
-VALUES(CAST(:company AS uuid),:grant,:tenant,:event,:hash,:decision_hash,:key)
+ signed_decision_sha256,signer_key_id,owner_revision,canonical_decision,signature_b64)
+VALUES(CAST(:company AS uuid),:grant,:tenant,:event,:hash,:decision_hash,:key,:rev,:raw,:sig)
 ON CONFLICT DO NOTHING RETURNING grant_ref
 SQL);
             $insert->execute([
@@ -191,7 +194,10 @@ SQL);
                 ':tenant'=>$tenant,':event'=>$event,
                 ':hash'=>$d['payload_hash'],
                 ':decision_hash'=>hash('sha256',$decisionCanonical),
-                ':key'=>$trustedKeyId
+                ':key'=>$trustedKeyId,
+                ':rev'=>$d['owner_revision'],
+                ':raw'=>$decisionCanonical,
+                ':sig'=>$signatureB64
             ]);
             return $insert->fetchColumn()===false
                 ?'DENY_OWNER_GRANT_ALREADY_CONSUMED'
