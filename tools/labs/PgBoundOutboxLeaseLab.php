@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgSyntheticReplayGate.php';
+require_once __DIR__.'/PgCompanyDispatchGuardLab.php';
 require_once __DIR__.'/../../src/MockOrchestration/MockN8nOutboxContract.php';
 
 use ImagineAI\AutomationFirst\MockP7ToAutoIaAdapter;
@@ -29,11 +30,13 @@ final class PgBoundOutboxLeaseLab
     /**
      * @return array{decision:string,reason:string,event_ref:?string,attempt:int,lease_until:int,ai_calls:int,service_effects:int}
      */
-    public function reserve(string $tenant, string $worker, int $now, ?int $trustedRevision=null): array
+    public function reserve(string $tenant, string $worker, int $now, ?int $trustedRevision=null,
+        ?string $companyId=null,?int $companyRevision=null): array
     {
         if (!self::ref($tenant) || !self::ref($worker)
             || $now < 0 || $now > 4_102_444_700
-            || $this->db->inTransaction()) {
+            || $this->db->inTransaction()
+            ||!PgCompanyDispatchGuardLab::validContext($companyId,$companyRevision)) {
             return self::out('DENY', 'UNTRUSTED_SCOPE_OR_NESTED_TRANSACTION');
         }
         try {
@@ -46,6 +49,13 @@ final class PgBoundOutboxLeaseLab
                     $this->db->rollBack();
                     return self::out('DENY','TENANT_AUTHORITY_REVOKED_OR_STALE');
                 }
+            }
+            // P43: a company-bound event must be authorized at lease time,
+            // not just at the earlier stage. This lock serializes revocation.
+            if($companyId!==null && !(new PgCompanyDispatchGuardLab($this->db))
+                ->mappingCurrent($companyId,$tenant,$companyRevision)){
+                $this->db->rollBack();
+                return self::out('DENY','COMPANY_MAPPING_REVOKED_OR_STALE');
             }
             // Exhausted leases are retained as DEAD and never silently reset.
             $expire = $this->db->prepare(<<<'SQL'
@@ -93,6 +103,12 @@ SQL);
                 || !hash_equals($ledger['payload_hash'],$row['event_hash'])) {
                 $this->db->rollBack();
                 return self::out('DENY', 'CROSS_TABLE_BINDING_INVALID');
+            }
+
+            if($companyId!==null && !(new PgCompanyDispatchGuardLab($this->db))
+                ->eventMatches($companyId,$tenant,$row['event_ref'],$row['event_hash'])){
+                $this->db->rollBack();
+                return self::out('DENY','COMPANY_EVENT_TRANSPORT_PROOF_INVALID');
             }
 
             // Historical derivation is a consistency check only, NEVER a
