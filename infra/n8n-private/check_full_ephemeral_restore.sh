@@ -65,7 +65,19 @@ docker run --rm --network none \
   -v "${dst_project}_n8n_data:/output" -v "$work:/backup:ro" \
   --entrypoint /bin/sh "$N8N_PG_IMAGE" \
   -c 'cd /output && tar -xf /backup/n8n_data.tar' >/dev/null
-restore_dc up -d --wait --wait-timeout 180 n8n >/dev/null
+if ! restore_dc up -d --wait --wait-timeout 180 n8n >/dev/null; then
+  echo CENTRAL_AUTO_P12_RECOVERED_N8N_START_FAILED >&2
+  restore_dc logs --no-color --tail 80 n8n > "$work/start.log" 2>&1 || true
+  python3 - "$work/start.log" <<'PY'
+import sys,re
+for line in open(sys.argv[1],encoding='utf-8',errors='replace').read().splitlines():
+    if not any(term in line.lower() for term in ('error','fail','permission','mismatch','fatal','eacces','exit','database','config')):
+        continue
+    line=re.sub(r'(?i)(password|secret|token|authorization|api.key)(\s*[:=]\s*)\S+',r'\1\2[REDACTED]',line)
+    print('P12_DIAGNOSTIC '+line[:220],file=sys.stderr)
+PY
+  exit 1
+fi
 restore_dc exec -T n8n node -e "require('http').get('http://127.0.0.1:5678/healthz/readiness',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
 test "$(restore_dc exec -T n8n-db psql -X -qAt -U n8n_bootstrap_admin -d n8n -c 'SELECT count(*) FROM workflow_entity')" = 1
 # The recovered app must also use the same restricted DB role.
