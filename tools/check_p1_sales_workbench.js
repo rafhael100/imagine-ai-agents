@@ -46,6 +46,9 @@ for(const [id,value] of Object.entries({
  "draft-name":"Consultor Comercial","draft-template":"sales",
  "lead-select":"A",goal:"next","agent-select":"PRESET_SALES",
 })){get(id).value=value;}
+// The stub DOM has no HTML parser; seed the static text from the fixture.
+assert.match(html,/id="run-quota"[^>]*>0 de 8 execuções simuladas nesta sessão<\/p>/);
+get("run-quota").textContent="0 de 8 execuções simuladas nesta sessão";
 const navs=["overview","agents","simulate","approvals","integrations"].map(value=>{
  const element=new Element("button");element.dataset.nav=value;return element;
 });
