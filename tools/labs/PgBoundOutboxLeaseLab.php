@@ -5,6 +5,7 @@ namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgSyntheticReplayGate.php';
 require_once __DIR__.'/PgCompanyDispatchGuardLab.php';
+require_once __DIR__.'/PgOwnerExecutionGuardLab.php';
 require_once __DIR__.'/../../src/MockOrchestration/MockN8nOutboxContract.php';
 
 use ImagineAI\AutomationFirst\MockP7ToAutoIaAdapter;
@@ -31,12 +32,14 @@ final class PgBoundOutboxLeaseLab
      * @return array{decision:string,reason:string,event_ref:?string,attempt:int,lease_until:int,ai_calls:int,service_effects:int}
      */
     public function reserve(string $tenant, string $worker, int $now, ?int $trustedRevision=null,
-        ?string $companyId=null,?int $companyRevision=null): array
+        ?string $companyId=null,?int $companyRevision=null,
+        bool $ownerGrantRequired=false): array
     {
         if (!self::ref($tenant) || !self::ref($worker)
             || $now < 0 || $now > 4_102_444_700
             || $this->db->inTransaction()
-            ||!PgCompanyDispatchGuardLab::validContext($companyId,$companyRevision)) {
+            ||!PgCompanyDispatchGuardLab::validContext($companyId,$companyRevision)
+            ||($ownerGrantRequired && $companyId===null)) {
             return self::out('DENY', 'UNTRUSTED_SCOPE_OR_NESTED_TRANSACTION');
         }
         try {
@@ -109,6 +112,16 @@ SQL);
                 ->eventMatches($companyId,$tenant,$row['event_ref'],$row['event_hash'])){
                 $this->db->rollBack();
                 return self::out('DENY','COMPANY_EVENT_TRANSPORT_PROOF_INVALID');
+            }
+
+            // P45: a previously consumed P44 owner grant does not stay
+            // valid automatically after revocation or expiration. Verify
+            // the signed grant while lease locks are still held.
+            if($ownerGrantRequired && !(new PgOwnerExecutionGuardLab($this->db))
+                ->grantCurrent($companyId,$tenant,$row['event_ref'],
+                    $row['event_hash'],$now)){
+                $this->db->rollBack();
+                return self::out('DENY','OWNER_DECISION_REVOKED_EXPIRED_OR_INVALID');
             }
 
             // Historical derivation is a consistency check only, NEVER a
