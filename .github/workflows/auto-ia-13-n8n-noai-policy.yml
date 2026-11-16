@@ -1,0 +1,29 @@
+name: AUTO-IA-13 n8n NO_AI workflow admission policy (offline)
+on:
+  push:
+    branches:
+      - feat/auto-ia-13-n8n-zero-ai-policy-gate-2026-11-16
+  pull_request:
+    branches:
+      - review/auto-ia-rc03-p12-convergence-2026-11-16
+permissions:
+  contents: read
+jobs:
+  no-ai-policy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: Deny unknown n8n workflows, AI nodes, network calls and unreviewed Code
+        run: |
+          python3 -m py_compile tools/auto_ia/policy/check_n8n_zero_ai.py
+          python3 tools/auto_ia/policy/check_n8n_zero_ai.py
+      - name: Confirm deterministic Visitas Leads Clientes output
+        run: |
+          node tools/auto_ia/demo/check_n8n_noai_workflow.cjs
+      - name: Preserve RC03 production prohibition
+        run: |
+          python3 tools/auto_ia/convergence/check_rc03_release.py
+          echo "NO_GO n8n_not_installed=1 model_calls=0 credits_debited=0"
