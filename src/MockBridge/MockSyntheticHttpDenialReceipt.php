@@ -42,7 +42,14 @@ final class MockSyntheticHttpDenialReceipt
                 'content-type', 'cache-control', 'x-robots-tag',
                 'x-content-type-options',
             ]
-                && $headers['cache-control'] === 'private, no-store, max-age=0'
+                && in_array(
+                    $headers['cache-control'],
+                    [
+                        'private, no-store, max-age=0',
+                        'max-age=0, no-store, private',
+                    ],
+                    true
+                )
                 && $headers['x-robots-tag'] === 'noindex, nofollow, noarchive'
                 && $headers['x-content-type-options'] === 'nosniff';
             if (!$f246 && !$f248) {
