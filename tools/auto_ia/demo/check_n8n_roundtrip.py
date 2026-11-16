@@ -94,7 +94,7 @@ def main():
     source=json.loads(source_path.read_text(encoding="utf-8"))
     if sys.argv[2]=="--self-test": raise Denied("BAD_SELF_TEST_PATH")
     exported=json.loads(exported_path.read_text(encoding="utf-8"))
-    if exported.get("nodes") is None and isinstance(exported,list) and len(exported)==1:
+    if isinstance(exported,list) and len(exported)==1:
         exported=exported[0]
     check=compare(source,exported)
     check["negative_mutations_denied"]=negative_tests(source)
