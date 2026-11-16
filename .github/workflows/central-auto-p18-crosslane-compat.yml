@@ -24,6 +24,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m py_compile tools/auto_ia/central_transport/check_crosslane_merge_tree.py
+          export PYTHONPYCACHEPREFIX="$RUNNER_TEMP/central-auto-p18-pycache"
           before="$(git rev-parse HEAD)"
           python3 tools/auto_ia/central_transport/check_crosslane_merge_tree.py
           test "$(git rev-parse HEAD)" = "$before"
@@ -40,6 +41,7 @@ jobs:
       - name: Rehearse P17 identity/P4 four-file resolution and P60 addition in runner only
         run: |
           set -euo pipefail
+          export PYTHONPYCACHEPREFIX="$RUNNER_TEMP/central-auto-p18-pycache"
           before="$(git rev-parse HEAD)"
           python3 -m py_compile tools/auto_ia/central_transport/rehearse_identity_merge_tree.py
           python3 tools/auto_ia/central_transport/rehearse_identity_merge_tree.py
