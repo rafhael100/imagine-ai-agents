@@ -25,7 +25,7 @@ final class PgBoundOutboxAckLab
 
     /** @return array{decision:string,reason:string,ai_calls:int,service_effects:int} */
     public function acknowledge(string $tenant,string $eventRef,string $worker,
-        int $attempt,int $now):array
+        int $attempt,int $now,?int $trustedRevision=null):array
     {
         if(!self::ref($tenant)||!self::ref($eventRef)||!self::ref($worker)
             ||$attempt<1||$attempt>3||$now<0||$now>4_102_444_800
@@ -34,6 +34,14 @@ final class PgBoundOutboxAckLab
         }
         try{
             $this->db->beginTransaction();
+            // P34: hold shared authority lock through ACK commit. Revocation
+            // waits; after it commits the stale revision cannot acknowledge.
+            if($trustedRevision!==null){
+                if($trustedRevision<1 || !$this->authorityCurrent($tenant,$trustedRevision)){
+                    $this->db->rollBack();
+                    return self::deny('TENANT_AUTHORITY_REVOKED_OR_STALE');
+                }
+            }
             $select=$this->db->prepare(<<<'SQL'
 SELECT state,attempts,lease_owner,lease_expires,canonical_event,event_hash
  FROM public.aia_lab_n8n_outbox_p6
@@ -111,6 +119,19 @@ SQL);
             if($this->db->inTransaction())$this->db->rollBack();
             return self::deny('DB_UNAVAILABLE_OR_TRANSACTION_FAILED');
         }
+    }
+
+    private function authorityCurrent(string $tenant,int $revision):bool
+    {
+        $stmt=$this->db->prepare(<<<'SQL'
+SELECT active,revision
+ FROM aia_p34_lab.tenant_policy
+ WHERE tenant_ref=:tenant FOR SHARE
+SQL);
+        $stmt->execute([':tenant'=>$tenant]);
+        $row=$stmt->fetch(PDO::FETCH_ASSOC);
+        return is_array($row) && in_array($row['active'],[true,1,'1','t'],true)
+            && (int)$row['revision']===$revision;
     }
 
     private static function ref(string $value):bool
