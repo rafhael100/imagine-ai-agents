@@ -79,7 +79,7 @@ try {
         WHERE tenant_ref='SYNTHETIC_TENANT_A'
         AND event_ref='SYNTHETIC_EVENT_01' FOR UPDATE")->fetchColumn();
     okay($locked==='SYNTHETIC_EVENT_01','locked first event');
-    $second=$other->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_02',$second['attempt'],$now);
+    $second=$other->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_02',$now);
     okay(($second['event_ref']??null)==='SYNTHETIC_EVENT_02','skip locked chooses second');
     okay(($second['attempt']??null)===1,'first attempt');
     $db->commit();
@@ -96,7 +96,7 @@ try {
     $one=$out->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_01',$now);
     okay(($one['event_ref']??null)==='SYNTHETIC_EVENT_01','first event claimed');
     okay($other->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_02',$now+10)===null,'live lease cannot be stolen');
-    $two=$other->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_02',$second['attempt'],$now+60);
+    $two=$other->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_02',$now+60);
     okay(($two['attempt']??null)===2,'retry after expiry');
     okay($out->acknowledge('SYNTHETIC_TENANT_A','SYNTHETIC_EVENT_01','SYNTHETIC_WORKER_01',$one['attempt'],$now+61)===false,'old worker denied');
     $three=$out->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_01',$now+120);
