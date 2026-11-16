@@ -22,6 +22,9 @@ from pathlib import Path
 
 from material_preflight import fingerprint
 from seal_backup import COMPONENTS, Denied, seal, verify_decrypted
+from signed_receipt_p23 import (Rejected as SignedRejected,
+    sign as sign_receipt,verify as verify_receipt,
+    public_fingerprint as signer_public_fingerprint)
 
 REPO="rafhael100/imagine-ai-agents"
 TABLE="p21_synthetic_records"
@@ -209,6 +212,31 @@ def main()->dict:
         shutil.copy2(outfile,copy)
         require(sha256(copy.read_bytes())==result["ciphertext_sha256"],
                 "COPY_SHA_MISMATCH")
+        # P23: cryptographic authorship is a SEPARATE Ed25519 proof.
+        # CI signer is synthetic; the public fingerprint is pinned explicitly.
+        signer_priv=root/"synthetic-custodian.key"
+        signer_pub=root/"synthetic-custodian.pub"
+        safe_run(["openssl","genpkey","-algorithm","Ed25519",
+                  "-out",str(signer_priv)])
+        signer_priv.chmod(0o600)
+        safe_run(["openssl","pkey","-in",str(signer_priv),
+                  "-pubout","-out",str(signer_pub)])
+        receipt_json=root/"signed-receipt.json"
+        receipt_sig=root/"signed-receipt.sig"
+        issued=int(__import__("time").time())
+        nonce="SYNTHETIC_RECEIPT_"+os.urandom(16).hex().upper()
+        sign_receipt(outfile,signer_priv,signer_pub,receipt_json,
+                     receipt_sig,now=issued,nonce=nonce)
+        verified_signature=verify_receipt(
+            copy,signer_pub,receipt_json,receipt_sig,
+            pinned_fingerprint=signer_public_fingerprint(signer_pub),
+            now=issued+1)
+        require(verified_signature["ed25519_signature_valid"] is True and
+                verified_signature["go_for_installation"] is False and
+                verified_signature["issuer_credential_custody_verified"] is False,
+                "SIGNED_CUSTODIAN_PROOF_FALSE_GO")
+        print("P23_STAGE_SIGNED_RECEIPT_PASS",flush=True)
+
         negative_wrong=not decrypt(copy,wrong_cert,wrong_key,
                                    quarantine/"wrong-key.tar")
         require(negative_wrong,"WRONG_DECRYPTION_KEY_MUST_DENY")
@@ -220,6 +248,17 @@ def main()->dict:
         negative_tamper=not decrypt(altered,cert,key,
                                    quarantine/"altered.tar")
         require(negative_tamper,"GCM_TAMPER_MUST_DENY")
+        # Reject an altered copy at the signed-receipt gate BEFORE decrypt.
+        try:
+            verify_receipt(altered,signer_pub,receipt_json,receipt_sig,
+                pinned_fingerprint=signer_public_fingerprint(signer_pub),
+                now=issued+1)
+        except SignedRejected:
+            signed_ciphertext_tamper_denied=True
+        else:
+            signed_ciphertext_tamper_denied=False
+        require(signed_ciphertext_tamper_denied,
+                "SIGNED_PACKAGE_TAMPER_ACCEPTED")
         print("P21_STAGE_NEGATIVE_CMS_PASS",flush=True)
         clear=quarantine/"verified-package.tar"
         require(decrypt(copy,cert,key,clear),"CMS_AUTH_DECRYPT_FAILED")
@@ -259,6 +298,9 @@ def main()->dict:
            "synthetic_volume_restored":True,
            "synthetic_key_restored":True,
            "cms_gcm_copy_hash_match":True,
+           "synthetic_ed25519_receipt_verified_before_decryption":True,
+           "signed_ciphertext_tamper_denied":signed_ciphertext_tamper_denied,
+           "real_signer_custody_verified":False,
            "wrong_decryption_key_denied":negative_wrong,
            "altered_ciphertext_denied":negative_tamper,
            "no_ai_credits":True,
@@ -274,7 +316,7 @@ if __name__=="__main__":
     try:
         print(json.dumps(main(),sort_keys=True))
         print("CENTRAL_AUTO_P21_CMS_PG_RESTORE_PASS NO_GO no_vps=1 no_paid_ai=1")
-    except (Failure,Denied,OSError,ValueError,tarfile.TarError,
+    except (Failure,Denied,SignedRejected,OSError,ValueError,tarfile.TarError,
             subprocess.SubprocessError,AssertionError) as exc:
         # Important: no command stdout/stderr, cryptographic material,
         # database rows, names or secrets in public CI logs.
