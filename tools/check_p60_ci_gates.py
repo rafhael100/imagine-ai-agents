@@ -44,6 +44,17 @@ def check(text:str)->bool:
         "id-token: write","packages: write",
     )):
         return False
+    # Every checkout occurrence must be fixed to the reviewed SHA, not
+    # merely one matching checkout elsewhere in the same workflow.
+    import re
+    pins=re.findall(r"uses:\\s*actions/checkout@([^\\s]+)",text)
+    if not pins or any(
+        pin!="3d3c42e5aac5ba805825da76410c181273ba90b1"
+        for pin in pins
+    ):
+        return False
+    if "persist-credentials: true" in text:
+        return False
     if text.count("    runs-on: ubuntu-24.04")!=3:
         return False
     return True
