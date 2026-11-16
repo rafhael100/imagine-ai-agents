@@ -119,8 +119,9 @@ function pipeline(visits,leadRate,closeRate){
  return Object.freeze({visits:Math.floor(visits),leads:leads,clients:Math.floor(leads*closeRate/100)});
 }
 function advice(leadId,goal){
+ if(typeof leadId!=="string" || !Object.prototype.hasOwnProperty.call(LAB_LEADS,leadId)
+    || !["next","summary"].includes(goal)){return null;}
  const lead=LAB_LEADS[leadId];
- if(!lead || !["next","summary"].includes(goal)){return null;}
  const next={
    novo:"Verificar aderência da oportunidade e elaborar uma abordagem inicial para revisão humana.",
    qualificado:"Preparar um diagnóstico de necessidades e propor uma conversa comercial, sujeita à aprovação.",
