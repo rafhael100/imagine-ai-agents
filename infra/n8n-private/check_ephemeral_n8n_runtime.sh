@@ -39,7 +39,8 @@ container="$(docker run -d --rm --network none \
   -e NODE_OPTIONS=--max-old-space-size=3072 \
   -e N8N_RUNNERS_ENABLED=true \
   -e N8N_RUNNERS_MODE=internal \
-  "$image" /bin/sh -c 'sleep 1200')"
+  --entrypoint /bin/sh \
+  "$image" -c 'exec sleep 1200')"
 echo "AUTO_IA_14_CONTAINER_ISOLATED"
 docker inspect "$container" --format '{{.HostConfig.NetworkMode}}' | grep -qx none
 python3 - "$container" <<'PY'
