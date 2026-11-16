@@ -77,6 +77,11 @@ for name in \
   test_f226_signed_fixture.py \
   test_f227_signed_fixture.py \
   test_f228_pg_lab_reciprocal.py \
+  test_f229_tenant_replay_matrix.py \
+  test_f230_response_seal.py \
+  test_f231_service_identity.py \
+  test_f236_integrity_aggregation.py \
+  test_f240_http_boundary.py \
   test_evid52_postmerge.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
@@ -128,6 +133,28 @@ php -l tools/check_f221_canonical_exchange.php
 php tools/check_f221_canonical_exchange.php
 php -l tools/check_f227_signed_fixture.php
 php tools/check_f227_signed_fixture.php
+php -l tools/check_f231_ed25519_preflight.php
+php tools/check_f231_ed25519_preflight.php
+php -l src/MockBridge/MockSyntheticScopePreflight.php
+php -l tools/check_f232_scope_preflight.php
+php tools/check_f232_scope_preflight.php
+php -l src/MockBridge/MockSharedNonceLedger.php
+php -l tools/check_f233_shared_nonce.php
+php tools/check_f233_shared_nonce.php
+php -l tools/labs/MockFileAtomicNonceLab.php
+php -l tools/f234_nonce_worker.php
+python3 tools/check_f234_multiprocess.py
+php -l src/MockBridge/MockSyntheticEvidenceGate.php
+php -l tools/check_f235_composed_gate.php
+php tools/check_f235_composed_gate.php
+php -l src/MockBridge/MockSyntheticHttpEnvelope.php
+php -l tools/check_f238_http_envelope.php
+php tools/check_f238_http_envelope.php
+php -l src/MockBridge/MockSyntheticHttpDenialReceipt.php
+php -l tools/check_f239_denial_receipt.php
+php tools/check_f239_denial_receipt.php
+php -l tools/check_f240_http_cycle.php
+php tools/check_f240_http_cycle.php
 bash tools/validate_ft01_offline.sh
 
 echo 'R01_OFFLINE_GATE_PASS operational_decision=NO_GO'

@@ -1,0 +1,34 @@
+name: F233 synthetic replay ledger (NO-GO)
+
+on:
+  push:
+    branches:
+      - dev/f233-shared-nonce-contract-offline-2026-11-15
+  pull_request:
+    branches:
+      - dev/f232-synthetic-scope-deny-first-2026-11-15
+
+permissions:
+  contents: read
+
+jobs:
+  replay-offline:
+    if: ${{ github.event.repository.private == false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - name: Checkout pinned action, no writable credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Run F232 and F233 synthetic-only checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l src/MockBridge/MockSyntheticScopePreflight.php
+          php -l tools/check_f232_scope_preflight.php
+          php tools/check_f232_scope_preflight.php
+          php -l src/MockBridge/MockSharedNonceLedger.php
+          php -l tools/check_f233_shared_nonce.php
+          php tools/check_f233_shared_nonce.php
+          echo 'NO_GO: in-process-only replay cannot authorize operational CRM' >> "$GITHUB_STEP_SUMMARY"
