@@ -20,6 +20,8 @@ jobs:
         run: |
           python3 -m py_compile tools/auto_ia/demo/verify_n8n_execution.py
           python3 tools/auto_ia/demo/verify_n8n_execution.py --self-test
+          python3 -m py_compile tools/auto_ia/demo/check_n8n_roundtrip.py
+          python3 tools/auto_ia/demo/check_n8n_roundtrip.py tools/auto_ia/demo/n8n-noai-demo.workflow.json tools/auto_ia/demo/n8n-noai-demo.workflow.json
           python3 tools/auto_ia/policy/check_n8n_zero_ai.py
       - name: Run official pinned n8n 2.47.7 no network or ports, validate output
         run: |
