@@ -49,11 +49,11 @@ function emitCase(string $name, array $e, string $expected, array $secrets): voi
     }
     $args=array_map('quoteSql',array_values($e));
     $call='auto_ia_lab.receive_signed_no_ai('.implode(',',$args).')';
-    echo "DO \\$\\$\n";
+    echo 'DO $$' . "\n";
     echo "DECLARE result text;\nBEGIN\n";
     echo "  result:=".$call.";\n";
     echo "  IF result<>'".$expected."' THEN RAISE EXCEPTION 'AUTO_IA_10_".$name." got % expected ".$expected."',result; END IF;\n";
-    echo "END \\$\\$;\n";
+    echo 'END $$;' . "\n";
 }
 echo "\\set ON_ERROR_STOP on\nSET ROLE aia_lab_tenant_a;\n";
 $good=signFixture($original,$secrets);
