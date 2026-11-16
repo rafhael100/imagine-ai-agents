@@ -26,7 +26,9 @@ final class PgBoundOutboxAckLab
     /** @return array{decision:string,reason:string,ai_calls:int,service_effects:int} */
     public function acknowledge(string $tenant,string $eventRef,string $worker,
         int $attempt,int $now,?int $trustedRevision=null,
-        ?string $expectedSignedPayloadHash=null):array
+        ?string $expectedSignedPayloadHash=null,
+        ?string $trustedExecutorKeyId=null,
+        ?string $expectedExecutorKeyFingerprint=null):array
     {
         if(!self::ref($tenant)||!self::ref($eventRef)||!self::ref($worker)
             ||$attempt<1||$attempt>3||$now<0||$now>4_102_444_800
@@ -37,6 +39,13 @@ final class PgBoundOutboxAckLab
             && (preg_match('/\A[a-f0-9]{64}\z/D',$expectedSignedPayloadHash)!==1)){
             return self::deny('SIGNED_PAYLOAD_HASH_INVALID');
         }
+        if(($trustedExecutorKeyId===null)!==($expectedExecutorKeyFingerprint===null)
+            ||($trustedExecutorKeyId!==null
+                && (!self::ref($trustedExecutorKeyId)
+                    ||preg_match('/\A[a-f0-9]{64}\z/D',
+                        $expectedExecutorKeyFingerprint)!==1))){
+            return self::deny('SIGNER_KEY_ARGUMENTS_INVALID');
+        }
         try{
             $this->db->beginTransaction();
             // P34: hold shared authority lock through ACK commit. Revocation
@@ -45,6 +54,16 @@ final class PgBoundOutboxAckLab
                 if($trustedRevision<1 || !$this->authorityCurrent($tenant,$trustedRevision)){
                     $this->db->rollBack();
                     return self::deny('TENANT_AUTHORITY_REVOKED_OR_STALE');
+                }
+            }
+            // P37: an external key lookup is not sufficient. Lock the
+            // exact tenant-scoped signer key and compare its fingerprint
+            // INSIDE the ACK transaction, serializing concurrent revocation.
+            if($trustedExecutorKeyId!==null){
+                if(!$this->signerKeyCurrent(
+                    $tenant,$trustedExecutorKeyId,$expectedExecutorKeyFingerprint)){
+                    $this->db->rollBack();
+                    return self::deny('EXECUTOR_SIGNER_REVOKED_OR_MISMATCH');
                 }
             }
             $select=$this->db->prepare(<<<'SQL'
@@ -133,6 +152,23 @@ SQL);
             if($this->db->inTransaction())$this->db->rollBack();
             return self::deny('DB_UNAVAILABLE_OR_TRANSACTION_FAILED');
         }
+    }
+
+    private function signerKeyCurrent(
+        string $tenant,string $keyId,string $fingerprint
+    ):bool {
+        $stmt=$this->db->prepare(<<<'SQL'
+SELECT active,key_fingerprint
+ FROM aia_p37_lab.executor_keys
+ WHERE tenant_ref=:tenant AND key_id=:key
+ FOR SHARE
+SQL);
+        $stmt->execute([':tenant'=>$tenant,':key'=>$keyId]);
+        $r=$stmt->fetch(PDO::FETCH_ASSOC);
+        return is_array($r)
+            && in_array($r['active'],[true,1,'1','t'],true)
+            && is_string($r['key_fingerprint'])
+            && hash_equals($fingerprint,$r['key_fingerprint']);
     }
 
     private function authorityCurrent(string $tenant,int $revision):bool
