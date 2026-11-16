@@ -1,0 +1,177 @@
+{
+  "name": "Imagine — Funil nativo sem Code e sem IA (laboratorio)",
+  "nodes": [
+    {
+      "id": "e9740209-445e-44d2-90f1-18f1c20d5701",
+      "name": "Disparo manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "e2924708-8a8b-4e5b-8e12-f1d03a172107",
+      "name": "Entradas ficticias",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0b949035-28da-4c60-a454-357e9fabae80",
+              "name": "weekly_visits",
+              "value": 120,
+              "type": "number"
+            },
+            {
+              "id": "510c3673-a8bf-4e7c-bf17-97d2fb12136d",
+              "name": "lead_rate_percent",
+              "value": 10,
+              "type": "number"
+            },
+            {
+              "id": "24b841be-0051-4684-a932-5e1b2e993edc",
+              "name": "client_rate_percent",
+              "value": 20,
+              "type": "number"
+            },
+            {
+              "id": "018ddc9a-46d1-47d7-bae3-90174b7a8344",
+              "name": "tenant_ref",
+              "value": "SYNTHETIC_TENANT_DEMO",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      }
+    },
+    {
+      "id": "d15c971a-e353-4cfa-acb6-bb41cfa958bf",
+      "name": "Projetar leads e clientes",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        750,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "54b22f30-2c69-44c9-996c-ebc907715a99",
+              "name": "schema",
+              "value": "AUTO_IA_NATIVE_NO_AI_V1",
+              "type": "string"
+            },
+            {
+              "id": "c743a904-a7c7-4834-9f19-bc5a66e1f4ab",
+              "name": "tenant_ref",
+              "value": "={{ $json.tenant_ref }}",
+              "type": "string"
+            },
+            {
+              "id": "f5e14a77-e988-40df-8134-a9698279a0b9",
+              "name": "visits",
+              "value": "={{ $json.weekly_visits }}",
+              "type": "number"
+            },
+            {
+              "id": "17a0be43-27d6-45d1-8b90-ab5a22cb8c56",
+              "name": "projected_leads",
+              "value": "={{ Math.round($json.weekly_visits * $json.lead_rate_percent / 100) }}",
+              "type": "number"
+            },
+            {
+              "id": "a2c0ecb1-b343-4f27-9978-5a86a1e2b2b4",
+              "name": "projected_customers",
+              "value": "={{ Math.round(Math.round($json.weekly_visits * $json.lead_rate_percent / 100) * $json.client_rate_percent / 100) }}",
+              "type": "number"
+            },
+            {
+              "id": "3a8f969c-c1c8-4982-be72-8b7c84aa6712",
+              "name": "decision",
+              "value": "NO_AI",
+              "type": "string"
+            },
+            {
+              "id": "10074743-548c-4a98-9eb0-900b7f6979e9",
+              "name": "ai_api_calls",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "44e66cdc-ece8-421c-83d6-9d7a4fa38d0c",
+              "name": "ai_tokens",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "5acc839b-407a-4ce6-9cf2-97ecf6378dc0",
+              "name": "commercial_credits_debited",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "c2d0f10c-e3e8-4b46-a060-20a5178c44be",
+              "name": "operational_authorization",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "fa6512cd-bc5a-453f-8602-5f837bc920ab",
+              "name": "mode",
+              "value": "SYNTHETIC_MANUAL_ONLY",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Disparo manual": {
+      "main": [
+        [
+          {
+            "node": "Entradas ficticias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entradas ficticias": {
+      "main": [
+        [
+          {
+            "node": "Projetar leads e clientes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}
