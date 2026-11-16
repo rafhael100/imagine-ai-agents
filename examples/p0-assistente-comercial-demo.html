@@ -63,7 +63,19 @@ main{min-width:0}.top{display:flex;justify-content:space-between;align-items:cen
         <div class="listitem"><div><h3>Analista de Leads</h3><p>Organiza oportunidades e identifica prioridades em cenários de teste.</p></div><span class="status neutral">Prévia</span></div>
         <div class="listitem"><div><h3>Assistente de Automação</h3><p>Fluxos futuros do n8n sujeitos a permissões e aprovação humana.</p></div><span class="status neutral">Bloqueado</span></div>
       </div>
-      <div class="controls"><button class="btn" type="button" data-switch="simulate">Abrir assistente comercial</button></div>
+      <div class="card" style="margin-top:17px">
+        <h2>Configurar agente de laboratório</h2>
+        <p class="muted">Crie até cinco rascunhos somente nesta aba. Os rascunhos não são contas, não são publicados e não recebem permissões de negócio.</p>
+        <div class="formgrid">
+          <div><label for="draft-name">Nome ilustrativo do agente</label><input id="draft-name" type="text" maxlength="40" autocomplete="off" placeholder="Ex.: Consultor Comercial" value="Consultor Comercial"></div>
+          <div><label for="draft-template">Modelo de laboratório</label><select id="draft-template"><option value="sales">Assistente Comercial</option><option value="analysis">Análise de leads (resumo)</option></select></div>
+          <div><label for="draft-purpose">Finalidade</label><input id="draft-purpose" type="text" value="Sugestões comerciais, sem ações externas" readonly></div>
+        </div>
+        <div class="controls"><button class="btn" id="save-draft" type="button">Criar rascunho</button><button class="btn secondary" type="button" data-switch="simulate">Testar agente</button></div>
+        <p class="muted" id="draft-feedback" role="status" aria-live="polite">Nenhum rascunho criado.</p>
+        <div class="list" id="draft-list" aria-label="Rascunhos locais"></div>
+      </div>
+      <div class="notice">Criação de agentes persistentes, modelos reais, faturamento e integração com CRM/n8n estão desativados neste protótipo.</div>
       <div class="notice">Criação de agentes persistentes, modelos reais, faturamento e integração com CRM/n8n estão desativados neste protótipo.</div>
     </section>
     <section class="page" id="page-simulate" hidden>
@@ -71,6 +83,8 @@ main{min-width:0}.top{display:flex;justify-content:space-between;align-items:cen
       <div class="grid two">
         <div class="card">
           <h2>Preparar execução</h2>
+          <label for="agent-select">Agente de laboratório</label><select id="agent-select"><option value="PRESET_SALES">Assistente Comercial — padrão</option></select>
+          <p class="muted" id="run-quota" aria-live="polite">0 de 8 execuções simuladas nesta sessão</p>
           <label for="lead-select">Lead de laboratório</label>
           <select id="lead-select"><option value="A">LEAD_TESTE_ALFA — Novo</option><option value="B">LEAD_TESTE_BETA — Qualificado</option><option value="C">LEAD_TESTE_GAMA — Proposta</option></select>
           <label for="goal">Objetivo</label>
@@ -130,9 +144,44 @@ function advice(leadId,goal){
  return Object.freeze({ref:lead.ref,stage:lead.stage,
    text:goal==="summary"?"Estágio atual: "+lead.stage+". Prioridade: acompanhamento supervisionado.":next[lead.stage]});
 }
+
+const WORKBENCH_MAX_DRAFTS=5, WORKBENCH_MAX_RUNS=8;
+const WORKBENCH_TEMPLATES=Object.freeze(["sales","analysis"]);
+/** Immutable result; existing array is never mutated on failed validation. */
+function createDraft(existing,name,template){
+ if(!Array.isArray(existing) || existing.length>=WORKBENCH_MAX_DRAFTS ||
+    typeof name!=="string" || typeof template!=="string" ||
+    !WORKBENCH_TEMPLATES.includes(template)){return null;}
+ const clean=name.normalize("NFC").trim().replace(/\s+/g," ");
+ if(clean.length<3 || clean.length>40 || !/^[\p{L}\p{N}][\p{L}\p{N} ._-]{2,39}$/u.test(clean) ||
+    existing.some(x=>x.name.toLocaleLowerCase("pt-BR")===clean.toLocaleLowerCase("pt-BR"))){
+   return null;
+ }
+ const next={id:"SYNTHETIC_AGENT_"+String(existing.length+1).padStart(2,"0"),
+   name:clean,template};
+ return [...existing,Object.freeze(next)];
+}
+/** A laboratory quota is a UI limitation, never an authority control. */
+function simulatedRun(drafts,selected,lead,goal,used){
+ if(!Number.isInteger(used) || used<0 || used>=WORKBENCH_MAX_RUNS ||
+    typeof selected!=="string" || !Array.isArray(drafts)){return null;}
+ let template="sales";
+ if(selected!=="PRESET_SALES"){
+   const match=drafts.find(x=>x.id===selected);
+   if(!match || !WORKBENCH_TEMPLATES.includes(match.template)){return null;}
+   template=match.template;
+ }
+ const effectiveGoal=template==="analysis"?"summary":goal;
+ const suggestion=advice(lead,effectiveGoal);
+ if(!suggestion){return null;}
+ return Object.freeze({suggestion,used:used+1,
+   requiresReview:effectiveGoal==="next",template});
+}
 // UI BOOT — all interactions are strictly local and in-memory.
 const $=id=>document.getElementById(id);
 const log=[];
+let drafts=[];
+let sessionRuns=0;
 const approvals=[
   {id:"01",text:"Revisar abordagem para LEAD_TESTE_ALFA",state:"PENDENTE"},
   {id:"02",text:"Revisar acompanhamento de LEAD_TESTE_GAMA",state:"PENDENTE"}
@@ -177,12 +226,66 @@ function recalc(){
  $("funnel-explanation").textContent="Hipótese calculada localmente: "+fmt.format(result.visits)+" visitas podem gerar "+fmt.format(result.leads)+" leads e "+fmt.format(result.clients)+" clientes, conforme as taxas escolhidas.";
 }
 ["visits","lead-rate","close-rate"].forEach(id=>$(id).addEventListener("input",recalc));
+function renderDrafts(){
+ const list=$("draft-list"),selector=$("agent-select");
+ const selected=selector.value || "PRESET_SALES";
+ list.replaceChildren();
+ selector.replaceChildren();
+ const standard=document.createElement("option");
+ standard.value="PRESET_SALES";
+ standard.textContent="Assistente Comercial — padrão";
+ selector.append(standard);
+ drafts.forEach(item=>{
+   const row=document.createElement("div");row.className="listitem";
+   const info=document.createElement("div");
+   const heading=document.createElement("h3");
+   heading.textContent=item.name;
+   const desc=document.createElement("p");
+   desc.textContent=(item.template==="analysis"?"Análise de leads":"Assistente Comercial")+" · somente nesta sessão";
+   info.append(heading,desc);row.append(info);
+   const badge=document.createElement("span");badge.className="status neutral";
+   badge.textContent="Rascunho local";
+   row.append(badge);list.append(row);
+   const option=document.createElement("option");
+   option.value=item.id;option.textContent=item.name+" — rascunho";
+   selector.append(option);
+ });
+ if([...selector.options].some(x=>x.value===selected)){selector.value=selected;}
+ $("save-draft").disabled=drafts.length>=WORKBENCH_MAX_DRAFTS;
+}
+$("save-draft").addEventListener("click",()=>{
+ const updated=createDraft(drafts,$("draft-name").value,$("draft-template").value);
+ if(updated===null){
+   $("draft-feedback").textContent="Rascunho recusado: nome inválido ou duplicado, modelo não permitido ou limite de 5 agentes atingido.";
+   return;
+ }
+ drafts=updated;
+ renderDrafts();
+ const latest=drafts[drafts.length-1];
+ $("agent-select").value=latest.id;
+ $("draft-feedback").textContent=drafts.length+" de 5 rascunhos locais criados. Abra Simulação para testar.";
+ audit("Rascunho local "+latest.id+" criado; nenhum serviço ativado.");
+});
 $("run-demo").addEventListener("click",()=>{
- const result=advice($("lead-select").value,$("goal").value);
- if(!result){$("run-result").hidden=true;return;}
- $("run-text").textContent=result.ref+" · "+result.text;
+ const result=simulatedRun(drafts,$("agent-select").value,$("lead-select").value,$("goal").value,sessionRuns);
+ if(!result){
+   $("run-text").textContent="Simulação recusada: verifique agente, entrada ou limite de oito execuções locais.";
+   $("run-result").hidden=false;
+   audit("Tentativa de simulação negada; sem efeitos externos.");
+   return;
+ }
+ sessionRuns=result.used;
+ $("run-text").textContent=result.suggestion.ref+" · "+result.suggestion.text;
  $("run-result").hidden=false;
- audit("Simulação comercial concluída para "+result.ref+" (sem ações externas).");
+ $("run-quota").textContent=sessionRuns+" de 8 execuções simuladas nesta sessão";
+ $("run-demo").disabled=sessionRuns>=WORKBENCH_MAX_RUNS;
+ if(result.requiresReview){
+   approvals.unshift({id:"SYNTHETIC_APPROVAL_"+String(sessionRuns).padStart(2,"0"),
+     text:"Revisar sugestão para "+result.suggestion.ref,state:"PENDENTE"});
+   renderApprovals();
+ }
+ audit("Simulação comercial "+sessionRuns+" concluída para "+result.suggestion.ref+
+   " · "+(result.requiresReview?"revisão humana pendente":"resumo sem aprovação")+" · sem ações externas.");
 });
 $("clear-result").addEventListener("click",()=>{$("run-result").hidden=true;});
 function renderApprovals(){
@@ -215,6 +318,7 @@ function renderApprovals(){
  });
 }
 recalc();
+renderDrafts();
 renderApprovals();
 </script>
 </body>
