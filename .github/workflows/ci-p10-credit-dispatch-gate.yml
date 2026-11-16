@@ -1,0 +1,72 @@
+name: Agents P10 - dispatch-state gate before AI credit charges
+
+on:
+  push:
+    branches:
+      - dev/aia-p10-credit-dispatch-gate-2026-11-16
+  pull_request:
+    branches:
+      - dev/aia-p9-fenced-n8n-ack-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  p10-credit-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      AIA_P4_PG_LAB: 'true'
+      AIA_P6_PG_LAB: 'true'
+      AIA_P8_PG_LAB: 'true'
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: imagine_agents_ci
+      DB_USERNAME: postgres
+      DB_PASSWORD: ci-only-password
+    steps:
+      - name: Read-only checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: PHP 8.4 and PG16
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_pgsql, pgsql
+          coverage: none
+      - name: Validate disposable target and code syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "rafhael100/imagine-ai-agents"
+          test "$DB_HOST" = "127.0.0.1"
+          test "$DB_DATABASE" = "imagine_agents_ci"
+          php -l tools/labs/PgAiCreditReservationLab.php
+          php -l tools/check_p8_credit_reservation.php
+      - name: Verify no unauthorized charge before dispatch
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p5_ai_routing.php
+          php tools/check_p8_credit_reservation.php
+      - name: Verify no stale n8n ACK and bounded quota
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p6_n8n_outbox.php
+          php tools/check_p4_pg_workbench.php
+          echo 'P10_DISPATCH_GATE_VALIDATED no_charge_before_dispatch=true timeout_hold=true terminal_replay_denied=true stale_ack_denied=true provider_calls=0 NO_GO' >> "$GITHUB_STEP_SUMMARY"

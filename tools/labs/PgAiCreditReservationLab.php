@@ -52,7 +52,7 @@ final readonly class PgAiCreditReservationLab
             fingerprint char(64) NOT NULL,
             estimated integer NOT NULL CHECK (estimated BETWEEN 1 AND 5000),
             state varchar(18) NOT NULL CHECK (state IN (
-                \'RESERVED\',\'UNCERTAIN\',\'FINALIZED\',\'CANCELED\',\'DISPUTED\'
+                \'RESERVED\',\'DISPATCHED\',\'UNCERTAIN\',\'FINALIZED\',\'CANCELED\',\'DISPUTED\'
             )),
             observed integer,
             PRIMARY KEY (tenant_ref,request_ref)
@@ -105,7 +105,9 @@ final readonly class PgAiCreditReservationLab
             $existing=$stmt->fetch(PDO::FETCH_ASSOC);
             if (is_array($existing)) {
                 if (!hash_equals($existing['fingerprint'],$fingerprint)
-                    || $existing['state']==='DISPUTED') {
+                    // Replays after dispatch/timeout/finalization/cancel are
+                    // never eligible for another dispatch or reservation.
+                    || $existing['state']!=='RESERVED') {
                     $this->db->rollBack();
                     return null;
                 }
@@ -135,10 +137,20 @@ final readonly class PgAiCreditReservationLab
         }
     }
 
+    /**
+     * Mark the synthetic outbound handoff BEFORE a remote side effect could
+     * occur. This is an in-process state marker, NOT a provider call/proof.
+     * Once dispatched, neither replay nor pre-dispatch cancellation is allowed.
+     */
+    public function markDispatched(string $tenant,string $request): bool
+    {
+        return $this->transitionOnly($tenant,$request,'RESERVED','DISPATCHED');
+    }
+
     /** A timeout or unknown provider result MUST keep the whole hold. */
     public function markUnknown(string $tenant,string $request): bool
     {
-        return $this->transitionOnly($tenant,$request,'RESERVED','UNCERTAIN');
+        return $this->transitionOnly($tenant,$request,'DISPATCHED','UNCERTAIN');
     }
 
     /**
@@ -196,7 +208,7 @@ final readonly class PgAiCreditReservationLab
                 $this->db->commit();
                 return false;
             }
-            if (!in_array($item['state'],['RESERVED','UNCERTAIN'],true)) {
+            if (!in_array($item['state'],['DISPATCHED','UNCERTAIN'],true)) {
                 $this->db->rollBack();
                 return false;
             }

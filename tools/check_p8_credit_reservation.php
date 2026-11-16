@@ -68,6 +68,14 @@ try {
     checkP8($lab->reserve('SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL',
         'SYNTHETIC_PURPOSE_MARKETING',$model['proposed_units'])===
         ['state'=>'RESERVED','estimated'=>15],'reserve separately after preflight');
+    checkP8(!$lab->markUnknown('SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL'),
+        'cannot declare timeout before dispatch');
+    checkP8(!$lab->reconcile('SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL',12),
+        'undispatched reservation cannot become charge');
+    checkP8($lab->markDispatched('SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL'),
+        'explicit synthetic outbound handoff marker');
+    checkP8(!$lab->cancelBeforeDispatch('SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL'),
+        'cannot cancel a dispatched operation');
     checkP8($lab->markUnknown('SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL'),
         'uncertain future provider response keeps hold');
     checkP8($lab->snapshot('SYNTHETIC_TENANT_C')['held']===15,
@@ -123,7 +131,23 @@ try {
     checkP8($lab->reserve('SYNTHETIC_TENANT_A',$first,
         'SYNTHETIC_PURPOSE_OTHER',20)===null,'conflicting id denied');
 
+    checkP8(!$lab->markUnknown('SYNTHETIC_TENANT_A',$first),
+        'cannot time out reserved non-dispatched operation');
+    checkP8(!$lab->reconcile('SYNTHETIC_TENANT_A',$first,19),
+        'must not charge a non-dispatched reservation');
+    checkP8($lab->markDispatched('SYNTHETIC_TENANT_A',$first),
+        'mark first as dispatched in lab');
+    checkP8(!$lab->markDispatched('SYNTHETIC_TENANT_A',$first),
+        'second dispatch marker denied');
+    checkP8(!$lab->cancelBeforeDispatch('SYNTHETIC_TENANT_A',$first),
+        'dispatched reservation must not be canceled');
+    checkP8($lab->reserve('SYNTHETIC_TENANT_A',$first,
+        'SYNTHETIC_PURPOSE_MARKETING',20)===null,
+        'dispatched request cannot be replayed as a new authorization');
     checkP8($lab->markUnknown('SYNTHETIC_TENANT_A',$first),'unknown holds credit');
+    checkP8($lab->reserve('SYNTHETIC_TENANT_A',$first,
+        'SYNTHETIC_PURPOSE_MARKETING',20)===null,
+        'uncertain request cannot be replayed');
     checkP8(!$lab->cancelBeforeDispatch('SYNTHETIC_TENANT_A',$first),
         'cannot refund unknown provider result');
     checkP8($lab->snapshot('SYNTHETIC_TENANT_A')['available']===0,
@@ -135,9 +159,16 @@ try {
         'verified cancellation before dispatch');
     checkP8(!$lab->cancelBeforeDispatch('SYNTHETIC_TENANT_A',$second),
         'cannot double refund');
+    checkP8(!$lab->markDispatched('SYNTHETIC_TENANT_A',$second),
+        'canceled hold cannot be marked dispatched');
+    checkP8($lab->reserve('SYNTHETIC_TENANT_A',$second,
+        'SYNTHETIC_PURPOSE_MARKETING',20)===null,
+        'canceled request cannot be replayed and dispatched');
     checkP8(!$lab->reconcile('SYNTHETIC_TENANT_A',$second,0),
         'cancelled cannot become provider charge');
 
+    checkP8($lab->markDispatched('SYNTHETIC_TENANT_A',$third),
+        'third execution explicitly marked dispatched');
     checkP8($lab->reconcile('SYNTHETIC_TENANT_A',$third,12),
         'verified observed 12');
     checkP8($lab->snapshot('SYNTHETIC_TENANT_A')===[
@@ -147,6 +178,9 @@ try {
         'late observed provider proof frees uncertain hold');
     checkP8($lab->reconcile('SYNTHETIC_TENANT_A',$first,19),
         'same measured proof idempotent');
+    checkP8($lab->reserve('SYNTHETIC_TENANT_A',$first,
+        'SYNTHETIC_PURPOSE_MARKETING',20)===null,
+        'finalized request never reauthorizes model dispatch');
     checkP8($lab->snapshot('SYNTHETIC_TENANT_A')===[
         'allowance'=>100,'spent'=>31,'held'=>40,'available'=>29,'frozen'=>false,
     ],'late proof only counted once');
@@ -168,6 +202,8 @@ try {
     checkP8($lab->reserve('SYNTHETIC_TENANT_B',$first,
         'SYNTHETIC_PURPOSE_MARKETING',20)===['state'=>'RESERVED','estimated'=>20],
         'tenant B independent request');
+    checkP8($lab->markDispatched('SYNTHETIC_TENANT_B',$first),
+        'B dispatch state separated by tenant');
     checkP8($lab->reconcile('SYNTHETIC_TENANT_B',$first,20),
         'B exact observation');
     checkP8($lab->snapshot('SYNTHETIC_TENANT_B')===[
