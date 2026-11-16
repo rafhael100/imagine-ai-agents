@@ -117,8 +117,8 @@ try {
     $cases[]=[[$body,$claims,$signature],$public,$scope,0];
     $cases[]=[[$body,$claims,$signature],$public,$scope,$now+20];
     $cases[]=[[$body,$claims,$signature],$public,$scope,$now+21];
-    $cases[]=[[$body,$claims,$signature],$public,$scope,$now+1];
-    $cases[]=[[$body,$claims,$signature],$public,$scope,$now+2];
+    $cases[]=[[$body,$claims,$signature],$public,$scope,$now+200];
+    $cases[]=[[$body,$claims,$signature],$public,$scope,4102444800];
     // Legitimately signed but policy-invalid payloads.
     $cases[]=[$issue(['resource_ref'=>'SYNTHETIC_LEAD_B']),$public,$scope,$now];
     $cases[]=[$issue([],['issuer'=>'SYNTHETIC_F238_OTHER']),$public,$scope,$now];
