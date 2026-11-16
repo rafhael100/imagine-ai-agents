@@ -60,7 +60,7 @@ for required in \
   src/MockTelemetry/MockCrmReadEdgeCounters.php \
   src/MockTelemetry/MockCrmReadEdgeBoundary.php \
   tests/Unit/edge_telemetry.php \
-  contracts/fixtures/f117-crm-op01-conformance.synthetic.json \
+  contracts/fixtures/f115-crm-op01-conformance.synthetic.json \
   contracts/crm-aia-readonly.v1.synthetic.schema.json \
   tests/Contracts/test_crm_aia_readonly_schema.py \
   tests/Unit/context_ref_strict.php \
