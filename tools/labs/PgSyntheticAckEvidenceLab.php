@@ -79,7 +79,8 @@ final class PgAtomicSignedEvidenceAckLab
         string $canonical,string $signatureB64,string $tenant,string $event,
         string $worker,int $attempt,int $now,int $trustedAuthorityRevision,
         string $trustedSignerKeyId,
-        ?string $companyId=null,?int $companyRevision=null
+        ?string $companyId=null,?int $companyRevision=null,
+        bool $ownerGrantRequired=false
     ):array {
         $key=$this->registry->resolveActive($tenant,$trustedSignerKeyId);
         if($key===null) return self::deny('NO_ACTIVE_SIGNER_KEY');
@@ -95,7 +96,7 @@ final class PgAtomicSignedEvidenceAckLab
             $tenant,$event,$worker,$attempt,$now,$trustedAuthorityRevision,
             $v['payload_hash'],$trustedSignerKeyId,hash('sha256',$key),
             $canonical,$signatureB64,$key,
-            $companyId,$companyRevision
+            $companyId,$companyRevision,$ownerGrantRequired
         );
         if($r['decision']!=='LAB_ACKED_NO_DELIVERY_PROOF')return $r;
         return [

@@ -5,6 +5,7 @@ namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgBoundOutboxLeaseLab.php';
 require_once __DIR__.'/PgCompanyDispatchGuardLab.php';
+require_once __DIR__.'/PgOwnerExecutionGuardLab.php';
 require_once __DIR__.'/../../src/MockOrchestration/MockN8nOutboxContract.php';
 
 use ImagineAI\AutomationFirst\MockP7ToAutoIaAdapter;
@@ -33,12 +34,14 @@ final class PgBoundOutboxAckLab
         ?string $canonicalSignedReceipt=null,
         ?string $receiptSignatureB64=null,
         ?string $receiptPublicKey=null,
-        ?string $companyId=null,?int $companyRevision=null):array
+        ?string $companyId=null,?int $companyRevision=null,
+        bool $ownerGrantRequired=false):array
     {
         if(!self::ref($tenant)||!self::ref($eventRef)||!self::ref($worker)
             ||$attempt<1||$attempt>3||$now<0||$now>4_102_444_800
             ||$this->db->inTransaction()
-            ||!PgCompanyDispatchGuardLab::validContext($companyId,$companyRevision)) {
+            ||!PgCompanyDispatchGuardLab::validContext($companyId,$companyRevision)
+            ||($ownerGrantRequired && $companyId===null)) {
             return self::deny('UNTRUSTED_REFERENCE_OR_NESTED_TX');
         }
         if($expectedSignedPayloadHash!==null
@@ -137,6 +140,15 @@ SQL);
                 ->eventMatches($companyId,$tenant,$eventRef,$row['event_hash'])){
                 $this->db->rollBack();
                 return self::deny('COMPANY_EVENT_TRANSPORT_PROOF_INVALID');
+            }
+
+            // P45: reverify owner-service Ed25519 decision at ACK time.
+            // Revocation between stage/lease/ACK blocks state transition.
+            if($ownerGrantRequired && !(new PgOwnerExecutionGuardLab($this->db))
+                ->grantCurrent($companyId,$tenant,$eventRef,
+                    $row['event_hash'],$now)){
+                $this->db->rollBack();
+                return self::deny('OWNER_DECISION_REVOKED_EXPIRED_OR_INVALID');
             }
 
             // P36: signed receipt's exact event digest is compared under
