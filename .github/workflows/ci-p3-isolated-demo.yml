@@ -20,6 +20,12 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+      - name: PHP 8.4 with UTF-8 validation
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring
+          coverage: none
       - name: Validate strict server and frontend source
         shell: bash
         run: |
