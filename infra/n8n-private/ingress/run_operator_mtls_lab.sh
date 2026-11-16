@@ -54,7 +54,20 @@ export N8N_OPERATOR_PORT=18744
 # Static guard before any Docker mutation. Full Compose must be exactly 3
 # services; only the mTLS proxy may use a host-bound TCP port.
 "${dc[@]}" config --format json | python3 "$root/infra/n8n-private/ingress/check_operator_overlay.py" > "$work/policy.json"
-"${dc[@]}" up -d --wait --wait-timeout 180 >/dev/null
+if ! "${dc[@]}" up -d --wait --wait-timeout 180 >/dev/null; then
+  echo "CENTRAL_AUTO_P15_INGRESS_START_FAILED" >&2
+  "${dc[@]}" logs --no-color --tail 40 operator-ingress > "$work/proxy-start.log" 2>&1 || true
+  python3 - "$work/proxy-start.log" <<'PY'
+import sys,re
+lines=open(sys.argv[1],encoding="utf-8",errors="replace").read().splitlines()
+for line in lines[-40:]:
+    if not any(w in line.lower() for w in ("error","emerg","warn","denied","failed","nginx:","permission")):
+        continue
+    line=re.sub(r"(?i)(password|token|secret|authorization)(\s*[:=]\s*)\S+",r"\1\2[REDACTED]",line)
+    print("P15_NGINX_DIAGNOSTIC "+line[:240],file=sys.stderr)
+PY
+  exit 1
+fi
 container="$("${dc[@]}" ps -q operator-ingress)"
 test -n "$container"
 python3 - "$container" <<'PY'
