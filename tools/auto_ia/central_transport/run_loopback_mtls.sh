@@ -81,3 +81,13 @@ done
 test "$ready" = 1
 php "$root/tools/auto_ia/central_transport/check_replay_after_restart.php"
 echo 'CENTRAL_AUTO_P6_PERSISTENT_REPLAY_PASS postgresql=16 no_vps=1 no_provider=1'
+
+# Fail-closed fault injection: revoke DB admission privilege while HTTPS server is up.
+test -n "$CENTRAL_AUTO_P8_PG_CONTAINER"
+pg_runner=(docker exec -i "$CENTRAL_AUTO_P8_PG_CONTAINER" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1)
+"${pg_runner[@]}" -c "REVOKE EXECUTE ON FUNCTION central_auto_lab.admit_nonce(text,text,text,text,text,text,bigint) FROM ca_mtls_lab_service" > /dev/null
+php "$root/tools/auto_ia/central_transport/check_storage_gate.php" 503
+"${pg_runner[@]}" -c "GRANT EXECUTE ON FUNCTION central_auto_lab.admit_nonce(text,text,text,text,text,text,bigint) TO ca_mtls_lab_service" > /dev/null
+php "$root/tools/auto_ia/central_transport/check_storage_gate.php" 200
+php "$root/tools/auto_ia/central_transport/check_storage_gate.php" 409
+echo 'CENTRAL_AUTO_P8_FAIL_CLOSED_PASS storage_denied=503 recovered=200 replay=409'

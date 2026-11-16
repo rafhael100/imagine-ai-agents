@@ -7,7 +7,7 @@ BEGIN
  IF current_database()<>'imagine_restored_ci' THEN
    RAISE EXCEPTION 'REFUSE_UNEXPECTED_DB_%',current_database(); END IF;
  SELECT count(*) INTO rows FROM central_auto_lab.mtls_nonce_ledger;
- IF rows<>5 THEN RAISE EXCEPTION 'RESTORE_ROW_COUNT % EXPECTED 5',rows; END IF;
+ IF rows<>6 THEN RAISE EXCEPTION 'RESTORE_ROW_COUNT % EXPECTED 6',rows; END IF;
  IF NOT EXISTS (
    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
    WHERE n.nspname='central_auto_lab' AND c.relname='mtls_nonce_ledger'
@@ -55,7 +55,7 @@ RESET ROLE;
 
 DO $$
 BEGIN
- IF (SELECT count(*) FROM central_auto_lab.mtls_nonce_ledger)<>5 THEN
+ IF (SELECT count(*) FROM central_auto_lab.mtls_nonce_ledger)<>6 THEN
    RAISE EXCEPTION 'RECOVERY_TEST_ADDED_ROWS'; END IF;
 END $$;
-\echo CENTRAL_AUTO_P7_RESTORE_PASS rows=5 rls=forced direct_write=0 replay=denied
+\echo CENTRAL_AUTO_P7_RESTORE_PASS rows=6 rls=forced direct_write=0 replay=denied
