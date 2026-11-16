@@ -45,7 +45,7 @@ class F222Integrity(unittest.TestCase):
         self.assertIn("contents: read",self.workflow)
         self.assertIn("d7c7aacc766c7ade4c65dcd211ed4569442144a9",self.workflow)
         self.assertIn("EXPECTED_CASES: '879'",self.workflow)
-        self.assertIn("EXPECTED_PHP: '112'",self.workflow)
+        self.assertIn("EXPECTED_PHP: '115'",self.workflow)
         self.assertIn("test_f222_integrity_triggers.py",self.gate)
 
     def test_no_new_secrets_network_or_deploy(self):
