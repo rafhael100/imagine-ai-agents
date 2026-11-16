@@ -79,16 +79,16 @@ try {
         WHERE tenant_ref='SYNTHETIC_TENANT_A'
         AND event_ref='SYNTHETIC_EVENT_01' FOR UPDATE")->fetchColumn();
     okay($locked==='SYNTHETIC_EVENT_01','locked first event');
-    $second=$other->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_02',$now);
+    $second=$other->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_02',$second['attempt'],$now);
     okay(($second['event_ref']??null)==='SYNTHETIC_EVENT_02','skip locked chooses second');
     okay(($second['attempt']??null)===1,'first attempt');
     $db->commit();
 
-    okay($out->acknowledge('SYNTHETIC_TENANT_B','SYNTHETIC_EVENT_02','SYNTHETIC_WORKER_02',$now)===false,'tenant swapped');
-    okay($out->acknowledge('SYNTHETIC_TENANT_A','SYNTHETIC_EVENT_02','SYNTHETIC_WORKER_FORGED',$now)===false,'worker mismatch');
-    okay($out->acknowledge('SYNTHETIC_TENANT_A','SYNTHETIC_EVENT_02','SYNTHETIC_WORKER_02',$now+60)===false,'expired lease');
-    okay($other->acknowledge('SYNTHETIC_TENANT_A','SYNTHETIC_EVENT_02','SYNTHETIC_WORKER_02',$now+1)===true,'valid ack');
-    okay($other->acknowledge('SYNTHETIC_TENANT_A','SYNTHETIC_EVENT_02','SYNTHETIC_WORKER_02',$now+1)===false,'duplicate ack');
+    okay($out->acknowledge('SYNTHETIC_TENANT_B','SYNTHETIC_EVENT_02','SYNTHETIC_WORKER_02',$second['attempt'],$now)===false,'tenant swapped');
+    okay($out->acknowledge('SYNTHETIC_TENANT_A','SYNTHETIC_EVENT_02','SYNTHETIC_WORKER_FORGED',$second['attempt'],$now)===false,'worker mismatch');
+    okay($out->acknowledge('SYNTHETIC_TENANT_A','SYNTHETIC_EVENT_02','SYNTHETIC_WORKER_02',$second['attempt'],$now+60)===false,'expired lease');
+    okay($other->acknowledge('SYNTHETIC_TENANT_A','SYNTHETIC_EVENT_02','SYNTHETIC_WORKER_02',$second['attempt'],$now+1)===true,'valid ack');
+    okay($other->acknowledge('SYNTHETIC_TENANT_A','SYNTHETIC_EVENT_02','SYNTHETIC_WORKER_02',$second['attempt'],$now+1)===false,'duplicate ack');
     okay($out->stats('SYNTHETIC_TENANT_A')===[
         'pending'=>1,'leased'=>0,'acked'=>1,'dead'=>0
     ],'first two event states');
@@ -96,11 +96,24 @@ try {
     $one=$out->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_01',$now);
     okay(($one['event_ref']??null)==='SYNTHETIC_EVENT_01','first event claimed');
     okay($other->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_02',$now+10)===null,'live lease cannot be stolen');
-    $two=$other->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_02',$now+60);
+    $two=$other->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_02',$second['attempt'],$now+60);
     okay(($two['attempt']??null)===2,'retry after expiry');
-    okay($out->acknowledge('SYNTHETIC_TENANT_A','SYNTHETIC_EVENT_01','SYNTHETIC_WORKER_01',$now+61)===false,'old worker denied');
+    okay($out->acknowledge('SYNTHETIC_TENANT_A','SYNTHETIC_EVENT_01','SYNTHETIC_WORKER_01',$one['attempt'],$now+61)===false,'old worker denied');
     $three=$out->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_01',$now+120);
     okay(($three['attempt']??null)===3,'bounded third attempt');
+    // Critical ABA regression: the same worker identifier is reused on
+    // attempt 3. Its delayed ACK from attempt 1 MUST NOT ACK attempt 3.
+    okay($out->acknowledge('SYNTHETIC_TENANT_A','SYNTHETIC_EVENT_01',
+        'SYNTHETIC_WORKER_01',$one['attempt'],$now+121)===false,
+        'stale same-worker ACK cannot acknowledge a later lease');
+    okay($out->acknowledge('SYNTHETIC_TENANT_A','SYNTHETIC_EVENT_01',
+        'SYNTHETIC_WORKER_01',0,$now+121)===false,
+        'zero fencing token denied');
+    okay($out->acknowledge('SYNTHETIC_TENANT_A','SYNTHETIC_EVENT_01',
+        'SYNTHETIC_WORKER_01',4,$now+121)===false,
+        'out of range fencing token denied');
+    okay($out->stats('SYNTHETIC_TENANT_A')['leased']===1,
+        'stale same-worker ACK has not changed leased state');
     okay($out->claim('SYNTHETIC_TENANT_A','SYNTHETIC_WORKER_01',$now+180)===null,'dead letter after last timeout');
     okay($out->stats('SYNTHETIC_TENANT_A')===[
         'pending'=>0,'leased'=>0,'acked'=>1,'dead'=>1
@@ -108,7 +121,7 @@ try {
 
     $beta=$other->claim('SYNTHETIC_TENANT_B','SYNTHETIC_WORKER_BETA',$now);
     okay(($beta['event_ref']??null)==='SYNTHETIC_EVENT_01','tenant B isolated');
-    okay($other->acknowledge('SYNTHETIC_TENANT_B','SYNTHETIC_EVENT_01','SYNTHETIC_WORKER_BETA',$now+1)===true,'tenant B ack');
+    okay($other->acknowledge('SYNTHETIC_TENANT_B','SYNTHETIC_EVENT_01','SYNTHETIC_WORKER_BETA',$beta['attempt'],$now+1)===true,'tenant B ack');
     okay($out->stats('SYNTHETIC_TENANT_B')===[
         'pending'=>0,'leased'=>0,'acked'=>1,'dead'=>0
     ],'B state independent');
