@@ -131,6 +131,38 @@ wrong_ca="$(curl --silent --max-time 4 --cacert "$work/server-ca.crt" \
   https://localhost:18744/ 2>/dev/null || true)"
 case "$wrong_ca" in 200|301|302|303) echo "P15_ROGUE_CA_ACCEPTED" >&2;exit 1;; esac
 
+# P17: perform a live, synthetic certificate rotation in the same nginx.
+# The former cert is still signed by the trusted CA, but must lose access
+# immediately after the pinned certificate is changed and nginx reloaded.
+old_fingerprint="$fingerprint"
+new_fingerprint="$(openssl x509 -in "$work/same-cn-operator.crt" -noout -fingerprint -sha1 | cut -d= -f2 | tr -d ":" | tr "A-F" "a-f")"
+[[ "$new_fingerprint" =~ ^[a-f0-9]{40}$ ]]
+test "$new_fingerprint" != "$old_fingerprint"
+chmod 0644 "$work/operator-fingerprints.conf"
+printf "%s 1;\n" "$new_fingerprint" > "$work/operator-fingerprints.conf"
+chmod 0444 "$work/operator-fingerprints.conf"
+! grep -q "$old_fingerprint" "$work/operator-fingerprints.conf"
+"${dc[@]}" exec -T operator-ingress nginx -t >/dev/null
+"${dc[@]}" exec -T operator-ingress nginx -s reload >/dev/null
+# Independent fresh curl TLS connections; old certificate must be 403.
+ok=0
+for _ in $(seq 1 25); do
+  old_code="$(curl --silent --max-time 4 --cacert "$work/server-ca.crt" \
+    --cert "$work/imagine-operator-ci.crt" --key "$work/imagine-operator-ci.key" \
+    --output /dev/null --write-out "%{http_code}" \
+    https://localhost:18744/ 2>/dev/null || true)"
+  rotated_code="$(curl --silent --max-time 4 --cacert "$work/server-ca.crt" \
+    --cert "$work/same-cn-operator.crt" --key "$work/same-cn-operator.key" \
+    --output /dev/null --write-out "%{http_code}" \
+    https://localhost:18744/ 2>/dev/null || true)"
+  if [[ "$old_code" = 403 ]] && [[ "$rotated_code" = 200 || "$rotated_code" = 301 || "$rotated_code" = 302 || "$rotated_code" = 303 ]]; then
+    ok=1;break
+  fi
+  sleep 0.25
+done
+test "$ok" = 1 || { echo "P17_ROTATED_CERT_NOT_ENFORCED" >&2;exit 1; }
+echo "CENTRAL_AUTO_P17_LIVE_CERT_ROTATION_PASS old_cert_denied=1 new_cert_allowed=1 same_cn=1 same_ca=1 nginx_reload=1 mfa=NO NO_GO"
+
 # The original n8n and DB still have NO host-published ports.
 python3 - "$("${dc[@]}" ps -q n8n)" "$("${dc[@]}" ps -q n8n-db)" <<'PY'
 import json,subprocess,sys
