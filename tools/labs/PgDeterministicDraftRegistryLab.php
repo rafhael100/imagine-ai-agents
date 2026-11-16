@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgSyntheticReplayGate.php';
+require_once __DIR__.'/PgDraftFingerprintLab.php';
 require_once __DIR__.'/../../src/Automation/DeterministicRuleEngine.php';
 
 use ImagineAI\Automation\DeterministicRuleEngine;
@@ -66,6 +67,7 @@ CREATE TABLE IF NOT EXISTS aia_p51_lab.review_drafts(
  ),
  observed BIGINT NOT NULL CHECK(observed BETWEEN 0 AND 100000000),
  threshold BIGINT NOT NULL CHECK(threshold BETWEEN 0 AND 100000000),
+ draft_sha256 CHAR(64) NOT NULL CHECK(draft_sha256 ~ '^[a-f0-9]{64}$'),
  state VARCHAR(40) NOT NULL DEFAULT 'AWAITING_HUMAN_REVIEW_LAB'
    CHECK(state='AWAITING_HUMAN_REVIEW_LAB'),
  PRIMARY KEY(tenant_ref,proposal_ref),
@@ -124,9 +126,9 @@ SQL);
                 $write=$this->db->prepare(<<<'SQL'
 INSERT INTO aia_p51_lab.review_drafts
  (tenant_ref,request_ref,ruleset_ref,revision,proposal_ref,
-  rule_ref,draft_kind,metric,observed,threshold,state)
+  rule_ref,draft_kind,metric,observed,threshold,draft_sha256,state)
  VALUES (:t,:request,:ruleset,:revision,:proposal,:rule,:kind,:metric,
-         :observed,:threshold,'AWAITING_HUMAN_REVIEW_LAB')
+         :observed,:threshold,:draft_hash,'AWAITING_HUMAN_REVIEW_LAB')
 SQL);
                 foreach($result['proposals'] as $proposal){
                     $write->execute([
@@ -137,7 +139,14 @@ SQL);
                         ':kind'=>$proposal['draft_kind'],
                         ':metric'=>$proposal['metric'],
                         ':observed'=>$proposal['observed'],
-                        ':threshold'=>$proposal['threshold']
+                        ':threshold'=>$proposal['threshold'],
+                        ':draft_hash'=>PgDraftFingerprintLab::sha256(
+                            $tenant,$request,$rulesetRef,$revision,
+                            $proposal['proposal_ref'],$proposal['rule_ref'],
+                            $proposal['draft_kind'],$proposal['metric'],
+                            $proposal['observed'],$proposal['threshold'],
+                            'AWAITING_HUMAN_REVIEW_LAB'
+                        )
                     ]);
                     if($write->rowCount()!==1){
                         $this->db->rollBack();
@@ -170,13 +179,27 @@ SQL);
                 return self::out('DENY','REPLAY_INPUT_CHANGED_OR_TAMPERED');
             }
             $exists=$this->db->prepare(<<<'SQL'
-SELECT proposal_ref FROM aia_p51_lab.review_drafts
+SELECT proposal_ref,draft_sha256 FROM aia_p51_lab.review_drafts
 WHERE tenant_ref=:t AND request_ref=:request ORDER BY proposal_ref FOR SHARE
 SQL);
             $exists->execute([':t'=>$tenant,':request'=>$request]);
-            $stored=$exists->fetchAll(PDO::FETCH_COLUMN);
-            $expected=array_column($result['proposals'],'proposal_ref');
-            sort($expected,SORT_STRING);
+            $stored=$exists->fetchAll(PDO::FETCH_ASSOC);
+            $expected=[];
+            foreach($result['proposals'] as $proposal){
+                $expected[]=[
+                    'proposal_ref'=>$proposal['proposal_ref'],
+                    'draft_sha256'=>PgDraftFingerprintLab::sha256(
+                        $tenant,$request,$rulesetRef,$revision,
+                        $proposal['proposal_ref'],$proposal['rule_ref'],
+                        $proposal['draft_kind'],$proposal['metric'],
+                        $proposal['observed'],$proposal['threshold'],
+                        'AWAITING_HUMAN_REVIEW_LAB'
+                    )
+                ];
+            }
+            usort($expected,static fn($a,$b)=>strcmp(
+                $a['proposal_ref'],$b['proposal_ref']
+            ));
             if($stored!==$expected){
                 $this->db->rollBack();
                 return self::out('DENY','STORED_DRAFTS_INCOMPLETE');
