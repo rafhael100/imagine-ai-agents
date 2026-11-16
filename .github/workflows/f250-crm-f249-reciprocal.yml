@@ -1,0 +1,47 @@
+name: F250 pinned CRM F249 reciprocal source conformance (NO-GO)
+
+on:
+  push:
+    branches:
+      - dev/f250-crm-f249-reciprocal-source-2026-11-15
+      - review/agents-f229-f251-integrated-2026-11-15
+  pull_request:
+    branches:
+      - dev/f240-http-contract-integrated-r01-2026-11-15
+      - dev/ft01-aia-core-mocks-2026-11-06
+
+permissions:
+  contents: read
+
+jobs:
+  reciprocal-crm-f249:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Block unreviewed private cross-repository checkout
+        if: ${{ github.event.repository.private == true }}
+        shell: bash
+        run: |
+          echo 'PRIVATE_CROSS_REPOSITORY_SOURCE_NOT_VERIFIED'; exit 1
+      - name: Read-only checkout of exact Agents HEAD
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Read-only checkout of original CRM F249 review SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-crm
+          ref: c67aaa0440ac4f9f1c607883d0c1347f5a067f92
+          path: _crm_f249_fixture
+          persist-credentials: false
+      - name: Check immutable CRM source and NO-GO denial boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _crm_f249_fixture rev-parse HEAD)" = "c67aaa0440ac4f9f1c607883d0c1347f5a067f92"
+          php -l _crm_f249_fixture/app/Support/Synthetic/AgentsPrivateKeyRevocationLockLab.php
+          php -l _crm_f249_fixture/app/Support/Synthetic/AgentsPrivateRestrictedKeyringLab.php
+          php -l _crm_f249_fixture/app/Support/Synthetic/AgentsSignedIngressCandidate.php
+          python3 tools/check_f250_crm_f249_source.py
+          php tools/check_f239_denial_receipt.php
+          echo 'F250_PINNED_CRM_SOURCE_ONLY real_authorization=false operational_decision=NO_GO' >> "$GITHUB_STEP_SUMMARY"
