@@ -5,6 +5,7 @@ namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgSyntheticCompanyTenantBridgeLab.php';
 require_once __DIR__.'/PgSyntheticAtomicStager.php';
+require_once __DIR__.'/PgOwnerDecisionLab.php';
 require_once __DIR__.'/../../src/MockOrchestration/MockN8nOutboxContract.php';
 
 use ImagineAI\MockOrchestration\MockN8nOutboxContract;
@@ -71,7 +72,9 @@ SQL);
         string $company,string $tenant,string $request,string $nonce,
         string $transportDigest,int $mappingRevision,int $transportNow,
         string $canonicalEvent,array $envelope,array $trustedPolicy,
-        int $eventNow,array $trustedKeys,array &$seen
+        int $eventNow,array $trustedKeys,array &$seen,
+        ?string $ownerDecision=null,?string $ownerSignatureB64=null,
+        ?string $ownerTrustedKeyId=null
     ):array {
         if($this->db->inTransaction()
             ||($trustedPolicy['tenant_ref']??null)!==$tenant){
@@ -80,6 +83,12 @@ SQL);
         $event=MockN8nOutboxContract::decode($canonicalEvent);
         if(!is_array($event)||$event['tenant_ref']!==$tenant){
             return self::deny('CANONICAL_EVENT_WRONG_TENANT');
+        }
+        if(($ownerDecision!==null ||$ownerSignatureB64!==null
+                ||$ownerTrustedKeyId!==null)
+            &&($ownerDecision===null||$ownerSignatureB64===null
+                ||$ownerTrustedKeyId===null)){
+            return self::deny('INCOMPLETE_OWNER_SERVICE_DECISION');
         }
         $tempSeen=$seen;
         try{
@@ -91,6 +100,21 @@ SQL);
             if($boundary['decision']!=='LAB_BOUND_UNCOMMITTED_NO_EFFECT'){
                 $this->db->rollBack();
                 return self::deny('MTLS_COMPANY_TENANT_PROOF_DENIED');
+            }
+            // P44 owner decision is distinct from read-only mTLS admission.
+            // It is checked and consumed under the SAME transaction as P42,
+            // so revocation can neither race past nor be silently reused.
+            if($ownerDecision!==null){
+                $granted=(new PgOwnerDecisionLab($this->db))
+                    ->verifyAndConsumeInsideTransaction(
+                        $company,$tenant,$event['event_ref'],
+                        $canonicalEvent,$ownerDecision,$ownerSignatureB64,
+                        $ownerTrustedKeyId,$eventNow
+                    );
+                if($granted!=='LAB_OWNER_DECISION_UNCOMMITTED'){
+                    $this->db->rollBack();
+                    return self::deny('OWNER_SERVICE_DECISION_DENIED');
+                }
             }
             // An admitted transport proof can be consumed once, regardless
             // of how many different event IDs a caller tries afterwards.
