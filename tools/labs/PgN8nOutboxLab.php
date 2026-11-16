@@ -57,8 +57,31 @@ final readonly class PgN8nOutboxLab
         $this->db->exec('DROP TABLE IF EXISTS '.self::TABLE);
     }
 
-    /** @return 'CREATED'|'REPLAY'|null */
+    /**
+     * Standalone P6 API retains its original transaction ownership.
+     * Nested callers MUST use enqueueWithinTransaction instead.
+     * @return 'CREATED'|'REPLAY'|null
+     */
     public function enqueue(string $canonical): ?string
+    {
+        if ($this->db->inTransaction()) return null;
+        return $this->enqueueCore($canonical, true);
+    }
+
+    /**
+     * P17: SAME connection, SAME caller-owned PostgreSQL transaction as
+     * the P16 replay claim. The caller MUST commit or rollback both records.
+     * A null return leaves transaction ownership with the caller.
+     * @return 'CREATED'|'REPLAY'|null
+     */
+    public function enqueueWithinTransaction(string $canonical): ?string
+    {
+        if (!$this->db->inTransaction()) return null;
+        return $this->enqueueCore($canonical, false);
+    }
+
+    /** @return 'CREATED'|'REPLAY'|null */
+    private function enqueueCore(string $canonical, bool $ownTransaction): ?string
     {
         $event=MockN8nOutboxContract::decode($canonical);
         if ($event===null) return null;
@@ -66,7 +89,7 @@ final readonly class PgN8nOutboxLab
         $ref=$event['event_ref'];
         $hash=hash('sha256',$canonical);
         try {
-            $this->db->beginTransaction();
+            if ($ownTransaction) $this->db->beginTransaction();
             $stmt=$this->db->prepare('INSERT INTO '.self::TABLE.'
                 (tenant_ref,event_ref,canonical_event,event_hash)
                 VALUES (:tenant,:ref,:body,:hash)
@@ -84,13 +107,13 @@ final readonly class PgN8nOutboxLab
             if (!is_array($row)
                 || !hash_equals($row['event_hash'],$hash)
                 || !hash_equals($row['canonical_event'],$canonical)) {
-                $this->db->rollBack();
+                if ($ownTransaction && $this->db->inTransaction()) $this->db->rollBack();
                 return null;
             }
-            $this->db->commit();
+            if ($ownTransaction) $this->db->commit();
             return $created?'CREATED':'REPLAY';
         } catch (Throwable) {
-            if ($this->db->inTransaction()) $this->db->rollBack();
+            if ($ownTransaction && $this->db->inTransaction()) $this->db->rollBack();
             return null;
         }
     }
