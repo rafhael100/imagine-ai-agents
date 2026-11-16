@@ -58,6 +58,7 @@ def check():
     own=(ROOT/"src/MockBridge/MockSyntheticHttpDenialReceipt.php").read_text()
     for token in (
         "'private, no-store, max-age=0'",
+        "'max-age=0, no-store, private'",
         "'x-robots-tag'",
         "'x-content-type-options'",
         "MockCrmPublicResponseContract::denial()",
