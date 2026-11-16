@@ -115,6 +115,58 @@ def rehearse()->dict:
       "tree_for_runner_only":final_tree,
     }
 
+def smoke_merged_tree(tree_sha:str)->dict:
+    """Run small, deterministic offline tests against the *combined tree*."""
+    import shutil
+    if not SHA.fullmatch(tree_sha):
+        raise RuntimeError("INVALID_SMOKE_TREE")
+    checks=[
+      ("inventory_v2",["python3","-m","unittest","discover",
+                       "-s","infra/n8n-private","-p","test_readonly_inventory.py","-v"]),
+      ("inventory_assessment",["python3","-m","unittest","discover",
+                       "-s","infra/n8n-private","-p","test_assess_readonly_host.py","-v"]),
+      ("noai_compose_policy",["python3","-m","unittest","discover",
+                       "-s","infra/n8n-private","-p","test_noai_egress_policy.py","-v"]),
+      ("operator_overlay_policy",["python3","-m","unittest","discover",
+                       "-s","infra/n8n-private/ingress","-p","test_operator_overlay.py","-v"]),
+      ("agents_p60_policy",["python3","tools/check_p60_ci_gates.py"]),
+      ("identity_lock_bash_syntax",["bash","-n","tools/auto_ia/pg/check_key_revocation_lock.sh"]),
+      ("operator_mtls_bash_syntax",["bash","-n","infra/n8n-private/ingress/run_operator_mtls_lab.sh"]),
+      ("n8n_restore_bash_syntax",["bash","-n","infra/n8n-private/check_full_ephemeral_restore.sh"]),
+    ]
+    with tempfile.TemporaryDirectory(prefix="central-auto-p18b-") as folder:
+        tar=Path(folder)/"snapshot.tar"
+        src=Path(folder)/"repo"
+        src.mkdir()
+        with tar.open("wb") as out:
+            p=subprocess.run(["git","archive","--format=tar",tree_sha],
+                stdout=out,stderr=subprocess.PIPE,timeout=90)
+        if p.returncode:
+            raise RuntimeError("GIT_ARCHIVE_FAILED")
+        with tarfile.open(tar,mode="r") as archive:
+            archive.extractall(path=src,filter="data")
+        report={}
+        env=os.environ.copy()
+        env["PYTHONPYCACHEPREFIX"]=str(Path(folder)/"pycache")
+        for name,command in checks:
+            p=subprocess.run(command,cwd=src,capture_output=True,text=True,
+                             env=env,timeout=75)
+            report[name]="PASS" if p.returncode==0 else "FAIL"
+            if p.returncode:
+                print("CENTRAL_AUTO_P18B_SMOKE_FAIL "+name+
+                      " rc="+str(p.returncode),file=sys.stderr)
+                raise RuntimeError("MERGED_TREE_SMOKE_FAILED_"+name)
+        if shutil.which("php"):
+            p=subprocess.run(["php","-l",
+                "tools/auto_ia/pg/check_key_revocation_lock.php"],
+                cwd=src,capture_output=True,text=True,timeout=20)
+            report["identity_lock_php_syntax"]="PASS" if p.returncode==0 else "FAIL"
+            if p.returncode:
+                raise RuntimeError("MERGED_TREE_PHP_SYNTAX_INVALID")
+        else:
+            report["identity_lock_php_syntax"]="NOT_AVAILABLE_ON_RUNNER"
+    return report
+
 if __name__=="__main__":
     if (os.environ.get("GITHUB_ACTIONS")!="true" or
         os.environ.get("GITHUB_REPOSITORY")!="rafhael100/imagine-ai-agents"):
@@ -125,6 +177,8 @@ if __name__=="__main__":
         print(json.dumps(result,sort_keys=True))
         if result["result"]!="THREE_LANE_SIMULATION_CLEAN_NO_GO":
             raise SystemExit(1)
+        smoke=smoke_merged_tree(result["tree_for_runner_only"])
+        print(json.dumps({"schema":"CENTRAL_AUTO_P18B_SMOKE_V1","tests":smoke,"release_authorized":False},sort_keys=True))
         print("CENTRAL_AUTO_P18B_THREE_LANE_REHEARSAL_PASS NO_GO review_only=1")
     except (RuntimeError,ValueError,subprocess.TimeoutExpired) as exc:
         print("CENTRAL_AUTO_P18B_DENIED_"+str(exc),file=sys.stderr)
