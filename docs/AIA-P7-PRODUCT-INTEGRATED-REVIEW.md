@@ -12,7 +12,7 @@ O novo workflow `ci-p7-product-integrated.yml` executa **P4 + P5 + P6 + regress�
 
 ## Qualidade integral R01
 
-O workflow R01 da árvore original é executado também nesta branch, sem modificar seus 879 casos oficiais. A contagem de lint dos arquivos em `src`, `tests/Unit`, `examples` deve aumentar de **117 para 119**, porque apenas duas classes PHP puras novas foram adicionadas em `src/MockOrchestration`. O adaptador PG16 permanece em `tools/labs` para cumprir a regra de isolamento. Atualizações correspondentes foram feitas na validação e nos dois contratos Python que exigiam o número anterior.
+O workflow R01 da árvore original é executado também nesta branch, sem modificar seus 879 casos oficiais. A contagem de lint dos arquivos em `src`, `tests/Unit`, `examples` deve aumentar de **117 para 119**, porque uma classe de domínio P2 e duas classes PHP puras P5/P6 foram adicionadas em `src/MockOrchestration`. O adaptador PG16 permanece em `tools/labs` para cumprir a regra de isolamento. Atualizações correspondentes foram feitas na validação e nos dois contratos Python que exigiam o número anterior.
 
 **Aprovação de CI não equivale a revisão independente.** Não transportar os adaptadores `tools/labs` para serviços, CRM ou VPS. O outbox não possui receptor n8n e o roteador IA não reserva créditos nem aciona modelos. São candidatos de arquitetura e testes, não funcionalidades operacionais vendáveis.
 
