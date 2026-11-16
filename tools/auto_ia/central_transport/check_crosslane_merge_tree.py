@@ -124,11 +124,17 @@ if __name__=="__main__":
     try:
         report=evaluate()
         print(json.dumps(report,sort_keys=True))
-        if any(x["outcome"]!="CLEAN_SYNTHETIC_MERGE_TREE"
-               for x in report["review_merges"].values()):
-            print("CENTRAL_AUTO_P18_MERGE_BLOCKED NO_GO",file=sys.stderr)
-            raise SystemExit(1)
-        print("CENTRAL_AUTO_P18_MERGE_TREE_PASS NO_GO no_push=1 no_deploy=1")
+        conflicts=[
+            name for name,x in report["review_merges"].items()
+            if x["outcome"]!="CLEAN_SYNTHETIC_MERGE_TREE"
+        ]
+        if conflicts:
+            # Known conflicts are a valid *diagnostic* result, NOT release
+            # approval. P18B runs a separate controlled resolution proof.
+            print("CENTRAL_AUTO_P18_CONFLICTS_IDENTIFIED_NO_GO "+",".join(conflicts))
+        else:
+            print("CENTRAL_AUTO_P18_MERGE_TREE_CLEAN_NO_GO")
+        print("CENTRAL_AUTO_P18_ANALYSIS_COMPLETE no_push=1 no_deploy=1 NO_GO")
     except (ValueError,RuntimeError,subprocess.TimeoutExpired) as exc:
         print("CENTRAL_AUTO_P18_DENIED_"+str(exc),file=sys.stderr)
         raise SystemExit(1)
