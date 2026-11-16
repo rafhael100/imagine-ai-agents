@@ -1,0 +1,64 @@
+name: Agents P8 - atomic AI credit reservation and reconciliation PG16
+
+on:
+  push:
+    branches:
+      - dev/aia-p8-pg-credit-reservation-2026-11-16
+  pull_request:
+    branches:
+      - review/aia-p4-p7-core-integrated-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  credit-pg16:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      AIA_P8_PG_LAB: 'true'
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: imagine_agents_ci
+      DB_USERNAME: postgres
+      DB_PASSWORD: ci-only-password
+    steps:
+      - name: Checkout candidate read-only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: PHP 8.4 with PDO PostgreSQL
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_pgsql, pgsql
+          coverage: none
+      - name: Verify disposable environment and lint credit engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "rafhael100/imagine-ai-agents"
+          test "$DB_HOST" = "127.0.0.1"
+          test "$DB_DATABASE" = "imagine_agents_ci"
+          php -l tools/labs/PgAiCreditReservationLab.php
+          php -l tools/p8_credit_worker.php
+          php -l tools/check_p8_credit_reservation.php
+      - name: Run multi-process account hold and measurement consistency tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p8_credit_reservation.php
+          echo 'P8_CREDIT_CI_ONLY technical_test_units=true provider_calls=0 real_billing=false operational_decision=NO_GO' >> "$GITHUB_STEP_SUMMARY"
