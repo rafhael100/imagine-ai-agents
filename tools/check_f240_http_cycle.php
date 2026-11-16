@@ -90,6 +90,13 @@ try {
         'cache-control'=>'no-store, private',
     ];
     f240Assert(MockSyntheticHttpDenialReceipt::matches(404,$responseHeaders,$denial));
+    $f248ResponseHeaders=[
+        'content-type'=>'application/json',
+        'cache-control'=>'private, no-store, max-age=0',
+        'x-robots-tag'=>'noindex, nofollow, noarchive',
+        'x-content-type-options'=>'nosniff',
+    ];
+    f240Assert(MockSyntheticHttpDenialReceipt::matches(404,$f248ResponseHeaders,$denial));
     $invalidResponses=[
         [200,$responseHeaders,$denial],
         [201,$responseHeaders,$denial],
@@ -107,11 +114,16 @@ try {
         [404,$responseHeaders,'{}'],
         [404,$responseHeaders,str_repeat('x',513)],
     ];
+    $invalidResponses[]=[404,array_replace($f248ResponseHeaders,['x-content-type-options'=>'unsafe']),$denial];
+    $invalidResponses[]=[404,array_replace($f248ResponseHeaders,['cache-control'=>'public']),$denial];
+    $invalidResponses[]=[404,array_merge($f248ResponseHeaders,['set-cookie'=>'fake_session']),$denial];
+    $invalidResponses[]=[404,array_replace($f248ResponseHeaders,['x-robots-tag'=>'follow']),$denial];
+    $invalidResponses[]=[201,$f248ResponseHeaders,$denial];
     foreach($invalidResponses as [$status,$headers,$bytes]) {
         f240Assert(!MockSyntheticHttpDenialReceipt::matches($status,$headers,$bytes));
     }
-    f240Assert(count($invalidResponses)===15);
-    echo "F240_SYNTHETIC_HTTP_CYCLE_PASS denied_response_accepted=true negative_responses=15 real_authorization=false external_calls=0 operational_decision=NO_GO\n";
+    f240Assert(count($invalidResponses)===20);
+    echo "F240_SYNTHETIC_HTTP_CYCLE_PASS denied_response_accepted=true negative_responses=20 real_authorization=false external_calls=0 operational_decision=NO_GO\n";
 } catch (Throwable) {
     fwrite(STDERR,"F240_SYNTHETIC_HTTP_CYCLE_DENIED operational_decision=NO_GO\n");
     exit(1);
