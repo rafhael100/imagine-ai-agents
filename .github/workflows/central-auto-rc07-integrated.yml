@@ -1,0 +1,175 @@
+name: CENTRAL-AUTO RC07 PG17 native n8n + mTLS immutable security (NO GO)
+on:
+  push:
+    branches:
+      - review/central-auto-rc07-pg17-native-n8n-2026-11-16
+permissions:
+  contents: read
+jobs:
+  private-compose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      COMPOSE_PROJECT_NAME: imagine-n8n-p4-ci
+      N8N_EXPECTED_PROJECT: imagine-n8n-p4-ci
+      N8N_IMAGE: ghcr.io/n8n-io/n8n@sha256:b4b90747b81fcda7e76550c0d3aa7f0f64917a1e9573cff40d6834eaf2e0f8ea
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Inventory parser and upstream immutable official n8n proof
+        run: |
+          python3 infra/n8n-private/test_readonly_inventory.py
+          python3 tools/auto_ia/check_rc04_integrity.py
+      - name: Prepare runner-only secret files and reviewed image reference
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$RUNNER_TEMP/n8n-p4-secrets"
+          python3 - <<'PY'
+          import os,secrets,pathlib
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'n8n-p4-secrets'
+          for name in ['admin','runtime','encryption']:
+            p=root/name;p.write_text(secrets.token_hex(32));p.chmod(0o444)
+          PY
+          echo "N8N_PG_ADMIN_PASSWORD_FILE=$RUNNER_TEMP/n8n-p4-secrets/admin" >> "$GITHUB_ENV"
+          echo "N8N_PG_PASSWORD_FILE=$RUNNER_TEMP/n8n-p4-secrets/runtime" >> "$GITHUB_ENV"
+          echo "N8N_ENCRYPTION_KEY_FILE=$RUNNER_TEMP/n8n-p4-secrets/encryption" >> "$GITHUB_ENV"
+          docker pull postgres:17 >/dev/null
+          docker pull "$N8N_IMAGE" >/dev/null
+          echo "N8N_PG_IMAGE=$(docker image inspect postgres:17 --format '{{index .RepoDigests 0}}')" >> "$GITHUB_ENV"
+      - name: Expand candidate safely and start only ephemeral isolated services
+        run: |
+          docker compose --profile homologation -f infra/n8n-private/docker-compose.yml config --format json | python3 infra/n8n-private/check_compose_static.py
+          docker compose --profile homologation -f infra/n8n-private/docker-compose.yml up -d --wait --wait-timeout 180
+      - name: Verify actual database runtime privileges, readiness, isolation and secrets
+        run: |
+          set -euo pipefail
+          dc=(docker compose --profile homologation -f infra/n8n-private/docker-compose.yml)
+          test "$("${dc[@]}" exec -T n8n-db psql -X -qAt -U n8n_bootstrap_admin -d n8n -c "SELECT rolsuper OR rolbypassrls OR rolcreatedb OR rolcreaterole FROM pg_roles WHERE rolname='n8n_runtime'")" = f
+          test "$("${dc[@]}" exec -T n8n-db psql -X -qAt -U n8n_bootstrap_admin -d n8n -c "SELECT count(*)>0 FROM pg_stat_activity WHERE usename='n8n_runtime' AND datname='n8n'")" = t
+          # Use the container-local readiness check. Internal=true Docker
+          # networks do not create a usable host-bound administrative port.
+          "${dc[@]}" exec -T n8n node -e "require('http').get('http://127.0.0.1:5678/healthz/readiness',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+          if curl --fail --silent --max-time 2 http://127.0.0.1:17990/healthz/readiness > /dev/null; then
+            echo 'P4_UNEXPECTED_HOST_UI_EXPOSURE' >&2
+            exit 1
+          fi
+          python3 - <<'PY'
+          import subprocess,json
+          command=['docker','compose','--profile','homologation','-f','infra/n8n-private/docker-compose.yml']
+          ids=subprocess.check_output(command+['ps','-q'],text=True).split()
+          assert len(ids)==2
+          for ident in ids:
+            data=json.loads(subprocess.check_output(['docker','inspect',ident]))[0]
+            assert not data['HostConfig']['Privileged']
+            assert not any(v.startswith(('POSTGRES_PASSWORD=','DB_POSTGRESDB_PASSWORD=','N8N_ENCRYPTION_KEY=')) for v in data['Config']['Env'])
+            for network in data['NetworkSettings']['Networks']:
+              item=json.loads(subprocess.check_output(['docker','network','inspect',network]))[0]
+              assert item['Internal'] is True
+          print('P4_PRIVATE_COMPOSE_PASS runtime_non_superuser=1 secret_values_in_container_env=0 private_networks=1 operational_release=0')
+          PY
+      - name: Test reviewed native-only workflow and adversarial mutations before importing
+        run: |
+          python3 -m py_compile infra/n8n-private/check_native_noai_flow.py
+          python3 infra/n8n-private/check_native_noai_flow.py static infra/n8n-private/workflows/native-funnel-noai.workflow.json
+          python3 infra/n8n-private/test_native_noai_flow.py
+          bash -n infra/n8n-private/run_native_noai_pg.sh
+      - name: Import, export and execute real three-node workflow in hardened official n8n
+        run: |
+          bash infra/n8n-private/run_native_noai_pg.sh
+          echo "CENTRAL_AUTO_P9_NO_GO real_n8n_and_pg16=1 provider_api=0 paid_credits=0 no_vps=1"
+
+      - name: Remove only this job's ephemeral stack
+        if: always()
+        run: docker compose --profile homologation -f infra/n8n-private/docker-compose.yml down --volumes --remove-orphans
+  durable-mtls-lab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      pg:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-crm
+          ref: 9afa6683e6b3463f12bd80a25f455f925828c0af
+          path: _crm_contract_pin
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-portal
+          ref: 9d3877dfaa81524faf2c08f80244b485968316ec
+          path: _portal_contract_pin
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: openssl
+          coverage: none
+      - name: Prove exact source commits and test-only syntax
+        run: |
+          test "$(git -C _crm_contract_pin rev-parse HEAD)" = "9afa6683e6b3463f12bd80a25f455f925828c0af"
+          test "$(git -C _portal_contract_pin rev-parse HEAD)" = "9d3877dfaa81524faf2c08f80244b485968316ec"
+          php -l tools/auto_ia/central_transport/check_replay_after_restart.php
+          python3 -m py_compile tools/auto_ia/central_transport/mtls_crm_lab_server.py
+          bash -n tools/auto_ia/central_transport/check_pg_nonce_race.sh
+      - name: Create least-privilege synthetic PostgreSQL replay ledger
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/central_transport/001_pg_durable_nonce.sql
+          psql --version
+      - name: Send real mTLS requests, deny unavailable storage and recover once
+        env:
+          CENTRAL_AUTO_P8_PG_CONTAINER: ${{ job.services.pg.id }}
+        run: |
+          bash tools/auto_ia/central_transport/run_loopback_mtls.sh
+      - name: Prove eight independent PostgreSQL sessions cannot reuse nonce
+        run: |
+          bash tools/auto_ia/central_transport/check_pg_nonce_race.sh
+      - name: Back up disposable PG16 database and restore into separate empty database
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" pg_dump -U postgres -d imagine_agents_ci -Fc > /tmp/central-auto-p7-ci-backup.dump
+          test -s /tmp/central-auto-p7-ci-backup.dump
+          docker exec -i "${{ job.services.pg.id }}" createdb -U postgres imagine_restored_ci
+          docker exec -i "${{ job.services.pg.id }}" pg_restore -U postgres -d imagine_restored_ci --exit-on-error < /tmp/central-auto-p7-ci-backup.dump
+      - name: Verify restored RLS, grants, signed replay, company and hash parity
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_restored_ci -v ON_ERROR_STOP=1 < tools/auto_ia/central_transport/check_pg_restore.sql
+          source_hash="$(docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -At -v ON_ERROR_STOP=1 -c "SELECT md5(string_agg(issuer||'|'||company_id::text||'|'||nonce||'|'||request_id||'|'||request_digest, ',' ORDER BY issuer,company_id,nonce)) FROM central_auto_lab.mtls_nonce_ledger;")"
+          restored_hash="$(docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_restored_ci -At -v ON_ERROR_STOP=1 -c "SELECT md5(string_agg(issuer||'|'||company_id::text||'|'||nonce||'|'||request_id||'|'||request_digest, ',' ORDER BY issuer,company_id,nonce)) FROM central_auto_lab.mtls_nonce_ledger;")"
+          test "$source_hash" = "$restored_hash"
+          echo "CENTRAL_AUTO_P7_BACKUP_RESTORE_PASS raw_data_not_uploaded=1"
+      - name: Audit isolation and NO_GO baseline
+        run: |
+          python3 tools/auto_ia/check_rc04_integrity.py
+          python3 tools/auto_ia/convergence/check_rc03_release.py
+          echo "CENTRAL_AUTO_P6_NO_GO no_n8n_vps=1 no_customer=1 no_provider=1"
+  no-go-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify zero AI and no operational release
+        run: |
+          python3 tools/auto_ia/check_rc04_integrity.py
+          python3 tools/auto_ia/convergence/check_rc03_release.py
+          python3 tools/auto_ia/check_rc02_release.py
+          python3 tools/auto_ia/policy/check_n8n_zero_ai.py
+          node tools/auto_ia/demo/check_n8n_noai_workflow.cjs
+          python3 infra/n8n-private/test_readonly_inventory.py
+          test ! -f infra/n8n-private/.env
+          echo 'CENTRAL_AUTO_RC06_NO_GO host_unchanged=1 paid_model_api=0 production_deploy=0'
