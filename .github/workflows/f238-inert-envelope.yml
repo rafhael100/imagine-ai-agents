@@ -1,0 +1,35 @@
+name: F238 inert HTTP envelope (NO-GO)
+
+on:
+  push:
+    branches:
+      - dev/f238-synthetic-http-envelope-2026-11-15
+  pull_request:
+    branches:
+      - dev/f237-crm602-pinned-reciprocal-contract-2026-11-15
+
+permissions:
+  contents: read
+
+jobs:
+  inert-envelope:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - name: Reject unreviewed private repository source before checkout
+        if: ${{ github.event.repository.private == true }}
+        run: |
+          echo "PRIVATE_CROSS_REPOSITORY_SOURCE_NOT_VERIFIED"; exit 1
+      - name: Read-only pinned checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Execute offline envelope gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l src/MockBridge/MockSyntheticHttpEnvelope.php
+          php -l tools/check_f238_http_envelope.php
+          php tools/check_f238_http_envelope.php
+          php tools/check_synthetic_php_isolation.php
+          echo 'NO_GO: Fixture is never an HTTP request' >> "$GITHUB_STEP_SUMMARY"
