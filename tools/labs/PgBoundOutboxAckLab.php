@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgBoundOutboxLeaseLab.php';
+require_once __DIR__.'/PgCompanyDispatchGuardLab.php';
 require_once __DIR__.'/../../src/MockOrchestration/MockN8nOutboxContract.php';
 
 use ImagineAI\AutomationFirst\MockP7ToAutoIaAdapter;
@@ -31,11 +32,13 @@ final class PgBoundOutboxAckLab
         ?string $expectedExecutorKeyFingerprint=null,
         ?string $canonicalSignedReceipt=null,
         ?string $receiptSignatureB64=null,
-        ?string $receiptPublicKey=null):array
+        ?string $receiptPublicKey=null,
+        ?string $companyId=null,?int $companyRevision=null):array
     {
         if(!self::ref($tenant)||!self::ref($eventRef)||!self::ref($worker)
             ||$attempt<1||$attempt>3||$now<0||$now>4_102_444_800
-            ||$this->db->inTransaction()) {
+            ||$this->db->inTransaction()
+            ||!PgCompanyDispatchGuardLab::validContext($companyId,$companyRevision)) {
             return self::deny('UNTRUSTED_REFERENCE_OR_NESTED_TX');
         }
         if($expectedSignedPayloadHash!==null
@@ -73,6 +76,12 @@ final class PgBoundOutboxAckLab
                     $this->db->rollBack();
                     return self::deny('TENANT_AUTHORITY_REVOKED_OR_STALE');
                 }
+            }
+            // P43: protect lease-time mapping from becoming stale before ACK.
+            if($companyId!==null && !(new PgCompanyDispatchGuardLab($this->db))
+                ->mappingCurrent($companyId,$tenant,$companyRevision)){
+                $this->db->rollBack();
+                return self::deny('COMPANY_MAPPING_REVOKED_OR_STALE');
             }
             // P37: an external key lookup is not sufficient. Lock the
             // exact tenant-scoped signer key and compare its fingerprint
@@ -120,6 +129,14 @@ SQL);
                 ||!hash_equals($row['event_hash'],$ledger['payload_hash'])) {
                 $this->db->rollBack();
                 return self::deny('CANONICAL_OR_LEDGER_MISMATCH');
+            }
+
+            // P43: only P42-originated events with one matching consumed
+            // mTLS transport proof can receive company-bound ACK.
+            if($companyId!==null && !(new PgCompanyDispatchGuardLab($this->db))
+                ->eventMatches($companyId,$tenant,$eventRef,$row['event_hash'])){
+                $this->db->rollBack();
+                return self::deny('COMPANY_EVENT_TRANSPORT_PROOF_INVALID');
             }
 
             // P36: signed receipt's exact event digest is compared under
