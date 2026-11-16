@@ -196,7 +196,9 @@ def main()->dict:
         cert,key=make_cert(root,"recipient")
         wrong_cert,wrong_key=make_cert(root,"wrongrecipient")
         outfile=root/"sealed-backup.cms"
+        print("P21_STAGE_SEAL_BEGIN",flush=True)
         result=seal(snapshot,cert,fingerprint(cert),outfile)
+        print("P21_STAGE_SEAL_PASS",flush=True)
         require(result["encrypted"] is True and
                 result["go_for_installation"] is False and
                 result["external_backup_verified"] is False,
@@ -218,9 +220,12 @@ def main()->dict:
         negative_tamper=not decrypt(altered,cert,key,
                                    quarantine/"altered.tar")
         require(negative_tamper,"GCM_TAMPER_MUST_DENY")
+        print("P21_STAGE_NEGATIVE_CMS_PASS",flush=True)
         clear=quarantine/"verified-package.tar"
         require(decrypt(copy,cert,key,clear),"CMS_AUTH_DECRYPT_FAILED")
+        print("P21_STAGE_MANIFEST_BEGIN",flush=True)
         proof=verify_decrypted(clear)
+        print("P21_STAGE_MANIFEST_PASS",flush=True)
         require(proof["component_hashes_match"] is True and
                 proof["go_for_installation"] is False,
                 "PACKAGE_VERIFICATION_FALSE_GO")
@@ -238,6 +243,7 @@ def main()->dict:
         require(restored_volume_content(clear,quarantine)==volume_payload,
                 "VOLUME_DATA_NOT_RECOVERED")
 
+        print("P21_STAGE_PG_RESTORE_BEGIN",flush=True)
         rows={}
         for filename,env,source,recovered,event in DBS:
             rows[filename]=restore(containers[env],recovered,
