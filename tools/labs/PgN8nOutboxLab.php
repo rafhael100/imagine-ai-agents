@@ -119,8 +119,8 @@ final readonly class PgN8nOutboxLab
                         state=\'LEASED\' AND lease_expires<=:now
                     )
                 ) AND attempts<3
-                ORDER BY event_ref
-                FOR UPDATE SKIP LOCKED LIMIT 1');
+                ORDER BY event_ref LIMIT 1
+                FOR UPDATE SKIP LOCKED');
             $select->execute(['tenant'=>$tenant,'now'=>$now]);
             $row=$select->fetch(PDO::FETCH_ASSOC);
             if (!is_array($row)) {
