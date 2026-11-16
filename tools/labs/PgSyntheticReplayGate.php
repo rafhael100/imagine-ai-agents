@@ -64,7 +64,12 @@ CREATE TABLE IF NOT EXISTS aia_p16_lab.event_replay (
  observed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
  PRIMARY KEY (tenant_ref, event_ref),
  UNIQUE (tenant_ref, request_ref),
- UNIQUE (tenant_ref, nonce_ref)
+ UNIQUE (tenant_ref, nonce_ref),
+ CONSTRAINT p27_replay_tenant_ref CHECK (tenant_ref ~ '^SYNTHETIC_[A-Z0-9_]{1,48}$'),
+ CONSTRAINT p27_replay_event_ref CHECK (event_ref ~ '^SYNTHETIC_[A-Z0-9_]{1,48}$'),
+ CONSTRAINT p27_replay_request_ref CHECK (request_ref ~ '^SYNTHETIC_[A-Z0-9_]{1,48}$'),
+ CONSTRAINT p27_replay_nonce_ref CHECK (nonce_ref ~ '^SYNTHETIC_[A-Z0-9_]{1,48}$'),
+ CONSTRAINT p27_replay_payload_hash CHECK (payload_hash ~ '^[a-f0-9]{64}$')
 )
 SQL);
     }
