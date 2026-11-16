@@ -49,8 +49,12 @@ docker run --rm --network none \
   -c 'cd /input && tar -cf /backup/n8n_data.tar .' >/dev/null
 test -s "$work/n8n_data.tar"
 # Test-only destination DB passwords intentionally rotate on recovery.
-openssl rand -hex 32 > "$work/admin"
-openssl rand -hex 32 > "$work/runtime"
+# PostgreSQL bootstrap uses btrim(file), while n8n reads the secret file.
+# The two consumers must receive byte-identical values, WITHOUT newline.
+openssl rand -hex 32 | tr -d "\n" > "$work/admin"
+openssl rand -hex 32 | tr -d "\n" > "$work/runtime"
+test "$(wc -c < "$work/admin")" -eq 64
+test "$(wc -c < "$work/runtime")" -eq 64
 cp "$N8N_ENCRYPTION_KEY_FILE" "$work/encryption"
 chmod 0444 "$work/admin" "$work/runtime" "$work/encryption"
 cmp -s "$N8N_ENCRYPTION_KEY_FILE" "$work/encryption"
