@@ -48,6 +48,15 @@ final readonly class PgN8nOutboxLab
             attempts smallint NOT NULL DEFAULT 0 CHECK (attempts BETWEEN 0 AND 3),
             lease_owner varchar(90),
             lease_expires bigint,
+            CONSTRAINT p27_outbox_tenant_ref CHECK (
+                tenant_ref ~ \'^[A-Z0-9_]{1,90}$\' AND tenant_ref ~ \'^SYNTHETIC_[A-Z0-9_]{1,80}$\'
+            ),
+            CONSTRAINT p27_outbox_event_ref CHECK (event_ref ~ \'^SYNTHETIC_[A-Z0-9_]{1,80}$\'),
+            CONSTRAINT p27_outbox_event_hash CHECK (event_hash ~ \'^[a-f0-9]{64}$\'),
+            CONSTRAINT p27_outbox_bytes CHECK (octet_length(canonical_event) <= 512),
+            CONSTRAINT p27_outbox_lease_owner CHECK (
+                lease_owner IS NULL OR lease_owner ~ \'^SYNTHETIC_[A-Z0-9_]{1,80}$\'
+            ),
             PRIMARY KEY (tenant_ref,event_ref)
         )');
     }
