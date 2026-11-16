@@ -1,0 +1,41 @@
+name: Agents P20 - immutable no-AI n8n example and routing matrix
+
+on:
+  push:
+    branches:
+      - review/aia-p20-noai-workflow-gates-2026-11-16
+  pull_request:
+    branches:
+      - review/aia-p19-rls-tenant-isolation-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  p20-noai-gates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 8b04d0e936168c77db028160b5aeb1758db497c4
+          path: _auto_ia_pinned_source
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+      - name: Enforce immutable pinned upstream and fail-closed P14 policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _auto_ia_pinned_source rev-parse HEAD)" = "8b04d0e936168c77db028160b5aeb1758db497c4"
+          python3 tools/check_p14_convergence_gates.py
+      - name: Review immutable manual n8n workflow without executing it
+        run: node tools/check_p20_noai_workflow_guard.cjs
+      - name: Verify the source router decision table avoids hidden API spend
+        run: php tools/check_p20_routes.php
