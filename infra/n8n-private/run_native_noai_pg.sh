@@ -28,7 +28,11 @@ print(found[0]["id"])
 PY
 )"
 test -n "$id"
-if ! "${dc[@]}" exec -T -e N8N_RUNNERS_ENABLED=false n8n n8n execute --id="$id" --rawOutput > "$work/execute.log" 2> "$work/execute.err"; then
+# The main n8n process owns the internal task-broker port 5679.
+# Stop ONLY the ephemeral n8n service (PostgreSQL stays running), then
+# launch a one-off CLI container on the same internal networks/database.
+"${dc[@]}" stop n8n > "$work/stop.log"
+if ! "${dc[@]}" run -T --rm --no-deps --entrypoint n8n n8n execute --id="$id" --rawOutput > "$work/execute.log" 2> "$work/execute.err"; then
   echo "CENTRAL_AUTO_P9_N8N_EXEC_FAILURE_DIAGNOSTIC_NO_SECRETS" >&2
   python3 - "$work/execute.log" "$work/execute.err" <<'PY'
 import sys,re
