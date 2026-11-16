@@ -1,0 +1,43 @@
+name: AUTO-IA-07 PostgreSQL16 RLS and atomic quota lab
+on:
+  push:
+    branches:
+      - feat/auto-ia-07-pg16-rls-lab-2026-11-16
+  pull_request:
+    branches:
+      - review/auto-ia-rc01-automations-first-2026-11-16
+permissions:
+  contents: read
+jobs:
+  pg16-rls-lab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    services:
+      pg:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: synthetic-only-ci-not-secret
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 pinned
+        with:
+          persist-credentials: false
+      - name: Initialize disposable Postgres16 schema and DB-only lab roles
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tools/auto_ia/pg/001_auto_ia_pg_lab.sql
+      - name: Enforce tenant RLS and deterministic NO_AI bypass denial
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tools/auto_ia/pg/check_auto_ia_07.sql
+      - name: Enforce no quota oversubscription with 8 independent DB sessions
+        run: |
+          bash tools/auto_ia/pg/check_parallel_07.sh "${{ job.services.pg.id }}"
+      - name: Preserve AUTO-IA RC01 policy and NO-GO checks
+        run: |
+          php tools/auto_ia/check_auto_ia.php
+          php tools/auto_ia/check_auto_ia_02.php
+          php tools/auto_ia/check_auto_ia_05.php
+          python3 tools/auto_ia/check_auto_ia_03.py
+          python3 tools/auto_ia/check_auto_ia_04.py
+          python3 tools/auto_ia/check_auto_ia_06.py
