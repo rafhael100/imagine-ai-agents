@@ -1,11 +1,5 @@
 # Imagine AI Agents — estado atual
 
-## Candidato de revisão (15/11/2026) — F229 a F237
-
-**Status: PRs em DRAFT / NO-GO.** A integração está preparada para revisão técnica, não para uso operacional. Candidato F236 [PR #327](https://github.com/rafhael100/imagine-ai-agents/pull/327), CI de gate R01 completo [#43787596312](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43787596312) concluída com sucesso após corrigir o baseline do scanner e dos contratos; **879 testes PHP, lint 115 arquivos**, mais Python e ensaios locais. A F237 [PR #328](https://github.com/rafhael100/imagine-ai-agents/pull/328) fixa o CRM #602 SHA `6e4e99879e456aea19124065b105cd989bbf1274`; CI fonte cruzada [#43787947431](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43787947431) aprovada.
-
-A experiência F234 de arquivo local ficou **fora de src/**; nenhum efeito de arquivo é permitido no código de aplicação. F235 combina apenas identidade Ed25519, escopo e replay **sintéticos**; CRM #602 tem ensaios PG16 mais próximos do futuro backend, mas não equivale ao CRM funcional #614 nem libera acesso a cliente. Não fazer merge/deploy automático; nenhum segredo, domínio, VPS ou main foi alterado. **CRM #57:** 14 gates/7 decisões/13 cenários reais continuam sem aceite.
-
 **14/11/2026.** GitHub. **Produção: NO-GO.**
 
 ## Estado executivo
