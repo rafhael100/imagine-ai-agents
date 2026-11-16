@@ -9,6 +9,7 @@ on:
       - dev/f231-ed25519-service-identity-preflight-2026-11-14
       - dev/f236-unified-r01-gate-2026-11-15
       - dev/f237-crm602-pinned-reciprocal-contract-2026-11-15
+      - dev/f240-http-contract-integrated-r01-2026-11-15
   pull_request:
     branches:
       - dev/ft01-aia-core-mocks-2026-11-06
@@ -54,7 +55,7 @@ jobs:
         shell: bash
         env:
           EXPECTED_SHA: ${{ github.sha }}
-          EXPECTED_PHP: '115'
+          EXPECTED_PHP: '117'
           EXPECTED_CASES: '879'
         run: |
           bash tools/run_r01_offline_quality_gate.sh
