@@ -29,9 +29,11 @@ printf "subjectAltName=DNS:localhost,IP:127.0.0.1\nextendedKeyUsage=serverAuth\n
 openssl x509 -req -sha256 -days 1 -in "$work/server.csr" -CA "$work/server-ca.crt" \
   -CAkey "$work/server-ca.key" -CAcreateserial -extfile "$work/ext" \
   -out "$work/server.crt" >/dev/null 2>&1
-for identity in imagine-operator-ci rogue-operator; do
+for identity in imagine-operator-ci rogue-operator same-cn-operator; do
+  name="$identity"
+  if [[ "$identity" = same-cn-operator ]]; then name=imagine-operator-ci; fi
   openssl req -newkey rsa:2048 -nodes -sha256 \
-    -subj "/CN=$identity" -keyout "$work/$identity.key" \
+    -subj "/CN=$name" -keyout "$work/$identity.key" \
     -out "$work/$identity.csr" >/dev/null 2>&1
   printf "extendedKeyUsage=clientAuth\n" > "$work/ext"
   openssl x509 -req -sha256 -days 1 -in "$work/$identity.csr" \
@@ -55,6 +57,13 @@ sudo chmod 0400 "$work/server.key"
 export N8N_OPERATOR_CERT_FILE="$work/server.crt"
 export N8N_OPERATOR_KEY_FILE="$work/server.key"
 export N8N_OPERATOR_CLIENT_CA_FILE="$work/client-ca.crt"
+# The CA may sign two certificates sharing a CN; only the exact reviewed
+# operator certificate fingerprint must pass, never any same-CN impostor.
+fingerprint="$(openssl x509 -in "$work/imagine-operator-ci.crt" -noout -fingerprint -sha1 | cut -d= -f2 | tr -d ":" | tr "A-F" "a-f")"
+[[ "$fingerprint" =~ ^[a-f0-9]{40}$ ]]
+printf "%s 1;\n" "$fingerprint" > "$work/operator-fingerprints.conf"
+chmod 0444 "$work/operator-fingerprints.conf"
+export N8N_OPERATOR_PIN_FILE="$work/operator-fingerprints.conf"
 export N8N_OPERATOR_PORT=18744
 
 # Static guard before any Docker mutation. Full Compose must be exactly 3
@@ -111,6 +120,11 @@ rogue_cn="$(curl --silent --max-time 4 --cacert "$work/server-ca.crt" \
   --output /dev/null --write-out "%{http_code}" \
   https://localhost:18744/ 2>/dev/null || true)"
 test "$rogue_cn" = 403 || { echo "P15_UNRECOGNIZED_OPERATOR_NOT_DENIED" >&2;exit 1; }
+same_cn="$(curl --silent --max-time 4 --cacert "$work/server-ca.crt" \
+  --cert "$work/same-cn-operator.crt" --key "$work/same-cn-operator.key" \
+  --output /dev/null --write-out "%{http_code}" \
+  https://localhost:18744/ 2>/dev/null || true)"
+test "$same_cn" = 403 || { echo "P16_SAME_CN_IMPOSTOR_ACCEPTED" >&2;exit 1; }
 wrong_ca="$(curl --silent --max-time 4 --cacert "$work/server-ca.crt" \
   --cert "$work/untrusted.crt" --key "$work/untrusted.key" \
   --output /dev/null --write-out "%{http_code}" \
@@ -127,4 +141,4 @@ for name in sys.argv[1:]:
     assert not obj["HostConfig"]["Privileged"]
 print("CENTRAL_AUTO_P15_PRIVATE_BACKEND_NO_PORTS_PASS")
 PY
-echo "CENTRAL_AUTO_P15_INGRESS_MTLS_PASS valid_client=1 missing_cert_denied=1 wrong_cn_denied=1 rogue_ca_denied=1 loopback_only=1 mfa=NO NO_GO"
+echo "CENTRAL_AUTO_P16_EXACT_CERT_PIN_PASS valid_client=1 missing_cert_denied=1 wrong_cn_denied=1 same_cn_different_cert_denied=1 rogue_ca_denied=1 loopback_only=1 mfa=NO NO_GO"
