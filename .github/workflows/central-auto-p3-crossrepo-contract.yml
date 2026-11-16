@@ -1,0 +1,52 @@
+name: CENTRAL-AUTO-P3 read-only CRM Portal Agents contract (NO-GO)
+on:
+  push:
+    branches:
+      - feat/central-auto-p3-crm-portal-agents-contract-2026-11-16
+permissions:
+  contents: read
+jobs:
+  cross-repository-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-crm
+          ref: dd88a88b29f9c659786793bbb677355a06ea83bd
+          path: _crm_contract_pin
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-portal
+          ref: 9d3877dfaa81524faf2c08f80244b485968316ec
+          path: _portal_contract_pin
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 21c820b56d53bce243969a4fdd440bf1e26644e5
+          path: _agents_lock_pin
+          persist-credentials: false
+      - name: Ensure immutable source versions and syntactic compatibility
+        run: |
+          test "$(git -C _crm_contract_pin rev-parse HEAD)" = "dd88a88b29f9c659786793bbb677355a06ea83bd"
+          test "$(git -C _portal_contract_pin rev-parse HEAD)" = "9d3877dfaa81524faf2c08f80244b485968316ec"
+          test "$(git -C _agents_lock_pin rev-parse HEAD)" = "21c820b56d53bce243969a4fdd440bf1e26644e5"
+          php -v
+          php -l tools/auto_ia/convergence/check_central_auto_p3_contract.php
+          php -l _crm_contract_pin/app/Core/Automation/RuleDefinition.php
+          php -l _portal_contract_pin/apps/portal/app/Domain/AutomationAdministration/AutomationStateReader.php
+          php -l _agents_lock_pin/tools/auto_ia/MockS2SEnvelopeVerifier.php
+      - name: Verify cross-repository source classes under hostile inputs
+        run: |
+          php tools/auto_ia/convergence/check_central_auto_p3_contract.php
+      - name: Preserve AUTO-IA-RC04 verified no paid AI baseline
+        run: |
+          python3 tools/auto_ia/check_rc04_integrity.py
+          python3 tools/auto_ia/convergence/check_rc03_release.py
+          python3 tools/auto_ia/policy/check_n8n_zero_ai.py
+          echo "CROSS_REPO_NO_GO provider_api=0 billing=0 n8n_vps_install=0"
