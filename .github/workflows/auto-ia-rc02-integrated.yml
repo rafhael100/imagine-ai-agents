@@ -1,0 +1,68 @@
+name: AUTO-IA RC02 integrated PostgreSQL / n8n readiness (NO-GO)
+on:
+  push:
+    branches:
+      - review/auto-ia-rc02-pg-n8n-integrated-2026-11-16
+  pull_request:
+    branches:
+      - review/auto-ia-rc01-automations-first-2026-11-16
+permissions:
+  contents: read
+jobs:
+  integrated-deny-first:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    services:
+      pg:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: synthetic-private-ci-no-production
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: AUTO-IA-01 through 06 pure routing and no credit debit
+        run: |
+          php tools/auto_ia/check_auto_ia.php
+          php tools/auto_ia/check_auto_ia_02.php
+          php tools/auto_ia/check_auto_ia_05.php
+          python3 tools/auto_ia/check_auto_ia_03.py
+          python3 tools/auto_ia/check_auto_ia_04.py
+          python3 tools/auto_ia/check_auto_ia_06.py
+      - name: AUTO-IA-07 PostgreSQL strict RLS, atomic budgets and concurrency
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -v ON_ERROR_STOP=1 < tools/auto_ia/pg/001_auto_ia_pg_lab.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -v ON_ERROR_STOP=1 < tools/auto_ia/pg/check_auto_ia_07.sql
+          bash tools/auto_ia/pg/check_parallel_07.sh "${{ job.services.pg.id }}"
+      - name: AUTO-IA-08 NO_AI durable inbox and eight concurrent nonces
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -v ON_ERROR_STOP=1 < tools/auto_ia/pg/002_no_ai_inbox.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -v ON_ERROR_STOP=1 < tools/auto_ia/pg/check_auto_ia_08.sql
+          bash tools/auto_ia/pg/check_parallel_08.sh "${{ job.services.pg.id }}"
+      - name: AUTO-IA-09 and 10 signed service event under PostgreSQL
+        run: |
+          php tools/auto_ia/check_auto_ia_09.php
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -v ON_ERROR_STOP=1 < tools/auto_ia/pg/003_signed_ingress_lab.sql
+          php tools/auto_ia/pg/check_auto_ia_10.php > /tmp/auto-ia-10-generated.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -v ON_ERROR_STOP=1 < /tmp/auto-ia-10-generated.sql
+      - name: AUTO-IA-11 offline Compose security checks (no image pull)
+        env:
+          N8N_IMAGE: n8nio/n8n@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          N8N_PG_IMAGE: postgres@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+          N8N_PG_PASSWORD: SYNTHETIC_CONFIG_ONLY_NOT_A_SECRET
+          N8N_ENCRYPTION_KEY: SYNTHETIC_CONFIG_ONLY_NOT_A_SECRET
+          N8N_LOOPBACK_PORT: "17990"
+        run: |
+          docker compose --profile homologation -f infra/n8n-private/docker-compose.yml config --format json > /tmp/auto-ia-n8n-config.json
+          python3 infra/n8n-private/check_compose_static.py < /tmp/auto-ia-n8n-config.json
+          bash -n infra/n8n-private/host_preflight_readonly.sh
+      - name: AUTO-IA-12 n8n manual demo (no real service)
+        run: |
+          node tools/auto_ia/demo/check_n8n_noai_workflow.cjs
+      - name: Final NO-GO evidence
+        run: |
+          python3 tools/auto_ia/check_rc02_release.py
+
