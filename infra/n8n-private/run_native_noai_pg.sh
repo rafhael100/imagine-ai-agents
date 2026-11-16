@@ -28,6 +28,18 @@ print(found[0]["id"])
 PY
 )"
 test -n "$id"
-"${dc[@]}" exec -T n8n n8n execute --id="$id" --rawOutput > "$work/execute.log"
+if ! "${dc[@]}" exec -T n8n n8n execute --id="$id" --rawOutput > "$work/execute.log" 2> "$work/execute.err"; then
+  echo "CENTRAL_AUTO_P9_N8N_EXEC_FAILURE_DIAGNOSTIC_NO_SECRETS" >&2
+  python3 - "$work/execute.log" "$work/execute.err" <<'PY'
+import sys,re
+for name in sys.argv[1:]:
+  lines=open(name,encoding="utf-8",errors="replace").read().splitlines()[-24:]
+  for line in lines:
+    if len(line)>250:line=line[:250]+"[TRUNCATED]"
+    line=re.sub(r"(?i)(password|token|secret|authorization|credential)(\\s*[=:]\\s*)(\\S+) ",r"\\1\\2[REDACTED] ",line)
+    print(line,file=sys.stderr)
+PY
+  exit 1
+fi
 python3 "$checker" result "$flow" "$work/execute.log"
 echo "CENTRAL_AUTO_P9_NATIVE_N8N_PASS postgresql_runtime=restricted no_code=1 provider_api=0 credits=0 release=NO_GO"
