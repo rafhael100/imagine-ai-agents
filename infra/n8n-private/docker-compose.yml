@@ -35,8 +35,10 @@ services:
     depends_on:
       n8n-db:
         condition: service_healthy
-    ports:
-      - "127.0.0.1:${N8N_LOOPBACK_PORT:-17990}:5678"
+    # Strictly zero host-published ports while both networks are internal.
+    # Private operator ingress (TLS/MFA) remains a separate future gate.
+    expose:
+      - "5678"
     environment:
       DB_TYPE: postgresdb
       DB_POSTGRESDB_HOST: n8n-db
