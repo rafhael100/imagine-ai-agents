@@ -1,7 +1,5 @@
 # Imagine AI Agents
 
-**Candidato 15/11/2026, ainda sem merge:** o conjunto F229–F237 está em revisão controlada; gate R01 F236 [CI #43787596312](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43787596312) verde (**879 testes PHP, lint 115**), e verificação da fonte original CRM F247/PR #602 em F237 [CI #43787947431](https://github.com/rafhael100/imagine-ai-agents/actions/runs/43787947431) verde. **NO-GO para uso real:** CRM #57 ainda exige autorização e homologação independente. Consulte [STATUS-ATUAL](STATUS-ATUAL.md) e [F237](docs/AIA-FT01-F237-CRM602-RECIPROCAL-SOURCE.md).
-
 **14/11/2026:** EVID-44,EVID-45,EVID-46,EVID-47,EVID-48; EVID-49 #293–294; [EVID-50](docs/AIA-R01-EVID-50-REAL-FACADE-CORE-CRM-POSTMERGE.md) #296–297; [EVID-51](docs/AIA-R01-EVID-51-OP01-CAMINHO-CRITICO-POSTMERGE.md) #299–301; EVID-52 #303–308. **879 PHP/lint110; NO-GO.**
 
 ## O que está implementado em laboratório
