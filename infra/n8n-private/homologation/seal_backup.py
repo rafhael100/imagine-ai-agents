@@ -13,13 +13,65 @@ def digest(path):
   for block in iter(lambda:f.read(1024*1024),b''):h.update(block)
  return h.hexdigest()
 
-def inspect_volume(path):
- total=0;count=0
- with tarfile.open(path,'r:*') as archive:
-  for entry in archive:
-   count+=1;total+=entry.size
-   name=PurePosixPath(entry.name)
-   if count>10000 or total>LIMIT or name.is_absolute() or '..' in name.parts or not (entry.isfile() or entry.isdir()):raise Denied('UNSAFE_VOLUME_ARCHIVE')
+def inspect_volume(source):
+ """Reject malicious nested volume entries before sealing AND after decrypting.
+
+ Accept a filesystem path or a non-seekable outer-TAR member stream.
+ No extraction and no buffering of the 20 GiB maximum volume.
+ """
+ total=0;count=0;seen={};parents=set()
+ try:
+  if hasattr(source,'read'):
+   opened=tarfile.open(fileobj=source,mode='r|*')
+  else:
+   opened=tarfile.open(source,mode='r|*')
+  with opened as archive:
+   for entry in archive:
+    count+=1
+    if count>10000 or entry.size<0 or entry.size>LIMIT:
+     raise Denied('UNSAFE_VOLUME_ARCHIVE')
+    total+=entry.size
+    if total>LIMIT or entry.type not in (tarfile.REGTYPE,tarfile.AREGTYPE,tarfile.DIRTYPE):
+     raise Denied('UNSAFE_VOLUME_ARCHIVE')
+    if entry.mode&0o6000:
+     raise Denied('UNSAFE_VOLUME_PERMISSIONS')
+    raw=entry.name
+    if (not isinstance(raw,str) or len(raw)>240 or
+        any(ord(ch)<32 for ch in raw) or '\\' in raw or ':' in raw):
+     raise Denied('UNSAFE_VOLUME_PATH')
+    if raw.startswith('./'):
+     raw=raw[2:]
+    if entry.isdir():
+     raw=raw.rstrip('/')
+    if raw in ('','.'):
+     if not entry.isdir() or raw in seen:
+      raise Denied('UNSAFE_VOLUME_ROOT')
+     seen[raw]='directory'
+     continue
+    normalized=PurePosixPath(raw)
+    if (normalized.is_absolute() or '..' in normalized.parts or
+        normalized.as_posix()!=raw or raw in seen):
+     raise Denied('UNSAFE_VOLUME_PATH')
+    kind='file' if entry.isfile() else 'directory'
+    if kind=='file' and raw in parents:
+     raise Denied('VOLUME_FILE_OVERLAPS_DIRECTORY')
+    parts=normalized.parts
+    for i in range(1,len(parts)):
+     p='/'.join(parts[:i])
+     if seen.get(p)=='file':
+      raise Denied('VOLUME_PARENT_IS_FILE')
+     parents.add(p)
+    seen[raw]=kind
+    if kind=='file':
+     stream=archive.extractfile(entry)
+     if stream is None:
+      raise Denied('UNREADABLE_VOLUME_MEMBER')
+     # Fully read to detect truncated TAR content, but never extract.
+     with stream:
+      while stream.read(1024*1024):
+       pass
+ except (tarfile.TarError,EOFError,OSError,ValueError) as error:
+  raise Denied('UNSAFE_VOLUME_ARCHIVE') from error
 
 def seal(source,recipient,pin,output):
  source=Path(source);s=source.lstat()
@@ -84,7 +136,15 @@ def verify_decrypted(path):
     payloads[member.name]={'sha256':h.hexdigest(),'bytes':size}
  if not isinstance(manifest,dict) or set(manifest)!={'schema','components','recipient_fingerprint','coherent_source_snapshot_verified','external_copy_verified','application_restore_verified'} or any(manifest[k] is not False for k in ['coherent_source_snapshot_verified','external_copy_verified','application_restore_verified']):raise Denied('MANIFEST_SCHEMA_DENIED')
  if seen!=expected or not isinstance(manifest.get('recipient_fingerprint'),str) or not re.fullmatch('[a-f0-9]{64}',manifest['recipient_fingerprint']) or manifest.get('schema')!='IMAGINE_RECOVERY_PACKAGE_V1' or manifest.get('components')!=payloads:raise Denied('PACKAGE_INTEGRITY_DENIED')
- return {'schema':'IMAGINE_RECOVERY_INTEGRITY_V1','component_hashes_match':True,'database_restore_verified':False,'go_for_installation':False}
+ # Even a valid component SHA may describe a *malicious* inner TAR.
+ # Re-inspect the actual decrypted volume bytes before anyone extracts them.
+ with tarfile.open(path,'r:') as outer:
+  volume=outer.getmember('n8n-data.tar')
+  stream=outer.extractfile(volume)
+  if stream is None:raise Denied('VOLUME_MEMBER_MISSING')
+  with stream:
+   inspect_volume(stream)
+ return {'schema':'IMAGINE_RECOVERY_INTEGRITY_V1','component_hashes_match':True,'volume_tar_safe_for_reviewed_extraction':True,'database_restore_verified':False,'go_for_installation':False}
 
 if __name__=='__main__':
  p=argparse.ArgumentParser();sub=p.add_subparsers(dest='operation',required=True)
