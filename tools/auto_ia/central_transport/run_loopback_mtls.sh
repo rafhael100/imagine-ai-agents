@@ -38,6 +38,7 @@ openssl req -x509 -newkey rsa:2048 -nodes -sha256 -days 1 \
 
 export CENTRAL_AUTO_P5_CERT_DIR="$tmp"
 export CENTRAL_AUTO_P5_FIXTURES="$tmp/crm-state.json"
+export CENTRAL_AUTO_P6_PG_NONCE=true
 php "$root/tools/auto_ia/central_transport/generate_crm_snapshot.php" > "$tmp/crm-state.json"
 python3 "$root/tools/auto_ia/central_transport/mtls_crm_lab_server.py" > "$tmp/server.log" 2>&1 &
 server_pid="$!"
@@ -60,4 +61,23 @@ if [[ "$ready" != 1 ]]; then
   exit 1
 fi
 php "$root/tools/auto_ia/central_transport/check_portal_crm_mtls.php"
-echo 'CENTRAL_AUTO_P5_REAL_TLS_PASS loopback_only=1 no_production_service=1 no_ai=1'
+echo 'CENTRAL_AUTO_P6_FIRST_MTLS_RUN_PASS db_nonce=1 no_real_service=1'
+# Restart the fixture server WITHOUT restarting PostgreSQL. Memory state is lost.
+kill "$server_pid"
+wait "$server_pid" 2>/dev/null || true
+server_pid=""
+python3 "$root/tools/auto_ia/central_transport/mtls_crm_lab_server.py" > "$tmp/restarted.log" 2>&1 &
+server_pid="$!"
+ready=0
+for _ in $(seq 1 60); do
+  if ! kill -0 "$server_pid" 2>/dev/null; then
+    cat "$tmp/restarted.log" >&2
+    exit 1
+  fi
+  http_code="$(curl --silent --max-time 2 --cacert "$tmp/ca.crt"     --cert "$tmp/portal.crt" --key "$tmp/portal.key"     --output /dev/null --write-out '%{http_code}'     https://localhost:18787/private/automation-state 2>/dev/null || true)"
+  if [[ "$http_code" = 405 ]]; then ready=1; break; fi
+  sleep 0.15
+done
+test "$ready" = 1
+php "$root/tools/auto_ia/central_transport/check_replay_after_restart.php"
+echo 'CENTRAL_AUTO_P6_PERSISTENT_REPLAY_PASS postgresql=16 no_vps=1 no_provider=1'

@@ -1,0 +1,66 @@
+name: CENTRAL-AUTO-P6 durable replay for mTLS CRM/Portal rehearsal (CI-only)
+on:
+  push:
+    branches:
+      - feat/central-auto-p6-durable-mtls-replay-2026-11-16
+permissions:
+  contents: read
+jobs:
+  durable-mtls-lab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      pg:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-crm
+          ref: 9afa6683e6b3463f12bd80a25f455f925828c0af
+          path: _crm_contract_pin
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-portal
+          ref: 9d3877dfaa81524faf2c08f80244b485968316ec
+          path: _portal_contract_pin
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: openssl
+          coverage: none
+      - name: Prove exact source commits and test-only syntax
+        run: |
+          test "$(git -C _crm_contract_pin rev-parse HEAD)" = "9afa6683e6b3463f12bd80a25f455f925828c0af"
+          test "$(git -C _portal_contract_pin rev-parse HEAD)" = "9d3877dfaa81524faf2c08f80244b485968316ec"
+          php -l tools/auto_ia/central_transport/check_replay_after_restart.php
+          python3 -m py_compile tools/auto_ia/central_transport/mtls_crm_lab_server.py
+          bash -n tools/auto_ia/central_transport/check_pg_nonce_race.sh
+      - name: Create least-privilege synthetic PostgreSQL replay ledger
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/central_transport/001_pg_durable_nonce.sql
+          psql --version
+      - name: Send real mTLS requests, restart server and deny persisted replay
+        run: |
+          bash tools/auto_ia/central_transport/run_loopback_mtls.sh
+      - name: Prove eight independent PostgreSQL sessions cannot reuse nonce
+        run: |
+          bash tools/auto_ia/central_transport/check_pg_nonce_race.sh
+      - name: Audit isolation and NO_GO baseline
+        run: |
+          python3 tools/auto_ia/check_rc04_integrity.py
+          python3 tools/auto_ia/convergence/check_rc03_release.py
+          echo "CENTRAL_AUTO_P6_NO_GO no_n8n_vps=1 no_customer=1 no_provider=1"
