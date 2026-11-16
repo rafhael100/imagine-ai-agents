@@ -69,6 +69,15 @@ jobs:
               assert item['Internal'] is True
           print('P4_PRIVATE_COMPOSE_PASS runtime_non_superuser=1 secret_values_in_container_env=0 private_networks=1 operational_release=0')
           PY
+      - name: Require live PostgreSQL 17 runtime, not merely the image label
+        run: |
+          dc=(docker compose --profile homologation -f infra/n8n-private/docker-compose.yml)
+          pg_num="$("${dc[@]}" exec -T n8n-db psql -X -qAt -U n8n_bootstrap_admin -d n8n -c 'SHOW server_version_num')"
+          if [[ ! "$pg_num" =~ ^17[0-9]{4}$ ]]; then
+            echo "CENTRAL_AUTO_RC07_EXPECTED_PG17_RUNTIME" >&2
+            exit 1
+          fi
+          echo "CENTRAL_AUTO_RC07_PG17_RUNTIME_VERIFIED"
       - name: Test reviewed native-only workflow and adversarial mutations before importing
         run: |
           python3 -m py_compile infra/n8n-private/check_native_noai_flow.py
@@ -78,7 +87,7 @@ jobs:
       - name: Import, export and execute real three-node workflow in hardened official n8n
         run: |
           bash infra/n8n-private/run_native_noai_pg.sh
-          echo "CENTRAL_AUTO_P9_NO_GO real_n8n_and_pg16=1 provider_api=0 paid_credits=0 no_vps=1"
+          echo "CENTRAL_AUTO_P9_NO_GO real_n8n_and_pg17=1 provider_api=0 paid_credits=0 no_vps=1"
 
       - name: Remove only this job's ephemeral stack
         if: always()
