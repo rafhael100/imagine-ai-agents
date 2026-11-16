@@ -155,6 +155,12 @@ def smoke_merged_tree(tree_sha:str)->dict:
             if p.returncode:
                 print("CENTRAL_AUTO_P18B_SMOKE_FAIL "+name+
                       " rc="+str(p.returncode),file=sys.stderr)
+                # Offline tests contain only synthetic data. Still truncate
+                # and redact any credential-like diagnostic before logging.
+                for line in (p.stdout+"\n"+p.stderr).splitlines()[-8:]:
+                    line=re.sub(r"(?i)(password|secret|token)(\\s*[:=]\\s*)\\S+",
+                                r"\\1\\2[REDACTED]",line)
+                    print("P18B_TEST_DIAGNOSTIC "+line[:240],file=sys.stderr)
                 raise RuntimeError("MERGED_TREE_SMOKE_FAILED_"+name)
         if shutil.which("php"):
             p=subprocess.run(["php","-l",
