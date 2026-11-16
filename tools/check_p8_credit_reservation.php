@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/labs/PgAiCreditReservationLab.php';
+require_once __DIR__.'/../src/MockOrchestration/MockAiOrAutomationRouter.php';
 
 use ImagineAI\Labs\PgAiCreditReservationLab;
 
@@ -29,6 +30,54 @@ $lab->createTables();
 try {
     checkP8($lab->seedSynthetic('SYNTHETIC_TENANT_A',100),'seed A');
     checkP8($lab->seedSynthetic('SYNTHETIC_TENANT_B',30),'seed B');
+
+    // P5 -> P8 integration contract: deterministic tasks never even
+    // request a credit hold; semantic tasks require all eligibility checks.
+    checkP8($lab->seedSynthetic('SYNTHETIC_TENANT_C',40),'seed model test tenant');
+    $intent=[
+        'tenant_ref'=>'SYNTHETIC_TENANT_C',
+        'run_ref'=>'SYNTHETIC_RUN_01',
+        'operation'=>'mock.funnel.estimate',
+        'content_class'=>'SYNTHETIC_ONLY',
+        'requires_external_effect'=>false,
+        'estimated_model_units'=>0,
+    ];
+    $policy=[
+        'tenant_ref'=>'SYNTHETIC_TENANT_C',
+        'ai_opt_in'=>false,'consent_verified'=>false,
+        'approved_for_model'=>false,'available_units'=>40,
+        'per_call_limit'=>0,'provider_configured'=>false,'ledger_certain'=>false,
+    ];
+    $route=\ImagineAI\MockOrchestration\MockAiOrAutomationRouter::inspect($intent,$policy);
+    checkP8($route['decision']==='DETERMINISTIC_ONLY'
+        && $route['proposed_units']===0
+        && $route['credits_consumed']===0,'deterministic preflight is zero-credit');
+    checkP8($lab->snapshot('SYNTHETIC_TENANT_C')['available']===40,
+        'preflight must not touch money or PG quota');
+    $intent['operation']='mock.copy.draft';
+    $intent['estimated_model_units']=15;
+    $policy=array_replace($policy,[
+        'ai_opt_in'=>true,'consent_verified'=>true,
+        'approved_for_model'=>true,'per_call_limit'=>20,
+        'provider_configured'=>true,'ledger_certain'=>true,
+    ]);
+    $model=\ImagineAI\MockOrchestration\MockAiOrAutomationRouter::inspect($intent,$policy);
+    checkP8($model['decision']==='MODEL_ELIGIBLE_NOT_EXECUTED'
+        && $model['proposed_units']===15 && $model['credits_consumed']===0
+        && $model['external_calls']===0,'model only eligible no API');
+    checkP8($lab->reserve('SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL',
+        'SYNTHETIC_PURPOSE_MARKETING',$model['proposed_units'])===
+        ['state'=>'RESERVED','estimated'=>15],'reserve separately after preflight');
+    checkP8($lab->markUnknown('SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL'),
+        'uncertain future provider response keeps hold');
+    checkP8($lab->snapshot('SYNTHETIC_TENANT_C')['held']===15,
+        'no automatic refund of unknown credit');
+    checkP8($lab->reconcile('SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL',12),
+        'verified synthetic observed measure');
+    checkP8($lab->snapshot('SYNTHETIC_TENANT_C')===[
+        'allowance'=>40,'spent'=>12,'held'=>0,'available'=>28,'frozen'=>false,
+    ],'only observed usage charged after reconciliation');
+
     checkP8(!$lab->seedSynthetic('SYNTHETIC_TENANT_A',100),'reject double funding');
     checkP8(!$lab->seedSynthetic('REAL_CUSTOMER',100),'reject real customer');
     checkP8($lab->reserve('SYNTHETIC_TENANT_A','INVALID_ID',
