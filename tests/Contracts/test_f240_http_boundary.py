@@ -28,6 +28,7 @@ class F240HttpBoundary(unittest.TestCase):
         self.assertIn("hash_equals($expected, $responseBody)",src)
         self.assertIn("$f246 = array_keys($headers) === ['content-type', 'cache-control']",src)
         self.assertIn("'private, no-store, max-age=0'",src)
+        self.assertIn("'max-age=0, no-store, private'",src)
         self.assertIn("'x-robots-tag'",src)
         self.assertIn("'x-content-type-options'",src)
         t=(ROOT/"tools/check_f239_denial_receipt.php").read_text()
