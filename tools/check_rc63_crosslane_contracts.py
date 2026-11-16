@@ -57,14 +57,15 @@ def verify_contracts()->dict:
     )
     sender=source(
         CRM,"app/Homologation/S2S/AgentsEventAdapter.php",
-        "lead.ingest","CRM_LEAD_EVENT_V1",
+        "lead.ingest","AUTO_IA_S2S_V1",
         "https://agents-s2s:8443/private/events","'DISABLED'",
         "ACK_SIGNATURE","verify_peer_name","SENDER_DISABLED"
     )
     source(
         CRM,"infra/homologation/s2s/outbound-candidate.sql",
         "action='lead.created'","operation='lead.ingest'",
-        "FORCE ROW LEVEL SECURITY","OUTBOUND_GRANT_DENIED"
+        "CRM_LEAD_EVENT_V1","FORCE ROW LEVEL SECURITY",
+        "OUTBOUND_GRANT_DENIED"
     )
     portal=source(
         PORTAL,"apps/portal/docs/administration/CENTRAL-AUTO-P20-AUTHORITY.md",
