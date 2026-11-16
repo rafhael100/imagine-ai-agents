@@ -56,6 +56,7 @@ grep -Eq '^2\.47\.7$' "$work/version.txt"
 docker exec "$container" n8n import:workflow --input=/tmp/noai.workflow.json
 docker exec "$container" n8n export:workflow --all --output=/tmp/exported.json
 docker cp "$container:/tmp/exported.json" "$work/exported.json"
+python3 "$root/tools/auto_ia/demo/check_n8n_roundtrip.py" "$workflow" "$work/exported.json"
 python3 - "$work/exported.json" > "$work/id.txt" <<'PY'
 import json,sys
 data=json.load(open(sys.argv[1],encoding="utf-8"))
