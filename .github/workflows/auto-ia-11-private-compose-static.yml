@@ -1,0 +1,32 @@
+name: AUTO-IA-11 private n8n Compose static safety (NO DEPLOY)
+on:
+  push:
+    branches:
+      - feat/auto-ia-11-n8n-private-staging-bundle-2026-11-16
+  pull_request:
+    branches:
+      - feat/auto-ia-10-postgres-signed-inbox-2026-11-16
+permissions:
+  contents: read
+jobs:
+  compose-readonly:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate Compose syntax with exclusively synthetic placeholders
+        env:
+          N8N_IMAGE: n8nio/n8n@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          N8N_PG_IMAGE: postgres@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+          N8N_PG_PASSWORD: SYNTHETIC_DB_PASS_ONLY_FOR_CONFIG_TEST
+          N8N_ENCRYPTION_KEY: SYNTHETIC_ENCRYPTION_KEY_CONFIG_TEST_ONLY
+          N8N_LOOPBACK_PORT: "17990"
+        run: |
+          docker compose --profile homologation -f infra/n8n-private/docker-compose.yml config --format json > /tmp/n8n-compose.json
+          python3 infra/n8n-private/check_compose_static.py < /tmp/n8n-compose.json
+          bash -n infra/n8n-private/host_preflight_readonly.sh
+          test ! -f infra/n8n-private/.env
+          echo "NO_DEPLOY_NO_N8N_INSTALLED_NO_PROVIDER_CALLS"
+
