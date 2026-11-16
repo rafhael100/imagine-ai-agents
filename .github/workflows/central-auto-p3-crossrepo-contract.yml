@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: rafhael100/imagine-crm
-          ref: dd88a88b29f9c659786793bbb677355a06ea83bd
+          ref: 9afa6683e6b3463f12bd80a25f455f925828c0af
           path: _crm_contract_pin
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -33,7 +33,7 @@ jobs:
           persist-credentials: false
       - name: Ensure immutable source versions and syntactic compatibility
         run: |
-          test "$(git -C _crm_contract_pin rev-parse HEAD)" = "dd88a88b29f9c659786793bbb677355a06ea83bd"
+          test "$(git -C _crm_contract_pin rev-parse HEAD)" = "9afa6683e6b3463f12bd80a25f455f925828c0af"
           test "$(git -C _portal_contract_pin rev-parse HEAD)" = "9d3877dfaa81524faf2c08f80244b485968316ec"
           test "$(git -C _agents_lock_pin rev-parse HEAD)" = "21c820b56d53bce243969a4fdd440bf1e26644e5"
           php -v
