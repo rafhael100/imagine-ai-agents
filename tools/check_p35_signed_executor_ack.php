@@ -21,6 +21,9 @@ $db=new PDO('pgsql:host=127.0.0.1;port=5432;dbname=imagine_agents_ci',
     'postgres','ci-only-password',[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
 $cycle=new PgRevocationBoundCycleLab($db);
 $cycle->createTables();
+// Earlier P34 test runs in this same disposable CI database.
+// Isolate fresh synthetic authority fixtures before the signature suite.
+$db->exec('TRUNCATE TABLE aia_p34_lab.tenant_policy');
 $db->exec('TRUNCATE TABLE aia_p16_lab.event_replay');
 $outbox=new PgN8nOutboxLab($db);
 $authority=$cycle->authority();
