@@ -1,0 +1,30 @@
+name: AUTO-IA-15 proof of real n8n result without paid AI
+on:
+  push:
+    branches:
+      - feat/auto-ia-15-n8n-verified-runtime-output-2026-11-16
+permissions:
+  contents: read
+concurrency:
+  group: auto-ia-15-runtime-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  official-n8n-runtime-result:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify result parser denies model charges and incorrect counts
+        run: |
+          python3 -m py_compile tools/auto_ia/demo/verify_n8n_execution.py
+          python3 tools/auto_ia/demo/verify_n8n_execution.py --self-test
+          python3 tools/auto_ia/policy/check_n8n_zero_ai.py
+      - name: Run official pinned n8n 2.47.7 no network or ports, validate output
+        run: |
+          bash infra/n8n-private/check_ephemeral_n8n_runtime.sh
+      - name: Preserve release veto after successful demonstration
+        run: |
+          python3 tools/auto_ia/convergence/check_rc03_release.py
+          echo 'AUTO_IA_15_TESTED production=NO_GO n8n_vps_installed=false provider_calls=0 paid_credits=0' >> "$GITHUB_STEP_SUMMARY"
