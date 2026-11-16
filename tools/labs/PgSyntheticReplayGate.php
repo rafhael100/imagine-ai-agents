@@ -29,11 +29,11 @@ final class PgSyntheticReplayGate
             }
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $identity = $db->query(
-                'SELECT current_database() AS db, current_user AS role'
+                'SELECT current_database() AS db, current_user AS username'
             )->fetch(PDO::FETCH_ASSOC);
             if (!is_array($identity)
                 || $identity['db'] !== 'imagine_agents_ci'
-                || $identity['role'] !== 'postgres') {
+                || $identity['username'] !== 'postgres') {
                 throw new \RuntimeException('P16_WRONG_DATABASE_IDENTITY');
             }
         } catch (Throwable $e) {
