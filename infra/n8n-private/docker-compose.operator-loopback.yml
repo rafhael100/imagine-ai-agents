@@ -1,6 +1,11 @@
 # CENTRAL-AUTO-P15: OPTIONAL CI-only operator ingress overlay.
 # Must never be enabled on VPS without host, MFA and IAM gates.
 services:
+  # Reverse-proxy awareness only while this optional overlay is enabled.
+  n8n:
+    environment:
+      N8N_PROXY_HOPS: "1"
+      N8N_EDITOR_BASE_URL: "https://localhost:${N8N_OPERATOR_PORT:-18744}/"
   operator-ingress:
     profiles: ["operator-lab"]
     image: ${N8N_OPERATOR_NGINX_IMAGE:?REQUIRE_PINNED_NGINX_IMAGE_DIGEST}
