@@ -4,7 +4,7 @@
 
 ## Entrega
 
-A F240 unifica as classes de laboratório F238 (preparação de envelope) e F239 (reconhecimento estrito de negativa HTTP 404) em `tools/check_f240_http_cycle.php`. O ensaio constrói uma requisição `crm.lead.read_minimal` de dados sintéticos, gera uma assinatura Ed25519 determinística de teste, confere identidade, escopo e replay via F235 e **apenas monta** cabeçalhos e corpo. A resposta CRM é simulada exclusivamente com o contrato público original `MockCrmPublicResponseContract::denial()`; o parser rejeita 15 respostas adversariais.
+A F240 unifica as classes de laboratório F238 (preparação de envelope) e F239 (reconhecimento estrito de negativa HTTP 404) em `tools/check_f240_http_cycle.php`. O ensaio constrói uma requisição `crm.lead.read_minimal` de dados sintéticos, gera uma assinatura Ed25519 determinística de teste, confere identidade, escopo e replay via F235 e **apenas monta** cabeçalhos e corpo. A resposta CRM é simulada exclusivamente com o contrato público original `MockCrmPublicResponseContract::denial()`; o parser rejeita 20 respostas adversariais.
 
 Nenhuma requisição sai do processo: não há URL de destino, controlador HTTP, instalação de pacotes, chaves reais, banco, IAM, perfil humano ou leads de clientes. A assinatura do teste **nunca** é credencial de serviço. `NO_GO` permanece explícito inclusive quando o teste é aprovado.
 
@@ -20,3 +20,5 @@ O workflow R01 será executado sobre HEAD exata do candidato F240 e exige:
 - Testes Python F240 verificando o gate sem permissões operacionais.
 
 A documentação detalhada do candidato anterior continua em F236/F237. Uma CI verde aqui não autoriza merge nem deploy.
+
+A revisão do CRM #614 identificou o adaptador F248 existente e seu perfil HTTP de negativa distinta da F246; F239 agora aceita estritamente ambos os perfis, sem aceitar outros cabeçalhos. A F240 prova os dois perfis e 20 variantes negativas.
