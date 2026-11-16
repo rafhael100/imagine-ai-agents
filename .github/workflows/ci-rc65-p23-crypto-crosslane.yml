@@ -1,0 +1,69 @@
+name: AIA RC65 - combine Central P23 encrypted PG recovery and Agents RC64 NO_AI
+
+on:
+  push:
+    branches:
+      - review/aia-rc65-p23-crypto-crosslane-2026-11-16
+  pull_request:
+    branches:
+      - review/aia-rc64-ephemeral-unified-lab-2026-11-16
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aia-rc65-virtual-tree-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  virtual-source-tree:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    services:
+      pg17:
+        image: postgres:17
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: synthetic-rc65-ci-only
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+      pg16:
+        image: postgres:16
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: synthetic-rc65-ci-only
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - name: Checkout RC64 Git history read-only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Checkout independent Central P23 at exact SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 995201f9300590f86b6ce5bf5d46168cee5ef903
+          path: _central_p20_pinned
+          persist-credentials: false
+      - name: PHP 8.4 for deterministic Agents suites
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, sodium
+          coverage: none
+      - name: Virtual merge-tree with Central P23 signatures and real PostgreSQL recovery + Agents NO_AI tests
+        shell: bash
+        env:
+          PG17_CONTAINER: ${{ job.services.pg17.id }}
+          PG16_CONTAINER: ${{ job.services.pg16.id }}
+        run: |
+          set -euo pipefail
+          bash -n tools/run_rc65_virtual_tree.sh
+          bash tools/run_rc65_virtual_tree.sh
+          echo 'RC65: Central P23 encrypted PG16/17 recovery and Agents NO_AI tested together; NO_GO.' >> "$GITHUB_STEP_SUMMARY"
