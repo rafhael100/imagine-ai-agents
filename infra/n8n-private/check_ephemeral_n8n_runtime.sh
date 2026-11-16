@@ -56,6 +56,7 @@ grep -Eq '^2\.47\.7$' "$work/version.txt"
 docker exec "$container" n8n import:workflow --input=/tmp/noai.workflow.json
 docker exec "$container" n8n export:workflow --all --output=/tmp/exported.json
 docker cp "$container:/tmp/exported.json" "$work/exported.json"
+python3 "$root/tools/auto_ia/demo/check_n8n_roundtrip.py" "$workflow" "$work/exported.json"
 python3 - "$work/exported.json" > "$work/id.txt" <<'PY'
 import json,sys
 data=json.load(open(sys.argv[1],encoding="utf-8"))
@@ -73,5 +74,6 @@ print(ident)
 PY
 id="$(cat "$work/id.txt")"
 echo "AUTO_IA_14_IMPORT_PASS active=false"
-docker exec "$container" n8n execute --id "$id" | tee "$work/execute.log"
-echo "AUTO_IA_14_N8N_RUNTIME_PASS external_network=none api_calls=0 vps_changed=0"
+docker exec "$container" n8n execute --id "$id" --rawOutput | tee "$work/execute.log"
+python3 "$root/tools/auto_ia/demo/verify_n8n_execution.py" "$work/execute.log"
+echo "AUTO_IA_15_N8N_EXECUTION_PROVEN external_network=none leads=12 clients=2 ai_calls=0 credit_debit=0 vps_changed=0"
