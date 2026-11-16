@@ -1,5 +1,9 @@
 # Imagine AI Agents — roadmap operacional
 
+## Próxima prioridade verificada — OP-01 real com CRM (15/11/2026)
+
+A implementação de laboratório F229–F237 já possui testes individuais e gate integral R01 com 879 testes PHP / 115 lints no candidato F236, além de verificação SHA-pinned da fonte CRM #602 em F237. **Não desenvolver nova alternativa de nonce local como se substituísse a implementação PG16 existente no CRM.** O caminho crítico é reconciliar o IAM, o banco e o backend funcional da PR CRM #614 com as proteções de #602, sem merge cego, e revisar os gates de política por empresa, usuário, recurso e campo. Em seguida, homologar OP-01 em staging isolado com chave protegida, nonce distribuído, mTLS, auditoria e rollback. **Nenhuma rota/credencial de produção liberada; todas as decisões reais continuam NO-GO.**
+
 **14/11/2026:** Histórico: [Histórico](historico/ROADMAP-ANTES-CONSOLIDACAO-2026-11-10.md). Estado: [STATUS-ATUAL.md](../STATUS-ATUAL.md), [EVID-49](AIA-R01-EVID-49-CRM-AGENTS-POSTMERGE.md), [EVID-50](AIA-R01-EVID-50-REAL-FACADE-CORE-CRM-POSTMERGE.md), [EVID-51](AIA-R01-EVID-51-OP01-CAMINHO-CRITICO-POSTMERGE.md), EVID-52.
 
 ## Fase A — base de demonstração offline
