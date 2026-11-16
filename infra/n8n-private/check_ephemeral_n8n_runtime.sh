@@ -73,5 +73,6 @@ print(ident)
 PY
 id="$(cat "$work/id.txt")"
 echo "AUTO_IA_14_IMPORT_PASS active=false"
-docker exec "$container" n8n execute --id "$id" | tee "$work/execute.log"
-echo "AUTO_IA_14_N8N_RUNTIME_PASS external_network=none api_calls=0 vps_changed=0"
+docker exec "$container" n8n execute --id "$id" --rawOutput | tee "$work/execute.log"
+python3 "$root/tools/auto_ia/demo/verify_n8n_execution.py" "$work/execute.log"
+echo "AUTO_IA_15_N8N_EXECUTION_PROVEN external_network=none leads=12 clients=2 ai_calls=0 credit_debit=0 vps_changed=0"
