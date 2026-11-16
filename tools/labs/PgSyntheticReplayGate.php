@@ -21,11 +21,11 @@ final class PgSyntheticReplayGate
         // Never instantiate the SQL-writing lab against an unexpected database,
         // even when the environment variables were accidentally copied.
         if (!self::labOnly()) {
-            throw new \\RuntimeException('P16_NON_CI_ENVIRONMENT_DENIED');
+            throw new \RuntimeException('P16_NON_CI_ENVIRONMENT_DENIED');
         }
         try {
             if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) !== 'pgsql') {
-                throw new \\RuntimeException('P16_WRONG_DATABASE_DRIVER');
+                throw new \RuntimeException('P16_WRONG_DATABASE_DRIVER');
             }
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $identity = $db->query(
@@ -34,10 +34,10 @@ final class PgSyntheticReplayGate
             if (!is_array($identity)
                 || $identity['db'] !== 'imagine_agents_ci'
                 || $identity['role'] !== 'postgres') {
-                throw new \\RuntimeException('P16_WRONG_DATABASE_IDENTITY');
+                throw new \RuntimeException('P16_WRONG_DATABASE_IDENTITY');
             }
         } catch (Throwable $e) {
-            throw new \\RuntimeException('P16_DATABASE_IDENTITY_DENIED', 0, $e);
+            throw new \RuntimeException('P16_DATABASE_IDENTITY_DENIED', 0, $e);
         }
     }
 
