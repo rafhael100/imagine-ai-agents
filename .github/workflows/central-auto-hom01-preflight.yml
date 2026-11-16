@@ -1,0 +1,50 @@
+name: CENTRAL-AUTO HOM01 read-only Leaseweb preflight contract and NO-GO
+on:
+  push:
+    branches:
+      - feat/central-auto-hom01-safe-host-preflight-2026-11-16
+permissions:
+  contents: read
+jobs:
+  host-inventory-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Review syntax and no-host-side-effect CLI commands
+        run: |
+          python3 -m py_compile infra/n8n-private/readonly_inventory.py infra/n8n-private/assess_readonly_host.py
+          python3 -m unittest discover -s infra/n8n-private -p 'test_*inventory.py' -v
+          python3 -m unittest discover -s infra/n8n-private -p 'test_assess_readonly_host.py' -v
+      - name: Analyze a synthetic mock snapshot, never probe GitHub runner as VPS
+        run: |
+          PYTHONPATH=infra/n8n-private python3 - <<'PY'
+          import json
+          from readonly_inventory import inventory
+          def fake(cmd):
+              if cmd[0]=='ss':return 'LISTEN\n' if cmd[-1]=='sport = :18081' else ''
+              if cmd[:2]==['docker','version']:return '27.5.1'
+              if cmd[:3]==['docker','compose','version']:return 'v2.32.4'
+              return 'synthetic-only\n'
+          with open('/tmp/central-auto-hom01-synthetic.json','w') as out:
+              json.dump(inventory(fake),out)
+          PY
+          python3 infra/n8n-private/assess_readonly_host.py /tmp/central-auto-hom01-synthetic.json > /tmp/central-auto-hom01-result.json
+          python3 - <<'PY'
+          import json
+          result=json.load(open('/tmp/central-auto-hom01-result.json'))
+          assert result['result']=='NO_GO'
+          assert result['host_identity_verified'] is False
+          assert result['mutations_performed']==0
+          assert result['source_claim']=='UNAUTHENTICATED_SNAPSHOT'
+          assert result['port_observation']['18081']=='occupied'
+          print('CENTRAL_AUTO_HOM01_SYNTHETIC_PASS no_host_probe=1 no_secret=1 NO_GO')
+          PY
+      - name: Preserve RC07 no AI and no deployment policy
+        run: |
+          python3 tools/auto_ia/check_rc04_integrity.py
+          python3 tools/auto_ia/check_rc02_release.py
+          python3 tools/auto_ia/policy/check_n8n_zero_ai.py
+          echo 'CENTRAL_AUTO_HOM01_NO_GO vps_unchanged=1 ai_paid_calls=0'
