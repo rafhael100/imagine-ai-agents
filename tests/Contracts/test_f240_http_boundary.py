@@ -46,7 +46,7 @@ class F240HttpBoundary(unittest.TestCase):
             self.assertIn(required,gate)
         self.assertIn("operational_decision=NO_GO",gate)
         wf=(ROOT/".github/workflows/r01-dev-integrity.yml").read_text()
-        self.assertIn("EXPECTED_PHP: '117'",wf)
+        self.assertIn("EXPECTED_PHP: '119'",wf)
         self.assertIn("EXPECTED_CASES: '879'",wf)
         self.assertIn("PRIVATE_CROSS_REPOSITORY_SOURCE_NOT_VERIFIED",wf)
 
