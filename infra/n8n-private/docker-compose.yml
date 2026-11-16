@@ -48,7 +48,12 @@ services:
       DB_POSTGRESDB_PASSWORD_FILE: /run/secrets/n8n_pg_password
       N8N_ENCRYPTION_KEY_FILE: /run/secrets/n8n_encryption_key
       N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
-      NODES_EXCLUDE: '["n8n-nodes-base.code","n8n-nodes-base.executeCommand","n8n-nodes-base.ssh"]'
+      # No model/network/tool nodes for the NO_AI stage. Reopening any node
+      # requires a reviewed transport contract, service identity and egress gate.
+      NODES_EXCLUDE: '["n8n-nodes-base.code","n8n-nodes-base.executeCommand","n8n-nodes-base.ssh","n8n-nodes-base.readWriteFile","n8n-nodes-base.httpRequest"]'
+      N8N_SSRF_PROTECTION_ENABLED: "true"
+      N8N_PUBLIC_API_DISABLED: "true"
+      N8N_PUBLIC_API_SWAGGERUI_DISABLED: "true"
       N8N_DIAGNOSTICS_ENABLED: "false"
       N8N_PERSONALIZATION_ENABLED: "false"
       N8N_COMMUNITY_PACKAGES_ENABLED: "false"
