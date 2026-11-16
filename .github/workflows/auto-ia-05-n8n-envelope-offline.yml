@@ -1,0 +1,29 @@
+name: AUTO-IA-05 internal n8n contract without transport (offline)
+on:
+  push:
+    branches:
+      - feat/auto-ia-05-n8n-private-event-contract-2026-11-16
+  pull_request:
+    branches:
+      - feat/auto-ia-04-synthetic-reconciliation-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  event-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: Enforce AUTO-IA-01 through AUTO-IA-05 offline
+        run: |
+          php -l tools/auto_ia/MockN8nEnvelope.php
+          php -l tools/auto_ia/check_auto_ia_05.php
+          php tools/auto_ia/check_auto_ia.php
+          php tools/auto_ia/check_auto_ia_02.php
+          php tools/auto_ia/check_auto_ia_05.php
+          python3 tools/auto_ia/check_auto_ia_03.py
+          python3 tools/auto_ia/check_auto_ia_04.py
