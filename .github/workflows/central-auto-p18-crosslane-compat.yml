@@ -48,3 +48,49 @@ jobs:
           test "$(git rev-parse HEAD)" = "$before"
           test -z "$(git status --porcelain)"
           echo 'CENTRAL_AUTO_P18B_NO_GO ephemeral_git_only=1 no_merge_push=1'
+  signed-identity-postgres16-combined-tree:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    services:
+      pg:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: synthetic-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s --health-timeout 3s --health-retries 12
+    env:
+      PGHOST: 127.0.0.1
+      PGUSER: postgres
+      PGDATABASE: postgres
+      PGPASSWORD: synthetic-ci-only
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pgsql, pdo_pgsql, openssl
+          coverage: none
+      - name: Compute exact 3-lane CI-only tree and extract outside checkout
+        run: |
+          set -euo pipefail
+          export PYTHONPYCACHEPREFIX="$RUNNER_TEMP/central-auto-p18b-phpcache"
+          python3 tools/auto_ia/central_transport/rehearse_identity_merge_tree.py --export-to "$RUNNER_TEMP/central-auto-p18b-merged"
+          test -f "$RUNNER_TEMP/central-auto-p18b-merged/tools/auto_ia/pg/check_key_revocation_lock.sh"
+      - name: Run P435 identity signed/revocation tests against merged source and disposable PostgreSQL 16
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/central-auto-p18b-merged"
+          php -l tools/auto_ia/pg/check_key_revocation_lock.php
+          psql -v ON_ERROR_STOP=1 -f tools/auto_ia/pg/001_auto_ia_pg_lab.sql
+          psql -v ON_ERROR_STOP=1 -f tools/auto_ia/pg/002_no_ai_inbox.sql
+          psql -v ON_ERROR_STOP=1 -f tools/auto_ia/pg/003_signed_ingress_lab.sql
+          php tools/auto_ia/pg/check_auto_ia_10.php > "$RUNNER_TEMP/p18b-signed-sql.txt"
+          psql -v ON_ERROR_STOP=1 -f "$RUNNER_TEMP/p18b-signed-sql.txt"
+          bash tools/auto_ia/pg/check_key_revocation_lock.sh
+          echo 'CENTRAL_AUTO_P18C_IDENTITY_PG16_PASS merged_tree_only=1 synthetic_data=1 NO_GO'
