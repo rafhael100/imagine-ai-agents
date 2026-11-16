@@ -1,7 +1,7 @@
 name: CENTRAL AUTO P4 private n8n Compose candidate
 on:
   pull_request:
-    paths: ['infra/n8n-private/**', '.github/workflows/central-auto-p4-private-compose.yml']
+    paths: ['tools/auto_ia/pg/**', '.github/workflows/central-auto-credential-lock.yml', 'infra/n8n-private/**', '.github/workflows/central-auto-p4-private-compose.yml']
 permissions:
   contents: read
 jobs:

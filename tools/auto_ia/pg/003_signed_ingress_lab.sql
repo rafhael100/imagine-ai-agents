@@ -59,7 +59,8 @@ BEGIN
    RETURN 'LAB_DENY_SIGNED_WINDOW';
  END IF;
  SELECT secret INTO v_secret FROM auto_ia_lab.mock_s2s_keys
- WHERE issuer=p_issuer AND key_id=p_key_id AND enabled=true;
+ -- Hold credential validity through inbox admission/duplicate lookup and commit.
+ WHERE issuer=p_issuer AND key_id=p_key_id AND enabled=true FOR SHARE;
  IF NOT FOUND THEN RETURN 'LAB_DENY_KEY'; END IF;
  v_data:=concat_ws(E'\n',p_schema,p_issuer,p_audience,p_product,p_operation,
    p_tenant,p_event,p_nonce,p_request,p_issued::text,p_expires::text,
