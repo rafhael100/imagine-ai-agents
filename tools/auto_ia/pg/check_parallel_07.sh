@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # AUTO-IA-07 CI-only: 8 independent PostgreSQL sessions, only 3 may reserve.
 set -euo pipefail
-container="\${1:?ephemeral-postgres-container-required}"
+container="${1:?ephemeral-postgres-container-required}"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 for i in $(seq 1 8); do
