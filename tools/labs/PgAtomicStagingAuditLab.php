@@ -5,8 +5,10 @@ namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgSyntheticReplayGate.php';
 require_once __DIR__.'/../../src/MockOrchestration/MockN8nOutboxContract.php';
+require_once __DIR__.'/../../_auto_ia_pinned_source/tools/auto_ia/convergence/MockP7ToAutoIaAdapter.php';
 
 use ImagineAI\MockOrchestration\MockN8nOutboxContract;
+use ImagineAI\AutomationFirst\MockP7ToAutoIaAdapter;
 use PDO;
 use Throwable;
 
@@ -32,6 +34,8 @@ final class PgAtomicStagingAuditLab
 SELECT a.tenant_ref AS replay_tenant,
        a.event_ref AS replay_event,
        a.payload_hash AS replay_hash,
+       a.request_ref AS replay_request,
+       a.nonce_ref AS replay_nonce,
        b.tenant_ref AS outbox_tenant,
        b.event_ref AS outbox_event,
        b.canonical_event AS outbox_canonical,
@@ -62,6 +66,23 @@ SQL)->fetchAll(PDO::FETCH_ASSOC);
                         $reason='CANONICAL_TENANT_OR_EVENT_MISMATCH';
                     }elseif(!hash_equals($row['replay_hash'],hash('sha256',$canonical))){
                         $reason='CANONICAL_PAYLOAD_HASH_MISMATCH';
+                    }else{
+                        // Historical offline reconstruction uses the recorded event timestamp,
+                        // NEVER the current wall clock. This does NOT establish current validity.
+                        $proposalResult=MockP7ToAutoIaAdapter::propose(
+                            $canonical, $row['replay_tenant'], (int)$event['occurred_at'] + 5
+                        );
+                        $proposal=$proposalResult['proposal'] ?? null;
+                        if($proposalResult['decision']!=='LAB_NO_AI_PROPOSAL_NOT_SIGNED'
+                            || !is_array($proposal)){
+                            $reason='HISTORICAL_CONTRACT_DERIVATION_DENIED';
+                        }elseif(!is_string($row['replay_request'])
+                            || !hash_equals($proposal['request_ref'],$row['replay_request'])){
+                            $reason='REPLAY_REQUEST_BINDING_MISMATCH';
+                        }elseif(!is_string($row['replay_nonce'])
+                            || !hash_equals($proposal['nonce_ref'],$row['replay_nonce'])){
+                            $reason='REPLAY_NONCE_BINDING_MISMATCH';
+                        }
                     }
                 }
                 if($reason!==null){

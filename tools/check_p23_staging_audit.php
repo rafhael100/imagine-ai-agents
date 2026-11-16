@@ -45,6 +45,29 @@ try {
         && $result['checked']===2 && $result['issues']===[],'clean_audit');
     p23Check($result['ai_calls']===0 && $result['external_calls']===0,'no_call');
 
+    // P25: request and nonce metadata must match the original pinned CONV-02
+    // adapter output, not merely the event and payload hash.
+    $original=$db->query("SELECT request_ref,nonce_ref FROM aia_p16_lab.event_replay
+        WHERE tenant_ref='SYNTHETIC_TENANT_A'")->fetch(PDO::FETCH_ASSOC);
+    p23Check(is_array($original),'captured_replay_bindings');
+    $db->exec("UPDATE aia_p16_lab.event_replay
+        SET request_ref='SYNTHETIC_P25_ALTERED_REQUEST'
+        WHERE tenant_ref='SYNTHETIC_TENANT_A'");
+    p23Check(in_array('REPLAY_REQUEST_BINDING_MISMATCH',p23Reasons($audit->scan()),true),
+        'altered_request_detected');
+    $db->prepare("UPDATE aia_p16_lab.event_replay SET request_ref=:original
+        WHERE tenant_ref='SYNTHETIC_TENANT_A'")->execute([':original'=>$original['request_ref']]);
+
+    $db->exec("UPDATE aia_p16_lab.event_replay
+        SET nonce_ref='SYNTHETIC_P25_ALTERED_NONCE'
+        WHERE tenant_ref='SYNTHETIC_TENANT_A'");
+    p23Check(in_array('REPLAY_NONCE_BINDING_MISMATCH',p23Reasons($audit->scan()),true),
+        'altered_nonce_detected');
+    $db->prepare("UPDATE aia_p16_lab.event_replay SET nonce_ref=:original
+        WHERE tenant_ref='SYNTHETIC_TENANT_A'")->execute([':original'=>$original['nonce_ref']]);
+    p23Check($audit->scan()['decision']==='LAB_CONSISTENT_NO_AUTHORIZATION',
+        'clean_after_binding_fixture_restore');
+
     // Adversarial changes here are performed ONLY on the disposable CI database.
     $db->exec("UPDATE public.aia_lab_n8n_outbox_p6 SET event_hash='".str_repeat('a',64)."'
         WHERE tenant_ref='SYNTHETIC_TENANT_A'");
