@@ -282,12 +282,15 @@ SQL);
 
     private function draft(string $tenant,string $proposal,bool $lock):?array
     {
+        // P58: serialize all competing review submissions for this same
+        // proposal before inspecting REJECT / existing role votes.
+        // Signature keys still use FOR SHARE to fence concurrent revocation.
         $q=$this->db->prepare(<<<'SQL'
 SELECT tenant_ref,request_ref,ruleset_ref,revision,proposal_ref,
        rule_ref,draft_kind,metric,observed,threshold,state,draft_sha256
 FROM aia_p51_lab.review_drafts
 WHERE tenant_ref=:t AND proposal_ref=:proposal
-SQL.($lock?' FOR SHARE':''));
+SQL.($lock?' FOR UPDATE':''));
         $q->execute([':t'=>$tenant,':proposal'=>$proposal]);
         $r=$q->fetch(PDO::FETCH_ASSOC);
         if(!is_array($r)||$r['state']!=='AWAITING_HUMAN_REVIEW_LAB')return null;
