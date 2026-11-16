@@ -1,0 +1,51 @@
+name: CENTRAL-AUTO P21 encrypted recovery package and real PG16/17 restore (NO-GO)
+on:
+  push:
+    branches:
+      - feat/central-auto-p21-crypto-pg-restore-ci-2026-11-16
+permissions:
+  contents: read
+concurrency:
+  group: central-auto-p21-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  encrypted-disposable-postgres-restore:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    services:
+      pg17:
+        image: postgres:17
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: synthetic-p21-ci-only
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+      pg16:
+        image: postgres:16
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: synthetic-p21-ci-only
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      PG17_CONTAINER: ${{ job.services.pg17.id }}
+      PG16_CONTAINER: ${{ job.services.pg16.id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify encrypted packaging original P20 and syntax
+        run: |
+          set -euo pipefail
+          python3 -m py_compile infra/n8n-private/homologation/check_p21_crypto_pg_restore.py
+          python3 infra/n8n-private/homologation/test_p20_security.py
+          test "$(openssl version | wc -c)" -gt 10
+      - name: Generate real synthetic PG custom archives then CMS seal decrypt restore
+        run: |
+          set -euo pipefail
+          python3 infra/n8n-private/homologation/check_p21_crypto_pg_restore.py
+          echo 'CENTRAL_AUTO_P21_HOMO_NO_GO real_external_backup=0 real_vps=0 production_access=0'
