@@ -36,7 +36,6 @@ def check() -> None:
         "app/Support/Synthetic/AgentsPrivateRestrictedKeyringLab.php": [
             "crm_aia_keyreader_f246_ci",
             "row_security_active(",
-            "rel",  # Column names are also tested in the PG16 suite.
             "public_key_base64",
         ],
         "app/Support/Synthetic/AgentsPrivateKeyRevocationLockLab.php": [
@@ -85,7 +84,7 @@ def check() -> None:
         raw = target.read_text(encoding="utf-8")
         for token in tokens:
             if token not in raw:
-                raise ValueError("F250_CRM_EXPECTED_BOUNDARY_DRIFT")
+                raise ValueError(f"F250_CRM_EXPECTED_BOUNDARY_DRIFT:{name}:{token}")
 
     web = CRM / "routes/web.php"
     if not web.is_file() or "AgentsSignedIngressCandidate" in web.read_text():
@@ -110,6 +109,6 @@ def check() -> None:
 if __name__ == "__main__":
     try:
         check()
-    except (OSError, ValueError):
-        print("F250_RECIPROCAL_SOURCE_DENIED operational_decision=NO_GO", file=sys.stderr)
+    except (OSError, ValueError) as error:
+        print(f"F250_RECIPROCAL_SOURCE_DENIED {error} operational_decision=NO_GO", file=sys.stderr)
         sys.exit(1)
