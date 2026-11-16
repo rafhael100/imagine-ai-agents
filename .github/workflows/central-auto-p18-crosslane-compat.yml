@@ -29,3 +29,20 @@ jobs:
           test "$(git rev-parse HEAD)" = "$before"
           test -z "$(git status --porcelain)"
           echo 'CENTRAL_AUTO_P18_READ_ONLY_BRANCH_INTEGRITY_PASS no_commit=1 no_push=1 NO_GO'
+  selected-conflict-resolution-rehearsal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Rehearse P17 identity/P4 four-file resolution and P60 addition in runner only
+        run: |
+          set -euo pipefail
+          before="$(git rev-parse HEAD)"
+          python3 -m py_compile tools/auto_ia/central_transport/rehearse_identity_merge_tree.py
+          python3 tools/auto_ia/central_transport/rehearse_identity_merge_tree.py
+          test "$(git rev-parse HEAD)" = "$before"
+          test -z "$(git status --porcelain)"
+          echo 'CENTRAL_AUTO_P18B_NO_GO ephemeral_git_only=1 no_merge_push=1'
