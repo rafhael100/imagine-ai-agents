@@ -31,5 +31,6 @@ services:
       start_period: 4s
 
 networks:
-  preview_private:
-    internal: true
+  # Ordinary isolated Compose bridge so Docker can publish loopback ingress.
+  # It is NOT an egress firewall. Staging must enforce outbound policy.
+  preview_private: {}
