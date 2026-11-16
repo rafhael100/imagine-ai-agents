@@ -106,7 +106,7 @@ def main()->None:
             problems.append(label+":mutation_anchor_missing")
             continue
         changed=dict(contents)
-        changed[filename]=changed[filename].replace(before,after,1)
+        changed[filename]=changed[filename].replace(before,after)
         if not audit_sources(changed):
             problems.append(label+":negative_mutation_not_detected")
     code=dict(contents)
