@@ -16,6 +16,7 @@ services:
       - "127.0.0.1:${N8N_OPERATOR_PORT:-18744}:8443"
     volumes:
       - ./ingress/nginx-operator.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${N8N_OPERATOR_PIN_FILE:?REQUIRE_PINNED_CERT_FINGERPRINT_FILE}:/etc/nginx/operator-fingerprints.conf:ro
     secrets:
       - operator_server_cert
       - operator_server_key
