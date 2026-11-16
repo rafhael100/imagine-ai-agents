@@ -33,7 +33,10 @@ def check(data:object)->dict:
         raise Denied("BASE_SECURITY_"+str(ex)) from ex
     if any(networks[n].get("internal") is not True for n in PRIVATE):
         raise Denied("INTERNAL_NETWORK_CHANGED")
-    if networks["operator_loopback_frontend"].get("internal") is not False:
+    # Docker Compose omits an explicit internal:false when rendering defaults.
+    # Only the ingress is connected to this isolated project bridge.
+    frontend=networks["operator_loopback_frontend"]
+    if frontend.get("internal",False) is not False or frontend.get("driver","bridge")!="bridge":
         raise Denied("OPERATOR_FRONTEND_ABSENT")
     app=services["n8n"]
     env=app.get("environment",{})
