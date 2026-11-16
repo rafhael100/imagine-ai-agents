@@ -1,0 +1,19 @@
+{
+  "schema": "AUTO_IA_N8N_NO_AI_POLICY_V1",
+  "mode": "DENY_UNKNOWN_WORKFLOWS",
+  "feature_scope": "tools/auto_ia/demo",
+  "workflows": {
+    "tools/auto_ia/demo/n8n-noai-demo.workflow.json": {
+      "git_blob_sha1": "513359b15149a74ef534c9ba1939e3e37767c6bf",
+      "classification": "NO_AI_MANUAL_ONLY",
+      "permitted_node_types": [
+        "n8n-nodes-base.manualTrigger",
+        "n8n-nodes-base.code"
+      ],
+      "active": false
+    }
+  },
+  "operational_authorization": false,
+  "api_provider_calls_allowed": 0,
+  "commercial_credit_debit_allowed": false
+}
