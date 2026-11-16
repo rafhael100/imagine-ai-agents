@@ -1,0 +1,45 @@
+name: Agents P5 - deterministic automation before any AI credit eligibility
+
+on:
+  push:
+    branches:
+      - dev/aia-p5-ai-or-automation-routing-2026-11-16
+  pull_request:
+    branches:
+      - dev/aia-p4-pg16-durable-quotas-approvals-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  zero-credit-router:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - name: Checkout current candidate read-only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: PHP 8.4 no network dependencies
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring
+          coverage: none
+      - name: Ensure pure no-I/O routing policy and run adversarial tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l src/MockOrchestration/MockAiOrAutomationRouter.php
+          php -l tools/check_p5_ai_routing.php
+          php tools/check_p5_ai_routing.php
+          python3 - <<'PY'
+          from pathlib import Path
+          text=Path('src/MockOrchestration/MockAiOrAutomationRouter.php').read_text()
+          forbidden=['curl_', 'file_get_contents(', 'PDO(', 'new PDO', 'http://',
+                     'https://', 'fetch(', 'exec(', 'shell_exec(', 'proc_open(',
+                     'new HttpClient', 'getenv(', 'setcookie(', 'include(']
+          assert all(term not in text for term in forbidden)
+          print('P5_PURE_NO_PROVIDER_IO_PASS')
+          PY
+          echo 'P5_ZERO_AI_CREDITS_BY_DEFAULT automation_first=true model_calls=0 billing=none operational_decision=NO_GO' >> "$GITHUB_STEP_SUMMARY"
