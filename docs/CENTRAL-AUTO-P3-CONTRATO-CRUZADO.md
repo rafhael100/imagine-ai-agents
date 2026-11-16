@@ -3,7 +3,7 @@
 Continua a diretriz aprovada de automações [Agents issue #339](https://github.com/rafhael100/imagine-ai-agents/issues/339) e complementa a [RC04 #387](https://github.com/rafhael100/imagine-ai-agents/pull/387). Evita duplicar o motor nativo do CRM e o Gateway já desenvolvidos.
 
 ## Fontes originais, não simulações de código
-- **CRM [PR #634](https://github.com/rafhael100/imagine-crm/pull/634)** — commit dd88a88b29f9c659786793bbb677355a06ea83bd. Carrega diretamente as classes originais RuleDefinition e AutomationSettings.
+- **CRM [PR #634](https://github.com/rafhael100/imagine-crm/pull/634)** — commit 9afa6683e6b3463f12bd80a25f455f925828c0af. Carrega diretamente as classes originais RuleDefinition e AutomationSettings.
 - **Portal [PR #904](https://github.com/rafhael100/imagine-portal/pull/904)** — commit 9d3877dfaa81524faf2c08f80244b485968316ec. Executa diretamente AutomationStateReader, que valida grants antes e depois da consulta.
 - **AI Agents [PR #384](https://github.com/rafhael100/imagine-ai-agents/pull/384)** — commit 21c820b56d53bce243969a4fdd440bf1e26644e5. Executa MockS2SEnvelopeVerifier sem reinvenção de assinatura.
 
