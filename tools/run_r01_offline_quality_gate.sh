@@ -81,6 +81,7 @@ for name in \
   test_f230_response_seal.py \
   test_f231_service_identity.py \
   test_f236_integrity_aggregation.py \
+  test_f240_http_boundary.py \
   test_evid52_postmerge.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
@@ -146,6 +147,14 @@ python3 tools/check_f234_multiprocess.py
 php -l src/MockBridge/MockSyntheticEvidenceGate.php
 php -l tools/check_f235_composed_gate.php
 php tools/check_f235_composed_gate.php
+php -l src/MockBridge/MockSyntheticHttpEnvelope.php
+php -l tools/check_f238_http_envelope.php
+php tools/check_f238_http_envelope.php
+php -l src/MockBridge/MockSyntheticHttpDenialReceipt.php
+php -l tools/check_f239_denial_receipt.php
+php tools/check_f239_denial_receipt.php
+php -l tools/check_f240_http_cycle.php
+php tools/check_f240_http_cycle.php
 bash tools/validate_ft01_offline.sh
 
 echo 'R01_OFFLINE_GATE_PASS operational_decision=NO_GO'
