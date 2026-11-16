@@ -173,6 +173,29 @@ def smoke_merged_tree(tree_sha:str)->dict:
             report["identity_lock_php_syntax"]="NOT_AVAILABLE_ON_RUNNER"
     return report
 
+def export_review_snapshot(tree_sha:str,destination:str)->None:
+    """Extract the ephemeral merged tree ONLY under the GitHub runner temp."""
+    runner=Path(os.environ.get("RUNNER_TEMP","")).resolve()
+    target=Path(destination)
+    if (not runner.is_dir() or not target.is_absolute()
+        or target.parent.resolve()!=runner or target.name!="central-auto-p18b-merged"
+        or target.exists() or not SHA.fullmatch(tree_sha)):
+        raise RuntimeError("UNSAFE_MERGED_TREE_EXPORT_TARGET")
+    target.mkdir(mode=0o700)
+    p=subprocess.Popen(["git","archive","--format=tar",tree_sha],
+                       stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    try:
+        assert p.stdout is not None
+        with tarfile.open(fileobj=p.stdout,mode="r|") as archive:
+            archive.extractall(path=target,filter="data")
+        if p.wait(timeout=90)!=0:
+            raise RuntimeError("GIT_ARCHIVE_EXPORT_FAILED")
+    finally:
+        if p.poll() is None:
+            p.kill()
+            p.wait()
+    print("CENTRAL_AUTO_P18B_EPHEMERAL_EXPORT_PASS NO_GO no_branch=1 no_deploy=1")
+
 if __name__=="__main__":
     if (os.environ.get("GITHUB_ACTIONS")!="true" or
         os.environ.get("GITHUB_REPOSITORY")!="rafhael100/imagine-ai-agents"):
@@ -185,6 +208,10 @@ if __name__=="__main__":
             raise SystemExit(1)
         smoke=smoke_merged_tree(result["tree_for_runner_only"])
         print(json.dumps({"schema":"CENTRAL_AUTO_P18B_SMOKE_V1","tests":smoke,"release_authorized":False},sort_keys=True))
+        if len(sys.argv)>1:
+            if len(sys.argv)!=3 or sys.argv[1]!="--export-to":
+                raise RuntimeError("P18B_EXPORT_ARGUMENT_NOT_ALLOWED")
+            export_review_snapshot(result["tree_for_runner_only"],sys.argv[2])
         print("CENTRAL_AUTO_P18B_THREE_LANE_REHEARSAL_PASS NO_GO review_only=1")
     except (RuntimeError,ValueError,subprocess.TimeoutExpired) as exc:
         print("CENTRAL_AUTO_P18B_DENIED_"+str(exc),file=sys.stderr)
