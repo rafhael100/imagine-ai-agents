@@ -1,0 +1,49 @@
+name: AUTO-IA RC01 integrated offline quality and explicit NO-GO
+
+on:
+  push:
+    branches:
+      - review/auto-ia-rc01-automations-first-2026-11-16
+  pull_request:
+    branches:
+      - review/agents-f229-f251-integrated-2026-11-15
+
+permissions:
+  contents: read
+
+jobs:
+  automation-first-no-go:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check PHP contract syntax
+        run: |
+          php -l tools/auto_ia/AutoIaRouter.php
+          php -l tools/auto_ia/MockAiBudgetGate.php
+          php -l tools/auto_ia/MockN8nEnvelope.php
+      - name: Check routing, quotas, n8n envelope and zero effects
+        run: |
+          php tools/auto_ia/check_auto_ia.php
+          php tools/auto_ia/check_auto_ia_02.php
+          php tools/auto_ia/check_auto_ia_05.php
+      - name: Check durable SQLite atomicity and distinct commercial credits
+        run: |
+          python3 tools/auto_ia/check_auto_ia_03.py
+          python3 tools/auto_ia/check_auto_ia_04.py
+      - name: Run independent negative release mutation checks
+        run: |
+          python3 tools/auto_ia/check_auto_ia_06.py
+          python3 tools/auto_ia/release_readiness_lab.py | tee /tmp/auto-ia-review.json
+          python3 - <<'PY'
+          import json
+          data=json.load(open('/tmp/auto-ia-review.json',encoding='utf-8'))
+          assert data['production_decision']=='NO_GO'
+          assert data['static_lab_checks']=='PASS'
+          assert data['ai_provider_calls']==0 and data['credits_debited']==0
+          assert data['vps_changed'] is False
+          assert len(data['production_blockers'])==8
+          print('AUTO_IA_RC01_PASS production=NO_GO')
+          PY
