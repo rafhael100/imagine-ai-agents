@@ -1,4 +1,4 @@
-name: F237 pinned CRM F247 source conformance (NO-GO)
+name: F240 pinned CRM F247+F248 source conformance (NO-GO)
 
 on:
   push:
@@ -46,3 +46,20 @@ jobs:
           python3 tools/check_f237_crm602_source.py
           php tools/check_f235_composed_gate.php
           echo 'F237_REVIEW_REQUIRED CRM_602_IS_NOT_CRM_614 operational_decision=NO_GO' >> "$GITHUB_STEP_SUMMARY"
+      - name: Checkout original CRM F248 private functional source at immutable SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-crm
+          ref: f12d57aa0057387729d6dba89987a94975b67478
+          path: _crm_f248_fixture
+          persist-credentials: false
+      - name: Verify real private CRM F248 NO-GO source and new Agents response profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _crm_f248_fixture rev-parse HEAD)" = "f12d57aa0057387729d6dba89987a94975b67478"
+          php -l _crm_f248_fixture/app/Support/Synthetic/AgentsSignedIngressCandidate.php
+          php -l _crm_f248_fixture/tests/Feature/AgentsPrivateIngressCandidateTest.php
+          python3 tools/check_f240_crm614_source.py
+          php tools/check_f239_denial_receipt.php
+          echo 'CRM_F248_STILL_DENY_ONLY operational_decision=NO_GO' >> "$GITHUB_STEP_SUMMARY"
