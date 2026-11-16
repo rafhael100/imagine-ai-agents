@@ -1,0 +1,42 @@
+name: AUTO-IA-10 signed Postgres ingress (CI-only lab)
+on:
+  push:
+    branches:
+      - feat/auto-ia-10-postgres-signed-inbox-2026-11-16
+  pull_request:
+    branches:
+      - feat/auto-ia-09-s2s-envelope-signatures-2026-11-16
+permissions:
+  contents: read
+jobs:
+  signed-ingress:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    services:
+      pg:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: synthetic-ci-only-not-secret
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify PHP envelope rules (untrusted event is never authority)
+        run: |
+          php tools/auto_ia/check_auto_ia_09.php
+      - name: Initialize isolated NO_AI schema
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -v ON_ERROR_STOP=1 < tools/auto_ia/pg/001_auto_ia_pg_lab.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -v ON_ERROR_STOP=1 < tools/auto_ia/pg/002_no_ai_inbox.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -v ON_ERROR_STOP=1 < tools/auto_ia/pg/003_signed_ingress_lab.sql
+      - name: Sign dynamic synthetic test fixtures offline and verify inside DB
+        run: |
+          php tools/auto_ia/pg/check_auto_ia_10.php > /tmp/auto-ia-10-tests.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -v ON_ERROR_STOP=1 < /tmp/auto-ia-10-tests.sql
+      - name: Verify NO_GO invariant, zero provider calls and billing
+        run: |
+          python3 tools/auto_ia/check_auto_ia_06.py
+
