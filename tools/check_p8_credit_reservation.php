@@ -5,6 +5,45 @@ require_once __DIR__.'/../src/MockOrchestration/MockAiOrAutomationRouter.php';
 
 use ImagineAI\Labs\PgAiCreditReservationLab;
 
+
+/**
+ * P11 test-only trusted signer: generated exclusively within ephemeral CI.
+ * Never a real provider key or authorization. The verifier is pinned into
+ * the lab object; signatures cannot specify or substitute their verifier.
+ */
+$fixturePair=sodium_crypto_sign_keypair();
+$fixtureSecret=sodium_crypto_sign_secretkey($fixturePair);
+$fixturePublic=sodium_crypto_sign_publickey($fixturePair);
+
+function signedP11(
+    string $tenant,string $request,int $observed,string $secret,
+    int $issued=1794690010,int $expires=1794690070,
+): array {
+    $proof=[
+        'contract'=>'SYNTHETIC_AIA_USAGE_RECEIPT_V1',
+        'issuer'=>'SYNTHETIC_PROVIDER_FIXTURE',
+        'proof_ref'=>'SYNTHETIC_PROOF_'.strtoupper(
+            substr(hash('sha256',$tenant."\n".$request."\n".$observed),0,20)
+        ),
+        'tenant_ref'=>$tenant,
+        'request_ref'=>$request,
+        'observed'=>$observed,
+        'issued_at'=>$issued,
+        'expires_at'=>$expires,
+    ];
+    $bytes=json_encode(
+        $proof,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+    );
+    return [$bytes,base64_encode(sodium_crypto_sign_detached($bytes,$secret))];
+}
+function reconcileFixture(
+    PgAiCreditReservationLab $lab,string $tenant,string $request,int $observed
+): bool {
+    global $fixtureSecret;
+    [$body,$sig]=signedP11($tenant,$request,$observed,$fixtureSecret);
+    return $lab->reconcileSigned($tenant,$request,$body,$sig,1794690020);
+}
+
 function checkP8(bool $ok,string $label): void
 {
     if (!$ok) throw new RuntimeException('P8_CREDIT_LAB_DENIED_'.$label);
@@ -25,11 +64,56 @@ if (getenv('AIA_P8_PG_LAB')!=='true'
     throw new RuntimeException('P8_CI_ONLY');
 }
 $db=connectP8();
-$lab=new PgAiCreditReservationLab($db);
+$lab=new PgAiCreditReservationLab($db,$fixturePublic);
 $lab->createTables();
 try {
     checkP8($lab->seedSynthetic('SYNTHETIC_TENANT_A',100),'seed A');
     checkP8($lab->seedSynthetic('SYNTHETIC_TENANT_B',30),'seed B');
+
+    checkP8(!method_exists($lab,'reconcile'),'no unsigned accounting API');
+    [$validBody,$validSig]=signedP11(
+        'SYNTHETIC_TENANT_B','SYNTHETIC_NOT_DISPATCHED',10,$fixtureSecret
+    );
+    checkP8(!$lab->reconcileSigned(
+        'SYNTHETIC_TENANT_B','SYNTHETIC_NOT_DISPATCHED',
+        $validBody,$validSig,1794690020
+    ),'signed proof cannot charge a missing request');
+
+    $wrongPair=sodium_crypto_sign_keypair();
+    $forgedSecret=sodium_crypto_sign_secretkey($wrongPair);
+    [$forgedBody,$forgedSig]=signedP11(
+        'SYNTHETIC_TENANT_B','SYNTHETIC_NONEXISTENT',10,$forgedSecret
+    );
+    checkP8(!$lab->reconcileSigned(
+        'SYNTHETIC_TENANT_B','SYNTHETIC_NONEXISTENT',
+        $forgedBody,$forgedSig,1794690020
+    ),'untrusted signing key denied');
+    checkP8(!$lab->reconcileSigned(
+        'SYNTHETIC_TENANT_B','SYNTHETIC_NONEXISTENT',
+        $forgedBody,$validSig,1794690020
+    ),'signature not interchangeable');
+    checkP8(!$lab->reconcileSigned(
+        'SYNTHETIC_TENANT_B','SYNTHETIC_NONEXISTENT',
+        $validBody." ",$validSig,1794690020
+    ),'noncanonical trailing bytes denied');
+    checkP8(!$lab->reconcileSigned(
+        'SYNTHETIC_TENANT_A','SYNTHETIC_NOT_DISPATCHED',
+        $validBody,$validSig,1794690020
+    ),'cross tenant signed proof denied');
+    checkP8(!$lab->reconcileSigned(
+        'SYNTHETIC_TENANT_B','SYNTHETIC_NOT_DISPATCHED',
+        $validBody,$validSig,1794690080
+    ),'expired provider fixture denied');
+    checkP8(!$lab->reconcileSigned(
+        'SYNTHETIC_TENANT_B','SYNTHETIC_NOT_DISPATCHED',
+        $validBody,$validSig,1794690000
+    ),'future dated fixture denied');
+    $untrustedLab=new PgAiCreditReservationLab(connectP8());
+    checkP8(!$untrustedLab->reconcileSigned(
+        'SYNTHETIC_TENANT_B','SYNTHETIC_NOT_DISPATCHED',
+        $validBody,$validSig,1794690020
+    ),'no trusted verifier means no reconciliation');
+
 
     // P5 -> P8 integration contract: deterministic tasks never even
     // request a credit hold; semantic tasks require all eligibility checks.
@@ -70,7 +154,7 @@ try {
         ['state'=>'RESERVED','estimated'=>15],'reserve separately after preflight');
     checkP8(!$lab->markUnknown('SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL'),
         'cannot declare timeout before dispatch');
-    checkP8(!$lab->reconcile('SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL',12),
+    checkP8(!reconcileFixture($lab,'SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL',12),
         'undispatched reservation cannot become charge');
     checkP8($lab->markDispatched('SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL'),
         'explicit synthetic outbound handoff marker');
@@ -80,7 +164,7 @@ try {
         'uncertain future provider response keeps hold');
     checkP8($lab->snapshot('SYNTHETIC_TENANT_C')['held']===15,
         'no automatic refund of unknown credit');
-    checkP8($lab->reconcile('SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL',12),
+    checkP8(reconcileFixture($lab,'SYNTHETIC_TENANT_C','SYNTHETIC_REQUEST_MODEL',12),
         'verified synthetic observed measure');
     checkP8($lab->snapshot('SYNTHETIC_TENANT_C')===[
         'allowance'=>40,'spent'=>12,'held'=>0,'available'=>28,'frozen'=>false,
@@ -133,7 +217,7 @@ try {
 
     checkP8(!$lab->markUnknown('SYNTHETIC_TENANT_A',$first),
         'cannot time out reserved non-dispatched operation');
-    checkP8(!$lab->reconcile('SYNTHETIC_TENANT_A',$first,19),
+    checkP8(!reconcileFixture($lab,'SYNTHETIC_TENANT_A',$first,19),
         'must not charge a non-dispatched reservation');
     checkP8($lab->markDispatched('SYNTHETIC_TENANT_A',$first),
         'mark first as dispatched in lab');
@@ -164,19 +248,19 @@ try {
     checkP8($lab->reserve('SYNTHETIC_TENANT_A',$second,
         'SYNTHETIC_PURPOSE_MARKETING',20)===null,
         'canceled request cannot be replayed and dispatched');
-    checkP8(!$lab->reconcile('SYNTHETIC_TENANT_A',$second,0),
+    checkP8(!reconcileFixture($lab,'SYNTHETIC_TENANT_A',$second,0),
         'cancelled cannot become provider charge');
 
     checkP8($lab->markDispatched('SYNTHETIC_TENANT_A',$third),
         'third execution explicitly marked dispatched');
-    checkP8($lab->reconcile('SYNTHETIC_TENANT_A',$third,12),
+    checkP8(reconcileFixture($lab,'SYNTHETIC_TENANT_A',$third,12),
         'verified observed 12');
     checkP8($lab->snapshot('SYNTHETIC_TENANT_A')===[
         'allowance'=>100,'spent'=>12,'held'=>60,'available'=>28,'frozen'=>false,
     ],'net after cancellation and 12 actual');
-    checkP8($lab->reconcile('SYNTHETIC_TENANT_A',$first,19),
+    checkP8(reconcileFixture($lab,'SYNTHETIC_TENANT_A',$first,19),
         'late observed provider proof frees uncertain hold');
-    checkP8($lab->reconcile('SYNTHETIC_TENANT_A',$first,19),
+    checkP8(reconcileFixture($lab,'SYNTHETIC_TENANT_A',$first,19),
         'same measured proof idempotent');
     checkP8($lab->reserve('SYNTHETIC_TENANT_A',$first,
         'SYNTHETIC_PURPOSE_MARKETING',20)===null,
@@ -184,12 +268,12 @@ try {
     checkP8($lab->snapshot('SYNTHETIC_TENANT_A')===[
         'allowance'=>100,'spent'=>31,'held'=>40,'available'=>29,'frozen'=>false,
     ],'late proof only counted once');
-    checkP8(!$lab->reconcile('SYNTHETIC_TENANT_B',$first,19),
+    checkP8(!reconcileFixture($lab,'SYNTHETIC_TENANT_B',$first,19),
         'cross tenant cannot reconcile');
 
     // Conflicting late proof must freeze the account rather than guessing
     // which charge to trust.
-    checkP8(!$lab->reconcile('SYNTHETIC_TENANT_A',$first,18),
+    checkP8(!reconcileFixture($lab,'SYNTHETIC_TENANT_A',$first,18),
         'contradictory proof denied');
     checkP8($lab->snapshot('SYNTHETIC_TENANT_A')['frozen']===true,
         'ledger frozen on contradiction');
@@ -204,7 +288,7 @@ try {
         'tenant B independent request');
     checkP8($lab->markDispatched('SYNTHETIC_TENANT_B',$first),
         'B dispatch state separated by tenant');
-    checkP8($lab->reconcile('SYNTHETIC_TENANT_B',$first,20),
+    checkP8(reconcileFixture($lab,'SYNTHETIC_TENANT_B',$first,20),
         'B exact observation');
     checkP8($lab->snapshot('SYNTHETIC_TENANT_B')===[
         'allowance'=>30,'spent'=>20,'held'=>0,'available'=>10,'frozen'=>false,
