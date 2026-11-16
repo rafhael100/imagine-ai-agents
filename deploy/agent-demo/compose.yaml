@@ -21,10 +21,8 @@ services:
     networks:
       - preview_private
     ports:
-      # No fixed host port, no public IP: avoid collision with CRM/Sites.
-      - target: 8080
-        host_ip: 127.0.0.1
-        protocol: tcp
+      # Docker allocates an ephemeral port on loopback, never 0.0.0.0.
+      - "127.0.0.1::8080"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; assert urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=2).read() == b'SIMULATED_READY_NO_GO\\n'"]
       interval: 5s
