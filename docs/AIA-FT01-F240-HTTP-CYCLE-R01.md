@@ -22,3 +22,5 @@ O workflow R01 será executado sobre HEAD exata do candidato F240 e exige:
 A documentação detalhada do candidato anterior continua em F236/F237. Uma CI verde aqui não autoriza merge nem deploy.
 
 A revisão do CRM #614 identificou o adaptador F248 existente e seu perfil HTTP de negativa distinta da F246; F239 agora aceita estritamente ambos os perfis, sem aceitar outros cabeçalhos. A F240 prova os dois perfis e 20 variantes negativas.
+
+**Correção F241 recíproca (Laravel real, sem rede):** a CI CRM identificou que Symfony normaliza `Cache-Control` para `max-age=0, no-store, private`, preservando a mesma negativa e o corpo JSON canônico de 136 bytes. F239 foi ajustada para permitir somente essa forma adicional no perfil F248. A compatibilidade no CRM deve ser reexecutada na HEAD corrigida e permanecer NO-GO.
