@@ -1,0 +1,39 @@
+name: F235 composed synthetic evidence gate (NO-GO)
+
+on:
+  push:
+    branches:
+      - dev/f235-composed-identity-scope-replay-offline-2026-11-15
+  pull_request:
+    branches:
+      - dev/f234-multiprocess-file-replay-lab-2026-11-15
+
+permissions:
+  contents: read
+
+jobs:
+  composed-offline:
+    if: ${{ github.event.repository.private == false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Checkout without write credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Execute F231 to F235 without external API
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l src/MockBridge/MockServiceIdentityPreflight.php
+          php tools/check_f231_ed25519_preflight.php
+          php -l src/MockBridge/MockSyntheticScopePreflight.php
+          php tools/check_f232_scope_preflight.php
+          php -l src/MockBridge/MockSharedNonceLedger.php
+          php tools/check_f233_shared_nonce.php
+          php -l src/MockBridge/MockFileAtomicNonceLab.php
+          python3 tools/check_f234_multiprocess.py
+          php -l src/MockBridge/MockSyntheticEvidenceGate.php
+          php -l tools/check_f235_composed_gate.php
+          php tools/check_f235_composed_gate.php
+          echo 'F235_SYNTHETIC_EVIDENCE_ONLY operational_decision=NO_GO' >> "$GITHUB_STEP_SUMMARY"
