@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src 'none'; img-src 'none'; font-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; form-action 'none'; object-src 'none'; base-uri 'none'">
+<title>Imagine Agentes de IA | Demonstração Comercial</title>
+<style>
+:root{font:14px/1.5 Arial,Helvetica,sans-serif;color:#24282d;background:#f6f7f8;--orange:#f9941d;--dark:#17212b;--line:#e5e7eb;--light:#fff8f0;--muted:#647180}
+*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #e6a34f;outline-offset:2px}button:disabled{opacity:.5;cursor:not-allowed}
+.shell{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}.side{background:white;border-right:1px solid var(--line);padding:25px 15px;display:flex;flex-direction:column;gap:26px}.brand{font-size:23px;font-weight:900;letter-spacing:-1px;color:var(--dark);padding:8px 13px}.brand i{color:var(--orange);font-style:normal}.brand small{display:block;color:var(--muted);font-size:11px;font-weight:500;letter-spacing:0}
+nav{display:grid;gap:6px}nav button{width:100%;border:0;text-align:left;background:transparent;border-radius:11px;padding:13px;color:#53606f;font-weight:700}nav button[aria-current="page"],nav button:hover{background:var(--light);color:#ad5703;border-left:3px solid var(--orange)}
+.sidefoot{margin-top:auto;border-radius:12px;background:#f6f7f8;padding:14px;font-size:11px;color:#727b85}.sidefoot strong{display:block;color:#424a50;margin-bottom:6px}
+main{min-width:0}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:20px clamp(20px,4vw,50px);border-bottom:1px solid var(--line);background:white}.top strong{font-size:16px}.top small{display:block;color:var(--muted)}.flag{border-radius:24px;padding:9px 12px;color:#935100;background:#fff3dc;font-weight:800;font-size:11px}
+.wrap{max-width:1150px;margin:0 auto;padding:30px clamp(18px,4vw,50px) 70px}.page[hidden]{display:none!important}h1{margin:0 0 8px;font-size:31px;letter-spacing:-1px}h2{font-size:18px;margin:0 0 15px}h3{font-size:15px;margin:0}.lead{color:var(--muted);margin:0 0 26px;max-width:830px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.grid.two{grid-template-columns:1.35fr 1fr}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 5px 14px #151b2106}.card small{color:var(--muted);font-weight:700}.number{font-size:29px;font-weight:800;color:#222d39;margin:5px 0}.pill{display:inline-block;border-radius:15px;font-size:11px;padding:5px 9px;font-weight:800;color:#8c4a0d;background:#fff1dd}
+.hero{padding:28px;border-radius:20px;background:linear-gradient(110deg,#171c22,#313742);color:white;margin-bottom:23px}.hero h2{color:white;font-size:27px}.hero p{color:#d5d7d9;max-width:650px;margin:12px 0 0}.hero b{color:#ffad4f}
+.funnel{display:flex;gap:9px;margin:16px 0}.funnel .step{flex:1;text-align:center;padding:19px 8px;border:1px solid #f5debd;background:#fff7ec;border-radius:12px}.step b{display:block;font-size:25px}.step span{font-weight:750;color:#995800}.step small{display:block;font-weight:500;margin-top:4px}.arrow{align-self:center;color:#b37a36;font-weight:900}.formgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:15px}label{display:block;font-weight:750;margin:12px 0 6px;color:#3c4957;font-size:12px}input,select{width:100%;background:white;border:1px solid #ccd4dc;border-radius:9px;padding:11px;color:#263341}input[type=number]{font-variant-numeric:tabular-nums}.btn{border:0;background:var(--orange);color:#231a0e;padding:11px 16px;border-radius:9px;font-weight:800}.btn.secondary{background:white;border:1px solid #d5dbe3;color:#475467}.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}.notice{border:1px solid #efdcb9;background:#fff9ef;color:#775019;padding:13px;border-radius:12px;font-size:12px;margin-top:19px}.list{display:grid;gap:12px}.listitem{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:17px;border:1px solid var(--line);border-radius:12px}.listitem h3{margin-bottom:4px}.listitem p{font-size:12px;color:var(--muted);margin:0}.status{font-size:11px;font-weight:800;color:#86570b;background:#fef3dc;border-radius:20px;padding:7px 10px;white-space:nowrap}.status.neutral{color:#4e5c6c;background:#eff3f7}
+.reply{padding:18px;background:#f8fafc;border:1px solid var(--line);border-radius:12px;min-height:120px;margin-top:14px}.reply strong{display:block;color:#29384c;margin-bottom:7px}.reply p{margin:0;color:#495f77}.reply[hidden]{display:none}.audit{display:grid;gap:8px;max-height:260px;overflow:auto}.audit div{border-bottom:1px solid var(--line);padding:9px 0;font-size:12px;color:#526171}.audit span{font-weight:700;color:#293849}.muted{color:var(--muted);font-size:12px}.note{font-size:11px;color:#77828d;padding-top:20px}.approvals .listitem button{white-space:nowrap}
+@media(max-width:950px){.grid.two{grid-template-columns:1fr}.shell{grid-template-columns:190px minmax(0,1fr)}}
+@media(max-width:700px){.shell{display:block}.side{position:static;padding:12px;gap:10px}.brand{font-size:19px;padding:6px}.sidefoot{display:none}nav{grid-template-columns:repeat(2,1fr)}nav button{padding:10px;font-size:12px}.top{padding:16px;flex-wrap:wrap}.wrap{padding:22px 16px}.grid,.formgrid{grid-template-columns:1fr}.funnel{flex-direction:column}.arrow{text-align:center}.hero h2{font-size:23px}.listitem{align-items:flex-start;flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="side" aria-label="Menu lateral">
+  <div class="brand">imagine<i>.</i><small>Agentes de Inteligência Artificial</small></div>
+  <nav aria-label="Áreas da demonstração">
+    <button type="button" data-nav="overview" aria-current="page">Visão geral</button>
+    <button type="button" data-nav="agents">Meus agentes</button>
+    <button type="button" data-nav="simulate">Executar simulação</button>
+    <button type="button" data-nav="approvals">Aprovações</button>
+    <button type="button" data-nav="integrations">Integrações</button>
+  </nav>
+  <div class="sidefoot"><strong>Ambiente de apresentação</strong> Nenhum cliente, lead, credencial, provedor de IA ou serviço externo está conectado. Dados fictícios apenas.</div>
+</aside>
+<main>
+  <header class="top"><div><strong>Imagine AI Agents</strong><small>Visitas → Leads → Clientes</small></div><span class="flag">● DEMONSTRAÇÃO OFFLINE · NO-GO</span></header>
+  <div class="wrap">
+    <section class="page" id="page-overview">
+      <div class="hero"><span class="pill">METODOLOGIA IMAGINE</span><h2>Transforme <b>visitas</b> em <b>leads</b> e leads em <b>clientes</b>.</h2><p>Explore cenários comerciais e acompanhe o papel dos agentes de IA na análise, na organização e nas recomendações. Todos os cálculos são ilustrativos.</p></div>
+      <h1>Visão geral</h1><p class="lead">Funil ilustrativo calculado com taxas informadas por você. Não representa previsão garantida de resultados.</p>
+      <div class="grid">
+        <div class="card"><small>Visitas esperadas / semana</small><div class="number" id="metric-visits">1.000</div><small>Tráfego estimado</small></div>
+        <div class="card"><small>Leads potenciais / semana</small><div class="number" id="metric-leads">50</div><small>Taxa de conversão configurável</small></div>
+        <div class="card"><small>Clientes potenciais / semana</small><div class="number" id="metric-clients">5</div><small>Fechamento configurável</small></div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <h2>Calculadora da metodologia</h2>
+        <div class="formgrid">
+          <div><label for="visits">Visitas por semana</label><input id="visits" type="number" min="0" max="100000" value="1000" step="100"></div>
+          <div><label for="lead-rate">Conversão de visitas em leads (%)</label><input id="lead-rate" type="number" min="0" max="100" step="0.5" value="5"></div>
+          <div><label for="close-rate">Conversão de leads em clientes (%)</label><input id="close-rate" type="number" min="0" max="100" step="0.5" value="10"></div>
+        </div>
+        <div class="funnel" role="status" aria-live="polite"><div class="step"><b id="funnel-visits">1.000</b><span>VISITAS</span><small>Alcance</small></div><div class="arrow">→</div><div class="step"><b id="funnel-leads">50</b><span>LEADS</span><small>Interesse</small></div><div class="arrow">→</div><div class="step"><b id="funnel-clients">5</b><span>CLIENTES</span><small>Conversão</small></div></div>
+        <p class="muted" id="funnel-explanation">Cenário calculado localmente.</p>
+      </div>
+      <p class="note">Nenhum dado deste formulário é enviado ou armazenado. Taxas são hipóteses alteráveis; não correspondem a taxas reais da Imagine.</p>
+    </section>
+    <section class="page" id="page-agents" hidden>
+      <h1>Meus agentes</h1><p class="lead">Modelos preparados para demonstração. Nenhum agente foi implantado ou conectado a um provedor de IA.</p>
+      <div class="list">
+        <div class="listitem"><div><h3>Assistente Comercial</h3><p>Analisa estágio de um lead fictício e sugere o próximo passo, sem enviar mensagens.</p></div><span class="status">Simulação disponível</span></div>
+        <div class="listitem"><div><h3>Analista de Leads</h3><p>Organiza oportunidades e identifica prioridades em cenários de teste.</p></div><span class="status neutral">Prévia</span></div>
+        <div class="listitem"><div><h3>Assistente de Automação</h3><p>Fluxos futuros do n8n sujeitos a permissões e aprovação humana.</p></div><span class="status neutral">Bloqueado</span></div>
+      </div>
+      <div class="controls"><button class="btn" type="button" data-switch="simulate">Abrir assistente comercial</button></div>
+      <div class="notice">Criação de agentes persistentes, modelos reais, faturamento e integração com CRM/n8n estão desativados neste protótipo.</div>
+    </section>
+    <section class="page" id="page-simulate" hidden>
+      <h1>Assistente Comercial</h1><p class="lead">Escolha um lead fictício e produza uma recomendação determinística. A operação não acessa o CRM nem faz chamadas a modelos de IA.</p>
+      <div class="grid two">
+        <div class="card">
+          <h2>Preparar execução</h2>
+          <label for="lead-select">Lead de laboratório</label>
+          <select id="lead-select"><option value="A">LEAD_TESTE_ALFA — Novo</option><option value="B">LEAD_TESTE_BETA — Qualificado</option><option value="C">LEAD_TESTE_GAMA — Proposta</option></select>
+          <label for="goal">Objetivo</label>
+          <select id="goal"><option value="next">Próxima ação comercial</option><option value="summary">Resumo do estágio</option></select>
+          <div class="controls"><button class="btn" id="run-demo" type="button">Executar simulação</button><button class="btn secondary" type="button" id="clear-result">Limpar</button></div>
+          <div class="reply" id="run-result" hidden aria-live="polite"><strong>Resultado do ensaio</strong><p id="run-text"></p></div>
+        </div>
+        <div class="card">
+          <h2>Governança ativa</h2>
+          <div class="list"><div><span class="pill">Dados fictícios</span><p class="muted">Nenhum registro pessoal ou empresa real.</p></div><div><span class="pill">Sem automação externa</span><p class="muted">Não há e-mail, WhatsApp, CRM ou n8n.</p></div><div><span class="pill">Aprovação humana</span><p class="muted">Sugestões não acionam tarefas reais.</p></div></div>
+          <div class="notice">OP-01 operacional: <strong>NO-GO</strong>. Autenticação de serviço, ACL por recurso/campo e os 13 testes de homologação real continuam pendentes.</div>
+        </div>
+      </div>
+    </section>
+    <section class="page" id="page-approvals" hidden>
+      <h1>Central de aprovações</h1><p class="lead">Teste local do processo de revisão humana. Aprovar aqui só altera o estado temporário desta página.</p>
+      <div id="approval-items" class="list approvals" aria-live="polite"></div>
+      <p class="note">O estado não é persistido, transmitido ou vinculado a CRM, Portal, IA ou n8n. Recarregar a página reinicia as decisões.</p>
+    </section>
+    <section class="page" id="page-integrations" hidden>
+      <h1>Integrações</h1><p class="lead">Visão das dependências planejadas do MVP. Não há conexões ativas nesta demonstração.</p>
+      <div class="list">
+        <div class="listitem"><div><h3>CRM Imagine</h3><p>Leitura mínima somente após identidade S2S, ACL empresarial e homologação OP-01.</p></div><span class="status neutral">Desabilitada</span></div>
+        <div class="listitem"><div><h3>Motor de IA</h3><p>Adaptador de provedor, medição de consumo, limites e aprovação de ferramentas.</p></div><span class="status neutral">Desabilitada</span></div>
+        <div class="listitem"><div><h3>n8n central</h3><p>Orquestração futura com assinaturas, escopos e idempotência entre serviços.</p></div><span class="status neutral">Desabilitada</span></div>
+        <div class="listitem"><div><h3>Portal Imagine</h3><p>Login, assinaturas e permissões de empresa em uma integração futura.</p></div><span class="status neutral">Desabilitada</span></div>
+      </div>
+    </section>
+    <div class="card" style="margin-top:22px"><h2>Histórico desta sessão</h2><div class="audit" id="audit-log"><div>Sem atividades de demonstração.</div></div><p class="muted">Apenas eventos exibidos na memória do navegador; sem arquivos, localStorage, cookies ou envio de rede.</p></div>
+  </div>
+</main>
+</div>
+<script>
+"use strict";
+const LAB_LEADS = Object.freeze({
+ A: Object.freeze({ref:"LEAD_TESTE_ALFA",stage:"novo"}),
+ B: Object.freeze({ref:"LEAD_TESTE_BETA",stage:"qualificado"}),
+ C: Object.freeze({ref:"LEAD_TESTE_GAMA",stage:"proposta"})
+});
+function pipeline(visits,leadRate,closeRate){
+ const valid=[visits,leadRate,closeRate].every(Number.isFinite) &&
+   visits>=0 && visits<=100000 && leadRate>=0 && leadRate<=100 &&
+   closeRate>=0 && closeRate<=100;
+ if(!valid){return null;}
+ const leads=Math.floor(visits*leadRate/100);
+ return Object.freeze({visits:Math.floor(visits),leads:leads,clients:Math.floor(leads*closeRate/100)});
+}
+function advice(leadId,goal){
+ const lead=LAB_LEADS[leadId];
+ if(!lead || !["next","summary"].includes(goal)){return null;}
+ const next={
+   novo:"Verificar aderência da oportunidade e elaborar uma abordagem inicial para revisão humana.",
+   qualificado:"Preparar um diagnóstico de necessidades e propor uma conversa comercial, sujeita à aprovação.",
+   proposta:"Revisar objeções e montar um roteiro de acompanhamento da proposta, sem enviar mensagens."
+ };
+ return Object.freeze({ref:lead.ref,stage:lead.stage,
+   text:goal==="summary"?"Estágio atual: "+lead.stage+". Prioridade: acompanhamento supervisionado.":next[lead.stage]});
+}
+// UI BOOT — all interactions are strictly local and in-memory.
+const $=id=>document.getElementById(id);
+const log=[];
+const approvals=[
+  {id:"01",text:"Revisar abordagem para LEAD_TESTE_ALFA",state:"PENDENTE"},
+  {id:"02",text:"Revisar acompanhamento de LEAD_TESTE_GAMA",state:"PENDENTE"}
+];
+function audit(message){
+ log.unshift(message);
+ if(log.length>10){log.pop();}
+ const root=$("audit-log");
+ root.replaceChildren();
+ log.forEach((line,index)=>{
+   const entry=document.createElement("div");
+   const title=document.createElement("span");
+   title.textContent=String(log.length-index).padStart(2,"0")+" · ";
+   entry.append(title,document.createTextNode(line));
+   root.append(entry);
+ });
+}
+function navigate(target){
+ const allowed=["overview","agents","simulate","approvals","integrations"];
+ if(!allowed.includes(target)){return;}
+ allowed.forEach(id=>{
+   $("page-"+id).hidden=id!==target;
+ });
+ document.querySelectorAll("[data-nav]").forEach(btn=>{
+   if(btn.dataset.nav===target){btn.setAttribute("aria-current","page");}
+   else{btn.removeAttribute("aria-current");}
+ });
+}
+document.querySelectorAll("[data-nav]").forEach(btn=>btn.addEventListener("click",()=>navigate(btn.dataset.nav)));
+document.querySelectorAll("[data-switch]").forEach(btn=>btn.addEventListener("click",()=>navigate(btn.dataset.switch)));
+const fmt=new Intl.NumberFormat("pt-BR");
+function recalc(){
+ const result=pipeline(Number($("visits").value),Number($("lead-rate").value),Number($("close-rate").value));
+ if(!result){
+   $("funnel-explanation").textContent="Informe valores entre os limites indicados.";
+   return;
+ }
+ [["metric-visits",result.visits],["metric-leads",result.leads],["metric-clients",result.clients],
+  ["funnel-visits",result.visits],["funnel-leads",result.leads],["funnel-clients",result.clients]].forEach(([id,value])=>{
+   $(id).textContent=fmt.format(value);
+ });
+ $("funnel-explanation").textContent="Hipótese calculada localmente: "+fmt.format(result.visits)+" visitas podem gerar "+fmt.format(result.leads)+" leads e "+fmt.format(result.clients)+" clientes, conforme as taxas escolhidas.";
+}
+["visits","lead-rate","close-rate"].forEach(id=>$(id).addEventListener("input",recalc));
+$("run-demo").addEventListener("click",()=>{
+ const result=advice($("lead-select").value,$("goal").value);
+ if(!result){$("run-result").hidden=true;return;}
+ $("run-text").textContent=result.ref+" · "+result.text;
+ $("run-result").hidden=false;
+ audit("Simulação comercial concluída para "+result.ref+" (sem ações externas).");
+});
+$("clear-result").addEventListener("click",()=>{$("run-result").hidden=true;});
+function renderApprovals(){
+ const root=$("approval-items");
+ root.replaceChildren();
+ approvals.forEach(item=>{
+   const row=document.createElement("div");row.className="listitem";
+   const info=document.createElement("div");const h=document.createElement("h3");
+   h.textContent=item.text;const p=document.createElement("p");
+   p.textContent="Decisão: "+item.state+" · apenas ensaio nesta sessão";
+   info.append(h,p);row.append(info);
+   if(item.state==="PENDENTE"){
+     const controls=document.createElement("div");controls.className="controls";
+     [["APROVADO_EM_ENSAIO","Aprovar (ensaio)"],["REJEITADO_EM_ENSAIO","Rejeitar (ensaio)"]].forEach(([state,label])=>{
+       const button=document.createElement("button");button.type="button";
+       button.className="btn"+(state.startsWith("REJEITADO")?" secondary":"");
+       button.textContent=label;
+       button.addEventListener("click",()=>{
+         item.state=state;renderApprovals();
+         audit("Decisão local "+state+" no item "+item.id+"; sem efeito externo.");
+       });
+       controls.append(button);
+     });
+     row.append(controls);
+   } else{
+     const mark=document.createElement("span");mark.className="status neutral";
+     mark.textContent=item.state;row.append(mark);
+   }
+   root.append(row);
+ });
+}
+recalc();
+renderApprovals();
+</script>
+</body>
+</html>
