@@ -1,0 +1,111 @@
+name: CENTRAL-AUTO-RC06 integrated private n8n and CRM Portal mTLS NO-GO
+on:
+  push:
+    branches:
+      - review/central-auto-rc06-mtls-n8n-private-2026-11-16
+permissions:
+  contents: read
+jobs:
+  durable-mtls-lab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      pg:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-crm
+          ref: 9afa6683e6b3463f12bd80a25f455f925828c0af
+          path: _crm_contract_pin
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-portal
+          ref: 9d3877dfaa81524faf2c08f80244b485968316ec
+          path: _portal_contract_pin
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: openssl
+          coverage: none
+      - name: Prove exact source commits and test-only syntax
+        run: |
+          test "$(git -C _crm_contract_pin rev-parse HEAD)" = "9afa6683e6b3463f12bd80a25f455f925828c0af"
+          test "$(git -C _portal_contract_pin rev-parse HEAD)" = "9d3877dfaa81524faf2c08f80244b485968316ec"
+          php -l tools/auto_ia/central_transport/check_replay_after_restart.php
+          python3 -m py_compile tools/auto_ia/central_transport/mtls_crm_lab_server.py
+          bash -n tools/auto_ia/central_transport/check_pg_nonce_race.sh
+      - name: Create least-privilege synthetic PostgreSQL replay ledger
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/central_transport/001_pg_durable_nonce.sql
+          psql --version
+      - name: Send real mTLS requests, deny unavailable storage and recover once
+        env:
+          CENTRAL_AUTO_P8_PG_CONTAINER: ${{ job.services.pg.id }}
+        run: |
+          bash tools/auto_ia/central_transport/run_loopback_mtls.sh
+      - name: Prove eight independent PostgreSQL sessions cannot reuse nonce
+        run: |
+          bash tools/auto_ia/central_transport/check_pg_nonce_race.sh
+      - name: Back up disposable PG16 database and restore into separate empty database
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" pg_dump -U postgres -d imagine_agents_ci -Fc > /tmp/central-auto-p7-ci-backup.dump
+          test -s /tmp/central-auto-p7-ci-backup.dump
+          docker exec -i "${{ job.services.pg.id }}" createdb -U postgres imagine_restored_ci
+          docker exec -i "${{ job.services.pg.id }}" pg_restore -U postgres -d imagine_restored_ci --exit-on-error < /tmp/central-auto-p7-ci-backup.dump
+      - name: Verify restored RLS, grants, signed replay, company and hash parity
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_restored_ci -v ON_ERROR_STOP=1 < tools/auto_ia/central_transport/check_pg_restore.sql
+          source_hash="$(docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -At -v ON_ERROR_STOP=1 -c "SELECT md5(string_agg(issuer||'|'||company_id::text||'|'||nonce||'|'||request_id||'|'||request_digest, ',' ORDER BY issuer,company_id,nonce)) FROM central_auto_lab.mtls_nonce_ledger;")"
+          restored_hash="$(docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_restored_ci -At -v ON_ERROR_STOP=1 -c "SELECT md5(string_agg(issuer||'|'||company_id::text||'|'||nonce||'|'||request_id||'|'||request_digest, ',' ORDER BY issuer,company_id,nonce)) FROM central_auto_lab.mtls_nonce_ledger;")"
+          test "$source_hash" = "$restored_hash"
+          echo "CENTRAL_AUTO_P7_BACKUP_RESTORE_PASS raw_data_not_uploaded=1"
+      - name: Audit isolation and NO_GO baseline
+        run: |
+          python3 tools/auto_ia/check_rc04_integrity.py
+          python3 tools/auto_ia/check_rc02_release.py
+          python3 tools/auto_ia/convergence/check_rc03_release.py
+          echo "CENTRAL_AUTO_P6_NO_GO no_n8n_vps=1 no_customer=1 no_provider=1"
+  private-compose-review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Require byte-for-byte same hardened Compose as successful P4 candidate
+        run: |
+          test "$(git hash-object infra/n8n-private/docker-compose.yml)" = "518b5a62f21b39497c9eb113d08677f7a4895351"
+          test "$(git hash-object infra/n8n-private/check_compose_static.py)" = "c1a755cf90a34b880e5847785a25d8ee1df0291c"
+          test "$(git hash-object infra/n8n-private/10-runtime-role.sh)" = "d92a33b508047db7c29c3afdabcce724628ed83c"
+      - name: Verify static no-host-port Compose and readonly inventory
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$RUNNER_TEMP/central-auto-rc06-secrets"
+          for key in admin runtime encryption; do printf "SYNTHETIC_CI_ONLY" > "$RUNNER_TEMP/central-auto-rc06-secrets/$key"; done
+          export N8N_PG_ADMIN_PASSWORD_FILE="$RUNNER_TEMP/central-auto-rc06-secrets/admin"
+          export N8N_PG_PASSWORD_FILE="$RUNNER_TEMP/central-auto-rc06-secrets/runtime"
+          export N8N_ENCRYPTION_KEY_FILE="$RUNNER_TEMP/central-auto-rc06-secrets/encryption"
+          export N8N_IMAGE="n8nio/n8n@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          export N8N_PG_IMAGE="postgres@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          export N8N_EXPECTED_PROJECT="imagine-n8n-private-staging"
+          docker compose --profile homologation -f infra/n8n-private/docker-compose.yml config --format json | python3 infra/n8n-private/check_compose_static.py
+          python3 infra/n8n-private/test_readonly_inventory.py
+          python3 tools/auto_ia/check_rc02_release.py
+          python3 tools/auto_ia/check_rc04_integrity.py
+          echo "CENTRAL_AUTO_RC06_PRIVATE_COMPOSE_PASS no_hosts_ports=1 no_model=1 no_deploy=1"
