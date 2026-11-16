@@ -54,7 +54,7 @@ class F231ServiceIdentity(unittest.TestCase):
         self.assertIn("test_f231_service_identity.py", self.gate)
         self.assertIn("php -l tools/check_f231_ed25519_preflight.php", self.gate)
         self.assertIn("php tools/check_f231_ed25519_preflight.php", self.gate)
-        self.assertIn("EXPECTED_PHP: '112'", self.wf)
+        self.assertIn("EXPECTED_PHP: '115'", self.wf)
         self.assertIn("EXPECTED_CASES: '879'", self.wf)
         self.assertIn("contents: read", self.wf)
         self.assertEqual(self.wf.count("persist-credentials: false"),2)
