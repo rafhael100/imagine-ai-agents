@@ -73,9 +73,9 @@ def check(data:object)->dict:
         proxy.get("security_opt")!=["no-new-privileges:true"]
     ):
         raise Denied("PROXY_PRIVILEGES")
-    # Root master only retains permission to drop worker UID/GID.
-    # Never authorize DAC override, network administration or SYS_ADMIN.
-    if set(proxy.get("cap_add",[]))!={"SETUID","SETGID"} or len(proxy.get("cap_add",[]))!=2:
+    # Root master only retains permission to drop worker UID/GID and
+    # chown its isolated temporary directory. No DAC override/NET_ADMIN.
+    if set(proxy.get("cap_add",[]))!={"SETUID","SETGID","CHOWN"} or len(proxy.get("cap_add",[]))!=3:
         raise Denied("PROXY_ONLY_SETUID_SETGID")
     if proxy.get("restart")!="no" or proxy.get("environment"):
         raise Denied("PROXY_ENV_OR_RESTART")
