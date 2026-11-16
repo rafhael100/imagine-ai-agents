@@ -1,0 +1,31 @@
+name: F232 isolated synthetic scope tests (NO-GO)
+
+on:
+  push:
+    branches:
+      - dev/f232-synthetic-scope-deny-first-2026-11-15
+  pull_request:
+    branches:
+      - review/aia-f229-f231-integrated-candidate-2026-11-14
+
+permissions:
+  contents: read
+
+jobs:
+  scope-offline:
+    if: ${{ github.event.repository.private == false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - name: Checkout without write credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned
+        with:
+          persist-credentials: false
+      - name: Run isolated offline F232 guard (no deployment)
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l src/MockBridge/MockSyntheticScopePreflight.php
+          php -l tools/check_f232_scope_preflight.php
+          php tools/check_f232_scope_preflight.php
+          echo 'F232_NO_GO_AUTHORIZATION_NOT_PROVEN' >> "$GITHUB_STEP_SUMMARY"
