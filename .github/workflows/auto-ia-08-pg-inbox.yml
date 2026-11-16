@@ -1,0 +1,60 @@
+name: AUTO-IA-08 PostgreSQL inbox for NO_AI internal events (CI only)
+on:
+  push:
+    branches:
+      - feat/auto-ia-08-pg-inbox-no-ai-2026-11-16
+  pull_request:
+    branches:
+      - feat/auto-ia-07-pg16-rls-lab-2026-11-16
+permissions:
+  contents: read
+jobs:
+  no-ai-inbox:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    services:
+      pg:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: synthetic-only-ci-not-secret
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: Create isolated synthetic Postgres16 RLS ledger
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tools/auto_ia/pg/001_auto_ia_pg_lab.sql
+      - name: Check quota isolation and atomicity
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tools/auto_ia/pg/check_auto_ia_07.sql
+          bash tools/auto_ia/pg/check_parallel_07.sh "${{ job.services.pg.id }}"
+      - name: Create synthetic NO_AI-only inbox and tests
+        run: |
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tools/auto_ia/pg/002_no_ai_inbox.sql
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tools/auto_ia/pg/check_auto_ia_08.sql
+          bash tools/auto_ia/pg/check_parallel_08.sh "${{ job.services.pg.id }}"
+      - name: Verify exact PHP-to-SQL operation catalog parity
+        run: |
+          php -r "require 'tools/auto_ia/AutoIaRouter.php'; echo json_encode(\\ImagineAI\\AutomationFirst\\AutoIaRouter::matrix());" > /tmp/auto-ia-catalog.json
+          docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d postgres -At -F '|' -c "SELECT product,operation,'NO_AI' FROM auto_ia_lab.no_ai_ops UNION ALL SELECT product,operation,'AI' FROM auto_ia_lab.allowed_ops ORDER BY 1,2;" > /tmp/auto-ia-sql-catalog.txt
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          m = json.loads(Path("/tmp/auto-ia-catalog.json").read_text())
+          php = {(p,op,"NO_AI" if kind=="NO_AI" else "AI") for p,ops in m.items() for op,kind in ops.items()}
+          sql = {tuple(s.split("|")) for s in Path("/tmp/auto-ia-sql-catalog.txt").read_text().splitlines()}
+          assert php == sql, {"missing_sql": list(php-sql), "extra_sql": list(sql-php)}
+          assert len(sql) == 24
+          print("AUTO_IA_08_CATALOG_PARITY_PASS operations=24")
+          PY
+      - name: Preserve all AUTO-IA RC01 release blockers
+        run: |
+          php tools/auto_ia/check_auto_ia.php
+          php tools/auto_ia/check_auto_ia_02.php
+          php tools/auto_ia/check_auto_ia_05.php
+          python3 tools/auto_ia/check_auto_ia_03.py
+          python3 tools/auto_ia/check_auto_ia_04.py
+          python3 tools/auto_ia/check_auto_ia_06.py
