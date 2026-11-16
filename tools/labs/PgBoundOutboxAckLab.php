@@ -28,7 +28,10 @@ final class PgBoundOutboxAckLab
         int $attempt,int $now,?int $trustedRevision=null,
         ?string $expectedSignedPayloadHash=null,
         ?string $trustedExecutorKeyId=null,
-        ?string $expectedExecutorKeyFingerprint=null):array
+        ?string $expectedExecutorKeyFingerprint=null,
+        ?string $canonicalSignedReceipt=null,
+        ?string $receiptSignatureB64=null,
+        ?string $receiptPublicKey=null):array
     {
         if(!self::ref($tenant)||!self::ref($eventRef)||!self::ref($worker)
             ||$attempt<1||$attempt>3||$now<0||$now>4_102_444_800
@@ -45,6 +48,21 @@ final class PgBoundOutboxAckLab
                     ||preg_match('/\A[a-f0-9]{64}\z/D',
                         $expectedExecutorKeyFingerprint)!==1))){
             return self::deny('SIGNER_KEY_ARGUMENTS_INVALID');
+        }
+        $signedEvidenceRequested=$canonicalSignedReceipt!==null
+            ||$receiptSignatureB64!==null||$receiptPublicKey!==null;
+        if($signedEvidenceRequested
+            && ($canonicalSignedReceipt===null||$receiptSignatureB64===null
+                ||$receiptPublicKey===null
+                ||$trustedRevision===null||$expectedSignedPayloadHash===null
+                ||$trustedExecutorKeyId===null
+                ||$expectedExecutorKeyFingerprint===null
+                ||strlen($receiptPublicKey)!==SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES
+                ||!hash_equals(
+                    hash('sha256',$receiptPublicKey),
+                    $expectedExecutorKeyFingerprint
+                ))){
+            return self::deny('SIGNED_EVIDENCE_ARGUMENTS_INVALID');
         }
         try{
             $this->db->beginTransaction();
@@ -127,6 +145,27 @@ SQL);
                 $this->db->rollBack();
                 return self::deny('REQUEST_OR_NONCE_MISMATCH');
             }
+            // P38: re-verify the Ed25519 V2 signature *inside* the DB
+            // transaction after tenant, signer and outbox locks are held.
+            // Neither a caller-supplied verified flag nor a standalone
+            // precheck may authorize inserting evidence or marking ACKED.
+            if($signedEvidenceRequested){
+                if(!class_exists(MockContentBoundExecutorReceiptV2::class)){
+                    $this->db->rollBack();
+                    return self::deny('SIGNED_RECEIPT_VERIFIER_UNAVAILABLE');
+                }
+                $checked=MockContentBoundExecutorReceiptV2::verify(
+                    $canonicalSignedReceipt,$receiptSignatureB64,$receiptPublicKey,
+                    $tenant,$eventRef,$worker,$attempt,$trustedRevision,$now
+                );
+                if($checked['decision']!=='LAB_SIGNED_CONTENT_BOUND_RECEIPT'
+                    ||!hash_equals(
+                        $checked['payload_hash']??'',$row['event_hash']
+                    )){
+                    $this->db->rollBack();
+                    return self::deny('SIGNED_RECEIPT_VERIFICATION_DENIED');
+                }
+            }
             $mark=$this->db->prepare(<<<'SQL'
 UPDATE public.aia_lab_n8n_outbox_p6
  SET state='ACKED',lease_owner=NULL,lease_expires=NULL
@@ -141,6 +180,32 @@ SQL);
             if($mark->rowCount()!==1){
                 $this->db->rollBack();
                 return self::deny('ACK_CONCURRENCY_DENIED');
+            }
+            // The ACK and its full synthetic signature evidence commit
+            // together, or PostgreSQL rolls both back. No repair side effect.
+            if($signedEvidenceRequested){
+                $e=$this->db->prepare(<<<'SQL'
+INSERT INTO aia_p38_lab.signed_ack_evidence
+ (tenant_ref,event_ref,worker_ref,attempt,authority_revision,
+  signer_key_id,key_fingerprint,payload_hash,canonical_receipt,signature_b64,
+  receipt_sha256)
+ VALUES (:tenant,:event,:worker,:attempt,:revision,
+         :key,:fingerprint,:hash,:receipt,:sig,:receipt_hash)
+SQL);
+                $e->execute([
+                    ':tenant'=>$tenant,':event'=>$eventRef,':worker'=>$worker,
+                    ':attempt'=>$attempt,':revision'=>$trustedRevision,
+                    ':key'=>$trustedExecutorKeyId,
+                    ':fingerprint'=>$expectedExecutorKeyFingerprint,
+                    ':hash'=>$row['event_hash'],
+                    ':receipt'=>$canonicalSignedReceipt,
+                    ':sig'=>$receiptSignatureB64,
+                    ':receipt_hash'=>hash('sha256',$canonicalSignedReceipt),
+                ]);
+                if($e->rowCount()!==1){
+                    $this->db->rollBack();
+                    return self::deny('ACK_EVIDENCE_NOT_INSERTED');
+                }
             }
             $this->db->commit();
             return [
