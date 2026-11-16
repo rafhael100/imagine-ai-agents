@@ -74,6 +74,22 @@ jobs:
           test "$(curl -s -X POST -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port/")" = 404
           docker compose -f deploy/agent-demo/compose.yaml exec -T preview python -c "from pathlib import Path; p=Path('/srv/demo/unauthorized'); assert not p.exists(); exec('try:\\n p.write_text(\"bad\")\\nexcept OSError:\\n pass'); assert not p.exists()"
           echo 'P3_STATIC_DEMO_HTTP_PASS bind=loopback_only health=simulated api=404 rootfs=readonly real_access=none operational_decision=NO_GO' >> "$GITHUB_STEP_SUMMARY"
+      - name: Package checked HTML preview for manual testing
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp examples/p0-assistente-comercial-demo.html dist/index.html
+          (cd dist && sha256sum index.html > SHA256SUMS && sha256sum -c SHA256SUMS)
+          printf '%s\n' 'Imagine Agentes de IA — Demonstração local' 'Extraia os arquivos e abra index.html no navegador.' 'Sem servidor, login, CRM, IA, n8n ou cobrança. Dados fictícios.' 'Não utilizar com dados de clientes.' > dist/LEIA-ME.txt
+          echo 'P3_OFFLINE_HTML_PREVIEW_ARTIFACT_READY checksum=SHA256SUMS' >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload temporary HTML demo as a CI artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: imagine-agentes-demo-html
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
       - name: Destroy all disposable containers and networks
         if: always()
         shell: bash
