@@ -40,16 +40,19 @@ def run(*args:str,allow_conflict:bool=False)->subprocess.CompletedProcess:
         raise RuntimeError("GIT_QUERY_FAILED_"+args[0]+"_rc_"+str(p.returncode))
     return p
 
-def validate_pins()->None:
+def validate_pins()->dict[str,bool]:
+    stale={}
     for name,(branch,sha) in BRANCHES.items():
         if not HEX.fullmatch(sha):raise ValueError("UNEXPECTED_PIN")
-        # GitHub Actions checkout fetch-depth:0 fetches remote branch refs.
+        # Checkout fetch-depth:0 fetches branch refs. A parallel stream
+        # can move during this job: preserve the immutable pinned proof,
+        # but mark it stale instead of discarding the merge-tree analysis.
         actual=run("rev-parse",f"refs/remotes/origin/{branch}").stdout.strip()
-        if actual!=sha:
-            raise ValueError("PIN_STALE_"+name)
+        stale[name]=(actual!=sha)
         resolved=run("rev-parse",f"{sha}^{{commit}}").stdout.strip()
         if resolved!=sha:
             raise ValueError("NOT_COMMIT_"+name)
+    return stale
 
 def commit_count(base:str,head:str)->int:
     return int(run("rev-list","--count",f"{base}..{head}").stdout.strip())
@@ -85,7 +88,7 @@ def merge_status(base:str,head:str)->dict:
     }
 
 def evaluate()->dict:
-    validate_pins()
+    stale=validate_pins()
     central=BRANCHES["central_p17"][1]
     main=BRANCHES["main"][1]
     result={
@@ -97,6 +100,8 @@ def evaluate()->dict:
       "central_commits_not_in_main":commit_count(main,central),
       "central_main_diff_too_large_for_unreviewed_merge":commit_count(main,central)>100,
       "branch_snapshots_immutable":True,
+      "branch_moved_since_snapshot":stale,
+      "current_branch_integration_attested":not any(stale.values()),
       "review_merges":{},
       "merge_commit_created":False,
       "github_branch_updated":False,
