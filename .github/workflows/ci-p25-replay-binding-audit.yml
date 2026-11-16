@@ -1,0 +1,68 @@
+name: Agents P25 - pinned request and nonce consistency audit
+
+on:
+  push:
+    branches:
+      - review/aia-p25-audit-request-nonce-2026-11-16
+  pull_request:
+    branches:
+      - review/aia-p24-rls-writer-boundary-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  p25-audit-bindings:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      AIA_P6_PG_LAB: 'true'
+      AIA_P16_PG_LAB: 'true'
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: imagine_agents_ci
+      DB_USERNAME: postgres
+    steps:
+      - name: Checkout reviewed P25 candidate read-only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Checkout original AUTO-IA CONV-02 pin read-only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 8b04d0e936168c77db028160b5aeb1758db497c4
+          path: _auto_ia_pinned_source
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, sodium, pdo_pgsql, pgsql
+          coverage: none
+      - name: Enforce immutable original adapter and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _auto_ia_pinned_source rev-parse HEAD)" = "8b04d0e936168c77db028160b5aeb1758db497c4"
+          php -l tools/labs/PgAtomicStagingAuditLab.php
+          php -l tools/check_p23_staging_audit.php
+      - name: Detect changed request and nonce identities, regress P23 and P24
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p23_staging_audit.php
+          php tools/check_p24_rls_writers.php
+          echo 'P25 CI-only historical binding audit: PASS (if green), production_decision=NO_GO.' >> "$GITHUB_STEP_SUMMARY"
