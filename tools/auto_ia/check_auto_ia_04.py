@@ -61,7 +61,7 @@ with tempfile.TemporaryDirectory(prefix="auto-ia-04-") as tmp:
     check(r.quote(**quote_args())=="LAB_QUOTE_IDEMPOTENT", "idempotent quote")
     denied("CREDIT_QUOTE_CONFLICT", lambda:r.quote(**quote_args(proposed_credits=5)))
     denied("CREDIT_QUOTE_CONFLICT", lambda:r.quote(**quote_args(
-        event="SYNTHETIC_EVENT_12",request_key="SYNTHETIC_KEY_12")))
+        quote_ref="SYNTHETIC_QUOTE_12")))
     denied("REQUEST_NOT_FOUND_OR_SCOPE_DENIED", lambda:r.quote(**quote_args(
         tenant="SYNTHETIC_TENANT_B")))
     check(r.report(tenant="SYNTHETIC_TENANT_A",product="imagine-crm",
