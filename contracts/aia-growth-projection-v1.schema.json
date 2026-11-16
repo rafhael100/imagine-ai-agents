@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Imagine AI Agents Deterministic Growth Projection V1 — synthetic only",
+  "description": "Two separate illustrative modes. Never an IAM grant or a sales forecast.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "mode", "tenant_ref", "request_ref",
+        "weekly_visits", "lead_rate_bp", "client_rate_bp"
+      ],
+      "properties": {
+        "schema": {"const": "AIA_GROWTH_PROJECTION_COMMAND_V1"},
+        "mode": {"const": "n8n_weekly"},
+        "tenant_ref": {"type": "string", "pattern": "^SYNTHETIC_[A-Z0-9_]{1,48}$", "maxLength": 64},
+        "request_ref": {"type": "string", "pattern": "^SYNTHETIC_[A-Z0-9_]{1,48}$", "maxLength": 64},
+        "weekly_visits": {"type": "integer", "minimum": 0, "maximum": 100000000},
+        "lead_rate_bp": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "client_rate_bp": {"type": "integer", "minimum": 0, "maximum": 10000}
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "mode", "tenant_ref", "request_ref",
+        "weekly_visits", "scenario"
+      ],
+      "properties": {
+        "schema": {"const": "AIA_GROWTH_PROJECTION_COMMAND_V1"},
+        "mode": {"const": "comercial_monthly"},
+        "tenant_ref": {"type": "string", "pattern": "^SYNTHETIC_[A-Z0-9_]{1,48}$", "maxLength": 64},
+        "request_ref": {"type": "string", "pattern": "^SYNTHETIC_[A-Z0-9_]{1,48}$", "maxLength": 64},
+        "weekly_visits": {"type": "integer", "minimum": 0, "maximum": 100000},
+        "scenario": {"enum": ["conservative", "reference", "optimistic"]}
+      }
+    }
+  ]
+}
