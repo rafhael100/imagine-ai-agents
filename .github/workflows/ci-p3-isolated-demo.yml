@@ -36,7 +36,14 @@ jobs:
           node tools/check_p1_sales_workbench.js
           php tools/check_p2_sales_domain.php
           node tools/check_p2_sales_parity.js
-      - name: Build and start fully isolated Compose on dynamic local port
+      - name: Select an unused loopback port in this disposable runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          selected="$(python3 -c 'import socket; sock=socket.socket(); sock.bind(("127.0.0.1",0)); print(sock.getsockname()[1]); sock.close()')"
+          test "$selected" -ge 1024
+          echo "AIA_DEMO_BIND_PORT=$selected" >> "$GITHUB_ENV"
+      - name: Build and start fully isolated Compose on selected local port
         shell: bash
         run: |
           set -euo pipefail
