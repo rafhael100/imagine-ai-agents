@@ -46,8 +46,13 @@ try {
         p19Check($result['decision']==='LAB_ATOMIC_STAGED_NO_DISPATCH','seed_'.$tenant);
     }
     // No LOGIN / no GRANT to application; roles exist strictly for CI simulation.
-    $db->exec('CREATE ROLE aia_p19_tenant_a NOLOGIN');
-    $db->exec('CREATE ROLE aia_p19_tenant_b NOLOGIN');
+    $passwords=[
+        'aia_p19_tenant_a'=>'ci_'.bin2hex(random_bytes(18)),
+        'aia_p19_tenant_b'=>'ci_'.bin2hex(random_bytes(18)),
+    ];
+    foreach($passwords as $role=>$password) {
+        $db->exec('CREATE ROLE '.$role.' LOGIN PASSWORD '.$db->quote($password));
+    }
     $db->exec('GRANT USAGE ON SCHEMA aia_p16_lab TO aia_p19_tenant_a, aia_p19_tenant_b');
     $db->exec('GRANT USAGE ON SCHEMA public TO aia_p19_tenant_a, aia_p19_tenant_b');
     foreach (['aia_p16_lab.event_replay','public.aia_lab_n8n_outbox_p6'] as $table) {
@@ -63,15 +68,16 @@ try {
         'aia_p19_tenant_a'=>'SYNTHETIC_TENANT_A',
         'aia_p19_tenant_b'=>'SYNTHETIC_TENANT_B',
     ] as $role=>$tenant) {
-        $db->exec('SET ROLE '.$role);
-        p19Check($db->query('SELECT current_user')->fetchColumn()===$role, 'role_context');
-        p19TenantVisible($db,$tenant);
+        $client=new PDO('pgsql:host=127.0.0.1;port=5432;dbname=imagine_agents_ci',
+            $role,$passwords[$role],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
+        p19Check($client->query('SELECT current_user')->fetchColumn()===$role, 'role_context');
+        p19TenantVisible($client,$tenant);
         $pretend=$tenant==='SYNTHETIC_TENANT_A'?'SYNTHETIC_TENANT_B':'SYNTHETIC_TENANT_A';
-        $db->exec("SET aia.tenant_ref='".$pretend."'");
-        p19TenantVisible($db,$tenant); // Caller-set GUC must never cross RLS boundaries.
+        $client->exec("SET aia.tenant_ref='".$pretend."'");
+        p19TenantVisible($client,$tenant); // Caller-set GUC must never cross RLS boundaries.
         $blocked=false;
         try {
-            $db->exec("INSERT INTO aia_p16_lab.event_replay
+            $client->exec("INSERT INTO aia_p16_lab.event_replay
                 (tenant_ref,event_ref,request_ref,nonce_ref,payload_hash)
                 VALUES ('SYNTHETIC_TENANT_A','SYNTHETIC_FORGED','SYNTHETIC_FAKE_REQUEST',
                     'SYNTHETIC_FAKE_NONCE','".str_repeat('a',64)."')");
@@ -79,14 +85,13 @@ try {
         p19Check($blocked,'role_cannot_write_claim');
         $blocked=false;
         try {
-            $db->exec('SET ROLE '.($role==='aia_p19_tenant_a'?'aia_p19_tenant_b':'aia_p19_tenant_a'));
+            $client->exec('SET ROLE '.($role==='aia_p19_tenant_a'?'aia_p19_tenant_b':'aia_p19_tenant_a'));
         }catch(PDOException){$blocked=true;}
         p19Check($blocked,'cannot_impersonate_other_role');
-        $db->exec('RESET ROLE');
+        $client=null;
     }
     echo "AIA_P19_RLS_READ_ISOLATION_PASS checks={$checks} tenant_roles=2 tables=2 ai_calls=0 operational_identity=false NO_GO\n";
 } finally {
-    $db->exec('RESET ROLE');
     if ($db->inTransaction()) $db->rollBack();
     // Never contaminate following tests; this database is CI-disposable anyway.
     foreach (['aia_p16_lab.event_replay','public.aia_lab_n8n_outbox_p6'] as $table) {
