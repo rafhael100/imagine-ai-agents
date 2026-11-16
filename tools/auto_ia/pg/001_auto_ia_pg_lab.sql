@@ -115,6 +115,10 @@ BEGIN
  tenant_id := CASE actor WHEN 'aia_lab_tenant_a' THEN 'SYNTHETIC_TENANT_A'
                         WHEN 'aia_lab_tenant_b' THEN 'SYNTHETIC_TENANT_B' ELSE NULL END;
  IF tenant_id IS NULL THEN RETURN 'LAB_DENY_IDENTITY'; END IF;
+ -- Serialize UNKNOWN against a concurrent reservation on the SAME budget row.
+ PERFORM 1 FROM auto_ia_lab.budgets
+ WHERE tenant=tenant_id AND product=p_product FOR UPDATE;
+ IF NOT FOUND THEN RETURN 'LAB_DENY_POLICY'; END IF;
  UPDATE auto_ia_lab.requests SET state='UNKNOWN'
  WHERE tenant=tenant_id AND product=p_product AND event_ref=p_event AND request_ref=p_request;
  GET DIAGNOSTICS affected=ROW_COUNT;
