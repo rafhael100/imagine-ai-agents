@@ -54,10 +54,10 @@ jobs:
         run: |
           docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/001_auto_ia_pg_lab.sql
           docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/check_auto_ia_07.sql
-          bash tools/auto_ia/pg/check_parallel_07.sh "${{ job.services.pg.id }}"
+          bash tools/auto_ia/pg/check_parallel_07.sh "${{ job.services.pg.id }}" imagine_agents_ci
           docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/002_no_ai_inbox.sql
           docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/check_auto_ia_08.sql
-          bash tools/auto_ia/pg/check_parallel_08.sh "${{ job.services.pg.id }}"
+          bash tools/auto_ia/pg/check_parallel_08.sh "${{ job.services.pg.id }}" imagine_agents_ci
           docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/pg/003_signed_ingress_lab.sql
           docker exec -i "${{ job.services.pg.id }}" psql -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1 < tools/auto_ia/convergence/004_mock_agents_signer_key.sql
       - name: Verify original P12 claim, durable signed inbox, ACK fencing, replay, dead-letter
