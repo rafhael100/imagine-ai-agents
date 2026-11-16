@@ -1,0 +1,23 @@
+name: AUTO-IA-12 n8n manually triggered NO_AI workflow (offline)
+on:
+  push:
+    branches:
+      - feat/auto-ia-12-n8n-noai-workflow-2026-11-16
+  pull_request:
+    branches:
+      - feat/auto-ia-11-n8n-private-staging-bundle-2026-11-16
+permissions:
+  contents: read
+jobs:
+  no-ai-manual-demo:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify workflow JSON and pure deterministic conversion
+        run: |
+          node tools/auto_ia/demo/check_n8n_noai_workflow.cjs
+          php tools/auto_ia/check_auto_ia.php
+          python3 tools/auto_ia/check_auto_ia_06.py
