@@ -43,9 +43,6 @@ final class MockAiOrAutomationRouter
      */
     public static function inspect(array $intent, array $policy): array
     {
-        $denied = static fn(string $reason): array => self::result(
-            'DENIED', $reason, 0
-        );
         if (!self::keysMatch($intent, self::INTENT_KEYS)
             || !self::keysMatch($policy, self::POLICY_KEYS)
             || !self::syntheticRef($intent['tenant_ref'])
@@ -72,40 +69,40 @@ final class MockAiOrAutomationRouter
             || $policy['per_call_limit'] < 0
             || $policy['per_call_limit'] > 10000
         ) {
-            return $denied('INVALID_SCOPE_OR_CONTRACT');
+            return self::result('DENIED','INVALID_SCOPE_OR_CONTRACT',0);
         }
 
         // Never permit a software automation or model to produce an external
         // effect merely because a policy selected its route.
         if ($intent['requires_external_effect']) {
-            return $denied('EXTERNAL_EFFECT_NOT_APPROVED');
+            return self::result('DENIED','EXTERNAL_EFFECT_NOT_APPROVED',0);
         }
         if ($intent['content_class'] !== 'SYNTHETIC_ONLY') {
-            return $denied('CONTENT_NOT_APPROVED');
+            return self::result('DENIED','CONTENT_NOT_APPROVED',0);
         }
         if (in_array($intent['operation'], self::DETERMINISTIC, true)) {
             if ($intent['estimated_model_units'] !== 0) {
-                return $denied('DETERMINISTIC_CANNOT_SPEND_AI');
+                return self::result('DENIED','DETERMINISTIC_CANNOT_SPEND_AI',0);
             }
             // Eligible for local deterministic handling without LLM credits.
             // Nothing is actually run by this decision-only class.
             return self::result('DETERMINISTIC_ONLY','NO_MODEL_REQUIRED',0);
         }
         if (!in_array($intent['operation'],self::SEMANTIC,true)) {
-            return $denied('UNKNOWN_OPERATION');
+            return self::result('DENIED','UNKNOWN_OPERATION',0);
         }
         $units = $intent['estimated_model_units'];
         if ($units <= 0 || !$policy['ledger_certain']) {
-            return $denied('MEASUREMENT_NOT_SAFE');
+            return self::result('DENIED','MEASUREMENT_NOT_SAFE',0);
         }
         if (!$policy['ai_opt_in'] || !$policy['consent_verified']
             || !$policy['approved_for_model'] || !$policy['provider_configured']) {
-            return $denied('MODEL_ACCESS_NOT_APPROVED');
+            return self::result('DENIED','MODEL_ACCESS_NOT_APPROVED',0);
         }
         if ($policy['per_call_limit'] === 0
             || $units > $policy['per_call_limit']
             || $units > $policy['available_units']) {
-            return $denied('MODEL_BUDGET_NOT_AVAILABLE');
+            return self::result('DENIED','MODEL_BUDGET_NOT_AVAILABLE',0);
         }
         // In production a separate, durable atomic reservation and a new
         // authorization boundary would be required before ANY API request.
