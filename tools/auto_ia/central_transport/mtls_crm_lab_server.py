@@ -4,7 +4,8 @@
 This server is not the CRM application, not a production API, not authority for
 any business effect. Network listener is strictly 127.0.0.1 on a CI runner.
 Mutual TLS is mandatory, as is a typed, time-bounded, MAC-bound request.
-Replay prevention is IN MEMORY and therefore explicitly not operational.
+Replay prevention is atomic in a DISPOSABLE PostgreSQL CI database.
+The role and company fixture are NOT operational identity management.
 """
 from __future__ import annotations
 
@@ -16,7 +17,7 @@ import os
 import re
 import ssl
 import sys
-import threading
+import subprocess
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -28,8 +29,6 @@ SECRET=b"SYNTHETIC_CENTRAL_AUTO_P5_ONLY_TEST_KEY_NOT_REAL"
 PATH="/private/automation-state"
 REF=re.compile(r"\ASYNTHETIC_[A-Z0-9_]{1,40}\Z")
 FIELDS={"schema","issuer","audience","company_id","request_id","nonce","issued_at","mac"}
-NONCES:set[tuple[str,str]]=set()
-LOCK=threading.Lock()
 
 
 def canonical(data:dict)->bytes:
@@ -65,6 +64,46 @@ def deny_reason(body:object,certificate:dict)->str|None:
     if not hmac.compare_digest(mac,expected):
         return "MAC"
     return None
+
+
+def admit_pg(body:dict)->str:
+    """Write the already mTLS-verified request to a PostgreSQL *test* ledger.
+
+    A restricted synthetic DB credential is required. Any database error
+    denies the request. This is not real CRM/Portal identity management.
+    """
+    if os.environ.get("CENTRAL_AUTO_P6_PG_NONCE")!="true":
+        return "LAB_DENY_STORAGE"
+    issuer=body["issuer"];audience=body["audience"]
+    company=body["company_id"];request=body["request_id"]
+    nonce=body["nonce"];issued=body["issued_at"]
+    digest=hashlib.sha256(canonical(body)+b"|"+body["mac"].encode()).hexdigest()
+    # All values have been restricted to ASCII labels, UUID constants, and
+    # server-validated integers before entering this SQL fixture command.
+    args=[issuer,audience,company,request,nonce,digest]
+    if not all(re.fullmatch(r"[A-Za-z0-9_-]{1,80}",v) for v in args):
+        return "LAB_DENY_STORAGE"
+    query="SELECT central_auto_lab.admit_nonce("+",".join(
+        "'"+v+"'" for v in args
+    )+","+str(int(issued))+");"
+    try:
+        result=subprocess.run([
+            "psql","-X","-q","-A","-t","-w",
+            "-h","127.0.0.1","-p","5432",
+            "-U","ca_mtls_lab_service",
+            "-d","imagine_agents_ci",
+            "-v","ON_ERROR_STOP=1","-c",query,
+        ],capture_output=True,text=True,timeout=5,check=False,
+        env={**os.environ,
+             "PGPASSWORD":"SYNTHETIC_CENTRAL_AUTO_P6_DB_LOGIN_ONLY"})
+    except (OSError,subprocess.TimeoutExpired):
+        return "LAB_DENY_STORAGE"
+    if result.returncode!=0 or result.stderr.strip():
+        return "LAB_DENY_STORAGE"
+    response=result.stdout.strip()
+    if response in ("LAB_ADMITTED_NO_DELIVERY","LAB_REPLAY_DENIED"):
+        return response
+    return "LAB_DENY_STORAGE"
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -103,12 +142,13 @@ class Handler(BaseHTTPRequestHandler):
         if reason is not None:
             self.respond(403,{"error":"LAB_DENIED"})
             return
-        key=(body["issuer"],body["nonce"])
-        with LOCK:
-            if key in NONCES:
-                self.respond(409,{"error":"LAB_REPLAY"})
-                return
-            NONCES.add(key)
+        admission=admit_pg(body)
+        if admission=="LAB_REPLAY_DENIED":
+            self.respond(409,{"error":"LAB_REPLAY"})
+            return
+        if admission!="LAB_ADMITTED_NO_DELIVERY":
+            self.respond(503,{"error":"LAB_STORAGE_DENIED"})
+            return
         state=self.server.synthetic_state
         # Transport returns a closed, signed response wrapper. Portal's real
         # AutomationStateReader checks the inner schema and authorization.
