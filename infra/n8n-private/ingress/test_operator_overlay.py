@@ -29,6 +29,9 @@ def candidate():
       "volumes":[{
         "type":"bind","source":"/home/runner/work/ci/infra/n8n-private/ingress/nginx-operator.conf",
         "target":"/etc/nginx/conf.d/default.conf","read_only":True,
+      },{
+        "type":"bind","source":"/tmp/ci/operator-fingerprints.conf",
+        "target":"/etc/nginx/operator-fingerprints.conf","read_only":True,
       }],
     }
     return data
@@ -66,6 +69,9 @@ class P15SecurityTests(unittest.TestCase):
           ("secrets_missing",lambda d:d["services"]["operator-ingress"]["secrets"].pop()),
           ("config_rw",lambda d:d["services"]["operator-ingress"]["volumes"][0].update(read_only=False)),
           ("config_swap",lambda d:d["services"]["operator-ingress"]["volumes"][0].update(source="/tmp/config.conf")),
+          ("pin_missing",lambda d:d["services"]["operator-ingress"]["volumes"].pop()),
+          ("pin_writeable",lambda d:d["services"]["operator-ingress"]["volumes"][1].update(read_only=False)),
+          ("pin_misdirected",lambda d:d["services"]["operator-ingress"]["volumes"][1].update(target="/etc/nginx/conf.d/evil.conf")),
           ("dangerous_service",lambda d:d["services"].update({"custom-agent":{}})),
           ("wrong_project",lambda d:d.update(name="imagine-other")),
           ("no_mtls_proxy_profile",lambda d:d["services"]["operator-ingress"].update(profiles=[])),
