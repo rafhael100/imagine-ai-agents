@@ -1,0 +1,30 @@
+name: AUTO-IA-03 durable synthetic ledger (offline)
+on:
+  push:
+    branches:
+      - feat/auto-ia-03-durable-synthetic-ledger-2026-11-16
+  pull_request:
+    branches:
+      - feat/auto-ia-02-offline-budget-gate-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  durable-lab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: PHP route and budget gates
+        run: |
+          php -l tools/auto_ia/AutoIaRouter.php
+          php -l tools/auto_ia/MockAiBudgetGate.php
+          php tools/auto_ia/check_auto_ia.php
+          php tools/auto_ia/check_auto_ia_02.php
+      - name: Durable SQLite laboratory, replay and multiprocess negative tests
+        run: |
+          python3 -m py_compile tools/auto_ia/durable_synthetic_ledger.py tools/auto_ia/check_auto_ia_03.py
+          python3 tools/auto_ia/check_auto_ia_03.py
