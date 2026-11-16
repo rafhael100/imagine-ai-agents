@@ -1,0 +1,8 @@
+# Dockerfile-specific allowlist — never include source, .git, secrets or CI files.
+**
+!examples/
+!examples/p0-assistente-comercial-demo.html
+!deploy/
+!deploy/agent-demo/
+!deploy/agent-demo/Dockerfile
+!deploy/agent-demo/server.py
