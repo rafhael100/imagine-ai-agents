@@ -16,8 +16,7 @@ $db=new PDO('pgsql:host=127.0.0.1;port=5432;dbname=imagine_agents_ci',
     'postgres','ci-only-password',[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
 $registry=new PgDeterministicDraftRegistryLab($db);
 $registry->createTables();
-$db->exec('TRUNCATE TABLE aia_p51_lab.review_drafts');
-$db->exec('TRUNCATE TABLE aia_p51_lab.preview_batches');
+$db->exec('TRUNCATE TABLE aia_p51_lab.review_drafts, aia_p51_lab.preview_batches');
 $checks=0;
 function p51Check(bool $ok,string $name):void {
     global $checks;$checks++;
