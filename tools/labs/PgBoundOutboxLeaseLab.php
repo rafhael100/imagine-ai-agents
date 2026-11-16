@@ -29,7 +29,7 @@ final class PgBoundOutboxLeaseLab
     /**
      * @return array{decision:string,reason:string,event_ref:?string,attempt:int,lease_until:int,ai_calls:int,service_effects:int}
      */
-    public function reserve(string $tenant, string $worker, int $now): array
+    public function reserve(string $tenant, string $worker, int $now, ?int $trustedRevision=null): array
     {
         if (!self::ref($tenant) || !self::ref($worker)
             || $now < 0 || $now > 4_102_444_700
@@ -38,6 +38,15 @@ final class PgBoundOutboxLeaseLab
         }
         try {
             $this->db->beginTransaction();
+            // P34: optional revision-bound authority requires an independent
+            // database row locked FOR SHARE until this entire lease commits.
+            // A revoker cannot complete concurrently between check and lease.
+            if($trustedRevision !== null){
+                if($trustedRevision < 1 || !$this->authorityCurrent($tenant,$trustedRevision)){
+                    $this->db->rollBack();
+                    return self::out('DENY','TENANT_AUTHORITY_REVOKED_OR_STALE');
+                }
+            }
             // Exhausted leases are retained as DEAD and never silently reset.
             $expire = $this->db->prepare(<<<'SQL'
 UPDATE public.aia_lab_n8n_outbox_p6
@@ -124,6 +133,19 @@ SQL);
             if($this->db->inTransaction()) $this->db->rollBack();
             return self::out('DENY','DB_UNAVAILABLE_OR_TRANSACTION_FAILED');
         }
+    }
+
+    private function authorityCurrent(string $tenant,int $revision):bool
+    {
+        $stmt=$this->db->prepare(<<<'SQL'
+SELECT active,revision
+ FROM aia_p34_lab.tenant_policy
+ WHERE tenant_ref=:tenant FOR SHARE
+SQL);
+        $stmt->execute([':tenant'=>$tenant]);
+        $row=$stmt->fetch(PDO::FETCH_ASSOC);
+        return is_array($row) && in_array($row['active'],[true,1,'1','t'],true)
+            && (int)$row['revision']===$revision;
     }
 
     private static function ref(string $value): bool
