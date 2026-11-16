@@ -1,0 +1,64 @@
+name: Agents P3 - isolated loopback Docker demo (NO-GO)
+
+on:
+  push:
+    branches:
+      - dev/aia-p3-isolated-demo-serving-2026-11-16
+  pull_request:
+    branches:
+      - dev/aia-p2-sales-workbench-domain-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  docker-demo-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact branch without write token
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Validate strict server and frontend source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile deploy/agent-demo/server.py
+          python3 tools/check_p0_sales_demo.py
+          node tools/check_p1_sales_workbench.js
+          php tools/check_p2_sales_domain.php
+          node tools/check_p2_sales_parity.js
+      - name: Build and start fully isolated Compose on dynamic local port
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker compose -f deploy/agent-demo/compose.yaml config --quiet
+          docker compose -f deploy/agent-demo/compose.yaml up --build --detach --wait
+      - name: Verify HTTP headers, single static document and no business ingress
+        shell: bash
+        run: |
+          set -euo pipefail
+          bind="$(docker compose -f deploy/agent-demo/compose.yaml port preview 8080)"
+          echo "$bind" | grep -Eq '^127\.0\.0\.1:[0-9]+$'
+          port="${bind##*:}"
+          test "$port" -ge 1024
+          curl -fsS -D headers.txt "http://127.0.0.1:$port/" -o body.html
+          grep -q 'Imagine Agentes de IA' body.html
+          grep -qi '^Content-Security-Policy:.*connect-src.*none' headers.txt
+          grep -qi '^Cache-Control:.*no-store' headers.txt
+          grep -qi '^X-Frame-Options: DENY' headers.txt
+          grep -qi '^X-Content-Type-Options: nosniff' headers.txt
+          test "$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port/healthz")" = 200
+          for path in /api/agents/op01/leads /api/crm/leads /admin /robots.txt /index.html.bak; do
+            code="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port$path")"
+            test "$code" = 404
+          done
+          test "$(curl -s -X POST -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port/")" = 404
+          docker compose -f deploy/agent-demo/compose.yaml exec -T preview python -c "from pathlib import Path; p=Path('/srv/demo/unauthorized'); assert not p.exists(); exec('try:\\n p.write_text(\"bad\")\\nexcept OSError:\\n pass'); assert not p.exists()"
+          echo 'P3_STATIC_DEMO_HTTP_PASS bind=loopback_only health=simulated api=404 rootfs=readonly real_access=none operational_decision=NO_GO' >> "$GITHUB_STEP_SUMMARY"
+      - name: Destroy all disposable containers and networks
+        if: always()
+        shell: bash
+        run: |
+          docker compose -f deploy/agent-demo/compose.yaml down --volumes --remove-orphans || true
