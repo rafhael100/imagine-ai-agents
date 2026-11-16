@@ -12,7 +12,7 @@ Code/ExecuteCommand/SSH ficam excluídos nesta configuração. O laboratório ma
 
 ## Dimensionamento e gates do host
 
-Candidato: n8n limitado a 1GB/2CPU; PostgreSQL a 768MB/1CPU. Estes são tetos propostos, não reserva de capacidade da VPS. Redis/queue/workers não são adicionados sem medição. Porta candidata 17990 somente loopback, **não inventariada nem reservada** na Leaseweb. CRM 18081 e Sites 18090 permanecem intocados.
+Candidato: n8n limitado a 1GB/2CPU; PostgreSQL a 768MB/1CPU. Estes são tetos propostos, não reserva de capacidade da VPS. Redis/queue/workers não são adicionados sem medição. **A configuração de homologação não publica porta alguma no host.** A tentativa anterior de usar `127.0.0.1:17990` com ambas as redes Docker `internal: true` falhou na CI: o n8n ficou saudável dentro do contêiner, mas a porta não era acessível do host (`curl` exit 7). Corrigimos a inconsistência sem abrir saída externa: `expose: 5678` é visível apenas nas redes internas e a validação testa readiness dentro do contêiner. **Acesso administrativo do operador por HTTPS/MFA ainda requer um ingress privado separado e homologado**; não assumir que túnel SSH para 17990 funcione nesta candidata. CRM 18081 e Sites 18090 permanecem intocados.
 
 O ambiente Codex desta rodada não tem SSH_AUTH_SOCK nem .ssh/config. Nenhuma conexão SSH, inventário remoto, instalação, alteração de firewall/DNS/proxy ou restart de serviço Leaseweb foi executado.
 
@@ -32,4 +32,4 @@ Rollback: parar somente ingress/execuções n8n da candidata; preservar snapshot
 
 Continuam pendentes inventário/identidade do host, enquadramento da licença, HTTPS/acesso nominal/MFA restrito, mTLS/S2S com autorização por empresa e revogação, egress específico por serviço, runner externo quando necessário, secret store, backup externo/restauração, monitoramento e autorização de instalação. Não usar APP_ENV=local/testing para expor aplicações. Community não é automaticamente válida por esconder o editor; regras dos clientes permanecem nativas no CRM.
 
-CI nova testa apenas a configuração corrigida com containers oficiais descartáveis: role não-superusuária efetivamente conectada, readiness, redes internas, ausência de valores secretos no Config.Env e invariantes de projeto/porta. Não é instalação/homologação da VPS nem prova de backup externo.
+CI testa a configuração com contêineres oficiais descartáveis: role não-superusuária conectada, readiness **dentro** do contêiner, ausência de portas do host, redes internas, valores secretos ausentes do Config.Env e invariantes de projeto. A execução inicial falhou por acesso host à porta; não mascaramos o erro como aprovação. Não é instalação/homologação da VPS nem prova de backup externo.
