@@ -1,0 +1,28 @@
+name: AUTO-IA-04 separate cost and commercial credit reconciliation (offline)
+
+on:
+  push:
+    branches:
+      - feat/auto-ia-04-synthetic-reconciliation-2026-11-16
+  pull_request:
+    branches:
+      - feat/auto-ia-03-durable-synthetic-ledger-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile-lab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 pinned
+        with:
+          persist-credentials: false
+      - name: Verify all AUTO-IA-01..04 offline checks
+        run: |
+          php tools/auto_ia/check_auto_ia.php
+          php tools/auto_ia/check_auto_ia_02.php
+          python3 -m py_compile tools/auto_ia/durable_synthetic_ledger.py tools/auto_ia/check_auto_ia_03.py tools/auto_ia/synthetic_reconciliation.py tools/auto_ia/check_auto_ia_04.py
+          python3 tools/auto_ia/check_auto_ia_03.py
+          python3 tools/auto_ia/check_auto_ia_04.py
