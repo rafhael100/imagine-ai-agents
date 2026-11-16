@@ -133,12 +133,14 @@ def sign(ciphertext:Path,priv:Path,pub:Path,metadata:Path,signature:Path,
     }
     validate_receipt(receipt,now)
     original=canonical(receipt)
-    signed=call_openssl(["pkeyutl","-sign","-rawin","-inkey",str(priv)],
-                        input_data=original)
-    if len(signed)!=64:
-        raise Rejected("NOT_ED25519_SIGNATURE")
+    # Ed25519 pkeyutl needs a seekable input with known size. Do not
+    # sign via stdin; sign the exact protected canonical metadata file.
     try:
         safe_write(metadata,original)
+        signed=call_openssl(["pkeyutl","-sign","-rawin","-inkey",
+                             str(priv),"-in",str(metadata)])
+        if len(signed)!=64:
+            raise Rejected("NOT_ED25519_SIGNATURE")
         safe_write(signature,signed)
     except Exception:
         metadata.unlink(missing_ok=True)
@@ -178,7 +180,7 @@ def verify(ciphertext:Path,pub:Path,metadata:Path,signature:Path,
         receipt["package_bytes"]!=length):
         raise Rejected("CIPHERTEXT_CHANGED")
     call_openssl(["pkeyutl","-verify","-rawin","-pubin","-inkey",
-                  str(pub),"-sigfile",str(signature)],input_data=raw)
+                  str(pub),"-sigfile",str(signature),"-in",str(metadata)])
     return {
         "schema":"CENTRAL_AUTO_P23_VERIFICATION_V1",
         "cms_package_hash_matches":True,
