@@ -31,9 +31,6 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U postgres -d postgres"
           --health-interval 5s --health-timeout 5s --health-retries 12
-    env:
-      PG17_CONTAINER: ${{ job.services.pg17.id }}
-      PG16_CONTAINER: ${{ job.services.pg16.id }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -45,6 +42,9 @@ jobs:
           python3 infra/n8n-private/homologation/test_p20_security.py
           test "$(openssl version | wc -c)" -gt 10
       - name: Generate real synthetic PG custom archives then CMS seal decrypt restore
+        env:
+          PG17_CONTAINER: ${{ job.services.pg17.id }}
+          PG16_CONTAINER: ${{ job.services.pg16.id }}
         run: |
           set -euo pipefail
           python3 infra/n8n-private/homologation/check_p21_crypto_pg_restore.py
