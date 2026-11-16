@@ -1,0 +1,32 @@
+name: AUTO-IA RC04 immutable n8n offline evidence (read only, NO-GO)
+on:
+  push:
+    branches:
+      - review/auto-ia-rc04-n8n-official-proof-2026-11-16
+permissions:
+  contents: read
+jobs:
+  immutable-runtime-review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: Prove release review uses byte-identical runtime-tested code
+        run: |
+          python3 tools/auto_ia/check_rc04_integrity.py
+      - name: Regress signed NO_AI policy and strict actual-result verifier
+        run: |
+          php tools/auto_ia/check_auto_ia.php
+          php tools/auto_ia/check_auto_ia_02.php
+          php tools/auto_ia/check_auto_ia_05.php
+          php tools/auto_ia/check_auto_ia_09.php
+          python3 tools/auto_ia/policy/check_n8n_zero_ai.py
+          python3 tools/auto_ia/demo/verify_n8n_execution.py --self-test
+          python3 tools/auto_ia/demo/check_n8n_roundtrip.py tools/auto_ia/demo/n8n-noai-demo.workflow.json tools/auto_ia/demo/n8n-noai-demo.workflow.json
+          node tools/auto_ia/demo/check_n8n_noai_workflow.cjs
+          python3 tools/auto_ia/convergence/check_rc03_release.py
+      - name: Review decision remains NO-GO
+        run: |
+          echo "AUTO_IA_RC04_PASS official_n8n_was_verified_in_run_43870748304=1 production=NO_GO n8n_vps_installed=0 ai_provider_calls=0"
