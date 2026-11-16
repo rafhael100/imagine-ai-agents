@@ -19,8 +19,8 @@ BRANCHES={
       "f558e94abd11c802ab7d59321b9aae9f8bd74b2d",
     ),
     "agents_p60": (
-      "review/aia-p60-efficient-ci-gates-2026-11-16",
-      "1cb27f71478d395402272d10cd9bdf39d44e771f",
+      "fix/aia-p60-review-mutation-completeness-2026-11-16",
+      "a8277b7c9052d35e909e487823675ab0b823ccc5",
     ),
     "identity_p4": (
       "integration/central-auto-identity-private-runtime-2026-11-16",
