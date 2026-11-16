@@ -25,7 +25,7 @@ FORBIDDEN_CODE=re.compile(
     re.IGNORECASE,
 )
 URL_OR_SECRET=re.compile(
-    r"https?://|wss?://|(?:api[_-]?key|bearer[_-]?token|authorization|"
+    r"https?://|wss?://|\b(?:api[_-]?key|bearer[_-]?token|authorization|"
     r"client[_-]?secret)\b",re.IGNORECASE,
 )
 
