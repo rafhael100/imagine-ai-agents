@@ -1,0 +1,31 @@
+name: CENTRAL-AUTO P18 read-only cross-lane Git merge compatibility
+on:
+  push:
+    branches:
+      - review/central-auto-p18-crosslane-integration-2026-11-16
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: central-auto-p18-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  merge-tree-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Assert no persistent repository changes and inspect pinned lane compatibility
+        env:
+          GITHUB_ACTIONS: 'true'
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/auto_ia/central_transport/check_crosslane_merge_tree.py
+          before="$(git rev-parse HEAD)"
+          python3 tools/auto_ia/central_transport/check_crosslane_merge_tree.py
+          test "$(git rev-parse HEAD)" = "$before"
+          test -z "$(git status --porcelain)"
+          echo 'CENTRAL_AUTO_P18_READ_ONLY_BRANCH_INTEGRITY_PASS no_commit=1 no_push=1 NO_GO'
