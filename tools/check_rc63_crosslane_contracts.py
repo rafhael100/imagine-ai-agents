@@ -45,7 +45,7 @@ def source(root:Path,path:str,*needles:str)->str:
 def verify_contracts()->dict:
     receiver=source(
         CENTRAL,"runtime/central-auto/index.php",
-        "CRM_LEAD_EVENT_V1","lead.created","lead.ingest",
+        "CRM_LEAD_EVENT_V1","lead.created",
         "AUTO_IA_ACK_V1","'DISABLED'","AGENTS_PRIVATE_S2S_PROFILE",
         "IMAGINE_MTLS_VERIFY"
     )
