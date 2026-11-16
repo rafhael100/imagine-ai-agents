@@ -1,0 +1,23 @@
+name: AIA P60 targeted negative mutation regression
+on:
+  push:
+    branches:
+      - fix/aia-p60-review-mutation-completeness-2026-11-16
+permissions:
+  contents: read
+concurrency:
+  group: aia-p60-fix-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  p60-negative-mutation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify all ten P60 adversarial mutation checks actually fail
+        run: |
+          set -euo pipefail
+          python3 tools/check_p60_ci_gates.py
+          echo 'AIA_P60_MUTATION_FIX_PASS no_merge=1 no_deploy=1 NO_GO'

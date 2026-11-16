@@ -72,7 +72,9 @@ def main()->None:
         original.replace("persist-credentials: false","persist-credentials: true",1),
         original.replace("actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
                          "actions/checkout@v4",1),
-        original.replace("tools/check_p59_author_review_separation.php","no_p59_tests.php",1),
+        # Both lint and execution references must disappear: changing only
+        # one occurrence leaves another and does not test gate enforcement.
+        original.replace("tools/check_p59_author_review_separation.php","no_p59_tests.php"),
         original.replace("p56-local-only-pg16-browser:","disabled-browser:",1),
         original.replace("p47-official-n8n-pg17-independent:","disabled-n8n:",1),
     ]
