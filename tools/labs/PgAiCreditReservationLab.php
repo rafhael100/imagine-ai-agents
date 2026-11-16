@@ -4,6 +4,7 @@ namespace ImagineAI\Labs;
 
 use PDO;
 use Throwable;
+require_once __DIR__.'/SyntheticUsageReceipt.php';
 
 /**
  * P8: synthetic PostgreSQL16 credit reservation and reconciliation.
@@ -16,8 +17,10 @@ final readonly class PgAiCreditReservationLab
     private const ACCOUNTS='public.aia_lab_credit_accounts_p8';
     private const REQUESTS='public.aia_lab_credit_requests_p8';
 
-    public function __construct(private PDO $db)
-    {
+    public function __construct(
+        private PDO $db,
+        private ?string $trustedUsagePublicKey = null,
+    ) {
         if (getenv('AIA_P8_PG_LAB')!=='true'
             || getenv('GITHUB_ACTIONS')!=='true'
             || getenv('GITHUB_REPOSITORY')!=='rafhael100/imagine-ai-agents'
@@ -34,6 +37,9 @@ final readonly class PgAiCreditReservationLab
             throw new \RuntimeException('P8_DB_IDENTITY_DENIED');
         }
         $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+        if ($trustedUsagePublicKey !== null && strlen($trustedUsagePublicKey)!==32) {
+            throw new \RuntimeException('P11_INVALID_TRUST_ANCHOR');
+        }
     }
 
     public function createTables(): void
@@ -55,6 +61,7 @@ final readonly class PgAiCreditReservationLab
                 \'RESERVED\',\'DISPATCHED\',\'UNCERTAIN\',\'FINALIZED\',\'CANCELED\',\'DISPUTED\'
             )),
             observed integer,
+            proof_hash char(64),
             PRIMARY KEY (tenant_ref,request_ref)
         )');
     }
@@ -184,10 +191,34 @@ final readonly class PgAiCreditReservationLab
     }
 
     /**
-     * Observed units from a verified synthetic fixture only.
-     * Conflicting measurement freezes tenant until independent review.
+     * Only a valid Ed25519 lab fixture signed by the explicitly trusted
+     * verifier can enter the consumption path. A caller-supplied key,
+     * numeric amount or unverified provider JSON is NEVER sufficient.
+     * This does not assert a real provider identity or external authorization.
      */
-    public function reconcile(string $tenant,string $request,int $observed): bool
+    public function reconcileSigned(
+        string $tenant,string $request,
+        string $canonicalReceipt,string $signatureB64,int $now
+    ): bool {
+        if (getenv('AIA_P11_SIGNED_PROOFS')!=='true'
+            || $this->trustedUsagePublicKey===null) return false;
+        $proof=SyntheticUsageReceipt::verify(
+            $canonicalReceipt,$signatureB64,$this->trustedUsagePublicKey,$now
+        );
+        if ($proof===null || $proof['tenant_ref']!==$tenant
+            || $proof['request_ref']!==$request) return false;
+        return $this->reconcileMeasurement(
+            $tenant,$request,$proof['observed'],hash('sha256',$canonicalReceipt)
+        );
+    }
+
+    /**
+     * Accounting primitive reachable only after verified, scoped receipt.
+     * Conflicting measurement OR receipt identity freezes the tenant.
+     */
+    private function reconcileMeasurement(
+        string $tenant,string $request,int $observed,string $proofHash
+    ): bool
     {
         if (!self::ref($tenant) || !self::ref($request)
             || $observed<0 || $observed>5000) return false;
@@ -200,7 +231,9 @@ final readonly class PgAiCreditReservationLab
                 return false;
             }
             if ($item['state']==='FINALIZED') {
-                if ((int)$item['observed']===$observed) {
+                if ((int)$item['observed']===$observed
+                    && is_string($item['proof_hash'])
+                    && hash_equals($item['proof_hash'],$proofHash)) {
                     $this->db->commit();
                     return true; // Duplicate proof never charges twice.
                 }
@@ -220,10 +253,11 @@ final readonly class PgAiCreditReservationLab
                 return false;
             }
             $stmt=$this->db->prepare('UPDATE '.self::REQUESTS.'
-                SET state=\'FINALIZED\',observed=:actual
+                SET state=\'FINALIZED\',observed=:actual,proof_hash=:proof
                 WHERE tenant_ref=:tenant AND request_ref=:request');
             $stmt->execute([
-                'actual'=>$observed,'tenant'=>$tenant,'request'=>$request,
+                'actual'=>$observed,'proof'=>$proofHash,
+                'tenant'=>$tenant,'request'=>$request,
             ]);
             $stmt=$this->db->prepare('UPDATE '.self::ACCOUNTS.'
                 SET spent=spent+:actual,held=held-:reserve
