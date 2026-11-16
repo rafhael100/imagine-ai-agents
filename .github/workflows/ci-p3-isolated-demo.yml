@@ -48,7 +48,10 @@ jobs:
         run: |
           set -euo pipefail
           docker compose -f deploy/agent-demo/compose.yaml config --quiet
+          docker compose -f deploy/agent-demo/compose.yaml config --format json | python3 -c 'import sys,json,os; p=json.load(sys.stdin)["services"]["preview"]["ports"]; assert len(p)==1 and str(p[0]["published"])==os.environ["AIA_DEMO_BIND_PORT"] and p[0]["host_ip"]=="127.0.0.1"'
           docker compose -f deploy/agent-demo/compose.yaml up --build --detach --wait
+          cid="$(docker compose -f deploy/agent-demo/compose.yaml ps -q preview)"
+          docker inspect "$cid" --format '{{json .NetworkSettings.Ports}}'
       - name: Verify HTTP headers, single static document and no business ingress
         shell: bash
         run: |
