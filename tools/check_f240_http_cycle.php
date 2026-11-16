@@ -97,6 +97,9 @@ try {
         'x-content-type-options'=>'nosniff',
     ];
     f240Assert(MockSyntheticHttpDenialReceipt::matches(404,$f248ResponseHeaders,$denial));
+    f240Assert(MockSyntheticHttpDenialReceipt::matches(
+        404,array_replace($f248ResponseHeaders,['cache-control'=>'max-age=0, no-store, private']),$denial
+    ));
     $invalidResponses=[
         [200,$responseHeaders,$denial],
         [201,$responseHeaders,$denial],
