@@ -25,12 +25,17 @@ final class PgBoundOutboxAckLab
 
     /** @return array{decision:string,reason:string,ai_calls:int,service_effects:int} */
     public function acknowledge(string $tenant,string $eventRef,string $worker,
-        int $attempt,int $now,?int $trustedRevision=null):array
+        int $attempt,int $now,?int $trustedRevision=null,
+        ?string $expectedSignedPayloadHash=null):array
     {
         if(!self::ref($tenant)||!self::ref($eventRef)||!self::ref($worker)
             ||$attempt<1||$attempt>3||$now<0||$now>4_102_444_800
             ||$this->db->inTransaction()) {
             return self::deny('UNTRUSTED_REFERENCE_OR_NESTED_TX');
+        }
+        if($expectedSignedPayloadHash!==null
+            && (preg_match('/\A[a-f0-9]{64}\z/D',$expectedSignedPayloadHash)!==1)){
+            return self::deny('SIGNED_PAYLOAD_HASH_INVALID');
         }
         try{
             $this->db->beginTransaction();
@@ -78,6 +83,15 @@ SQL);
                 ||!hash_equals($row['event_hash'],$ledger['payload_hash'])) {
                 $this->db->rollBack();
                 return self::deny('CANONICAL_OR_LEDGER_MISMATCH');
+            }
+
+            // P36: signed receipt's exact event digest is compared under
+            // the SAME locks and transaction as P30/P34's guarded ACK.
+            // This prevents a TOCTOU gap between signature check and commit.
+            if($expectedSignedPayloadHash!==null
+                && !hash_equals($expectedSignedPayloadHash,$row['event_hash'])){
+                $this->db->rollBack();
+                return self::deny('SIGNED_RECEIPT_PAYLOAD_HASH_MISMATCH');
             }
 
             // Recorded timestamp is only for reconstruction of synthetic refs.
