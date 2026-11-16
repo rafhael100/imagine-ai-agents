@@ -80,6 +80,7 @@ for name in \
   test_f229_tenant_replay_matrix.py \
   test_f230_response_seal.py \
   test_f231_service_identity.py \
+  test_f236_integrity_aggregation.py \
   test_evid52_postmerge.py \
   test_ci_guardrails.py \
   test_op01_readiness_dashboard.py \
