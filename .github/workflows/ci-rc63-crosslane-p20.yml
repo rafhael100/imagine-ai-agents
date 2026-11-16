@@ -1,0 +1,56 @@
+name: AIA RC63 - exact-pin CRM Portal Central integration boundaries
+
+on:
+  push:
+    branches:
+      - review/aia-rc63-p20-crosslane-gates-2026-11-16
+  pull_request:
+    branches:
+      - review/aia-rc-p14-p61-integrated-2026-11-16
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aia-rc63-exact-p20-review
+  cancel-in-progress: true
+
+jobs:
+  pinned-crosslane-no-go:
+    name: Reconcile operation contracts and preview Git integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 13
+    steps:
+      - name: Checkout Agents RC63 full history read-only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Checkout Central P20 exact reviewed SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 3cf31b78f745d539425b46b754edbe3c48e9d088
+          path: _central_p20_pinned
+          persist-credentials: false
+      - name: Checkout CRM P19 private event sender exact SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-crm
+          ref: cca5055608acff8c767b888b6322df77fe966558
+          path: _crm_p19_pinned
+          persist-credentials: false
+      - name: Checkout Portal P20 MFA owner authority exact SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-portal
+          ref: 12d08d2e2af36b8011bc520d55c5e9cdbcccc108
+          path: _portal_p20_pinned
+          persist-credentials: false
+      - name: Validate sources, distinct operations, and dry-run merge with NO_GO
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/check_rc63_crosslane_contracts.py
+          python3 tools/check_rc63_crosslane_contracts.py
+          echo 'AIA RC63: independent Git source review only; n8n dispatch disabled; production NO_GO.' >> "$GITHUB_STEP_SUMMARY"
