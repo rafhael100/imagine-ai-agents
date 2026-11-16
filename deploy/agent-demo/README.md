@@ -15,3 +15,7 @@ A CI executa Docker real em runner descartável, testa a saúde, bloqueia APIs, 
 As decisões OP-01 e PR CRM #57 seguem NO-GO; rodar esta imagem não executa a integração funcional Agents↔CRM.
 
 **Correção de CI:** a combinação de rede `internal:true` e publicação de porta não permitiu o acesso de loopback no runner Docker. A rede continua isolada por projeto, e a porta permanece restrita a `127.0.0.1`, mas o bridge permite rotas de saída que deverão ser bloqueadas por firewall antes de qualquer implantação. A CSP bloqueia `connect-src` no navegador; ela não substitui controles de saída do contêiner.
+
+## Acesso à demonstração sem VPS
+
+Depois da CI aprovada, abra a execução GitHub Actions `Agents P3 - isolated loopback Docker demo (NO-GO)`, localize o artefato temporário **`imagine-agentes-demo-html`** (retenção de 7 dias), baixe o ZIP, extraia e abra `index.html` no navegador. É um arquivo completamente offline, inclusive com todas as recomendações determinísticas embutidas. O ZIP contém `SHA256SUMS` para verificar a integridade e `LEIA-ME.txt`. **Não é uma URL publicada e não oferece autenticação, contas nem dados reais.**
