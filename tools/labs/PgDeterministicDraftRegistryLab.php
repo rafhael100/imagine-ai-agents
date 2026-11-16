@@ -202,10 +202,14 @@ SQL);
 SELECT request_ref,proposal_ref,rule_ref,draft_kind,metric,
        observed,threshold,state
 FROM aia_p51_lab.review_drafts WHERE tenant_ref=:tenant
-ORDER BY request_ref,proposal_ref LIMIT 128
+ORDER BY request_ref,proposal_ref LIMIT 129
 SQL);
             $q->execute([':tenant'=>$tenant]);
             $rows=$q->fetchAll(PDO::FETCH_ASSOC);
+            if(count($rows)>128){
+                return ['decision'=>'DENY','drafts'=>[],
+                    'ai_calls'=>0,'service_effects'=>0];
+            }
             return [
                 'decision'=>'LAB_READONLY_DRAFTS_NO_APPROVAL',
                 'tenant_ref'=>$tenant,
