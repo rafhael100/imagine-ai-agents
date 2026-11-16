@@ -1,0 +1,82 @@
+name: CENTRAL-AUTO RC05 real PG key revocation plus pinned CRM Portal Agents
+on:
+  push:
+    branches:
+      - review/central-auto-rc05-signed-revocation-2026-11-16
+permissions:
+  contents: read
+jobs:
+  postgres-key-revocation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: synthetic-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGUSER: postgres
+      PGDATABASE: postgres
+      PGPASSWORD: synthetic-ci-only
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Assert exact upstream Agents #384 security fix reused
+        run: |
+          test "$(git hash-object tools/auto_ia/pg/003_signed_ingress_lab.sql)" = "ffa4792fd5a5b86a5ba50cacfcd58f93e0ffaec8"
+          test "$(git hash-object tools/auto_ia/pg/check_key_revocation_lock.php)" = "a3956ae86a03a78166b8cf399c9faadec155e3f0"
+          test "$(git hash-object tools/auto_ia/pg/check_key_revocation_lock.sh)" = "207bed5ee60323151479732efff49cdd72f151b5"
+      - name: Initialize isolated PostgreSQL 16 SQL and signed ingress
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tools/auto_ia/pg/001_auto_ia_pg_lab.sql
+          psql -v ON_ERROR_STOP=1 -f tools/auto_ia/pg/002_no_ai_inbox.sql
+          psql -v ON_ERROR_STOP=1 -f tools/auto_ia/pg/003_signed_ingress_lab.sql
+          php tools/auto_ia/pg/check_auto_ia_10.php > /tmp/rc05-signed-test.sql
+          psql -v ON_ERROR_STOP=1 -f /tmp/rc05-signed-test.sql
+      - name: Prove concurrent credential revocation waits for admission commit
+        run: |
+          bash tools/auto_ia/pg/check_key_revocation_lock.sh
+      - name: Preserve immutable n8n official runtime evidence
+        run: |
+          python3 tools/auto_ia/check_rc04_integrity.py
+          python3 tools/auto_ia/convergence/check_rc03_release.py
+          echo "CENTRAL_AUTO_RC05_REVOCATION_PASS production=NO_GO"
+  cross-repository-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-crm
+          ref: dd88a88b29f9c659786793bbb677355a06ea83bd
+          path: _crm_contract_pin
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-portal
+          ref: 9d3877dfaa81524faf2c08f80244b485968316ec
+          path: _portal_contract_pin
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 21c820b56d53bce243969a4fdd440bf1e26644e5
+          path: _agents_lock_pin
+          persist-credentials: false
+      - name: Require exact real source commits
+        run: |
+          test "$(git -C _crm_contract_pin rev-parse HEAD)" = "dd88a88b29f9c659786793bbb677355a06ea83bd"
+          test "$(git -C _portal_contract_pin rev-parse HEAD)" = "9d3877dfaa81524faf2c08f80244b485968316ec"
+          test "$(git -C _agents_lock_pin rev-parse HEAD)" = "21c820b56d53bce243969a4fdd440bf1e26644e5"
+          php tools/auto_ia/convergence/check_central_auto_p3_contract.php
+          python3 tools/auto_ia/policy/check_n8n_zero_ai.py
+          echo "CENTRAL_AUTO_RC05_CROSSREPO_PASS no_customer_data=1 no_provider=1"
