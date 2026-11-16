@@ -1,0 +1,50 @@
+{
+  "name": "Imagine — laboratório Visitas → Leads → Clientes (sem IA)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "d40ad35f-77a5-4e37-b28a-601a3d447221",
+      "name": "Disparo manual — somente laboratório",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// AUTO-IA-12 — isolated, manually triggered, 100% synthetic workflow.\nconst event = Object.freeze({\n  schema: 'AUTO_IA_DEMO_EVENT_V1',\n  product: 'imagine-comercial',\n  operation: 'funnel.calculate',\n  tenant_ref: 'SYNTHETIC_TENANT_DEMO',\n  event_ref: 'SYNTHETIC_EVENT_DEMO',\n  weekly_visits: 120,\n  lead_rate_percent: 10,\n  customer_rate_percent: 20,\n});\nif (!event.tenant_ref.startsWith('SYNTHETIC_') || event.operation !== 'funnel.calculate') {\n  throw new Error('AUTO_IA_12_CLOSED_FIXTURE_REQUIRED');\n}\nconst projected_leads = Math.round(event.weekly_visits * event.lead_rate_percent / 100);\nconst projected_customers = Math.round(projected_leads * event.customer_rate_percent / 100);\nreturn [{\n  json: {\n    schema: 'AUTO_IA_DEMO_RESULT_V1',\n    decision: 'NO_AI',\n    tenant_ref: event.tenant_ref,\n    event_ref: event.event_ref,\n    visits: event.weekly_visits,\n    projected_leads,\n    projected_customers,\n    ai_api_calls: 0,\n    ai_tokens: 0,\n    commercial_credits_debited: 0,\n    operational_authorization: false,\n    mode: 'SYNTHETIC_MANUAL_ONLY',\n  }\n}];"
+      },
+      "id": "264bdd52-51f5-4343-9613-15f2daa75286",
+      "name": "Calcular funil sem IA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        490,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Disparo manual — somente laboratório": {
+      "main": [
+        [
+          {
+            "node": "Calcular funil sem IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}
