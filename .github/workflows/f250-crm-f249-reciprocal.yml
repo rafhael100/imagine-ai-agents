@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - dev/f250-crm-f249-reciprocal-source-2026-11-15
+      - review/agents-f229-f251-integrated-2026-11-15
   pull_request:
     branches:
       - dev/f240-http-contract-integrated-r01-2026-11-15
+      - dev/ft01-aia-core-mocks-2026-11-06
 
 permissions:
   contents: read
