@@ -28,8 +28,8 @@ class F236UnifiedGate(unittest.TestCase):
     def test_expected_lint_inventory_matches_new_pure_sources(self):
         workflow=(ROOT/".github/workflows/r01-dev-integrity.yml").read_text()
         validator=(ROOT/"tools/validate_ft01_offline.sh").read_text()
-        self.assertIn("EXPECTED_PHP: '117'",workflow)
-        self.assertIn('expected_php="${EXPECTED_PHP:-117}"',validator)
+        self.assertIn("EXPECTED_PHP: '119'",workflow)
+        self.assertIn('expected_php="${EXPECTED_PHP:-119}"',validator)
         self.assertIn("PRIVATE_CROSS_REPOSITORY_SOURCE_NOT_VERIFIED",workflow)
         self.assertIn("OP01_MAIN_PROMOTION_NO_GO",workflow)
         for path in ("MockSyntheticScopePreflight.php",
