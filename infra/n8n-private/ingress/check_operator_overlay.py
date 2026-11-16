@@ -61,7 +61,7 @@ def check(data:object)->dict:
     ):
         raise Denied("PROXY_PORT_MUST_BE_LOOPBACK_TLS")
     if (proxy.get("privileged") or proxy.get("network_mode") or proxy.get("extra_hosts")
-        or proxy.get("dns") or proxy.get("pid") or proxy.get("ipc") or proxy.get("cap_add")
+        or proxy.get("dns") or proxy.get("pid") or proxy.get("ipc")
         or proxy.get("devices") or proxy.get("build")):
         raise Denied("UNSAFE_PROXY_OVERRIDE")
     image=proxy.get("image","")
@@ -73,6 +73,10 @@ def check(data:object)->dict:
         proxy.get("security_opt")!=["no-new-privileges:true"]
     ):
         raise Denied("PROXY_PRIVILEGES")
+    # Root master only retains permission to drop worker UID/GID.
+    # Never authorize DAC override, network administration or SYS_ADMIN.
+    if set(proxy.get("cap_add",[]))!={"SETUID","SETGID"} or len(proxy.get("cap_add",[]))!=2:
+        raise Denied("PROXY_ONLY_SETUID_SETGID")
     if proxy.get("restart")!="no" or proxy.get("environment"):
         raise Denied("PROXY_ENV_OR_RESTART")
     # Compose renders byte/pid limits as either strings or integers.
