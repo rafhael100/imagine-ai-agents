@@ -14,6 +14,10 @@ A principal preocupação comercial e técnica da Imagine é consumir créditos 
 
 Tudo é etiquetado com identificadores `SYNTHETIC_...` e se refere a unidades técnicas inteiras; os números **não correspondem a dinheiro, planos ou tokens reais de fornecedores**. O banco é `imagine_agents_ci` na ação descartável, nunca o CRM ou a VPS. O ensaio cria tabelas `aia_lab_` e usa o superusuário temporário da CI, não um papel operacional.
 
+## Integração testada com P5 — automação primeiro
+
+O teste usa o código original `MockAiOrAutomationRouter`: uma tarefa de funil classificada como `DETERMINISTIC_ONLY` não cria nenhuma reserva, mesmo havendo saldo disponível. Uma tarefa semântica aprovada permanece apenas `MODEL_ELIGIBLE_NOT_EXECUTED`; o laboratório precisa fazer uma **reserva explícita e separada** de 15 unidades, mantendo-a no timeout e cobrando apenas 12 após uma prova observada fictícia. Não ocorre chamada de provedor, e nenhum crédito é consumido no pré-roteamento.
+
 ## Testes e concorrência
 
 Dez processos PHP independentes disputam uma única conta fictícia com 100 unidades de saldo e reserva unitária de 20. Exatamente cinco devem conseguir, cinco devem ser negados; nunca pode existir overbooking. A suíte também cobre idempotência, mesmo request com finalidade alterada, timeout sem liberação, cancelamento pré-despacho, reconciliação tardia com medição observada, conflito de medidas que congela a conta, isolamento de duas empresas e falha de banco sem fallback.
