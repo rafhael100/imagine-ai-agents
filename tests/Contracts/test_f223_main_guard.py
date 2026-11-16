@@ -37,7 +37,7 @@ class F223MainGuard(unittest.TestCase):
         for item in ("if: "+"$"+"{{ github.event.repository.private == true }}",
                      "PRIVATE_CROSS_REPOSITORY_SOURCE_NOT_VERIFIED",
                      "EXPECTED_CASES: '879'",
-                     "EXPECTED_PHP: '117'",
+                     "EXPECTED_PHP: '120'",
                      "contents: read",
                      "repository: rafhael100/imagine-crm",
                      "ref: d7c7aacc766c7ade4c65dcd211ed4569442144a9"):
