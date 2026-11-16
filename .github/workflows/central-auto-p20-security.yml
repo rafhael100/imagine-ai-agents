@@ -1,0 +1,17 @@
+name: CENTRAL-AUTO P20 offline material and recovery package
+on:
+  push:
+    branches:
+      - feat/central-auto-p20-homologation-readiness-2026-11-16
+permissions:
+  contents: read
+jobs:
+  material-and-package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: New offline security cases only, no infrastructure access
+        run: python3 infra/n8n-private/homologation/test_p20_security.py
