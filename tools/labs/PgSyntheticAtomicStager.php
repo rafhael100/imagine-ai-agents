@@ -76,6 +76,42 @@ final class PgSyntheticAtomicStager
         }
     }
 
+    /**
+     * P42: caller-owned transaction for P41 identity + P16 replay + P6
+     * outbox. NEVER commits or rolls back. Caller MUST roll back on DENY.
+     *
+     * IMPORTANT: the seen array is tentative until outer commit. The
+     * caller must pass a local copy, only publishing it after successful
+     * transaction commit. Return value is NOT permission to dispatch.
+     * @return array{decision:string,reason:string,ai_calls:int,service_effects:int}
+     */
+    public function stageWithinTransaction(
+        string $p7,array $envelope,array $trustedPolicy,int $now,
+        array $keys,array &$tentativeSeen
+    ):array {
+        if(!$this->db->inTransaction()){
+            return self::deny('EXTERNAL_TRANSACTION_REQUIRED');
+        }
+        try {
+            $claim=$this->replay->inspectAndClaim(
+                $p7,$envelope,$trustedPolicy,$now,$keys,$tentativeSeen
+            );
+            if($claim['decision']!=='LAB_ATOMIC_CLAIM_NO_EFFECT'){
+                return self::deny('REPLAY_OR_POLICY_DENIED');
+            }
+            if($this->outbox->enqueueWithinTransaction($p7)!=='CREATED'){
+                return self::deny('OUTBOX_CONFLICT_OR_ERROR');
+            }
+            return [
+                'decision'=>'LAB_STAGED_UNCOMMITTED_NO_DELIVERY',
+                'reason'=>'CALLER_MUST_COMMIT_WITH_BRIDGE_PROOF',
+                'ai_calls'=>0,'service_effects'=>0,
+            ];
+        }catch(Throwable){
+            return self::deny('ATOMIC_STAGE_QUERY_FAILED');
+        }
+    }
+
     /** @return array{decision:string,reason:string,ai_calls:int,service_effects:int} */
     private static function deny(string $reason): array
     {
