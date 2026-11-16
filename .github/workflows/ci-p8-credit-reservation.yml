@@ -31,6 +31,7 @@ jobs:
           --health-retries 12
     env:
       AIA_P8_PG_LAB: 'true'
+      AIA_P11_SIGNED_PROOFS: 'true'
       DB_HOST: 127.0.0.1
       DB_DATABASE: imagine_agents_ci
       DB_USERNAME: postgres
@@ -44,7 +45,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mbstring, pdo_pgsql, pgsql
+          extensions: mbstring, sodium, pdo_pgsql, pgsql
           coverage: none
       - name: Verify disposable environment and lint credit engine
         shell: bash
