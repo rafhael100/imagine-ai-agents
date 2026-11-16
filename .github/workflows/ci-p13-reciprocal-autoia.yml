@@ -1,0 +1,67 @@
+name: Agents P13 - P12 to AUTO-IA RC02 reciprocal compatibility
+
+on:
+  push:
+    branches:
+      - review/aia-p13-p12-autoia-convergence-2026-11-16
+  pull_request:
+    branches:
+      - review/aia-p8-p12-secure-credit-automation-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  pinned-convergence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - name: Checkout exact P12-derived candidate read-only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Checkout independently reviewed AUTO-IA CONV-02 source by exact SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 8b04d0e936168c77db028160b5aeb1758db497c4
+          path: _auto_ia_pinned_source
+          persist-credentials: false
+      - name: PHP 8.4 to run real adapter across two separate checkouts
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, sodium
+          coverage: none
+      - name: Enforce immutable AUTO-IA pin, no source override or external service
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "rafhael100/imagine-ai-agents"
+          test "$(git -C _auto_ia_pinned_source rev-parse HEAD)" = "8b04d0e936168c77db028160b5aeb1758db497c4"
+          test -f _auto_ia_pinned_source/tools/auto_ia/AutoIaRouter.php
+          test -f _auto_ia_pinned_source/tools/auto_ia/convergence/MockP7ToAutoIaAdapter.php
+          test -f src/MockOrchestration/MockN8nOutboxContract.php
+          php -l _auto_ia_pinned_source/tools/auto_ia/convergence/check_convergence_02.php
+          php -l src/MockOrchestration/MockN8nOutboxContract.php
+          # The original CONV-02 harness locates its P7 source at its checkout
+          # root under _p7_pinned_source. Redirect to the CURRENT P12 source,
+          # without editing or merging either repository checkout.
+          ln -s "$PWD" _auto_ia_pinned_source/_p7_pinned_source
+          test "$(readlink -f _auto_ia_pinned_source/_p7_pinned_source)" = "$PWD"
+      - name: Execute unmodified CONV-02 adapter tests against P12 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          php _auto_ia_pinned_source/tools/auto_ia/convergence/check_convergence_02.php
+          python3 _auto_ia_pinned_source/tools/auto_ia/check_rc02_release.py
+      - name: Regress P12 no-AI routing and original commercial page
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p5_ai_routing.php
+          python3 tools/check_p0_sales_demo.py
+          node tools/check_p1_sales_workbench.js
+          php tools/check_p2_sales_domain.php
+          node tools/check_p2_sales_parity.js
+          echo 'P13_P12_AUTOIA_RECIPROCAL_CI_PASS adapter=original_CONV02 P12_event_contract=current autoia_pin=immutable ai_calls=0 external_calls=0 real_authorization=false NO_GO' >> "$GITHUB_STEP_SUMMARY"
