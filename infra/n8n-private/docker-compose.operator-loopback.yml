@@ -1,0 +1,56 @@
+# CENTRAL-AUTO-P15: OPTIONAL CI-only operator ingress overlay.
+# Must never be enabled on VPS without host, MFA and IAM gates.
+services:
+  # Reverse-proxy awareness only while this optional overlay is enabled.
+  n8n:
+    environment:
+      N8N_PROXY_HOPS: "1"
+      N8N_EDITOR_BASE_URL: "https://localhost:${N8N_OPERATOR_PORT:-18744}/"
+  operator-ingress:
+    profiles: ["operator-lab"]
+    image: ${N8N_OPERATOR_NGINX_IMAGE:?REQUIRE_PINNED_NGINX_IMAGE_DIGEST}
+    depends_on:
+      n8n:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${N8N_OPERATOR_PORT:-18744}:8443"
+    volumes:
+      - ./ingress/nginx-operator.conf:/etc/nginx/conf.d/default.conf:ro
+    secrets:
+      - operator_server_cert
+      - operator_server_key
+      - operator_client_ca
+    networks:
+      - n8n_apps_private
+      - operator_loopback_frontend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # Nginx master needs only UID/GID switching and temp directory chown.
+    # No NET_ADMIN, DAC_OVERRIDE or NET_BIND_SERVICE.
+    cap_add:
+      - SETUID
+      - SETGID
+      - CHOWN
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+    mem_limit: 128m
+    cpus: 0.5
+    pids_limit: 64
+    restart: "no"
+
+networks:
+  operator_loopback_frontend:
+    driver: bridge
+    internal: false
+
+secrets:
+  operator_server_cert:
+    file: ${N8N_OPERATOR_CERT_FILE:?REQUIRE_CERT_FILE}
+  operator_server_key:
+    file: ${N8N_OPERATOR_KEY_FILE:?REQUIRE_KEY_FILE}
+  operator_client_ca:
+    file: ${N8N_OPERATOR_CLIENT_CA_FILE:?REQUIRE_CLIENT_CA_FILE}
