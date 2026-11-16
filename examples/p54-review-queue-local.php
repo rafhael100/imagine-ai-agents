@@ -24,7 +24,9 @@ function p54Deny(int $status):never
 
 if(PHP_SAPI!=='cli-server'
     ||!in_array($_SERVER['REMOTE_ADDR']??'',['127.0.0.1','::1'],true)
-    ||!in_array($_SERVER['SERVER_ADDR']??'',['127.0.0.1','::1'],true)){
+    ||!in_array($_SERVER['SERVER_NAME']??'',['127.0.0.1','::1'],true)
+    ||preg_match('/\A(?:127\.0\.0\.1|localhost|\[::1\])(?::[0-9]{1,5})?\z/D',
+        $_SERVER['HTTP_HOST']??'')!==1){
     p54Deny(403);
 }
 if(($_SERVER['REQUEST_METHOD']??'')!=='GET')p54Deny(405);
