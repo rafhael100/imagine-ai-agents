@@ -12,7 +12,7 @@ A P17 [#438](https://github.com/rafhael100/imagine-ai-agents/pull/438) e a trilh
 ## Snapshots que precisam de revalidação após novos commits
 - `main`: `ec305688528fe35e9a9dc2d3b1bda1255cbd074a`
 - Central P17: `f558e94abd11c802ab7d59321b9aae9f8bd74b2d`
-- Agents P60: `1cb27f71478d395402272d10cd9bdf39d44e771f`
+- Agents P60 com correção de teste negativo [#449](https://github.com/rafhael100/imagine-ai-agents/pull/449): `a8277b7c9052d35e909e487823675ab0b823ccc5` (snapshot fixado para integração; não representa merge no P60 original)
 - Central identidade P3/P4: `5f96750619e26bb860486a9f43bc83805a2e0ef4`
 
 ## Critérios de conclusão
