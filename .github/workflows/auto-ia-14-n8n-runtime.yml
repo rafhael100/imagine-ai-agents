@@ -1,0 +1,25 @@
+name: AUTO-IA-14 n8n official CLI in isolated CI only
+on:
+  push:
+    branches:
+      - feat/auto-ia-14-n8n-runtime-offline-ci-2026-11-16
+  pull_request:
+    branches:
+      - feat/auto-ia-13-n8n-zero-ai-policy-gate-2026-11-16
+permissions:
+  contents: read
+jobs:
+  isolated-n8n:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 pinned
+        with:
+          persist-credentials: false
+      - name: Import and execute manual NO_AI workflow in first-party n8n container with no network
+        run: |
+          bash infra/n8n-private/check_ephemeral_n8n_runtime.sh
+      - name: Preserve project release NO-GO constraints
+        run: |
+          python3 tools/auto_ia/convergence/check_rc03_release.py
+          python3 tools/auto_ia/policy/check_n8n_zero_ai.py
