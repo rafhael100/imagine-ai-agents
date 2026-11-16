@@ -1,0 +1,33 @@
+name: AIA-CONV-02 P7 to AUTO-IA contract compatibility (offline)
+on:
+  push:
+    branches:
+      - feat/auto-ia-conv02-p7-contract-adapter-2026-11-16
+  pull_request:
+    branches:
+      - review/auto-ia-rc02-pg-n8n-integrated-2026-11-16
+permissions:
+  contents: read
+jobs:
+  p7-contract-pin:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: Checkout pinned P7 read-only source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 4ba4f486faf0f9b4bf8b73be299fa840c54ed6bc
+          path: _p7_pinned_source
+          persist-credentials: false
+      - name: Ensure exact P7 SHA and deny any cross-source ambiguity
+        run: |
+          test "$(git -C _p7_pinned_source rev-parse HEAD)" = "4ba4f486faf0f9b4bf8b73be299fa840c54ed6bc"
+          php -l tools/auto_ia/convergence/MockP7ToAutoIaAdapter.php
+          php -l tools/auto_ia/convergence/check_convergence_02.php
+          php tools/auto_ia/convergence/check_convergence_02.php
+          python3 tools/auto_ia/check_rc02_release.py
+
