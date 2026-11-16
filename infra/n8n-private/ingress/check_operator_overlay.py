@@ -75,7 +75,13 @@ def check(data:object)->dict:
         raise Denied("PROXY_PRIVILEGES")
     if proxy.get("restart")!="no" or proxy.get("environment"):
         raise Denied("PROXY_ENV_OR_RESTART")
-    if proxy.get("mem_limit")!=134217728 or proxy.get("pids_limit")!=64:
+    # Compose renders byte/pid limits as either strings or integers.
+    try:
+        memory=int(proxy.get("mem_limit",0))
+        pids=int(proxy.get("pids_limit",0))
+    except (TypeError,ValueError):
+        raise Denied("PROXY_RESOURCE_LIMITS") from None
+    if memory!=134217728 or pids!=64:
         raise Denied("PROXY_RESOURCE_LIMITS")
     if proxy.get("depends_on",{}).get("n8n",{}).get("condition")!="service_healthy":
         raise Denied("PROXY_UPSTREAM_HEALTHCHECK")
