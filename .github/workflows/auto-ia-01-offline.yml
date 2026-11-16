@@ -1,0 +1,27 @@
+name: AUTO-IA-01 routing policy (offline, zero AI usage)
+
+on:
+  push:
+    branches:
+      - feat/auto-ia-01-deterministic-router-2026-11-16
+  pull_request:
+    branches:
+      - review/agents-f229-f251-integrated-2026-11-15
+
+permissions:
+  contents: read
+
+jobs:
+  route-policy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned v7.0.1
+        with:
+          persist-credentials: false
+      - name: Static and executable policy checks - no network/provider secrets
+        run: |
+          php -v
+          php -l tools/auto_ia/AutoIaRouter.php
+          php -l tools/auto_ia/check_auto_ia.php
+          php tools/auto_ia/check_auto_ia.php
