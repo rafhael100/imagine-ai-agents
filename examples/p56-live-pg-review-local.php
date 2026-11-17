@@ -7,8 +7,10 @@ declare(strict_types=1);
  * No business tenant, public API, logins, approvals or side effects.
  */
 require_once __DIR__.'/../tools/labs/PgScopedReviewQueueBridgeLab.php';
+require_once __DIR__.'/../tools/labs/PgSignedReviewQueueBridgeLab.php';
 
 use ImagineAI\Convergence\PgScopedReviewQueueBridgeLab;
+use ImagineAI\Convergence\PgSignedReviewQueueBridgeLab;
 
 function p56Deny(int $status):never
 {
@@ -59,16 +61,38 @@ try{
         'aia_p55_ci_read_a',$password,
         [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_TIMEOUT=>3]
     );
-    $result=(new PgScopedReviewQueueBridgeLab($pdo))->read(
-        'SYNTHETIC_TENANT_A'
-    );
-    if(($result['decision']??null)!=='LAB_READONLY_PG_REVIEW_NO_GO'
-        ||!is_array($result['presentation']??null)
-        ||$result['presentation']['can_approve']!==false
-        ||$result['presentation']['can_execute']!==false){
-        p56Deny(503);
+    $signedMode=getenv('AIA_P62_SIGNED_REVIEW_LAB')==='true';
+    $snapshot=null;
+    $signedItems=[];
+    if($signedMode){
+        $snapshot=(new PgSignedReviewQueueBridgeLab($pdo))->read(
+            'SYNTHETIC_TENANT_A'
+        );
+        if(($snapshot['decision']??null)!==
+                'LAB_SIGNED_REVIEW_SNAPSHOT_NO_GO'
+            ||!is_array($snapshot['queue']??null)
+            ||$snapshot['can_approve']!==false
+            ||$snapshot['can_execute']!==false){
+            p56Deny(503);
+        }
+        $model=$snapshot['queue'];
+        if($snapshot['current_review_available']){
+            foreach($snapshot['signed_review']['items'] as $item){
+                $signedItems[$item['proposal_ref']]=$item;
+            }
+        }
+    }else{
+        $result=(new PgScopedReviewQueueBridgeLab($pdo))->read(
+            'SYNTHETIC_TENANT_A'
+        );
+        if(($result['decision']??null)!=='LAB_READONLY_PG_REVIEW_NO_GO'
+            ||!is_array($result['presentation']??null)
+            ||$result['presentation']['can_approve']!==false
+            ||$result['presentation']['can_execute']!==false){
+            p56Deny(503);
+        }
+        $model=$result['presentation'];
     }
-    $model=$result['presentation'];
 }catch(Throwable){
     p56Deny(503);
 }
@@ -92,6 +116,16 @@ $metricNames=[
     'projected_leads'=>'Leads projetados',
     'projected_customers'=>'Clientes projetados'
 ];
+$reviewNames=[
+    'LAB_AWAITING_REVIEWS_NO_ACTION'=>'AGUARDANDO PARECERES',
+    'LAB_PARTIAL_REVIEW_NO_ACTION'=>'UM PARECER ASSINADO',
+    'LAB_TWO_SIGNED_OBSERVATIONS_NO_ACTION'=>'DUAS OBSERVAÇÕES ASSINADAS',
+    'LAB_REVIEW_REJECTED_NO_ACTION'=>'PARECER DE RECUSA REGISTRADO',
+];
+$consultationTime=$signedMode
+    ?(new DateTimeImmutable('@'.$snapshot['snapshot_observed_at']))
+        ->setTimezone(new DateTimeZone('America/Sao_Paulo'))
+    :null;
 function p56E(string|int $x):string
 {
     return htmlspecialchars((string)$x,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
@@ -125,6 +159,7 @@ h1{font-size:clamp(28px,4.5vw,42px);letter-spacing:-.045em;margin:0 0 8px;line-h
 .card,.draft{border:1px solid var(--line);background:var(--white);border-radius:18px;padding:21px;box-shadow:0 4px 20px #1c263507}
 .card strong{display:block;font-size:34px;font-variant-numeric:tabular-nums;line-height:1.3}
 .card span,small{color:var(--muted);font-size:13px}
+.review-status strong{display:inline;font-size:inherit}
 h2{font-size:19px;letter-spacing:-.025em}
 .filters{display:flex;flex-wrap:wrap;gap:6px}
 .filters a{background:#fff;padding:8px 12px;color:#445569;text-decoration:none;font-size:13px;border:1px solid var(--line);border-radius:11px}
@@ -148,10 +183,22 @@ h2{font-size:19px;letter-spacing:-.025em}
 <h1>Central de propostas</h1>
 <p class="subtitle">Dados fictícios de rascunhos gravados no PostgreSQL de laboratório, lidos com isolamento por empresa e checagem de integridade. Nenhuma ação ou aprovação está disponível.</p>
 <section class="cards" aria-label="Contadores de rascunhos">
-<div class="card"><strong><?= p56E($model['total_pending']) ?></strong><span>Propostas aguardando revisão</span></div>
+<div class="card"><strong><?= p56E($model['total_pending']) ?></strong><span><?= $signedMode?'Propostas nesta consulta':'Propostas aguardando revisão' ?></span></div>
 <div class="card"><strong><?= p56E($model['by_kind']['crm_task_draft']) ?></strong><span>Rascunhos de tarefas CRM</span></div>
 <div class="card"><strong><?= p56E($model['by_kind']['operator_notice_draft']) ?></strong><span>Rascunhos de notificações</span></div>
 </section>
+<?php if($signedMode): ?>
+<section class="card review-status" aria-labelledby="signed-review-title">
+<h2 id="signed-review-title">Pareceres da proposta</h2>
+<p data-review-history="verified">Histórico verificado: <?= p56E($snapshot['historical']['checked_signed_observations']) ?> observações assinadas em <?= p56E($snapshot['historical']['checked_drafts']) ?> propostas desta empresa.</p>
+<?php if($snapshot['current_review_available']): ?>
+<p data-review-current="available">Fila, autoria e pareceres foram lidos na mesma consulta. Os estados abaixo foram revalidados nesse momento; duas observações não constituem aprovação.</p>
+<?php else: ?>
+<p data-review-current="unavailable"><strong>Estado atual dos pareceres indisponível.</strong> A prova histórica continua verificável, mas não substitui pareceres válidos e chaves ativas no momento da consulta. Não há aprovação ou execução disponível.</p>
+<?php endif; ?>
+<small>Consulta: <?= p56E($consultationTime->format('d/m/Y H:i:s')) ?> (America/Sao_Paulo, UTC<?= p56E($consultationTime->format('P')) ?>). Uma alteração posterior aparecerá na próxima leitura. Esta consulta não concede autorização.</small>
+</section>
+<?php endif; ?>
 <section aria-labelledby="queue-title">
 <div class="heading">
 <h2 id="queue-title">Fila de revisão</h2>
@@ -171,7 +218,15 @@ h2{font-size:19px;letter-spacing:-.025em}
 <small><?= p56E($names[$proposal['kind']]) ?></small>
 <h3><?= p56E($metricNames[$proposal['metric']]) ?></h3>
 <div class="mono"><?= p56E($proposal['request_ref']) ?> · <?= p56E($proposal['rule_ref']) ?></div>
+<?php if($signedMode&&$snapshot['current_review_available']): ?>
+<?php $signed=$signedItems[$proposal['proposal_ref']]; ?>
+<span class="state" data-review-state="<?= p56E($signed['review_state']) ?>"><?= p56E($reviewNames[$signed['review_state']]) ?> · NÃO EXECUTADO</span>
+<p><small><?= p56E($signed['signed_observations']) ?> pareceres · <?= p56E(implode(' / ',$signed['review_roles'])?:'Nenhum papel observado') ?></small></p>
+<?php elseif($signedMode): ?>
+<span class="state" data-review-state="UNAVAILABLE">PARECER ATUAL INDISPONÍVEL · NÃO EXECUTADO</span>
+<?php else: ?>
 <span class="state">AGUARDANDO REVISÃO · NÃO EXECUTADO</span>
+<?php endif; ?>
 </div>
 <div class="metric">
 <strong><?= p56E($proposal['observed']) ?></strong>
