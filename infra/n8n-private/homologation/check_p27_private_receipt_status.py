@@ -457,13 +457,16 @@ def exercise(lab: ReceiptLab) -> dict:
             "external_backup_verified": False, "go_for_installation": False}
 
 
-def main() -> dict:
+def main(*, expected_ingress_sha256: str = INDEX_SHA256, after_receipt_checks=None) -> dict:
     require(os.environ.get("GITHUB_ACTIONS") == "true" and
             os.environ.get("GITHUB_REPOSITORY") == "rafhael100/imagine-ai-agents" and
             os.environ.get("P24_RUNNER_ENVIRONMENT") == "github-hosted" and
             not os.environ.get("DOCKER_HOST") and not os.environ.get("DOCKER_CONTEXT"),
             "P27_HOSTED_CI_LOCAL_DOCKER_ONLY")
-    require(hashlib.sha256((ROOT / "runtime/central-auto/index.php").read_bytes()).hexdigest() == INDEX_SHA256,
+    # An explicit reviewed entry point can reuse this matrix for later ingress
+    # changes. Standalone P27 continues to require its original source pin.
+    require(re.fullmatch(r"[a-f0-9]{64}", expected_ingress_sha256) is not None, "P27_INGRESS_PIN_FORMAT")
+    require(hashlib.sha256((ROOT / "runtime/central-auto/index.php").read_bytes()).hexdigest() == expected_ingress_sha256,
             "P27_EXISTING_INGRESS_CHANGED")
     require(run(["docker", "context", "show"], "P27_DOCKER_CONTEXT").stdout.strip() == b"default",
             "P27_LOCAL_DOCKER_CONTEXT_REQUIRED")
@@ -475,7 +478,11 @@ def main() -> dict:
         with tempfile.TemporaryDirectory(prefix="aia-p27-", dir=os.environ.get("RUNNER_TEMP")) as work:
             lab = ReceiptLab("p27-" + secrets.token_hex(6), Path(work) / "receipt-lab")
             try:
-                return exercise(lab)
+                proof = exercise(lab)
+                proof["existing_p19_ack_source_sha256"] = expected_ingress_sha256
+                if after_receipt_checks is not None:
+                    proof["additional_ingress_boundaries"] = after_receipt_checks(lab)
+                return proof
             finally:
                 lab.cleanup()
     finally:
