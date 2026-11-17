@@ -15,13 +15,14 @@ jobs:
     timeout-minutes: 10
     env:
       N8N_IMAGE: ghcr.io/n8n-io/n8n@sha256:b4b90747b81fcda7e76550c0d3aa7f0f64917a1e9573cff40d6834eaf2e0f8ea
-      P30_RUNNER_ENVIRONMENT: ${{ runner.environment }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Verify source and prepare pinned images
+        env:
+          P30_RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
@@ -34,6 +35,8 @@ jobs:
           test -n "$n8n_pg"
           echo "N8N_PG_IMAGE=$n8n_pg" >> "$GITHUB_ENV"
       - name: Exercise original n8n MFA and session routes
+        env:
+          P30_RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           set -euo pipefail
           python3 infra/n8n-private/homologation/check_p30_native_operator_mfa.py
