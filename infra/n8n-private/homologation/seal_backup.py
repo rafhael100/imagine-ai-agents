@@ -125,16 +125,41 @@ def verify_decrypted(path):
   for member in archive:
    total+=member.size
    if total>LIMIT:raise Denied('PACKAGE_TOO_LARGE')
-   if member.name not in expected or member.name in seen or not member.isfile() or member.size>LIMIT:raise Denied('PACKAGE_SCHEMA_DENIED')
+   if (member.name not in expected or member.name in seen or
+       member.type not in (tarfile.REGTYPE,tarfile.AREGTYPE) or
+       not 0<member.size<=LIMIT or member.mode not in (0o400,0o600)):
+    raise Denied('PACKAGE_SCHEMA_DENIED')
    seen.add(member.name);stream=archive.extractfile(member)
+   if stream is None:raise Denied('PACKAGE_SCHEMA_DENIED')
    if member.name=='manifest.json':
     if member.size>8192:raise Denied('MANIFEST_TOO_LARGE')
-    manifest=json.load(stream)
+    def unique(pairs):
+     value={}
+     for key,item in pairs:
+      if key in value:raise Denied('DUPLICATE_MANIFEST_KEY')
+      value[key]=item
+     return value
+    manifest=json.load(stream,object_pairs_hook=unique)
    else:
-    h=hashlib.sha256();size=0
+    if member.name=='n8n-encryption.key' and not 32<=member.size<=256:
+     raise Denied('ENCRYPTION_KEY_SIZE_DENIED')
+    h=hashlib.sha256();size=0;prefix=stream.read(5)
+    if member.name.endswith('.dump') and prefix!=b'PGDMP':
+     raise Denied('CUSTOM_PG_DUMP_REQUIRED')
+    h.update(prefix);size+=len(prefix)
     for block in iter(lambda:stream.read(1024*1024),b''):h.update(block);size+=len(block)
+    if size!=member.size:raise Denied('PACKAGE_COMPONENT_TRUNCATED')
     payloads[member.name]={'sha256':h.hexdigest(),'bytes':size}
  if not isinstance(manifest,dict) or set(manifest)!={'schema','components','recipient_fingerprint','coherent_source_snapshot_verified','external_copy_verified','application_restore_verified'} or any(manifest[k] is not False for k in ['coherent_source_snapshot_verified','external_copy_verified','application_restore_verified']):raise Denied('MANIFEST_SCHEMA_DENIED')
+ components=manifest.get('components')
+ if not isinstance(components,dict) or set(components)!=set(COMPONENTS):
+  raise Denied('MANIFEST_COMPONENTS_DENIED')
+ for component in components.values():
+  if (not isinstance(component,dict) or set(component)!={'sha256','bytes'} or
+      type(component['bytes']) is not int or not 0<component['bytes']<=LIMIT or
+      not isinstance(component['sha256'],str) or
+      not re.fullmatch('[a-f0-9]{64}',component['sha256'])):
+   raise Denied('MANIFEST_COMPONENTS_DENIED')
  if seen!=expected or not isinstance(manifest.get('recipient_fingerprint'),str) or not re.fullmatch('[a-f0-9]{64}',manifest['recipient_fingerprint']) or manifest.get('schema')!='IMAGINE_RECOVERY_PACKAGE_V1' or manifest.get('components')!=payloads:raise Denied('PACKAGE_INTEGRITY_DENIED')
  # Even a valid component SHA may describe a *malicious* inner TAR.
  # Re-inspect the actual decrypted volume bytes before anyone extracts them.

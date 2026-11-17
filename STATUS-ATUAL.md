@@ -1,5 +1,38 @@
 # Imagine AI Agents — estado atual
 
+## Candidata P24 / RC66 — 17/11/2026
+
+Branch isolada `feat/central-auto-p24-complete-n8n-recovery-2026-11-17`, derivada da
+[Central P23 #456](https://github.com/rafhael100/imagine-ai-agents/pull/456), SHA
+`995201f9300590f86b6ce5bf5d46168cee5ef903`. A linha Agents permanece fixada na
+[RC65 #457](https://github.com/rafhael100/imagine-ai-agents/pull/457), SHA
+`3fb86c5fb011bc9df1f12a4a30a7c094370b6872`. Não houve merge entre essas branches.
+
+- **Correções reproduzidas:** a recusa de gravação do recibo preserva destinos de
+  outro produtor; o assinante exige par Ed25519 correspondente; flags exigem
+  booleano falso; o manifesto recusa chaves JSON duplicadas, tipos incorretos,
+  dumps fora do formato custom, chave fora dos limites e permissões inseguras.
+- **Novo ensaio funcional:** recuperação do schema real do n8n em PostgreSQL 17,
+  volume e chave, desde pacote CMS assinado, com nova stack descartável. Verifica
+  workflow nativo antes/depois e credencial exclusivamente sintética criptografada.
+  Os componentes CRM/Agents desse pacote continuam sendo bancos marcadores
+  sintéticos; não representam restauração dos schemas desses produtos.
+- **Compatibilidade:** `tools/run_rc66_p24_virtual_tree.sh` combina os fontes em
+  árvore Git temporária, confere os blobs das duas origens e executa segurança,
+  domínio Agents e recuperação n8n nessa mesma árvore, sem criar merge commit.
+- **Evidências:** regressões locais em Python/OpenSSL e revisão independente do
+  código. O ensaio Docker/PHP é exclusivo de GitHub Actions; resultado e SHA
+  executados devem ser conferidos no check da PR. Não usar um check da P23/RC65
+  antiga como evidência da nova candidata.
+
+Procedimento e limites: [RECOVERY-P24](infra/n8n-private/homologation/RECOVERY-P24.md).
+**DRAFT / NO-GO operacional.** Backup externo, restauração em outro host, custódia
+real, identidade operacional e homologação da VPS continuam dependentes de
+evidências próprias. Esta candidata não altera a `main`, a VPS, o R2, os serviços
+reais, a cobrança ou as permissões de clientes; dispatch permanece desligado.
+
+## Histórico da linha dev — 14/11/2026
+
 **14/11/2026.** GitHub. **Produção: NO-GO.**
 
 ## Estado executivo
