@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgDraftFingerprintLab.php';
+require_once __DIR__.'/PgReadOnlySnapshotLab.php';
 require_once __DIR__.'/../../src/Automation/ReviewQueueReadModel.php';
 
 use ImagineAI\Automation\ReviewQueueReadModel;
@@ -33,8 +34,20 @@ final class PgScopedReviewQueueBridgeLab
     /** @return array<string,mixed> */
     public function read(string $tenant):array
     {
+        return $this->snapshot($tenant,false);
+    }
+
+    /** P62 composition: caller owns the exact READ ONLY / REPEATABLE READ tx. */
+    public function readInsideReadOnlySnapshot(string $tenant):array
+    {
+        return $this->snapshot($tenant,true);
+    }
+
+    private function snapshot(string $tenant,bool $inside):array
+    {
         if(!self::ref($tenant)
-            ||$this->db->inTransaction()
+            ||($inside?!PgReadOnlySnapshotLab::active($this->db)
+                :$this->db->inTransaction())
             ||getenv('GITHUB_ACTIONS')!=='true'
             ||getenv('GITHUB_REPOSITORY')!=='rafhael100/imagine-ai-agents'
             ||getenv('AIA_P55_SCOPED_LAB')!=='true'
@@ -43,15 +56,17 @@ final class PgScopedReviewQueueBridgeLab
             return self::deny('CI_SCOPED_SNAPSHOT_REQUIRED');
         }
         try{
-            $this->db->beginTransaction();
-            $this->db->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY');
+            if(!$inside){
+                $this->db->beginTransaction();
+                $this->db->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY');
+            }
             $ctx=$this->db->query('SELECT session_user,current_database()')
                 ->fetch(PDO::FETCH_NUM);
             if(!is_array($ctx)
                 ||!isset(self::SCOPES[$ctx[0]])
                 ||self::SCOPES[$ctx[0]]!==$tenant
                 ||$ctx[1]!=='imagine_agents_ci'){
-                $this->db->rollBack();
+                if(!$inside)$this->db->rollBack();
                 return self::deny('DATABASE_ROLE_TENANT_SCOPE_DENIED');
             }
             $batches=$this->db->prepare(<<<'SQL'
@@ -63,7 +78,7 @@ SQL);
             $batches->execute([':tenant'=>$tenant]);
             $batchRows=$batches->fetchAll(PDO::FETCH_ASSOC);
             if(count($batchRows)>self::MAX_BATCHES){
-                $this->db->rollBack();
+                if(!$inside)$this->db->rollBack();
                 return self::deny('BATCH_CAPACITY_LIMIT');
             }
             $index=[];
@@ -71,7 +86,7 @@ SQL);
                 foreach(['command_sha256','ruleset_sha256','preview_sha256'] as $hash){
                     if(!is_string($batch[$hash])
                         ||preg_match('/\A[a-f0-9]{64}\z/D',$batch[$hash])!==1){
-                        $this->db->rollBack();
+                        if(!$inside)$this->db->rollBack();
                         return self::deny('BATCH_METADATA_INVALID');
                     }
                 }
@@ -92,7 +107,7 @@ SQL);
             $drafts->execute([':tenant'=>$tenant]);
             $rows=$drafts->fetchAll(PDO::FETCH_ASSOC);
             if(count($rows)>self::MAX_DRAFTS){
-                $this->db->rollBack();
+                if(!$inside)$this->db->rollBack();
                 return self::deny('REVIEW_QUEUE_CAPACITY_LIMIT');
             }
 
@@ -100,7 +115,7 @@ SQL);
             foreach($rows as $row){
                 $request=$row['request_ref'];
                 if(!isset($index[$request])){
-                    $this->db->rollBack();
+                    if(!$inside)$this->db->rollBack();
                     return self::deny('ORPHANED_REVIEW_DRAFT');
                 }
                 $batch=&$index[$request];
@@ -108,7 +123,7 @@ SQL);
                 if($batch['ruleset']!==$row['ruleset_ref']
                     ||$batch['revision']!==$revision
                     ||$row['state']!=='AWAITING_HUMAN_REVIEW_LAB'){
-                    $this->db->rollBack();
+                    if(!$inside)$this->db->rollBack();
                     return self::deny('REVIEW_DRAFT_SCOPE_OR_STATE_CHANGED');
                 }
                 $expected=PgDraftFingerprintLab::sha256(
@@ -119,7 +134,7 @@ SQL);
                 );
                 if(!is_string($row['draft_sha256'])
                     ||!hash_equals($expected,$row['draft_sha256'])){
-                    $this->db->rollBack();
+                    if(!$inside)$this->db->rollBack();
                     return self::deny('REVIEW_DRAFT_HASH_INCONSISTENT');
                 }
                 ++$batch['count'];
@@ -137,7 +152,7 @@ SQL);
             }
             foreach($index as $batch){
                 if($batch['declared']!==$batch['count']){
-                    $this->db->rollBack();
+                    if(!$inside)$this->db->rollBack();
                     return self::deny('REVIEW_DRAFT_COUNT_INCONSISTENT');
                 }
             }
@@ -148,7 +163,7 @@ SQL);
                 'ai_calls'=>0,
                 'service_effects'=>0,
             ],$tenant);
-            $this->db->commit();
+            if(!$inside)$this->db->commit();
             return [
                 'schema'=>'AIA_P55_PG_READONLY_REVIEW_V1',
                 'decision'=>'LAB_READONLY_PG_REVIEW_NO_GO',
@@ -162,7 +177,7 @@ SQL);
                 'service_effects'=>0,
             ];
         }catch(Throwable){
-            if($this->db->inTransaction())$this->db->rollBack();
+            if(!$inside&&$this->db->inTransaction())$this->db->rollBack();
             return self::deny('READONLY_QUERY_OR_INTEGRITY_FAILURE');
         }
     }
