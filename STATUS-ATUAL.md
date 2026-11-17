@@ -1,5 +1,29 @@
 # Imagine AI Agents — estado atual
 
+## Candidata P27 / RC69 — 17/11/2026
+
+Continuação da [P26 #460](https://github.com/rafhael100/imagine-ai-agents/pull/460),
+SHA `8cea78524c0ec9cc6aafe440c7b6b17160177bf9`, cuja
+[CI 44190424888](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44190424888)
+aprovou o fluxo real e a conciliação. Branch:
+`feat/central-auto-p27-private-receipt-status-2026-11-17`.
+
+A nova consulta privada permite recuperar o recibo de um evento já recebido
+sem reenviá-lo. Exige mTLS, assinatura e concessão específica de leitura,
+além do vínculo empresa/tenant, grant de ingresso e chave atuais. Retorna
+somente referências e `RECEIVED / DISABLED / NOT_DISPATCHED`, com assinatura
+vinculada à consulta. Outra empresa, revogação, evento inexistente e hash
+incorreto não recebem informações sobre o evento.
+
+O receiver P19 e seu ACK permanecem intactos. A consulta não apresenta a
+inbox como execução n8n nem liga `lead.ingest` à operação P26. O ensaio usa
+HTTPS/mTLS real com certificados sintéticos e componentes isolados, além das
+verificações P25/P26 anteriores na mesma árvore temporária.
+
+Contrato e limites: [RECEIPTS-P27](infra/n8n-private/homologation/RECEIPTS-P27.md).
+Verificar o resultado na CI da HEAD desta candidata.
+**DRAFT / NO-GO operacional; integração do cliente CRM ainda não realizada.**
+
 ## Candidata P26 / RC68 — 17/11/2026
 
 Continuação da [P25 #459](https://github.com/rafhael100/imagine-ai-agents/pull/459),
