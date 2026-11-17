@@ -9,3 +9,22 @@ O schema e referências SYNTHETIC são exclusivamente de CI. Nenhuma fixture rep
 Teste integrado fixado na candidata CRM #636: duas aplicações Laravel + runtime PHP do produto Agents, três contêineres de aplicação e bancos independentes, ingress privados mTLS, certificado/empresa/operação/revogação, idempotência, auditoria, falha e recuperação. Criação de arquivo não equivale a execução aprovada. Registro dos resultados segue após CI.
 
 Pendente para operação: autoridade de concessões real e revisão externa, política de retenção, custódia/rotação de chaves, migração própria sem tabelas lab, inventário Leaseweb, MFA humano, backup externo e licença. DRAFT/NO-GO; nenhuma VPS ou porta existente alterada.
+
+
+## Consulta privada de recibo — P27
+
+A rota candidata `POST /private/events/receipt` recupera o recibo de um evento
+P19 já admitido, sem reenviá-lo. Exige mTLS, query assinada e concessão
+independente `event.receipt.read`, além do vínculo de empresa, grant de ingresso
+e chave atuais. Retorna somente referências e `RECEIVED`, `DISABLED`,
+`NOT_DISPATCHED`; não afirma execução pela fila P26.
+
+`receipt-status.sql` instala a função e o papel NOLOGIN/EXECUTE-only de leitura.
+O login separado e os grants usados pelo ensaio são criados exclusivamente na
+CI. `index.php` e o ACK original permanecem intactos. O Dockerfile passa a
+incluir o novo handler e o nginx acrescenta apenas a rota exata de consulta.
+
+Contrato, assinatura, permissões, ensaio HTTPS/mTLS e limites:
+[RECEIPTS-P27](../../infra/n8n-private/homologation/RECEIPTS-P27.md).
+O estado operacional continua **NO-GO**, sem instalação ou integração do cliente
+CRM presumidas por estes testes.
