@@ -40,6 +40,24 @@ descriptografia autenticada, valida o manifesto e materializa os componentes
 pelos helpers existentes. Não há um segundo protocolo de backup ou um caminho
 de recuperação sem assinatura.
 
+### Representação dos CHECKs depois da restauração
+
+O PostgreSQL 16 reconstitui três CHECKs com uma diferença textual: o cast de
+um array de literais `varchar` para `text[]` passa a aparecer como cast de
+cada elemento. Os valores, tipos e regras permanecem os mesmos. A
+[documentação de catálogo](https://www.postgresql.org/docs/16/functions-info.html)
+caracteriza `pg_get_constraintdef` como reconstrução decompilada; a
+[discussão do projeto PostgreSQL](https://www.postgresql.org/message-id/30073.1459287952@sss.pgh.pa.us)
+explica essa explicitação de casts na restauração.
+
+A comparação reconhece somente essa reescrita nos três CHECKs identificados
+de `state`: dois no ledger nativo e um na outbox. A projeção esperada precisa
+coincidir com o hash integral das definições do destino. Identificadores,
+literais ordenados, flags, colunas e relações continuam sendo comparados;
+outros tipos, casts, operadores ou regras não ganham equivalência. Os testes
+de mutação exigem recusa dessas outras mudanças. O relatório separa essa
+equivalência de representação da igualdade exata do conteúdo das 17 tabelas.
+
 ## Quarentena e referência atual
 
 Depois do dump, a origem revoga o grant de leitura A e a chave de proprietário

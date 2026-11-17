@@ -61,7 +61,9 @@ for file in \
   infra/n8n-private/homologation/check_p27_private_receipt_status.py \
   infra/n8n-private/homologation/check_p28_candidate_state_restore.py \
   runtime/central-auto/p28-state-probe.php \
-  runtime/central-auto/p28-recovery-roles.sql; do
+  runtime/central-auto/p28-recovery-roles.sql \
+  runtime/central-auto/p28-constraint-compare.php \
+  runtime/central-auto/p28-constraint-compare-test.php; do
   test "$(git rev-parse "$central_sha:$file")" = "$(git rev-parse "$tree:$file")"
 done
 
@@ -132,6 +134,8 @@ printf 'RC70_SOURCE central=%s agents=%s tree=%s\n' "$central_sha" "$agents_sha"
   php -l runtime/central-auto/event-status.php
   php -l runtime/central-auto/p27-receipt-probe.php
   php -l runtime/central-auto/p28-state-probe.php
+  php -l runtime/central-auto/p28-constraint-compare.php
+  php -l runtime/central-auto/p28-constraint-compare-test.php
   for file in runtime/central-auto/lab-executor/*.php; do php -l "$file"; done
   php -l src/Automation/DeterministicAutomationService.php
   php -l src/Automation/DeterministicRuleEngine.php

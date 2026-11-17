@@ -3,6 +3,7 @@ declare(strict_types=1);
 /** P28 disposable recovery probes. No transport listener or executor capability. */
 require_once __DIR__.'/lab-executor/PgNativeExecutionLedgerLab.php';
 require_once __DIR__.'/../../tools/labs/PgOwnerDecisionLab.php';
+require_once __DIR__.'/p28-constraint-compare.php';
 
 use ImagineAI\NativeLab\PgNativeExecutionLedgerLab;
 use ImagineAI\Convergence\PgOwnerDecisionLab;
@@ -50,25 +51,7 @@ function p28Role(PDO $db,string $role,callable $operation):mixed {
 }
 /** Diagnostic text only. Literal values never leave this probe in DDL form. */
 function p28ConstraintShape(string $definition):array {
-    $literals=[];
-    $pattern=<<<'REGEX'
-~(?:\bE|\bU&)?'(?:''|\\.|[^'\\])*'~is
-REGEX;
-    $shape=preg_replace_callback($pattern,static function(array $match)use(&$literals):string{
-        $literals[]=$match[0];return "'LITERAL'";
-    },$definition);
-    if(is_string($shape))$shape=preg_replace('/\s+/',' ',trim($shape));
-    // pg_get_constraintdef emits quoted SQL constants, not rows. If a future
-    // deparser introduces syntax this redactor does not understand, omit the
-    // text and retain its exact hash. Never fall back to the original SQL.
-    $withoutLiterals=is_string($shape)?str_replace("'LITERAL'",'', $shape):'';
-    $withoutIdentifiers=preg_replace('/"[A-Za-z_][A-Za-z0-9_]*"/','IDENTIFIER',$withoutLiterals);
-    if(!is_string($shape)||strlen($shape)>4096
-        ||preg_match('/[\x00-\x1f\x7f\x80-\xff\'\$]/',$withoutLiterals)===1
-        ||!is_string($withoutIdentifiers)||str_contains($withoutIdentifiers,'"')){
-        $shape=null;
-    }
-    return ['sql_shape'=>$shape,'literal_tokens_sha256'=>p28Hash($literals)];
+    return P28ConstraintCompare::shape($definition);
 }
 /** Nominal catalog identities only: OIDs and raw conbin/location are unstable. */
 function p28ConstraintDetails(PDO $db,array $constraints):array {
@@ -80,10 +63,24 @@ SELECT n.nspname,c.relname,k.conname,k.contype::text AS kind,
  COALESCE((SELECT jsonb_agg(a.attname ORDER BY ord.position)
   FROM unnest(k.conkey) WITH ORDINALITY AS ord(attnum,position)
   JOIN pg_attribute a ON a.attrelid=k.conrelid AND a.attnum=ord.attnum),'[]'::jsonb)::text AS columns_json,
+ COALESCE((SELECT jsonb_agg(jsonb_build_object('name',a.attname,
+   'type',format_type(a.atttypid,a.atttypmod),
+   'collation',cn.nspname||'.'||co.collname) ORDER BY ord.position)
+  FROM unnest(k.conkey) WITH ORDINALITY AS ord(attnum,position)
+  JOIN pg_attribute a ON a.attrelid=k.conrelid AND a.attnum=ord.attnum
+  LEFT JOIN pg_collation co ON co.oid=a.attcollation
+  LEFT JOIN pg_namespace cn ON cn.oid=co.collnamespace),'[]'::jsonb)::text AS column_types_json,
  CASE WHEN k.confrelid<>0 THEN rn.nspname||'.'||rc.relname END AS referenced_table,
  COALESCE((SELECT jsonb_agg(a.attname ORDER BY ord.position)
   FROM unnest(k.confkey) WITH ORDINALITY AS ord(attnum,position)
   JOIN pg_attribute a ON a.attrelid=k.confrelid AND a.attnum=ord.attnum),'[]'::jsonb)::text AS referenced_columns_json,
+ COALESCE((SELECT jsonb_agg(jsonb_build_object('name',a.attname,
+   'type',format_type(a.atttypid,a.atttypmod),
+   'collation',cn.nspname||'.'||co.collname) ORDER BY ord.position)
+  FROM unnest(k.confkey) WITH ORDINALITY AS ord(attnum,position)
+  JOIN pg_attribute a ON a.attrelid=k.confrelid AND a.attnum=ord.attnum
+  LEFT JOIN pg_collation co ON co.oid=a.attcollation
+  LEFT JOIN pg_namespace cn ON cn.oid=co.collnamespace),'[]'::jsonb)::text AS referenced_column_types_json,
  CASE WHEN k.contype='f' THEN k.confmatchtype::text END AS match_type,
  CASE WHEN k.contype='f' THEN k.confupdtype::text END AS on_update,
  CASE WHEN k.contype='f' THEN k.confdeltype::text END AS on_delete,
@@ -104,7 +101,7 @@ WHERE n.nspname LIKE 'aia\_%' ESCAPE '\'
 ORDER BY n.nspname,c.relname,k.conname
 SQL);
     p28Must(count($catalog)===count($constraints),'CONSTRAINT_DIAGNOSTIC_COUNT');
-    $details=[];
+    $contexts=[];
     foreach($catalog as $i=>$row){
         $original=$constraints[$i];
         foreach(['nspname','relname','conname'] as $name){
@@ -113,25 +110,21 @@ SQL);
                 'CONSTRAINT_DIAGNOSTIC_IDENTITY');
         }
         $identity=$row['nspname'].'.'.$row['relname'].'.'.$row['conname'];
-        p28Must(!isset($details[$identity]),'CONSTRAINT_DIAGNOSTIC_DUPLICATE');
+        p28Must(!isset($contexts[$identity]),'CONSTRAINT_DIAGNOSTIC_DUPLICATE');
         $structure=['kind'=>$row['kind']];
         foreach(['validated','deferrable','initially_deferred','local','no_inherit'] as $name)
             $structure[$name]=p28True($row[$name]);
         $structure['inherited_count']=(int)$row['inherited_count'];
         $structure['columns']=json_decode($row['columns_json'],true,8,JSON_THROW_ON_ERROR);
+        $structure['column_types']=json_decode($row['column_types_json'],true,8,JSON_THROW_ON_ERROR);
         $structure['referenced_table']=$row['referenced_table'];
         $structure['referenced_columns']=json_decode($row['referenced_columns_json'],true,8,JSON_THROW_ON_ERROR);
+        $structure['referenced_column_types']=json_decode($row['referenced_column_types_json'],true,8,JSON_THROW_ON_ERROR);
         foreach(['match_type','on_update','on_delete','index_name','extension'] as $name)
             $structure[$name]=$row[$name];
-        $details[$identity]=[
-            'definition_sha256'=>hash('sha256',$original['definition']),
-            'definition_bytes'=>strlen($original['definition']),
-            'expression_sha256'=>is_string($row['expression'])?hash('sha256',$row['expression']):null,
-            'structure'=>$structure,
-            ...p28ConstraintShape($original['definition']),
-        ];
+        $contexts[$identity]=['expression'=>$row['expression'],'structure'=>$structure];
     }
-    return $details;
+    return P28ConstraintCompare::capture($constraints,$contexts);
 }
 function p28Snapshot(PDO $db):array {
     $tables=[];
@@ -167,10 +160,9 @@ ORDER BY n.nspname,c.relname,k.conname
 SQL);
     return ['schema'=>'P28_DATABASE_SNAPSHOT_V1','tables'=>$tables,
         'objects_sha256'=>p28Hash($objects),'functions_sha256'=>p28Hash($functions),
-        // Keep this exact pre-existing acceptance hash. The per-constraint
-        // diagnostics explain a mismatch; they do not normalize it away.
-        'constraints_sha256'=>p28Hash($constraints),
-        'constraint_details'=>p28ConstraintDetails($db,$constraints)];
+        // capture retains the original ordered raw hash and additionally
+        // commits to the one exact, observed varchar-array round-trip form.
+        ...p28ConstraintDetails($db,$constraints)];
 }
 function p28Permissions(PDO $db,bool $readEnabled):void {
     foreach(P28_ROLES as $role){
@@ -281,12 +273,17 @@ try{
             'read_revoked'=>p28Grant($db,P28_A),'read_unchanged'=>p28Grant($db,P28_B),
             'owner_revoked'=>p28Owner($db,$context),'real_authority_verified'=>false];
     }elseif($mode==='verify-and-quarantine'){
-        p28Must(p28Snapshot($db)===($input['snapshot']??null),'RESTORED_CONTENT_OR_SCHEMA_CHANGED');
+        p28Must(is_array($input['snapshot']??null),'RESTORED_SNAPSHOT_REQUIRED');
+        $comparison=P28ConstraintCompare::compare($input['snapshot'],p28Snapshot($db));
+        p28Must($comparison!==null,'RESTORED_CONTENT_OR_SCHEMA_CHANGED');
         p28Permissions($db,true);
         $db->exec('REVOKE EXECUTE ON FUNCTION '.P28_READ_FUNCTION.' FROM aia_private_receipt');
         p28Permissions($db,false);
         $out=['schema'=>'P28_RESTORED_QUARANTINE_V1','exact_state_restored'=>true,
-            'receipt_execute_suspended'=>true,'roles_nologin'=>true,'memberships_absent'=>true];
+            'receipt_execute_suspended'=>true,'roles_nologin'=>true,'memberships_absent'=>true,
+            'constraint_cast_equivalences'=>$comparison['equivalences'],
+            'constraint_comparison_rule'=>$comparison['rule'],
+            'raw_target_constraint_aggregate_verified'=>true];
     }elseif($mode==='apply-current-revocations'){
         $current=$input['current']??null;
         p28Must(is_array($current)&&($current['schema']??null)==='P28_CURRENT_REVOCATION_FIXTURE_V1'

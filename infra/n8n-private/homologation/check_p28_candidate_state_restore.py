@@ -31,6 +31,7 @@ from native_contract import ContractDenied, materialize, template, verify_export
 from p25_agents_recovery import AgentsRecovery
 
 PROBE = ROOT / "runtime/central-auto/p28-state-probe.php"
+COMPARE_TEST = ROOT / "runtime/central-auto/p28-constraint-compare-test.php"
 MARKER = b"CENTRAL_AUTO_P28_NATIVE_CANDIDATE_VOLUME_ONLY\n"
 CRM_DATABASE = "p28_crm_marker_ci"
 CRM_MARKER = "SYNTHETIC_P28_CRM_MARKER_NOT_REAL_CRM_SCHEMA"
@@ -241,6 +242,10 @@ def recover_candidate(agents: AgentsRecovery, stack: Stack, parent: Path, contex
         quarantine = rpc("dst", "verify-and-quarantine", snapshot=state_snapshot)
         require(quarantine.get("exact_state_restored") is True and quarantine.get("receipt_execute_suspended") is True,
                 "P28_RESTORE_QUARANTINE")
+        require(quarantine.get("constraint_cast_equivalences") == 3 and
+                quarantine.get("constraint_comparison_rule") == "P28_VARCHAR_LITERAL_ARRAY_CAST_V1" and
+                quarantine.get("raw_target_constraint_aggregate_verified") is True,
+                "P28_REVIEWED_CONSTRAINT_CAST_PROJECTION")
         quarantined = query("dst", "A")
         require(quarantined.get("permission_denied") is True and quarantined.get("receipt") is None,
                 "P28_NO_READ_BEFORE_CURRENT_AUTHORITY")
@@ -309,6 +314,8 @@ def recover_candidate(agents: AgentsRecovery, stack: Stack, parent: Path, contex
             "current_read_and_owner_revocations_applied": True, "historical_ack_and_evidence_count": 1,
             "unknown_automatic_retries": 0, "result_preserved_without_new_ack": True,
             "receipt_only_reads_unchanged_state": True, "roles_nologin_memberships_absent": True,
+            "constraint_cast_equivalences": quarantine["constraint_cast_equivalences"],
+            "raw_target_constraint_aggregate_verified": True,
             "n8n_pg17_volume_key_restored": True, "inactive_workflows_exported_and_verified": 6,
             "native_execution_calls_during_recovery": 0, "n8n_durable_execution_count_verified": False,
             "credential_decryption_verified_in_this_profile": False, "new_mtls_exchange_verified": False,
@@ -323,11 +330,47 @@ def recover_candidate(agents: AgentsRecovery, stack: Stack, parent: Path, contex
         destination.cleanup()
 
 
+def constraint_comparator_selftest() -> dict:
+    """Exercise the actual PHP comparator before creating any database or n8n."""
+    require(os.environ.get("GITHUB_ACTIONS") == "true" and
+            os.environ.get("GITHUB_REPOSITORY") == "rafhael100/imagine-ai-agents" and
+            os.environ.get("P24_RUNNER_ENVIRONMENT") == "github-hosted", "P28_COMPARE_HOSTED_CI_ONLY")
+    require(not os.environ.get("DOCKER_HOST") and not os.environ.get("DOCKER_CONTEXT"),
+            "P28_COMPARE_REMOTE_DOCKER_FORBIDDEN")
+    require(run(["docker", "context", "show"], "P28_COMPARE_CONTEXT").stdout.strip() == b"default",
+            "P28_COMPARE_DEFAULT_CONTEXT_REQUIRED")
+    context = json.loads(run(["docker", "context", "inspect", "default"], "P28_COMPARE_CONTEXT").stdout)
+    require(context[0]["Endpoints"]["docker"]["Host"] == "unix:///var/run/docker.sock",
+            "P28_COMPARE_LOCAL_DOCKER_REQUIRED")
+    php_image = os.environ.get("AGENTS_PHP_IMAGE", "")
+    require(re.fullmatch(r"sha256:[a-f0-9]{64}", php_image) is not None,
+            "P28_COMPARE_PINNED_PHP_IMAGE_REQUIRED")
+    result = run(["docker", "run", "--rm", "--network", "none", "--read-only", "--cap-drop", "ALL",
+                  "--security-opt", "no-new-privileges:true", "--memory", "128m", "--cpus", "1",
+                  "--pids-limit", "64", "--mount", "type=bind,src=" + str(ROOT) + ",dst=/repo,readonly",
+                  "--entrypoint", "php", php_image, "/repo/" + COMPARE_TEST.relative_to(ROOT).as_posix()],
+                 "P28_CONSTRAINT_COMPARATOR_TESTS", check=False)
+    proof = json.loads(result.stdout)
+    if result.returncode:
+        label = proof.get("reason", "") if isinstance(proof, dict) else ""
+        require(isinstance(label, str) and re.fullmatch(r"P28_COMPARE_TEST_[A-Z0-9_]{1,96}", label) is not None,
+                "P28_COMPARATOR_TEST_FAILED_WITHOUT_SAFE_CODE")
+        raise Failure(label)
+    require(proof.get("schema") == "P28_CONSTRAINT_COMPARE_TESTS_V1" and proof.get("passed") is True and
+            type(proof.get("tests")) is int and proof["tests"] >= 30 and
+            proof.get("observed_equivalences") == 3 and proof.get("network_calls") == 0 and
+            proof.get("database_writes") == 0, "P28_COMPARATOR_TEST_PROOF")
+    print("P28_CONSTRAINT_COMPARATOR_TESTS_PASS tests=" + str(proof["tests"]), flush=True)
+    return proof
+
+
 def main() -> dict:
+    comparator = constraint_comparator_selftest()
     report = native_main(after_scenarios=recover_candidate)
     require(report.get("real_n8n_executions_observed") == 2 and
             report.get("candidate_state_recovery", {}).get("native_execution_calls_during_recovery") == 0,
             "P28_NO_ADDITIONAL_NATIVE_EXECUTION")
+    report["candidate_state_recovery"]["constraint_comparator_tests"] = comparator["tests"]
     return report
 
 
