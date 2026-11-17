@@ -287,7 +287,13 @@ def native_roundtrip(stack: Stack, path: Path, source: dict) -> dict:
     return verify_result(parse_output(output))
 
 
-def main() -> dict:
+def main(agents_factory=None) -> dict:
+    """Run the proven n8n recovery, optionally including the P25 Agents state.
+
+    The factory is supplied only by the separate, CI-only P25 entry point.
+    Both candidates pass through the same signed, encrypted package before
+    either database is restored. P24's standalone behavior stays available.
+    """
     require(os.environ.get("GITHUB_ACTIONS") == "true" and
             os.environ.get("GITHUB_REPOSITORY") == "rafhael100/imagine-ai-agents" and
             os.environ.get("P24_RUNNER_ENVIRONMENT") == "github-hosted", "HOSTED_CI_ONLY")
@@ -312,6 +318,9 @@ def main() -> dict:
         prefix = "imagine-p24-" + run_id + "-" + attempt
         src = Stack(prefix + "-src", workspace / "source-secrets", pg_image)
         dst = Stack(prefix + "-dst", workspace / "destination-secrets", pg_image)
+        agents = agents_factory(prefix, workspace / "agents-recovery") if agents_factory else None
+        auxiliary = tuple(item for item in AUXILIARY
+                          if agents is None or item[0] != "agents-service.dump")
         try:
             src.claim_empty()
             dst.claim_empty()
@@ -345,12 +354,14 @@ def main() -> dict:
             snapshot.mkdir(mode=0o700)
             src.dc("exec", "-T", "n8n-db", "pg_dump", "-U", "n8n_bootstrap_admin", "-d", "n8n",
                    "--format", "custom", "--no-owner", "--no-acl", output=snapshot / "n8n-pg.dump")
-            for filename, database, value in AUXILIARY:
+            for filename, database, value in auxiliary:
                 src.dc("exec", "-T", "n8n-db", "createdb", "-U", "n8n_bootstrap_admin", database)
                 src.sql("CREATE TABLE p24_synthetic_marker(value text PRIMARY KEY); "
                         "INSERT INTO p24_synthetic_marker VALUES ('" + value + "')", database)
                 src.dc("exec", "-T", "n8n-db", "pg_dump", "-U", "n8n_bootstrap_admin", "-d", database,
                        "--format", "custom", "--no-owner", "--no-acl", output=snapshot / filename)
+            if agents is not None:
+                agents.prepare_and_dump(snapshot / "agents-service.dump")
             run(["docker", "run", "--rm", "--network", "none", "--read-only", "--cap-drop", "ALL",
                  "--security-opt", "no-new-privileges:true", "--user", "1000:1000",
                  "-v", src.project + "_n8n_data:/input:ro", "--entrypoint", "tar", pg_image,
@@ -416,12 +427,13 @@ def main() -> dict:
             dst.dc("exec", "-T", "n8n-db", "pg_restore", "-U", "n8n_bootstrap_admin", "-d", "n8n",
                    "--exit-on-error", "--no-owner", "--no-acl", "--role=n8n_runtime",
                    stdin=(recovered / "n8n-pg.dump").read_bytes())
-            for filename, database, value in AUXILIARY:
+            for filename, database, value in auxiliary:
                 dst.dc("exec", "-T", "n8n-db", "createdb", "-U", "n8n_bootstrap_admin", database)
                 dst.dc("exec", "-T", "n8n-db", "pg_restore", "-U", "n8n_bootstrap_admin", "-d", database,
                        "--exit-on-error", "--no-owner", "--no-acl", stdin=(recovered / filename).read_bytes())
                 require(dst.sql("SELECT value FROM p24_synthetic_marker", database) == value,
                         "AUXILIARY_SYNTHETIC_COMPONENT_CHANGED")
+            agents_proof = agents.restore_and_verify(recovered / "agents-service.dump") if agents else None
             dst.dc("create", "n8n")
             # The input here is OUR regenerated archive with fixed owners/modes,
             # never the untrusted backup TAR. Only an empty job-owned volume mounts RW.
@@ -454,7 +466,7 @@ def main() -> dict:
             require(wrong.returncode != 0 and wrong_output.stat().st_size == 0,
                     "WRONG_RESTORED_N8N_KEY_ACCEPTED")
             print("P24_STAGE_RESTORED_APPLICATION_PASS", flush=True)
-            return {
+            report = {
                 "schema": "CENTRAL_AUTO_P24_FULL_N8N_CRYPTO_RESTORE_V1",
                 "real_n8n_schema_pg17_restored": True,
                 "n8n_volume_and_key_restored": True,
@@ -469,7 +481,7 @@ def main() -> dict:
                 "signed_tamper_denied_before_decryption": True,
                 "gcm_tamper_denied": True,
                 "database_passwords_rotated": True,
-                "auxiliary_pg17_marker_databases_restored": 2,
+                "auxiliary_pg17_marker_databases_restored": len(auxiliary),
                 "real_crm_agents_schemas_restored": False,
                 "networks_internal": True, "host_published_ports": 0,
                 "ai_api_calls": 0, "ai_tokens": 0, "credits_debited": 0,
@@ -480,15 +492,20 @@ def main() -> dict:
                 "real_customer_credentials_restored": False,
                 "vps_modified": False, "go_for_installation": False,
             }
+            if agents_proof is not None:
+                report["schema"] = "CENTRAL_AUTO_P25_N8N_AND_AGENTS_STATE_RESTORE_V1"
+                report["agents_recovery"] = agents_proof
+                report["real_crm_schema_restored"] = False
+            return report
         finally:
             # Each project was required to be absent before we claimed it.
             # Cleanup never names another project's containers, networks or volumes.
             errors = []
-            for stack in (dst, src):
+            for stack in ((agents,) if agents else ()) + (dst, src):
                 try:
                     stack.cleanup()
                 except (Failure, OSError, subprocess.SubprocessError):
-                    errors.append(stack.project)
+                    errors.append(type(stack).__name__)
             if errors:
                 raise Failure("OWNED_STACK_CLEANUP_FAILED")
 
