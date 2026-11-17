@@ -1,5 +1,30 @@
 # Imagine AI Agents — estado atual
 
+## Candidata P30 / RC72 — 17/11/2026
+
+Continuação da [P29 #463](https://github.com/rafhael100/imagine-ai-agents/pull/463),
+SHA `1838e7e13667c2f2c33d19b5b3eb469637a7c431`, cuja matriz consolidada
+está na [CI 44203009721](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44203009721).
+Branch: `feat/central-auto-p30-native-operator-mfa-2026-11-17`.
+
+A autenticação agora é exercitada nas rotas nativas da imagem n8n fixada,
+com conta nominal sintética: cadastro de segundo fator, TOTP, código de
+recuperação de uso único, logout e revogação de sessões após mudança de
+senha e recadastro de MFA. O ensaio verifica acesso à API protegida e o
+estado persistido; apagar um cookie no cliente não conta como revogação.
+
+O ensaio isolado passou na
+[CI 44197654228](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44197654228),
+com vinte assertivas e versão `2.47.7` confirmada. A política global de MFA
+permaneceu efetiva e persistentemente desligada na imagem sem entitlement;
+MFA individual demonstrado não fecha o requisito de obrigatoriedade para
+todos os operadores. A RC72 executa essa prova junto com P25/P26/P28/P29/P27
+e as suítes Agents na mesma árvore. Conferir a CI desta HEAD concreta.
+
+Procedimento: [MFA-P30](infra/n8n-private/homologation/MFA-P30.md).
+**DRAFT / NO-GO operacional.** Identidade real, política obrigatória efetiva,
+licenciamento e autorização de instalação continuam como decisões externas.
+
 ## Candidata P29 / RC71 — 17/11/2026
 
 Continuação da [P28 #462](https://github.com/rafhael100/imagine-ai-agents/pull/462),

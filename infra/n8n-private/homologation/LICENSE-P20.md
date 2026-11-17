@@ -14,4 +14,20 @@ Esse recorte permite preparar uma homologação de uso técnico interno compatí
 
 Administração nominal/MFA deve ser comprovada na imagem/edição pinada. MFA do Portal e mTLS do ingresso não comprovam MFA do editor n8n. As [instruções oficiais de 2FA](https://github.com/n8n-io/n8n-docs/blob/main/docs/administer/manage-users-and-access/verify-user-identity/require-two-factor-auth.md) descrevem inscrição pessoal e recuperação. Disponibilidade de MFA não significa sua obrigatoriedade. Não introduzimos flags não verificadas nem declaramos recursos comerciais liberados. Aprovação exige demonstração com operador fictício nominal na imagem exata, política de sessão/revogação e evidência sanitizada de MFA obrigatório para todos os operadores.
 
+### Evidência técnica P30 — 17/11/2026
+
+O [ensaio isolado 44197654228](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44197654228)
+verificou as rotas nativas na imagem fixada, versão `2.47.7`: conta nominal
+sintética, TOTP, recovery code de uso único, logout, troca de senha e
+invalidação de sessões anteriores. O procedimento completo está em
+[MFA-P30](MFA-P30.md), incluindo o compromisso de executar também a matriz
+consolidada da candidata.
+
+A tentativa de enforcement retornou HTTP 200, mas a configuração efetiva e
+persistida continuou `false`, com entitlement ausente. Portanto o aceite
+de obrigatoriedade para todos os operadores permanece aberto. A fonte da
+versão fixada e a [documentação de políticas](https://docs.n8n.io/deploy/host-n8n/configure-n8n/security/manage-security-policies)
+distinguem esse recurso do cadastro individual. Esta evidência não ativa
+licença ou altera a conclusão comercial condicional acima.
+
 Nenhuma IA paga é necessária para gatilhos, follow-up, notificações, agendas e validação determinística. Manter dispatch e APIs pagas desligados; solicitação excepcional passa pelo AI Gateway, nunca diretamente do n8n ao fornecedor.
