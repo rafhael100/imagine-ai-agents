@@ -1,0 +1,39 @@
+name: CENTRAL-AUTO P30 isolated native MFA probe
+on:
+  push:
+    branches:
+      - test/central-auto-p30-native-mfa-2026-11-17
+permissions:
+  contents: read
+concurrency:
+  group: central-auto-p30-probe-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-mfa-probe:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      N8N_IMAGE: ghcr.io/n8n-io/n8n@sha256:b4b90747b81fcda7e76550c0d3aa7f0f64917a1e9573cff40d6834eaf2e0f8ea
+      P30_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify source and prepare pinned images
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor 8041c022776bbc1f998224a880726a8a3e69db37 HEAD
+          test "$P30_RUNNER_ENVIRONMENT" = github-hosted
+          chmod 0644 infra/n8n-private/10-runtime-role.sh
+          docker pull "$N8N_IMAGE" >/dev/null
+          docker pull postgres:17 >/dev/null
+          n8n_pg="$(docker image inspect postgres:17 --format '{{index .RepoDigests 0}}')"
+          test -n "$n8n_pg"
+          echo "N8N_PG_IMAGE=$n8n_pg" >> "$GITHUB_ENV"
+      - name: Exercise original n8n MFA and session routes
+        run: |
+          set -euo pipefail
+          python3 infra/n8n-private/homologation/check_p30_native_operator_mfa.py
