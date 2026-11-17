@@ -37,6 +37,10 @@ BEGIN
  OR (e->>'expires_at')::bigint-(e->>'issued_at')::bigint>300
  OR fp !~ '^[a-f0-9]{64}$' THEN RETURN 'LAB_DENY_ENVELOPE'; END IF;
  SELECT * INTO g FROM auto_ia_lab.service_company_grants WHERE company_id=company AND fingerprint=fp AND operation=e->>'operation' FOR SHARE;
+ -- Lock acquisition may have waited across the signed envelope's deadline.
+ n:=floor(extract(epoch FROM clock_timestamp()))::bigint;
+ IF (e->>'issued_at')::bigint<n-120 OR (e->>'issued_at')::bigint>n+5
+ OR (e->>'expires_at')::bigint<=n THEN RETURN 'LAB_DENY_ENVELOPE'; END IF;
  IF NOT FOUND OR NOT g.active OR g.expires_at<=n OR g.tenant<>e->>'tenant_ref' THEN
  INSERT INTO auto_ia_lab.service_event_audit(company_id,event_ref,outcome) VALUES(company,COALESCE(e->>'event_ref','INVALID'),'LAB_DENY_GRANT');
  RETURN 'LAB_DENY_GRANT'; END IF;
@@ -50,7 +54,13 @@ BEGIN
  IF NOT FOUND THEN RETURN 'LAB_DENY_KEY'; END IF;
  canonical:=concat_ws(E'\n',e->>'schema',e->>'issuer',e->>'audience',e->>'product',e->>'operation',e->>'tenant_ref',e->>'event_ref',e->>'nonce_ref',e->>'request_ref',e->>'issued_at',e->>'expires_at',e->>'payload_hash',e->>'key_id');
  IF encode(public.hmac(canonical,key_value,'sha256'),'hex')<>e->>'signature' THEN RETURN 'LAB_DENY_MAC'; END IF;
+ n:=floor(extract(epoch FROM clock_timestamp()))::bigint;
+ IF (e->>'issued_at')::bigint<n-120 OR (e->>'issued_at')::bigint>n+5
+ OR (e->>'expires_at')::bigint<=n OR g.expires_at<=n THEN RETURN 'LAB_DENY_ENVELOPE'; END IF;
  -- Same durable inbox, unique event/nonce constraints and operation catalog as AUTO-IA-08/10.
+ -- This subtransaction owns only the current attempt. A late expiry after an
+ -- ON CONFLICT wait or audit INSERT rolls back its writes, never another row.
+ BEGIN
  INSERT INTO auto_ia_lab.event_inbox(tenant,product,operation,event_ref,nonce_ref,payload_hash,issued_epoch,expires_epoch)
  VALUES(g.tenant,e->>'product',e->>'operation',e->>'event_ref',e->>'nonce_ref',e->>'payload_hash',(e->>'issued_at')::bigint,(e->>'expires_at')::bigint) ON CONFLICT DO NOTHING;
  IF FOUND THEN decision:='LAB_RECEIVED_NO_DELIVERY'; ELSE
@@ -59,9 +69,16 @@ BEGIN
  AND existing.payload_hash=e->>'payload_hash' AND existing.issued_epoch=(e->>'issued_at')::bigint AND existing.expires_epoch=(e->>'expires_at')::bigint
  THEN decision:='LAB_DUPLICATE_NO_DELIVERY'; ELSE decision:='LAB_DENY_REPLAY_CONFLICT'; END IF;
  END IF;
- IF g.expires_at<=floor(extract(epoch FROM clock_timestamp()))::bigint THEN RAISE EXCEPTION 'GRANT_EXPIRED_DURING_ADMISSION'; END IF;
  INSERT INTO auto_ia_lab.service_event_audit(company_id,event_ref,outcome,grant_revision) VALUES(company,e->>'event_ref',decision,g.revision);
+ n:=floor(extract(epoch FROM clock_timestamp()))::bigint;
+ IF (e->>'issued_at')::bigint<n-120 OR (e->>'issued_at')::bigint>n+5
+ OR (e->>'expires_at')::bigint<=n OR g.expires_at<=n THEN
+  RAISE EXCEPTION USING ERRCODE='P2901',MESSAGE='ADMISSION_WINDOW_EXPIRED';
+ END IF;
  RETURN decision;
+ EXCEPTION WHEN SQLSTATE 'P2901' THEN
+  RETURN 'LAB_DENY_ENVELOPE';
+ END;
 END $$;
 RESET ROLE;
 CREATE ROLE aia_private_transport NOLOGIN NOSUPERUSER NOBYPASSRLS NOCREATEROLE NOCREATEDB;

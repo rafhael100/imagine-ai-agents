@@ -28,3 +28,18 @@ Contrato, assinatura, permissões, ensaio HTTPS/mTLS e limites:
 [RECEIPTS-P27](../../infra/n8n-private/homologation/RECEIPTS-P27.md).
 O estado operacional continua **NO-GO**, sem instalação ou integração do cliente
 CRM presumidas por estes testes.
+
+## Validação do ingresso — P29
+
+O receiver passa a recusar nomes JSON duplicados, inclusive escapes
+equivalentes, e exige referências UUID textuais para empresa, evento e lead.
+Mensagens JSON válidas conservam liberdade de formatação e ordem dos campos.
+O ACK válido mantém seu formato, assinatura e dispatch `DISABLED`.
+
+A função de admissão confere novamente os prazos depois das esperas no banco.
+Uma tentativa que expire durante a escrita desfaz suas alterações de inbox e
+auditoria, preservando o registro de outra transação vencedora. O ensaio
+cobre requisições HTTP malformadas com HMAC válido e quatro corridas reais no
+PostgreSQL, seguidas por controles válidos.
+
+Contrato e verificação: [INGRESS-P29](../../infra/n8n-private/homologation/INGRESS-P29.md).
