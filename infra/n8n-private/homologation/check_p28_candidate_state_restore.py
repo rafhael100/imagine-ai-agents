@@ -220,6 +220,20 @@ def recover_candidate(agents: AgentsRecovery, stack: Stack, parent: Path, contex
         agents._sql("dst", (ROOT / "runtime/central-auto/p28-recovery-roles.sql").read_text())
         run(["docker", "exec", "-i", agents.containers["dst"], "pg_restore", "-U", "postgres",
              "-d", "imagine_agents_ci", "--exit-on-error"], "P28_RESTORE_AGENTS_OWNER_ACL", stdin=restored_dump)
+        # Compare only public object names, counts and digests in diagnostics.
+        # Never print restored rows, SQL bodies, credentials or key material.
+        restored_snapshot = rpc("dst", "snapshot")
+        if restored_snapshot != state_snapshot:
+            differences = {}
+            for component, expected in state_snapshot.items():
+                actual = restored_snapshot.get(component)
+                if actual != expected:
+                    if component == "tables":
+                        differences[component] = {name: {"expected": value, "actual": actual.get(name)}
+                            for name, value in expected.items() if actual.get(name) != value}
+                    else:
+                        differences[component] = {"expected": expected, "actual": actual}
+            print("P28_RESTORE_SNAPSHOT_DIFFERENCES " + json.dumps(differences, sort_keys=True), flush=True)
         quarantine = rpc("dst", "verify-and-quarantine", snapshot=state_snapshot)
         require(quarantine.get("exact_state_restored") is True and quarantine.get("receipt_execute_suspended") is True,
                 "P28_RESTORE_QUARANTINE")
