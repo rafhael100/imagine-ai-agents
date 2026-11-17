@@ -1,6 +1,7 @@
 <?php
 // Product-owned candidate ingress; existing durable NO_AI inbox. CI profile ONLY, no n8n dispatch.
 declare(strict_types=1);
+require_once __DIR__.'/strict-json.php';
 header('Content-Type: application/json');header('Cache-Control: no-store');
 function deny(int $status):never {http_response_code($status);echo '{"error":"EVENT_DENIED"}';exit;}
 if(getenv('AGENTS_PRIVATE_S2S_PROFILE')!=='synthetic-private-v1')deny(404);
@@ -8,15 +9,22 @@ if(($_SERVER['IMAGINE_MTLS_VERIFY']??'')!=='SUCCESS'||isset($_SERVER['HTTP_COOKI
 try {
  $cert=rawurldecode($_SERVER['IMAGINE_MTLS_CERT']??'');$fp=openssl_x509_fingerprint($cert,'sha256');if(!$fp||strlen($cert)>8192)deny(403);
  $raw=file_get_contents('php://input',false,null,0,8193);if(strlen($raw)>8192)deny(413);
- $v=json_decode($raw,true,12,JSON_THROW_ON_ERROR);$keys=array_keys($v);sort($keys);if($keys!==['company_id','envelope','payload_b64'])deny(403);
+ $v=agents_json_decode($raw,8192,12);if(!is_array($v)||array_is_list($v))deny(403);
+ $keys=array_keys($v);sort($keys);if($keys!==['company_id','envelope','payload_b64'])deny(403);
  if(!is_string($v['company_id'])||!preg_match('/\A[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}\z/D',$v['company_id'])||!is_string($v['payload_b64'])||!is_array($v['envelope']))deny(403);
  $payload=base64_decode($v['payload_b64'],true);if($payload===false||strlen($payload)>2048)deny(403);
- $p=json_decode($payload,true,8,JSON_THROW_ON_ERROR);$k=array_keys($p);sort($k);
+ $p=agents_json_decode($payload,2048,8);if(!is_array($p)||array_is_list($p))deny(403);$k=array_keys($p);sort($k);
  if($k!==['action','company_id','event_id','lead_id','schema']||$p['schema']!=='CRM_LEAD_EVENT_V1'||$p['action']!=='lead.created'||$p['company_id']!==$v['company_id']||hash('sha256',$payload)!==($v['envelope']['payload_hash']??null))deny(403);
+ // PostgreSQL UUID columns in the pinned sender serialize these identifiers
+ // as strings. Accept UUID hex case/version without imposing a new JSON form.
+ foreach(['company_id','event_id','lead_id'] as $field)
+  if(!is_string($p[$field])||!preg_match('/\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z/D',$p[$field]))deny(403);
  $expected=['schema','issuer','audience','product','operation','tenant_ref','event_ref','nonce_ref','request_ref','issued_at','expires_at','payload_hash','key_id','signature'];
  $actual=array_keys($v['envelope']);sort($actual);$sorted=$expected;sort($sorted);if($actual!==$sorted)deny(403);
  foreach($expected as $field)if(in_array($field,['issued_at','expires_at'],true)?!is_int($v['envelope'][$field]):!is_string($v['envelope'][$field]))deny(403);
  if($v['envelope']['event_ref']!=='SYNTHETIC_'.strtoupper(str_replace('-','',$p['event_id'])))deny(403);
+} catch(Throwable){deny(403);}
+try {
  $db=new PDO(getenv('AGENTS_PRIVATE_DSN'),'aia_private_transport',trim(file_get_contents(getenv('AGENTS_PRIVATE_DB_PASSWORD_FILE'))),[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_EMULATE_PREPARES=>false]);
  $db->exec("SET statement_timeout='2000ms'; SET lock_timeout='1000ms'");
  $role=$db->query('SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname=current_user')->fetchColumn();if($role)deny(503);

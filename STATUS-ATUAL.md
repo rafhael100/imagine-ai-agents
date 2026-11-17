@@ -1,5 +1,30 @@
 # Imagine AI Agents — estado atual
 
+## Candidata P29 / RC71 — 17/11/2026
+
+Continuação da [P28 #462](https://github.com/rafhael100/imagine-ai-agents/pull/462),
+SHA `c0c46f6f1d3d4ff007469388d3f53fa4719eb71e`, aprovada na
+[CI 44201828792](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44201828792).
+Branch: `feat/central-auto-p29-ingress-boundaries-2026-11-17`.
+
+O ingresso assinado passa a recusar nomes JSON repetidos, inclusive escapes
+equivalentes, e referências UUID malformadas antes de consultar o banco.
+A validade é reavaliada depois das esperas reais por locks; uma tentativa
+vencida desfaz sua própria inbox e auditoria sem apagar um escritor vencedor.
+ACK, consulta de recibo e dispatch `DISABLED` conservam seus contratos.
+
+O ensaio isolado passou na
+[CI 44198509977](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44198509977):
+24 casos do parser, 25 negativos HTTP assinados, quatro corridas PostgreSQL
+observadas e controles válidos posteriores, junto com HTTPS/mTLS P27.
+A RC71 verifica novamente esse conjunto com a recuperação completa P25/P28,
+a execução P26 e as suítes Agents na mesma árvore temporária. Conferir o
+resultado da HEAD concreta antes de considerar a matriz consolidada aprovada.
+
+Contrato e limites: [INGRESS-P29](infra/n8n-private/homologation/INGRESS-P29.md).
+**DRAFT / NO-GO operacional.** Dados, certificados e concessões sintéticos;
+integração do cliente CRM e autoridade real continuam pendentes.
+
 ## Candidata P28 / RC70 — 17/11/2026
 
 Continuação da [P27 #461](https://github.com/rafhael100/imagine-ai-agents/pull/461),
