@@ -48,6 +48,91 @@ function p28Role(PDO $db,string $role,callable $operation):mixed {
     $db->exec('SET ROLE '.$role);
     try{return $operation();}finally{$db->exec('RESET ROLE');}
 }
+/** Diagnostic text only. Literal values never leave this probe in DDL form. */
+function p28ConstraintShape(string $definition):array {
+    $literals=[];
+    $pattern=<<<'REGEX'
+~(?:\bE|\bU&)?'(?:''|\\.|[^'\\])*'~is
+REGEX;
+    $shape=preg_replace_callback($pattern,static function(array $match)use(&$literals):string{
+        $literals[]=$match[0];return "'LITERAL'";
+    },$definition);
+    if(is_string($shape))$shape=preg_replace('/\s+/',' ',trim($shape));
+    // pg_get_constraintdef emits quoted SQL constants, not rows. If a future
+    // deparser introduces syntax this redactor does not understand, omit the
+    // text and retain its exact hash. Never fall back to the original SQL.
+    $withoutLiterals=is_string($shape)?str_replace("'LITERAL'",'', $shape):'';
+    $withoutIdentifiers=preg_replace('/"[A-Za-z_][A-Za-z0-9_]*"/','IDENTIFIER',$withoutLiterals);
+    if(!is_string($shape)||strlen($shape)>4096
+        ||preg_match('/[\x00-\x1f\x7f\x80-\xff\'\$]/',$withoutLiterals)===1
+        ||!is_string($withoutIdentifiers)||str_contains($withoutIdentifiers,'"')){
+        $shape=null;
+    }
+    return ['sql_shape'=>$shape,'literal_tokens_sha256'=>p28Hash($literals)];
+}
+/** Nominal catalog identities only: OIDs and raw conbin/location are unstable. */
+function p28ConstraintDetails(PDO $db,array $constraints):array {
+    $catalog=p28Rows($db,<<<'SQL'
+SELECT n.nspname,c.relname,k.conname,k.contype::text AS kind,
+ k.convalidated AS validated,k.condeferrable AS deferrable,
+ k.condeferred AS initially_deferred,k.conislocal AS local,
+ k.coninhcount AS inherited_count,k.connoinherit AS no_inherit,
+ COALESCE((SELECT jsonb_agg(a.attname ORDER BY ord.position)
+  FROM unnest(k.conkey) WITH ORDINALITY AS ord(attnum,position)
+  JOIN pg_attribute a ON a.attrelid=k.conrelid AND a.attnum=ord.attnum),'[]'::jsonb)::text AS columns_json,
+ CASE WHEN k.confrelid<>0 THEN rn.nspname||'.'||rc.relname END AS referenced_table,
+ COALESCE((SELECT jsonb_agg(a.attname ORDER BY ord.position)
+  FROM unnest(k.confkey) WITH ORDINALITY AS ord(attnum,position)
+  JOIN pg_attribute a ON a.attrelid=k.confrelid AND a.attnum=ord.attnum),'[]'::jsonb)::text AS referenced_columns_json,
+ CASE WHEN k.contype='f' THEN k.confmatchtype::text END AS match_type,
+ CASE WHEN k.contype='f' THEN k.confupdtype::text END AS on_update,
+ CASE WHEN k.contype='f' THEN k.confdeltype::text END AS on_delete,
+ CASE WHEN k.conindid<>0 THEN ixn.nspname||'.'||ix.relname END AS index_name,
+ pg_get_expr(k.conbin,k.conrelid,false) AS expression,
+ (SELECT e.extname FROM pg_depend d JOIN pg_extension e ON e.oid=d.refobjid
+  WHERE d.classid='pg_constraint'::regclass AND d.objid=k.oid
+   AND d.refclassid='pg_extension'::regclass AND d.deptype='e') AS extension
+FROM pg_constraint k JOIN pg_class c ON c.oid=k.conrelid
+JOIN pg_namespace n ON n.oid=c.relnamespace
+LEFT JOIN pg_class rc ON rc.oid=k.confrelid
+LEFT JOIN pg_namespace rn ON rn.oid=rc.relnamespace
+LEFT JOIN pg_class ix ON ix.oid=k.conindid
+LEFT JOIN pg_namespace ixn ON ixn.oid=ix.relnamespace
+WHERE n.nspname LIKE 'aia\_%' ESCAPE '\'
+ OR n.nspname IN ('auto_ia_lab','central_auto_lab')
+ OR (n.nspname='public' AND c.relname='aia_lab_n8n_outbox_p6')
+ORDER BY n.nspname,c.relname,k.conname
+SQL);
+    p28Must(count($catalog)===count($constraints),'CONSTRAINT_DIAGNOSTIC_COUNT');
+    $details=[];
+    foreach($catalog as $i=>$row){
+        $original=$constraints[$i];
+        foreach(['nspname','relname','conname'] as $name){
+            p28Must($row[$name]===$original[$name]
+                &&preg_match('/\A[A-Za-z_][A-Za-z0-9_]{0,62}\z/D',$row[$name])===1,
+                'CONSTRAINT_DIAGNOSTIC_IDENTITY');
+        }
+        $identity=$row['nspname'].'.'.$row['relname'].'.'.$row['conname'];
+        p28Must(!isset($details[$identity]),'CONSTRAINT_DIAGNOSTIC_DUPLICATE');
+        $structure=['kind'=>$row['kind']];
+        foreach(['validated','deferrable','initially_deferred','local','no_inherit'] as $name)
+            $structure[$name]=p28True($row[$name]);
+        $structure['inherited_count']=(int)$row['inherited_count'];
+        $structure['columns']=json_decode($row['columns_json'],true,8,JSON_THROW_ON_ERROR);
+        $structure['referenced_table']=$row['referenced_table'];
+        $structure['referenced_columns']=json_decode($row['referenced_columns_json'],true,8,JSON_THROW_ON_ERROR);
+        foreach(['match_type','on_update','on_delete','index_name','extension'] as $name)
+            $structure[$name]=$row[$name];
+        $details[$identity]=[
+            'definition_sha256'=>hash('sha256',$original['definition']),
+            'definition_bytes'=>strlen($original['definition']),
+            'expression_sha256'=>is_string($row['expression'])?hash('sha256',$row['expression']):null,
+            'structure'=>$structure,
+            ...p28ConstraintShape($original['definition']),
+        ];
+    }
+    return $details;
+}
 function p28Snapshot(PDO $db):array {
     $tables=[];
     foreach(P28_TABLES as $table=>$order){
@@ -82,7 +167,10 @@ ORDER BY n.nspname,c.relname,k.conname
 SQL);
     return ['schema'=>'P28_DATABASE_SNAPSHOT_V1','tables'=>$tables,
         'objects_sha256'=>p28Hash($objects),'functions_sha256'=>p28Hash($functions),
-        'constraints_sha256'=>p28Hash($constraints)];
+        // Keep this exact pre-existing acceptance hash. The per-constraint
+        // diagnostics explain a mismatch; they do not normalize it away.
+        'constraints_sha256'=>p28Hash($constraints),
+        'constraint_details'=>p28ConstraintDetails($db,$constraints)];
 }
 function p28Permissions(PDO $db,bool $readEnabled):void {
     foreach(P28_ROLES as $role){
@@ -141,8 +229,12 @@ try{
         'AIA_P6_PG_LAB'=>'true','AIA_P16_PG_LAB'=>'true','DB_HOST'=>'127.0.0.1',
         'DB_DATABASE'=>'imagine_agents_ci','DB_USERNAME'=>'postgres'] as $name=>$value)
         p28Must(getenv($name)===$value,'DISPOSABLE_CONTEXT');
-    $raw=stream_get_contents(STDIN,131073);
-    p28Must(is_string($raw)&&strlen($raw)<=131072,'INPUT_LIMIT');
+    $mode=$argv[1]??'';
+    // Only restore comparison carries the complete diagnostic snapshot back
+    // through RPC. Other request limits remain unchanged.
+    $inputLimit=$mode==='verify-and-quarantine'?524288:131072;
+    $raw=stream_get_contents(STDIN,$inputLimit+1);
+    p28Must(is_string($raw)&&strlen($raw)<=$inputLimit,'INPUT_LIMIT');
     $input=$raw===''?[]:json_decode($raw,true,64,JSON_THROW_ON_ERROR);
     p28Must(is_array($input),'INPUT_OBJECT');
     $password=file_get_contents('/run/secrets/p25-password');
@@ -150,7 +242,6 @@ try{
     $db=new PDO('pgsql:host=127.0.0.1;port=5432;dbname=imagine_agents_ci','postgres',$password,
         [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_EMULATE_PREPARES=>false]);
     $db->exec("SET statement_timeout='5000ms'; SET lock_timeout='1000ms'; SET idle_in_transaction_session_timeout='10s'");
-    $mode=$argv[1]??'';
     if($mode==='seed-receipts'){
         $events=$input['events']??null;$fingerprints=$input['fingerprints']??null;
         p28Must(is_array($events)&&array_keys($events)===['A','B']&&is_array($fingerprints),

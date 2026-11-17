@@ -44,6 +44,18 @@ def private_write(path: Path, value: bytes) -> None:
         os.fsync(target.fileno())
 
 
+def snapshot_differences(expected: dict, actual: dict) -> dict:
+    """Only called for snapshots containing public metadata, counts and digests."""
+    changed = {}
+    for name in sorted(set(expected) | set(actual)):
+        before, after = expected.get(name), actual.get(name)
+        if before != after:
+            changed[name] = (snapshot_differences(before, after)
+                             if isinstance(before, dict) and isinstance(after, dict)
+                             else {"expected": before, "actual": after})
+    return changed
+
+
 def volume_manifest(path: Path, *, normalized: bool = False) -> dict:
     """Inspect content only, never extract an untrusted archive on the runner."""
     from seal_backup import inspect_volume
@@ -224,15 +236,7 @@ def recover_candidate(agents: AgentsRecovery, stack: Stack, parent: Path, contex
         # Never print restored rows, SQL bodies, credentials or key material.
         restored_snapshot = rpc("dst", "snapshot")
         if restored_snapshot != state_snapshot:
-            differences = {}
-            for component, expected in state_snapshot.items():
-                actual = restored_snapshot.get(component)
-                if actual != expected:
-                    if component == "tables":
-                        differences[component] = {name: {"expected": value, "actual": actual.get(name)}
-                            for name, value in expected.items() if actual.get(name) != value}
-                    else:
-                        differences[component] = {"expected": expected, "actual": actual}
+            differences = snapshot_differences(state_snapshot, restored_snapshot)
             print("P28_RESTORE_SNAPSHOT_DIFFERENCES " + json.dumps(differences, sort_keys=True), flush=True)
         quarantine = rpc("dst", "verify-and-quarantine", snapshot=state_snapshot)
         require(quarantine.get("exact_state_restored") is True and quarantine.get("receipt_execute_suspended") is True,
