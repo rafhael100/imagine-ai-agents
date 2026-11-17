@@ -1,0 +1,58 @@
+name: CENTRAL-AUTO P24 full encrypted n8n recovery and Agents RC66
+on:
+  push:
+    branches:
+      - feat/central-auto-p24-complete-n8n-recovery-2026-11-17
+permissions:
+  contents: read
+concurrency:
+  group: central-auto-p24-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  complete-n8n-recovery:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      N8N_IMAGE: ghcr.io/n8n-io/n8n@sha256:b4b90747b81fcda7e76550c0d3aa7f0f64917a1e9573cff40d6834eaf2e0f8ea
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 3fb86c5fb011bc9df1f12a4a30a7c094370b6872
+          path: _agents_rc65_pinned
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check exact candidate and required runner tools
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C _agents_rc65_pinned rev-parse HEAD)" = 3fb86c5fb011bc9df1f12a4a30a7c094370b6872
+          test "$P24_RUNNER_ENVIRONMENT" = github-hosted
+          python3 --version
+          php --version
+          docker compose version
+          openssl version
+          python3 -m py_compile infra/n8n-private/homologation/check_p24_full_n8n_restore.py
+          bash -n tools/run_rc66_p24_virtual_tree.sh
+      - name: Prepare official images before creating isolated internal networks
+        run: |
+          set -euo pipefail
+          docker pull "$N8N_IMAGE" >/dev/null
+          docker pull postgres:17 >/dev/null
+          pg_image="$(docker image inspect postgres:17 --format '{{index .RepoDigests 0}}')"
+          test -n "$pg_image"
+          echo "N8N_PG_IMAGE=$pg_image" >> "$GITHUB_ENV"
+      - name: Test P24 plus Agents RC65 in one temporary combined tree
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          bash tools/run_rc66_p24_virtual_tree.sh
+          echo 'CENTRAL_AUTO_P24_RC66_NO_GO external_backup=0 real_custody=0 vps=0 paid_ai=0'

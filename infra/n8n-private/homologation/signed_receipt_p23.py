@@ -28,6 +28,10 @@ KEYS={
 }
 HEX64=re.compile(r"^[a-f0-9]{64}$")
 NONCE=re.compile(r"^SYNTHETIC_RECEIPT_[A-F0-9]{32}$")
+FALSE_FLAGS=("external_copy_verified","real_custodian_identity_verified",
+             "recovery_in_different_host_verified","go_for_installation")
+# RFC 8410 SubjectPublicKeyInfo: id-Ed25519, absent parameters, 32 key bytes.
+ED25519_SPKI_PREFIX=bytes.fromhex("302a300506032b6570032100")
 
 class Rejected(Exception):
     pass
@@ -69,33 +73,51 @@ def public_fingerprint(pub:Path)->str:
     if pub.is_symlink() or not pub.is_file() or pub.stat().st_size>16384:
         raise Rejected("PUBLIC_SIGNER_KEY_INVALID")
     der=call_openssl(["pkey","-pubin","-in",str(pub),"-outform","DER"])
+    if len(der)!=44 or not der.startswith(ED25519_SPKI_PREFIX):
+        raise Rejected("ED25519_SIGNER_REQUIRED")
     return hashlib.sha256(der).hexdigest()
 
 def canonical(receipt:dict)->bytes:
     return json.dumps(receipt,sort_keys=True,separators=(",",":"),
                       ensure_ascii=True,allow_nan=False).encode("ascii")
 
-def safe_write(path:Path,payload:bytes)->None:
+def remove_created(path:Path,identity:tuple[int,int])->None:
+    """Clean up only our exclusive-created inode, never a competing output.
+
+    Output parents must still be trusted directories without hostile writers;
+    this is not a filesystem sandbox against a same-user adversary.
+    """
+    try:
+        current=path.lstat()
+        if (current.st_dev,current.st_ino)==identity:
+            path.unlink()
+    except FileNotFoundError:
+        pass
+
+def safe_write(path:Path,payload:bytes)->tuple[int,int]:
     parent=path.parent.lstat()
     if not stat.S_ISDIR(parent.st_mode) or parent.st_mode&0o022:
         raise Rejected("UNSAFE_OUTPUT_DIRECTORY")
     try:
         fd=os.open(path,os.O_CREAT|os.O_EXCL|os.O_WRONLY|os.O_NOFOLLOW,0o600)
-        with os.fdopen(fd,"wb") as out:
-            out.write(payload);out.flush();os.fsync(out.fileno())
     except FileExistsError as exc:
         raise Rejected("NO_OVERWRITE") from exc
+    state=os.fstat(fd)
+    identity=(state.st_dev,state.st_ino)
+    try:
+        with os.fdopen(fd,"wb") as out:
+            out.write(payload);out.flush();os.fsync(out.fileno())
+    except BaseException:
+        remove_created(path,identity)
+        raise
+    return identity
 
 def validate_receipt(receipt:object,now:int)->dict:
     if not isinstance(receipt,dict) or set(receipt)!=KEYS:
         raise Rejected("CLOSED_RECEIPT_KEYS")
     if any(receipt.get(k)!=v for k,v in {
         "schema":SCHEMA,"source":SOURCE,"issuer":ISSUER,"audience":AUDIENCE,
-        "external_copy_verified":False,
-        "real_custodian_identity_verified":False,
-        "recovery_in_different_host_verified":False,
-        "go_for_installation":False
-    }.items()):
+    }.items()) or any(receipt[k] is not False for k in FALSE_FLAGS):
         raise Rejected("SYNTHETIC_SCOPE_REQUIRED")
     for key in ("package_sha256","signing_key_fingerprint"):
         if not isinstance(receipt[key],str) or not HEX64.fullmatch(receipt[key]):
@@ -118,13 +140,18 @@ def validate_receipt(receipt:object,now:int)->dict:
 def sign(ciphertext:Path,priv:Path,pub:Path,metadata:Path,signature:Path,
          *,now:int,nonce:str)->dict:
     private_file(priv)
-    if metadata.exists() or signature.exists():
+    if os.path.lexists(metadata) or os.path.lexists(signature):
         raise Rejected("NO_OVERWRITE")
+    signing_fingerprint=public_fingerprint(pub)
+    private_public=call_openssl(["pkey","-in",str(priv),"-pubout",
+                                "-outform","DER"])
+    if hashlib.sha256(private_public).hexdigest()!=signing_fingerprint:
+        raise Rejected("SIGNING_KEYPAIR_MISMATCH")
     digest,length=sha256_file(ciphertext)
     receipt={
       "schema":SCHEMA,"source":SOURCE,"issuer":ISSUER,"audience":AUDIENCE,
       "package_sha256":digest,"package_bytes":length,
-      "signing_key_fingerprint":public_fingerprint(pub),
+      "signing_key_fingerprint":signing_fingerprint,
       "issued_at":now,"expires_at":now+1200,"nonce_ref":nonce,
       "external_copy_verified":False,
       "real_custodian_identity_verified":False,
@@ -135,16 +162,17 @@ def sign(ciphertext:Path,priv:Path,pub:Path,metadata:Path,signature:Path,
     original=canonical(receipt)
     # Ed25519 pkeyutl needs a seekable input with known size. Do not
     # sign via stdin; sign the exact protected canonical metadata file.
+    created=[]
     try:
-        safe_write(metadata,original)
+        created.append((metadata,safe_write(metadata,original)))
         signed=call_openssl(["pkeyutl","-sign","-rawin","-inkey",
                              str(priv),"-in",str(metadata)])
         if len(signed)!=64:
             raise Rejected("NOT_ED25519_SIGNATURE")
-        safe_write(signature,signed)
-    except Exception:
-        metadata.unlink(missing_ok=True)
-        signature.unlink(missing_ok=True)
+        created.append((signature,safe_write(signature,signed)))
+    except BaseException:
+        for path,identity in reversed(created):
+            remove_created(path,identity)
         raise
     return receipt
 
