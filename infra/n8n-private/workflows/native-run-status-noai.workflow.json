@@ -1,0 +1,225 @@
+{
+  "name": "Imagine - Estado tecnico nativo sem IA (P26 laboratorio)",
+  "nodes": [
+    {
+      "id": "p26-trigger",
+      "name": "Disparo manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "p26-input",
+      "name": "Referencias tecnicas",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "p26-input-tenant_ref",
+              "name": "tenant_ref",
+              "value": "SYNTHETIC_P26_TENANT",
+              "type": "string"
+            },
+            {
+              "id": "p26-input-event_ref",
+              "name": "event_ref",
+              "value": "SYNTHETIC_P26_TEMPLATE_EVENT",
+              "type": "string"
+            },
+            {
+              "id": "p26-input-run_ref",
+              "name": "run_ref",
+              "value": "SYNTHETIC_P26_RUN",
+              "type": "string"
+            },
+            {
+              "id": "p26-input-reference_ref",
+              "name": "reference_ref",
+              "value": "SYNTHETIC_P26_RESOURCE",
+              "type": "string"
+            },
+            {
+              "id": "p26-input-payload_hash",
+              "name": "payload_hash",
+              "value": "0000000000000000000000000000000000000000000000000000000000000000",
+              "type": "string"
+            },
+            {
+              "id": "p26-input-worker_ref",
+              "name": "worker_ref",
+              "value": "SYNTHETIC_P26_WORKER",
+              "type": "string"
+            },
+            {
+              "id": "p26-input-attempt",
+              "name": "attempt",
+              "value": 1,
+              "type": "number"
+            },
+            {
+              "id": "p26-input-template_sha256",
+              "name": "template_sha256",
+              "value": "0000000000000000000000000000000000000000000000000000000000000000",
+              "type": "string"
+            },
+            {
+              "id": "p26-input-workflow_ref",
+              "name": "workflow_ref",
+              "value": "SYNTHETIC_P26_RUN_STATUS_V1",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      }
+    },
+    {
+      "id": "p26-project",
+      "name": "Projetar estado da execucao",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        740,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "p26-output-schema",
+              "name": "schema",
+              "value": "AIA_NATIVE_RUN_STATUS_V1",
+              "type": "string"
+            },
+            {
+              "id": "p26-output-tenant_ref",
+              "name": "tenant_ref",
+              "value": "={{ $json.tenant_ref }}",
+              "type": "string"
+            },
+            {
+              "id": "p26-output-event_ref",
+              "name": "event_ref",
+              "value": "={{ $json.event_ref }}",
+              "type": "string"
+            },
+            {
+              "id": "p26-output-run_ref",
+              "name": "run_ref",
+              "value": "={{ $json.run_ref }}",
+              "type": "string"
+            },
+            {
+              "id": "p26-output-reference_ref",
+              "name": "reference_ref",
+              "value": "={{ $json.reference_ref }}",
+              "type": "string"
+            },
+            {
+              "id": "p26-output-payload_hash",
+              "name": "payload_hash",
+              "value": "={{ $json.payload_hash }}",
+              "type": "string"
+            },
+            {
+              "id": "p26-output-worker_ref",
+              "name": "worker_ref",
+              "value": "={{ $json.worker_ref }}",
+              "type": "string"
+            },
+            {
+              "id": "p26-output-attempt",
+              "name": "attempt",
+              "value": "={{ $json.attempt }}",
+              "type": "number"
+            },
+            {
+              "id": "p26-output-template_sha256",
+              "name": "template_sha256",
+              "value": "={{ $json.template_sha256 }}",
+              "type": "string"
+            },
+            {
+              "id": "p26-output-workflow_ref",
+              "name": "workflow_ref",
+              "value": "={{ $json.workflow_ref }}",
+              "type": "string"
+            },
+            {
+              "id": "p26-output-operation",
+              "name": "operation",
+              "value": "run.status.project",
+              "type": "string"
+            },
+            {
+              "id": "p26-output-run_status",
+              "name": "run_status",
+              "value": "COMPLETED",
+              "type": "string"
+            },
+            {
+              "id": "p26-output-ai_api_calls",
+              "name": "ai_api_calls",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "p26-output-operational_authorization",
+              "name": "operational_authorization",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Disparo manual": {
+      "main": [
+        [
+          {
+            "node": "Referencias tecnicas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Referencias tecnicas": {
+      "main": [
+        [
+          {
+            "node": "Projetar estado da execucao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}
