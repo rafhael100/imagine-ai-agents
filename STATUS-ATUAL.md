@@ -1,5 +1,25 @@
 # Imagine AI Agents — estado atual
 
+## Candidata P28 / RC70 — 17/11/2026
+
+Continuação da [P27 #461](https://github.com/rafhael100/imagine-ai-agents/pull/461),
+SHA `8041c022776bbc1f998224a880726a8a3e69db37`, aprovada na
+[CI 44192247253](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44192247253).
+Branch: `feat/central-auto-p28-complete-candidate-recovery-2026-11-17`.
+
+O backup agora captura o estado produzido pelo fluxo P26, incluindo resultado,
+recibo e evidência de ACK, junto com inbox e grants P27. A restauração compara
+17 tabelas e seus objetos em outro PG16, reconcilia revogações atuais mantidas
+fora do dump e confirma que ACK histórico, RESULT e UNKNOWN não geram novo
+trabalho. Roles permanecem NOLOGIN, sem reativação de concessões.
+
+O mesmo pacote recupera PG17, volume, chave e seis workflows n8n inativos em
+outro Stack. Os grafos são conferidos por exportação, sem executar novamente.
+O wrapper roda P26 uma vez com o hook P28, além de P25 e do transporte P27.
+
+Procedimento e limites: [RECOVERY-P28](infra/n8n-private/homologation/RECOVERY-P28.md).
+Conferir a execução na CI da HEAD concreta. **DRAFT / NO-GO operacional.**
+
 ## Candidata P27 / RC69 — 17/11/2026
 
 Continuação da [P26 #460](https://github.com/rafhael100/imagine-ai-agents/pull/460),

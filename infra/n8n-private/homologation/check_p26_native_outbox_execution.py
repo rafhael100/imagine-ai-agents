@@ -28,7 +28,7 @@ from native_contract import (ContractDenied, canonical, materialize, template,
 PROBE = ROOT / "runtime/central-auto/lab-executor/probe.php"
 
 
-def main() -> dict:
+def main(after_scenarios=None) -> dict:
     require(os.environ.get("GITHUB_ACTIONS") == "true" and
             os.environ.get("GITHUB_REPOSITORY") == "rafhael100/imagine-ai-agents" and
             os.environ.get("P24_RUNNER_ENVIRONMENT") == "github-hosted", "P26_HOSTED_CI_ONLY")
@@ -206,7 +206,7 @@ def main() -> dict:
             require(states.count("ACKED") == 1 and states.count("RESULT") == 1 and
                     states.count("UNKNOWN") == 2 and len(states) == 4, "P26_DURABLE_STATE_COUNTS")
             print("P26_REAL_NATIVE_OUTBOX_RECONCILIATION_PASS NO_GO", flush=True)
-            return {
+            report = {
                 "schema": "CENTRAL_AUTO_P26_NATIVE_OUTBOX_EXECUTION_V1",
                 "successful": 1, "real_n8n_executions_observed": observed_executions,
                 "execution_observation_source": "trusted_ci_cli_output",
@@ -227,6 +227,15 @@ def main() -> dict:
                 "real_owner_iam": False, "real_n8n_signer_custody": False,
                 "p19_received_ack_dispatch": "DISABLED", "go_for_installation": False,
             }
+            if after_scenarios is not None:
+                extension = after_scenarios(agents, stack, directory, {
+                    "MAIN": main_context, "MALFORMED": malformed, "FAILURE": failed,
+                    "REVOKED": revoked, "FENCE": fenced, "AFTER_START": after,
+                })
+                require(isinstance(extension, dict) and extension.get("go_for_installation") is False,
+                        "P26_AFTER_SCENARIOS_REPORT")
+                report["candidate_state_recovery"] = extension
+            return report
         finally:
             errors = []
             for resource in (agents, stack):
