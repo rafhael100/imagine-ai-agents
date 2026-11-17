@@ -1,5 +1,27 @@
 # Imagine AI Agents — estado atual
 
+## Candidata P25 / RC67 — 17/11/2026
+
+Continuação da [P24 #458](https://github.com/rafhael100/imagine-ai-agents/pull/458),
+SHA `62474b6a8d7b6f9119b31ae9c5ed3ca49f842689`, na branch
+`feat/central-auto-p25-agents-state-recovery-2026-11-17`.
+
+O ensaio passa a recuperar o **estado efetivo da candidata Agents** em outro
+servidor PostgreSQL 16 descartável: inbox, grants, roles, ACLs, RLS, replay,
+outbox e controles de reserva. O dump atravessa o mesmo pacote assinado e
+cifrado que o n8n completo. O componente CRM continua um marcador sintético.
+
+Inclui a distinção entre revogações já presentes no backup e revogações
+posteriores: o estado antigo permanece em quarentena até reconciliar uma
+referência atual sintética, mantida fora do dump. Isso não comprova IAM real.
+As classes originais da RC65 permanecem pinadas e são exercitadas na árvore
+temporária RC67, sem merge entre as linhas de desenvolvimento.
+
+Procedimento, critérios de CI e limites:
+[RECOVERY-P25](infra/n8n-private/homologation/RECOVERY-P25.md).
+Resultado de execução deve ser conferido no check da HEAD desta candidata.
+**DRAFT / NO-GO operacional; dispatch desligado.**
+
 ## Candidata P24 / RC66 — 17/11/2026
 
 Branch isolada `feat/central-auto-p24-complete-n8n-recovery-2026-11-17`, derivada da
