@@ -1,5 +1,27 @@
 # Imagine AI Agents — estado atual
 
+## Candidata P26 / RC68 — 17/11/2026
+
+Continuação da [P25 #459](https://github.com/rafhael100/imagine-ai-agents/pull/459),
+SHA `63695d777dff4088717c262b13f98576ee02f96f`, cuja
+[CI 44188838729](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44188838729)
+aprovou a recuperação integrada. Branch:
+`feat/central-auto-p26-native-outbox-execution-2026-11-17`.
+
+O novo executor CI liga a fila P45 a uma projeção técnica **real no n8n**,
+conserva o resultado observado e utiliza o ACK/evidência transacional original.
+Um ledger persistido antes da chamada impede repetição automática quando o
+processo termina sem resultado conhecido. A conciliação após resultado durável
+reutiliza o comprovante, revalida a autorização e não executa o workflow outra
+vez. As referências, conteúdo, tentativa e grafo ficam vinculados.
+
+O evento é `mock.run.completed`, operação `run.status.project`. P19
+`lead.ingest` conserva seu contrato e dispatch desligado. As identidades e
+concessões permanecem sintéticas; execução em CI não constitui IAM real.
+Procedimento: [EXECUTION-P26](infra/n8n-private/homologation/EXECUTION-P26.md).
+O resultado do conjunto deve ser conferido no check desta HEAD.
+**DRAFT / NO-GO operacional.**
+
 ## Candidata P25 / RC67 — 17/11/2026
 
 Continuação da [P24 #458](https://github.com/rafhael100/imagine-ai-agents/pull/458),

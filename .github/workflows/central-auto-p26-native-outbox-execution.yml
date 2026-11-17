@@ -1,0 +1,64 @@
+name: CENTRAL-AUTO P26 native outbox execution and recovery
+on:
+  push:
+    branches:
+      - feat/central-auto-p26-native-outbox-execution-2026-11-17
+permissions:
+  contents: read
+concurrency:
+  group: central-auto-p26-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-outbox-execution:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      N8N_IMAGE: ghcr.io/n8n-io/n8n@sha256:b4b90747b81fcda7e76550c0d3aa7f0f64917a1e9573cff40d6834eaf2e0f8ea
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 3fb86c5fb011bc9df1f12a4a30a7c094370b6872
+          path: _agents_rc65_pinned
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate the exact candidate and disposable runner
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$P24_RUNNER_ENVIRONMENT" = github-hosted
+          test "$(git -C _agents_rc65_pinned rev-parse HEAD)" = 3fb86c5fb011bc9df1f12a4a30a7c094370b6872
+          python3 --version
+          php --version
+          docker compose version
+          openssl version
+          bash -n tools/run_rc68_p26_virtual_tree.sh
+      - name: Prepare images before the isolated recovery
+        run: |
+          set -euo pipefail
+          docker pull "$N8N_IMAGE" >/dev/null
+          docker pull postgres:17 >/dev/null
+          docker pull postgres:16 >/dev/null
+          n8n_pg="$(docker image inspect postgres:17 --format '{{index .RepoDigests 0}}')"
+          agents_pg="$(docker image inspect postgres:16 --format '{{index .RepoDigests 0}}')"
+          test -n "$n8n_pg"
+          test -n "$agents_pg"
+          docker build --quiet -f runtime/central-auto/Dockerfile -t "imagine-p26-php:$GITHUB_RUN_ID" . >/dev/null
+          agents_php="$(docker image inspect "imagine-p26-php:$GITHUB_RUN_ID" --format '{{.Id}}')"
+          test -n "$agents_php"
+          echo "N8N_PG_IMAGE=$n8n_pg" >> "$GITHUB_ENV"
+          echo "AGENTS_PG_IMAGE=$agents_pg" >> "$GITHUB_ENV"
+          echo "AGENTS_PHP_IMAGE=$agents_php" >> "$GITHUB_ENV"
+      - name: Recover candidates and execute the native outbox cycle
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          bash tools/run_rc68_p26_virtual_tree.sh
