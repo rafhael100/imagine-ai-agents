@@ -1,0 +1,48 @@
+name: AIA P62 isolated signed review page probe
+on:
+  push:
+    branches:
+      - test/aia-p62-live-signed-review-2026-11-17
+permissions:
+  contents: read
+concurrency:
+  group: aia-p62-probe-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  signed-review-page-probe:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: c0c46f6f1d3d4ff007469388d3f53fa4719eb71e
+          path: _central_probe_pinned
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare isolated database and PHP runtime
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$P24_RUNNER_ENVIRONMENT" = github-hosted
+          bash -n tools/run_p62_review_probe_virtual_tree.sh
+          docker pull postgres:16 >/dev/null
+          agents_pg="$(docker image inspect postgres:16 --format '{{index .RepoDigests 0}}')"
+          docker build --quiet -f _central_probe_pinned/runtime/central-auto/Dockerfile -t "imagine-p62-probe:$GITHUB_RUN_ID" _central_probe_pinned >/dev/null
+          agents_php="$(docker image inspect "imagine-p62-probe:$GITHUB_RUN_ID" --format '{{.Id}}')"
+          test -n "$agents_pg" && test -n "$agents_php"
+          echo "AGENTS_PG_IMAGE=$agents_pg" >> "$GITHUB_ENV"
+          echo "AGENTS_PHP_IMAGE=$agents_php" >> "$GITHUB_ENV"
+      - name: Exercise signed reviews, coherent snapshot and read-only page
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          bash tools/run_p62_review_probe_virtual_tree.sh

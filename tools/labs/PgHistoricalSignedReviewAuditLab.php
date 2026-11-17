@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgDraftFingerprintLab.php';
+require_once __DIR__.'/PgReadOnlySnapshotLab.php';
 
 use PDO;
 use Throwable;
@@ -32,23 +33,44 @@ final class PgHistoricalSignedReviewAuditLab
     /** @return array<string,mixed> */
     public function scan():array
     {
-        if(!self::ciOnly()||$this->db->inTransaction()
+        return $this->snapshot(null,false);
+    }
+
+    /** P62 tenant-scoped historical scan; does not commit the caller's tx. */
+    public function scanTenantInsideReadOnlySnapshot(string $tenant):array
+    {
+        if(strlen($tenant)>64
+            ||preg_match('/\ASYNTHETIC_[A-Z0-9_]{1,48}\z/D',$tenant)!==1){
+            return self::out('INDETERMINATE',0,0,[
+                ['reason'=>'LAB_TENANT_SCOPE_REQUIRED']
+            ]);
+        }
+        return $this->snapshot($tenant,true);
+    }
+
+    private function snapshot(?string $tenant,bool $inside):array
+    {
+        if(!self::ciOnly()
+            ||($inside?!PgReadOnlySnapshotLab::active($this->db)
+                :$this->db->inTransaction())
             ||$this->db->getAttribute(PDO::ATTR_DRIVER_NAME)!=='pgsql'){
             return self::out('INDETERMINATE',0,0,[
                 ['reason'=>'LAB_READONLY_SNAPSHOT_REQUIRED']
             ]);
         }
         try{
-            $this->db->beginTransaction();
-            $this->db->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY');
+            if(!$inside){
+                $this->db->beginTransaction();
+                $this->db->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY');
+            }
             if($this->db->query('SELECT current_database()')->fetchColumn()
                 !=='imagine_agents_ci'){
-                $this->db->rollBack();
+                if(!$inside)$this->db->rollBack();
                 return self::out('INDETERMINATE',0,0,[
                     ['reason'=>'WRONG_LAB_DATABASE']
                 ]);
             }
-            $rows=$this->db->query(<<<'SQL'
+            $sql=<<<'SQL'
 SELECT d.tenant_ref,d.request_ref,d.ruleset_ref,d.revision,
  d.proposal_ref,d.rule_ref,d.draft_kind,d.metric,d.observed,
  d.threshold,d.state,d.draft_sha256,
@@ -63,12 +85,15 @@ LEFT JOIN aia_p57_lab.signed_observations v
  ON v.tenant_ref=d.tenant_ref AND v.proposal_ref=d.proposal_ref
 LEFT JOIN aia_p57_lab.reviewers k
  ON k.tenant_ref=v.tenant_ref AND k.reviewer_ref=v.reviewer_ref
-ORDER BY d.tenant_ref,d.proposal_ref,v.reviewer_role
-LIMIT 2001
-SQL)->fetchAll(PDO::FETCH_ASSOC);
+SQL;
+            if($tenant!==null)$sql.=' WHERE d.tenant_ref=:tenant';
+            $sql.=' ORDER BY d.tenant_ref,d.proposal_ref,v.reviewer_role LIMIT 2001';
+            $query=$this->db->prepare($sql);
+            $query->execute($tenant===null?[]:[':tenant'=>$tenant]);
+            $rows=$query->fetchAll(PDO::FETCH_ASSOC);
 
             if(count($rows)>self::LIMIT){
-                $this->db->commit();
+                if(!$inside)$this->db->commit();
                 return self::out('INDETERMINATE',0,0,[
                     ['reason'=>'REVIEW_AUDIT_CAPACITY_LIMIT']
                 ]);
@@ -128,14 +153,14 @@ SQL)->fetchAll(PDO::FETCH_ASSOC);
                     ];
                 }
             }
-            $this->db->commit();
+            if(!$inside)$this->db->commit();
             return self::out(
                 $issues?'DENY_INCONSISTENT':
                     'LAB_HISTORICAL_SIGNED_REVIEWS_CONSISTENT_NO_GO',
                 count($seen),$votes,$issues
             );
         }catch(Throwable){
-            if($this->db->inTransaction())$this->db->rollBack();
+            if(!$inside&&$this->db->inTransaction())$this->db->rollBack();
             return self::out('INDETERMINATE',0,0,[
                 ['reason'=>'LAB_READONLY_QUERY_OR_SCHEMA_UNAVAILABLE']
             ]);

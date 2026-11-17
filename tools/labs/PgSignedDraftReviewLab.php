@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgDraftFingerprintLab.php';
+require_once __DIR__.'/PgReadOnlySnapshotLab.php';
 require_once __DIR__.'/PgDraftAuthorProvenanceLab.php';
 
 use PDO;
@@ -219,26 +220,43 @@ SQL);
     public function status(string $tenant,string $proposal,int $now,
         bool $enforceAuthor=false):array
     {
+        return $this->statusSnapshot($tenant,$proposal,$now,$enforceAuthor,false);
+    }
+
+    /** P62 composition always requires the P59 author binding. */
+    public function statusInsideReadOnlySnapshot(
+        string $tenant,string $proposal,int $now
+    ):array {
+        return $this->statusSnapshot($tenant,$proposal,$now,true,true);
+    }
+
+    private function statusSnapshot(string $tenant,string $proposal,int $now,
+        bool $enforceAuthor,bool $inside):array
+    {
         if(!self::ciOnly()||!self::ref($tenant)
             ||!self::proposal($proposal)
-            ||$now<0||$now>4102444800||$this->db->inTransaction()){
+            ||$now<0||$now>4102444800
+            ||($inside?!PgReadOnlySnapshotLab::active($this->db)
+                :$this->db->inTransaction())){
             return self::deny('INVALID_REVIEW_STATUS_SCOPE');
         }
         try{
-            $this->db->beginTransaction();
-            $this->db->exec(
-                'SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY'
-            );
+            if(!$inside){
+                $this->db->beginTransaction();
+                $this->db->exec(
+                    'SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY'
+                );
+            }
             $draft=$this->draft($tenant,$proposal,false);
             if($draft===null){
-                $this->db->rollBack();
+                if(!$inside)$this->db->rollBack();
                 return self::deny('REVIEW_DRAFT_NOT_FOUND_OR_INCONSISTENT');
             }
             if($enforceAuthor && !(new PgDraftAuthorProvenanceLab($this->db))
                 ->authorDistinctInsideTransaction(
                     $tenant,$proposal,$draft['draft_sha256'],null,false
                 )){
-                $this->db->rollBack();
+                if(!$inside)$this->db->rollBack();
                 return self::deny('DRAFT_AUTHOR_PROVENANCE_DENIED');
             }
             $q=$this->db->prepare(<<<'SQL'
@@ -251,7 +269,7 @@ SQL);
             $q->execute([':t'=>$tenant,':proposal'=>$proposal]);
             $votes=$q->fetchAll(PDO::FETCH_ASSOC);
             if(count($votes)>2){
-                $this->db->rollBack();
+                if(!$inside)$this->db->rollBack();
                 return self::deny('REVIEW_OBSERVATION_CAPACITY_INVALID');
             }
             $roles=[];$refs=[];$rejected=false;
@@ -276,14 +294,14 @@ SQL);
                     ||!self::validSignature($key,$vote['canonical_vote'],$signature)
                     ||in_array($v['role'],$roles,true)
                     ||in_array($v['reviewer_ref'],$refs,true)){
-                    $this->db->rollBack();
+                    if(!$inside)$this->db->rollBack();
                     return self::deny('HISTORICAL_REVIEW_TAMPERED_EXPIRED_OR_REVOKED');
                 }
                 $roles[]=$v['role'];
                 $refs[]=$v['reviewer_ref'];
                 $rejected=$rejected||$v['decision']==='REJECT';
             }
-            $this->db->commit();
+            if(!$inside)$this->db->commit();
             $label=$rejected?'LAB_REVIEW_REJECTED_NO_ACTION':
                 (count($votes)===2?
                     'LAB_TWO_SIGNED_OBSERVATIONS_NO_ACTION':
@@ -300,7 +318,7 @@ SQL);
                 'service_effects'=>0
             ];
         }catch(Throwable){
-            if($this->db->inTransaction())$this->db->rollBack();
+            if(!$inside&&$this->db->inTransaction())$this->db->rollBack();
             return self::deny('REVIEW_STATUS_UNAVAILABLE');
         }
     }
