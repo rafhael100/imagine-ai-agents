@@ -157,7 +157,7 @@ def recover_candidate(agents: AgentsRecovery, stack: Stack, parent: Path, contex
 
         # A harmless volume marker proves the captured mounted volume, in
         # addition to comparing every archive member's content at restore.
-        run(["docker", "run", "--rm", "--network", "none", "--read-only", "--cap-drop", "ALL",
+        run(["docker", "run", "--rm", "-i", "--network", "none", "--read-only", "--cap-drop", "ALL",
              "--security-opt", "no-new-privileges:true", "--user", "1000:1000",
              "-v", stack.project + "_n8n_data:/output", "--entrypoint", "sh", pg_image,
              "-eu", "-c", "umask 077; cat > /output/p28-state-marker"], "P28_VOLUME_MARKER", stdin=MARKER)
