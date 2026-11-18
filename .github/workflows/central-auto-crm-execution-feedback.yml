@@ -1,8 +1,9 @@
-name: CENTRAL-AUTO CRM execution feedback and durable history
+name: CENTRAL-AUTO CRM execution feedback and monitor evidence
 on:
   push:
     branches:
       - feat/n8n-crm-execution-feedback-2026-11-17
+      - feat/n8n-crm-monitor-evidence-2026-11-17
 permissions:
   contents: read
 concurrency:
@@ -30,7 +31,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: rafhael100/imagine-crm
-          ref: be9c1243a45ab867309a89f8c40d61dc44b7a7f4
+          ref: e1b3b7f118eff0350a00789aecc7bb2bb2331464
           path: _crm_feedback_pinned
           persist-credentials: false
       - name: Validate the exact candidate and disposable runner
@@ -41,7 +42,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test "$P24_RUNNER_ENVIRONMENT" = github-hosted
           test "$(git -C _agents_lead_pinned rev-parse HEAD)" = 05e4ea7942e530055f4e455544d82f5d3edbd56d
-          test "$(git -C _crm_feedback_pinned rev-parse HEAD)" = be9c1243a45ab867309a89f8c40d61dc44b7a7f4
+          test "$(git -C _crm_feedback_pinned rev-parse HEAD)" = e1b3b7f118eff0350a00789aecc7bb2bb2331464
           python3 --version
           php --version
           docker compose version
@@ -81,7 +82,7 @@ jobs:
           echo "AGENTS_PG_IMAGE=$agents_pg" >> "$GITHUB_ENV"
           echo "AGENTS_PHP_IMAGE=$agents_php" >> "$GITHUB_ENV"
           echo "AGENTS_NGINX_IMAGE=$agents_nginx" >> "$GITHUB_ENV"
-      - name: Verify signed CRM result tracking, native n8n and recovery
+      - name: Verify native n8n, signed CRM history, monitor read model and recovery
         env:
           P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |

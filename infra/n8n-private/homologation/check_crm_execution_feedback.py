@@ -58,6 +58,8 @@ CRM_DATABASE = "imagine_crm_private_homologation"
 DENIAL = b'{"error":"EXECUTION_STATUS_DENIED"}'
 HTTP_PROBE = ROOT / "runtime/central-auto/feedback-http-probe.php"
 CRM_PROBE = ROOT / "runtime/central-auto/feedback-crm-probe.php"
+MONITOR_PROBE = ROOT / "runtime/central-auto/feedback-crm-monitor-probe.php"
+MONITOR_OBSERVATION_FIELDS = ("sequence", "execution_state", "queue_state", "result_code", "attempt", "observed_at")
 ACTOR = "11111111-1111-4111-8111-111111111111"
 FUNNEL_A = "22222222-2222-4222-8222-222222222222"
 FUNNEL_B = "33333333-3333-4333-8333-333333333333"
@@ -277,10 +279,18 @@ class CrmLab(AgentsRecovery):
         args = ["docker", "exec", "-i", "-e", "POSTGRES_DB=" + CRM_DATABASE,
                 "-e", "POSTGRES_USER=crm_homologation_owner", "-e", "PGPORT=5433"]
         for name in ("APP", "IAM", "ENROLLMENT", "OPERATOR"):
-            args += ["-e", "CRM_PRIVATE_" + name + "_PASSWORD=" + secrets.token_hex(32)]
+            password = secrets.token_hex(32)
+            if name == "APP":
+                # Retain only the existing app role's credential for the separate,
+                # read-only CLI proof. No IAM or S2S credential enters that process.
+                path = self.directory / "monitor-app-password"
+                path.write_text(password); path.chmod(0o444)
+                self.secrets["monitor-app-password"] = path
+            args += ["-e", "CRM_PRIVATE_" + name + "_PASSWORD=" + password]
         run(args + [self.containers["src"], "sh", "-s"], "FEEDBACK_CRM_RUNTIME_ROLES",
             stdin=(self.source / "infra/homologation/20-runtime-roles.sh").read_bytes())
-        for name in ("install-candidate.sql", "outbound-candidate.sql", "execution-feedback-candidate.sql"):
+        for name in ("install-candidate.sql", "outbound-candidate.sql", "execution-feedback-candidate.sql",
+                     "execution-monitor-candidate.sql"):
             self.sql((self.source / "infra/homologation/s2s" / name).read_text())
         for name, role in (("sender.password", "crm_auto_sender"),
                            ("execution-reader.password", "crm_auto_execution_reconciler")):
@@ -311,7 +321,47 @@ class CrmLab(AgentsRecovery):
             self.sql("INSERT INTO crm_private_events VALUES(" + literal(CASE_IDS[case]) + "," + literal(COMPANY_A) +
                      "," + literal(ACTOR) + "," + literal(LEAD_A) + ",'lead.created'," + str(now) + ")")
         self.profile, self.metadata = self.backup.detect_profile(self.sql, self.base_tables)
-        require(self.profile.get("execution_feedback") is True, "FEEDBACK_CRM_BACKUP_PROFILE")
+        require(self.profile.get("execution_feedback") is True and self.profile.get("execution_monitor") is True
+                and self.profile.get("name") == "synthetic-private-s2s-execution-monitor-v1",
+                "FEEDBACK_CRM_BACKUP_PROFILE")
+
+    def monitor(self, mode: str, event: str | None = CASE_IDS["MAIN"], *, company: str = COMPANY_A,
+                raw: str | None = None) -> dict:
+        """Separate app-role reader, or credential-free decoding after restore.
+
+        This is a scoped CI SQL/parser proof. It does not bootstrap the human
+        application or pretend that the port-5433 fixture satisfies its IAM gate.
+        """
+        require(mode in ("read", "validate", "isolation") and company in (COMPANY_A, COMPANY_B),
+                "FEEDBACK_MONITOR_MODE_OR_COMPANY")
+        hardening = self.agents.base_args()
+        require(hardening[:2] == ["--network", "container:" + self.agents.containers["src"]],
+                "FEEDBACK_MONITOR_NETWORK_CONTRACT")
+        if mode == "validate":
+            hardening[1] = "none"
+        args = ["docker", "run", "--rm", "-i"] + hardening
+        args += self.agents.mount(MONITOR_PROBE, "/probe.php") + self.agents.mount(self.source, "/crm-source")
+        environment = {
+            "GITHUB_ACTIONS": os.environ["GITHUB_ACTIONS"], "GITHUB_REPOSITORY": os.environ["GITHUB_REPOSITORY"],
+            "CRM_FEEDBACK_CI": "synthetic-private-v1", "CRM_FEEDBACK_SOURCE_SHA": self.source_sha,
+        }
+        payload = {"company_id": company, "event_id": event}
+        if mode == "validate":
+            require(isinstance(raw, str), "FEEDBACK_MONITOR_RESTORED_WIRE_REQUIRED")
+            payload["body_b64"] = base64.b64encode(raw.encode("utf-8")).decode()
+        else:
+            require(raw is None, "FEEDBACK_MONITOR_UNEXPECTED_WIRE")
+            args += self.agents.mount(self.secrets["monitor-app-password"], "/run/secrets/crm-monitor-app-password")
+            environment["CRM_MONITOR_DSN"] = "pgsql:host=127.0.0.1;port=5433;dbname=" + CRM_DATABASE
+            environment["PGAPPNAME"] = "crm_feedback_monitor"
+        for name, value in environment.items():
+            args += ["-e", name + "=" + value]
+        args += ["--entrypoint", "php", self.php_image, "/probe.php", mode]
+        result = closed_json(run(args, "FEEDBACK_MONITOR_" + mode.upper(), stdin=wire(payload), timeout=20).stdout)
+        require(result.get("ok") is True,
+                "FEEDBACK_MONITOR_" + mode.upper() + "_" + result.get("reason", "FAILED"))
+        require(isinstance(result.get("value"), dict), "FEEDBACK_MONITOR_RESPONSE_OBJECT")
+        return result["value"]
 
     def call(self, mode: str, event: str = CASE_IDS["MAIN"], *, company: str = COMPANY_A,
              profile: str | None = None, **payload) -> dict:
@@ -411,6 +461,47 @@ def need_view(view: dict, body: dict, state: str, queue: str, history: int, task
             "FEEDBACK_CRM_HISTORY_ORDER")
 
 
+def read_monitor(crm: CrmLab, event: str | None = CASE_IDS["MAIN"], *, company: str = COMPANY_A) -> dict:
+    before = crm.snapshot()
+    model = crm.monitor("read", event, company=company)
+    require(crm.snapshot() == before, "FEEDBACK_MONITOR_READ_MUTATED_CRM")
+    require(set(model) == {"schema", "company_id", "generated_at", "total_events", "events", "selected"}
+            and model["schema"] == "CRM_N8N_EXECUTION_MONITOR_V1" and model["company_id"] == company
+            and type(model["generated_at"]) is int and type(model["total_events"]) is int
+            and isinstance(model["events"], list) and len(model["events"]) == min(50, model["total_events"]),
+            "FEEDBACK_MONITOR_CLOSED_MODEL")
+    require(all(row.get("history") == [] for row in model["events"]), "FEEDBACK_MONITOR_LIST_LEAKED_HISTORY")
+    return model
+
+
+def need_monitor(model: dict, event: str, view: dict | None, *, delivery: str = "accepted") -> None:
+    selected = model.get("selected")
+    require(model.get("company_id") == COMPANY_A and isinstance(selected, dict)
+            and selected.get("event_id") == event and selected.get("lead_id") == LEAD_A
+            and selected.get("lead_title") == "LEAD_TESTE_FEEDBACK" and selected.get("delivery_state") == delivery,
+            "FEEDBACK_MONITOR_SOURCE_BINDING")
+    # Compare the display fields directly with the already-verified reconciler
+    # output, preserving persisted sequence/time. No receipt or fact is invented.
+    expected_observation = None if view is None else {
+        field: view["observation"][field] for field in MONITOR_OBSERVATION_FIELDS}
+    expected_history = [] if view is None else [
+        {field: row[field] for field in MONITOR_OBSERVATION_FIELDS} for row in view["history"]]
+    require(selected.get("observation") == expected_observation
+            and selected.get("history") == expected_history
+            and selected.get("history_count") == (0 if view is None else view["history_count"]),
+            "FEEDBACK_MONITOR_REAL_SIGNED_HISTORY_DIFFERS")
+    summary = dict(selected, history=[])
+    require([row for row in model["events"] if row.get("event_id") == event] == [summary],
+            "FEEDBACK_MONITOR_LIST_DETAIL_DISAGREE")
+
+
+def monitor_durable_fields(model: dict) -> dict:
+    # The SQL reader deliberately stamps each statement. This is the only
+    # source/restore difference excluded; all event and observation bytes count.
+    require(type(model.get("generated_at")) is int, "FEEDBACK_MONITOR_GENERATED_AT_REQUIRED")
+    return {key: value for key, value in model.items() if key != "generated_at"}
+
+
 def execution_permissions(lab: FeedbackLab, crm: CrmLab) -> None:
     for role in ("aia_private_execution", "aia_private_execution_login"):
         for table, privilege in (("auto_ia_lab.lead_ingest_payloads", "SELECT"),
@@ -439,6 +530,11 @@ def execution_permissions(lab: FeedbackLab, crm: CrmLab) -> None:
     require(crm.backup.scoped_counts(crm.sql, "", role="crm_auto_reader_owner", tables=tables) == "SCOPED|0|0|0",
             "FEEDBACK_CRM_UNSCOPED_RLS")
     require(crm.success("isolation")["agents_database_denied"] is True, "FEEDBACK_CRM_DATABASE_ISOLATION")
+    require(crm.monitor("isolation") == {
+        "database_role": "crm_homologation_app", "transaction_read_only": True,
+        "service_capabilities_denied": True, "tenant_context_cleared": True,
+        "human_authorization_tested": False,
+    }, "FEEDBACK_MONITOR_APP_ROLE_ISOLATION")
 
 
 def projection_fault(crm: CrmLab, lab: FeedbackLab) -> None:
@@ -595,6 +691,11 @@ def restore_crm(crm: CrmLab, lab: FeedbackLab, stack: Stack, directory: Path) ->
     profile, metadata = crm.backup.detect_profile(crm.sql, crm.base_tables)
     original = crm.snapshot()
     native_before, agents_before = n8n_snapshot(stack), agents_snapshot(lab)
+    monitor_cases = [(COMPANY_A, CASE_IDS[case]) for case in ("MAIN", "UNKNOWN", "PENDING")]
+    monitor_cases += [(COMPANY_A, None), (COMPANY_B, CASE_IDS["MAIN"])]
+    original_monitors = {(company, event): read_monitor(crm, event, company=company)
+                         for company, event in monitor_cases}
+    require(crm.snapshot() == original, "FEEDBACK_MONITOR_PRE_DUMP_READ_MUTATED_CRM")
     dump = directory / "crm-feedback.dump"
     run(["docker", "exec", crm.containers["src"], "pg_dump", "-p", "5433", "-U", "crm_homologation_owner",
          "-d", CRM_DATABASE, "--format", "custom"], "FEEDBACK_CRM_DUMP", output=dump)
@@ -622,6 +723,20 @@ def restore_crm(crm: CrmLab, lab: FeedbackLab, stack: Stack, directory: Path) ->
                  literal(CASE_IDS[case]) + "); RAISE EXCEPTION 'FEEDBACK_RESTORED_GRANT_ADMITTED'; "
                  "EXCEPTION WHEN SQLSTATE 'P0001' THEN IF SQLERRM<>'EXECUTION_READ_GRANT_DENIED' THEN RAISE; "
                  "END IF; END $probe$; ROLLBACK;")
+    for company, event in monitor_cases:
+        # Restored roles remain NOLOGIN with no password. The CI administrator
+        # assumes only the app role for this read; PHP validates offline with no
+        # database or service secret and --network none.
+        event_sql = "NULL::uuid" if event is None else literal(event) + "::uuid"
+        raw = crm._sql("dst", "BEGIN READ ONLY; SET LOCAL ROLE crm_homologation_app; "
+                      "SET LOCAL row_security=on; SET LOCAL app.tenant_id=" + literal(company) + "; "
+                      "SELECT CASE WHEN current_user='crm_homologation_app' "
+                      "AND current_setting('transaction_read_only')='on' "
+                      "THEN crm_auto_service.read_execution_monitor(" + event_sql + ")::text ELSE NULL END; ROLLBACK;")
+        require(bool(raw), "FEEDBACK_RESTORED_MONITOR_APP_ROLE_REQUIRED")
+        restored = crm.monitor("validate", event, company=company, raw=raw)
+        require(monitor_durable_fields(restored) == monitor_durable_fields(original_monitors[(company, event)]),
+                "FEEDBACK_RESTORED_MONITOR_MODEL_DIFFERS")
     require(crm.snapshot("dst") == revoked and n8n_snapshot(stack) == native_before and
             agents_snapshot(lab) == agents_before, "FEEDBACK_RESTORE_MUTATED_OR_REEXECUTED")
     require(crm.backup.scoped_counts(restored_query, COMPANY_B, role="crm_auto_reader_owner",
@@ -630,6 +745,9 @@ def restore_crm(crm: CrmLab, lab: FeedbackLab, stack: Stack, directory: Path) ->
             "table_snapshots": len(original), "http_evidence_history_projection_exact": True,
             "security_manifest_preserved": True, "roles_nologin_without_memberships": True,
             "post_snapshot_read_and_outbound_revocations_applied": True,
+            "monitor_app_role_and_offline_php_preserved": True,
+            "monitor_restore_ignored_fields": ["generated_at"],
+            "monitor_models_compared": len(monitor_cases),
             "native_execution_calls_during_restore": 0, "separate_pg16_clusters": 2,
             "external_backup_verified": False, "go_for_installation": False}
 
@@ -648,15 +766,22 @@ def exercise(lab: FeedbackLab, crm: CrmLab, stack: Stack, directory: Path) -> di
     require(crm.business() == business_before and rpc(lab, "stats")["outbox"] == 0,
             "FEEDBACK_RECEIPT_MUST_NOT_EXECUTE_OR_MUTATE_LEAD")
     projection_fault(crm, lab)
+    monitor_agents_before, monitor_native_before = agents_snapshot(lab), n8n_snapshot(stack)
+    need_monitor(read_monitor(crm), CASE_IDS["MAIN"], None)
+    require(agents_snapshot(lab) == monitor_agents_before and n8n_snapshot(stack) == monitor_native_before,
+            "FEEDBACK_UNOBSERVED_MONITOR_MUTATED_AGENTS_OR_NATIVE")
     source_template = template(PRIVATE / "workflows/native-crm-lead-noai.workflow.json")
     observed_calls = 0
 
     def observe(body: dict, state: str, queue: str, count: int, task: str = "") -> dict:
         event = json.loads(base64.b64decode(body["payload_b64"]))["event_id"]
         before = agents_snapshot(lab)
+        native_before = n8n_snapshot(stack)
         view = crm.success("reconcile", event)
         need_view(view, body, state, queue, count, task)
-        require(agents_snapshot(lab) == before and crm.business() == business_before,
+        need_monitor(read_monitor(crm, event), event, view)
+        require(agents_snapshot(lab) == before and crm.business() == business_before
+                and n8n_snapshot(stack) == native_before,
                 "FEEDBACK_READ_MUTATED_AGENTS_OR_COMMERCIAL_CRM")
         return view
 
@@ -753,6 +878,17 @@ def exercise(lab: FeedbackLab, crm: CrmLab, stack: Stack, directory: Path) -> di
     need_denial(crm.call("reconcile", CASE_IDS["PENDING"]), "EXECUTION_TRANSPORT_DENIED")
     require(crm.snapshot() == pending_before and agents_snapshot(lab) == destination_before,
             "FEEDBACK_UNDELIVERED_EVENT_GAINED_STATUS")
+    need_monitor(read_monitor(crm, CASE_IDS["PENDING"]), CASE_IDS["PENDING"], None, delivery="pending")
+    listed = read_monitor(crm, None)
+    require(listed["selected"] is None and listed["total_events"] == 3
+            and [row["event_id"] for row in listed["events"]]
+            == sorted((CASE_IDS[case] for case in ("MAIN", "UNKNOWN", "PENDING")), reverse=True),
+            "FEEDBACK_MONITOR_REAL_EVENT_LIST_ORDER")
+    foreign = read_monitor(crm, CASE_IDS["MAIN"], company=COMPANY_B)
+    require(foreign["events"] == [] and foreign["selected"] is None and foreign["total_events"] == 0,
+            "FEEDBACK_MONITOR_FOREIGN_TENANT_EXPOSED_EVENT")
+    require(crm.snapshot() == pending_before and agents_snapshot(lab) == destination_before
+            and n8n_snapshot(stack) == native_history, "FEEDBACK_MONITOR_SCOPE_READS_MUTATED_STATE")
 
     # Read authority is independent from the historical sender/owner/executor.
     rpc(lab, "revoke-owner", context=main)
@@ -761,6 +897,8 @@ def exercise(lab: FeedbackLab, crm: CrmLab, stack: Stack, directory: Path) -> di
              "WHERE key_id=" + literal(main["executor_key_id"]))
     crm.sql("UPDATE crm_auto_service.outbound_grants SET active=false,revision=revision+1 WHERE company_id=" + literal(COMPANY_A))
     require(crm.success("reconcile") == acked, "FEEDBACK_HISTORICAL_STATUS_DEPENDED_ON_REVOKED_EXECUTOR")
+    historical_monitor = read_monitor(crm)
+    need_monitor(historical_monitor, CASE_IDS["MAIN"], acked)
     for side in ("agents", "crm"):
         query = ("UPDATE " + (EXECUTION_GRANTS if side == "agents" else "crm_auto_service.execution_read_grants") +
                  " SET active=false,revision=revision+1 WHERE company_id=" + literal(COMPANY_A))
@@ -773,6 +911,11 @@ def exercise(lab: FeedbackLab, crm: CrmLab, stack: Stack, directory: Path) -> di
                     "FEEDBACK_REVOKED_DESTINATION_READ_GRANT_HTTP_STATUS")
         require(crm.snapshot() == before and agents_snapshot(lab) == destination_before,
                 "FEEDBACK_REVOKED_READ_GRANT_WROTE_STATE")
+        after_revocation = read_monitor(crm)
+        need_monitor(after_revocation, CASE_IDS["MAIN"], acked)
+        require(monitor_durable_fields(after_revocation) == monitor_durable_fields(historical_monitor)
+                and agents_snapshot(lab) == destination_before and n8n_snapshot(stack) == native_history,
+                "FEEDBACK_MONITOR_HISTORY_DEPENDED_ON_SERVICE_READ_GRANT")
         query = query.replace("active=false", "active=true")
         (lambda q: lab._sql("src", q) if side == "agents" else crm.sql(q))(query)
         require(crm.success("reconcile") == acked, "FEEDBACK_READ_GRANT_RECOVERY_DUPLICATED_HISTORY")
@@ -782,11 +925,17 @@ def exercise(lab: FeedbackLab, crm: CrmLab, stack: Stack, directory: Path) -> di
     require(n8n_snapshot(stack) == native_history, "FEEDBACK_STATUS_LOOKUP_RERAN_NATIVE_WORKFLOW")
     recovery = restore_crm(crm, lab, stack, directory)
     require(n8n_snapshot(stack) == native_history, "FEEDBACK_RESTORE_RERAN_NATIVE_WORKFLOW")
+    print("CRM_FEEDBACK_MONITOR_SQL_AND_PHP_REAL_HISTORY_READONLY_RESTORE_PASS", flush=True)
     return {"schema": "CRM_EXECUTION_FEEDBACK_VERIFIED_V1", "crm_source_sha": crm.source_sha,
             "actual_crm_emitter_and_reconciler": True, "actual_native_n8n_executions": observed_calls,
             "execution_states_observed": ["NOT_STAGED", "NOT_STARTED", "STARTED", "RESULT", "ACKED", "UNKNOWN"],
             "signed_status_via_real_mtls": True, "agents_status_reads_readonly": True,
             "crm_projection_and_immutable_http_history": True, "main_history_observations": 6,
+            "monitor_sql_and_php_from_real_history": True, "human_identity_exercised": False,
+            "monitor_source_database_role": "crm_homologation_app",
+            "monitor_unobserved_and_not_staged_distinct": True,
+            "monitor_foreign_tenant_returns_no_event": True,
+            "monitor_history_survives_service_read_revocation": True,
             "concurrent_poll_creates_one_observation": True, "grant_revocation_fenced_through_projection": True,
             "write_failure_rolls_back_history_and_projection": True,
             "acked_and_unknown_regressions_denied": True, "unknown_automatic_retries": 0,
@@ -814,8 +963,12 @@ def main() -> dict:
             and source.is_dir() and not source.is_symlink()
             and source.resolve() == ROOT / "_crm_feedback_pinned_source", "FEEDBACK_PINNED_CRM_ARCHIVE_REQUIRED")
     for relative in ("infra/homologation/schema.sql", "infra/homologation/20-runtime-roles.sh",
-                     "infra/homologation/s2s/execution-feedback-candidate.sql", "scripts/ops/private_crm_backup_contract.py"):
+                     "infra/homologation/s2s/execution-feedback-candidate.sql",
+                     "infra/homologation/s2s/execution-monitor-candidate.sql",
+                     "app/Homologation/ExecutionMonitor.php", "app/Homologation/S2S/StrictJson.php",
+                     "scripts/ops/private_crm_backup_contract.py"):
         require((source / relative).is_file() and not (source / relative).is_symlink(), "FEEDBACK_CRM_PUBLIC_SOURCE_REQUIRED")
+    require(MONITOR_PROBE.is_file() and not MONITOR_PROBE.is_symlink(), "FEEDBACK_MONITOR_PROBE_REQUIRED")
     require(hashlib.sha256((ROOT / "runtime/central-auto/index.php").read_bytes()).hexdigest() == INDEX_SHA256,
             "FEEDBACK_EXISTING_INGRESS_PIN")
     pg_image = os.environ.get("N8N_PG_IMAGE", "")
