@@ -1,0 +1,69 @@
+name: AIA P63 verifiable proposal detail and full Central regression
+on:
+  push:
+    branches:
+      - feat/aia-p63-verifiable-proposal-detail-2026-11-17
+permissions:
+  contents: read
+concurrency:
+  group: aia-p63-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verifiable-proposal-detail:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      N8N_IMAGE: ghcr.io/n8n-io/n8n@sha256:b4b90747b81fcda7e76550c0d3aa7f0f64917a1e9573cff40d6834eaf2e0f8ea
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: c08688b16e61d8d1ecc4d8c0ed4da8758a687ee8
+          path: _central_p30_pinned
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate the exact candidate and disposable runner
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$P24_RUNNER_ENVIRONMENT" = github-hosted
+          test "$(git -C _central_p30_pinned rev-parse HEAD)" = c08688b16e61d8d1ecc4d8c0ed4da8758a687ee8
+          python3 --version
+          php --version
+          docker compose version
+          openssl version
+          bash -n tools/run_rc74_p63_virtual_tree.sh
+      - name: Prepare images before the isolated recovery
+        run: |
+          set -euo pipefail
+          docker pull "$N8N_IMAGE" >/dev/null
+          docker pull postgres:17 >/dev/null
+          docker pull postgres:16 >/dev/null
+          docker pull nginx:stable-alpine >/dev/null
+          n8n_pg="$(docker image inspect postgres:17 --format '{{index .RepoDigests 0}}')"
+          agents_pg="$(docker image inspect postgres:16 --format '{{index .RepoDigests 0}}')"
+          test -n "$n8n_pg"
+          test -n "$agents_pg"
+          agents_nginx="$(docker image inspect nginx:stable-alpine --format '{{index .RepoDigests 0}}')"
+          test -n "$agents_nginx"
+          docker build --quiet -f _central_p30_pinned/runtime/central-auto/Dockerfile -t "imagine-p63-php:$GITHUB_RUN_ID" _central_p30_pinned >/dev/null
+          agents_php="$(docker image inspect "imagine-p63-php:$GITHUB_RUN_ID" --format '{{.Id}}')"
+          test -n "$agents_php"
+          echo "N8N_PG_IMAGE=$n8n_pg" >> "$GITHUB_ENV"
+          echo "AGENTS_PG_IMAGE=$agents_pg" >> "$GITHUB_ENV"
+          echo "AGENTS_PHP_IMAGE=$agents_php" >> "$GITHUB_ENV"
+          echo "AGENTS_NGINX_IMAGE=$agents_nginx" >> "$GITHUB_ENV"
+      - name: Verify canonical proposal detail, signed review and complete regression matrix
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+          P30_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          bash tools/run_rc74_p63_virtual_tree.sh
