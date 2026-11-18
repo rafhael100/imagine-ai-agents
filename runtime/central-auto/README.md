@@ -52,3 +52,15 @@ cobre requisições HTTP malformadas com HMAC válido e quatro corridas reais no
 PostgreSQL, seguidas por controles válidos.
 
 Contrato e verificação: [INGRESS-P29](../../infra/n8n-private/homologation/INGRESS-P29.md).
+## Execução de lead capturado no laboratório
+
+A candidata `feat/n8n-crm-lead-execution-2026-11-17` estende a captura com uma
+tarefa própria de `lead.ingest`, autorização de proprietário separada e uso
+da fila existente. O n8n produz um recibo de preparo vinculado ao lead; não
+altera dados comerciais do CRM. A intenção, o resultado e o ACK usam o ledger
+nativo existente, incluindo a negação de retry automático em estado incerto.
+
+O desenho, os limites e a matriz de verificação estão em
+[`CRM-LEAD-EXECUTION.md`](../../infra/n8n-private/homologation/CRM-LEAD-EXECUTION.md).
+A CI precisa aprovar os SHAs exatos da Central e do domínio; o perfil continua
+exclusivo de homologação descartável, sem aprovação de instalação.
