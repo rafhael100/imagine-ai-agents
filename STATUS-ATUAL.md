@@ -1,5 +1,44 @@
 # Imagine AI Agents — estado atual
 
+## 2026-11-18 — pacote dos providers com as fontes CRM #664
+
+A branch `integrate/n8n-owner-components-crm-664-2026-11-18` é filha direta
+da [#482](https://github.com/rafhael100/imagine-ai-agents/pull/482), fixada em
+`ce004ad4a8fa5fb59ef38cdd250126d0f0e99b46`. Atualiza o pin CRM de `96db` para
+`7e1b00a0c173bcfcac3a9051ef6cad3aededcdb8`, da
+[#664](https://github.com/rafhael100/imagine-crm/pull/664). O pacote passa a
+incluir a migration001 corrigida e os dois migradores incrementais já
+validados na CI própria do CRM. O verificador exige 32 caminhos CRM e recusa
+a falta das fontes adicionais tanto na criação quanto na inspeção offline.
+
+A admissão exige a ancestralidade real da #482 e mantém a #481 como origem
+das nove dependências owner. Foram preservados os 14 imports P67/P68,
+os 81 vínculos históricos e os três vínculos do bridge, os 22 grupos de
+execução Agents e o registro inicial de integridade. As migrações CRM não
+são executadas por esses grupos. A prova nativa continua no perfil de 33
+tabelas; o laboratório owner mantém seus processos e bancos separados.
+
+A [CI CRM #664](https://github.com/rafhael100/imagine-crm/actions/runs/44262660735)
+passou na tentativa 1: base25→monitor33 registrou 917 chamadas instrumentadas
+e monitor33→owner35 registrou 997, em ensaios separados. A
+[CI do ledger na mesma HEAD](https://github.com/rafhael100/imagine-crm/actions/runs/44262660963)
+também passou. São 25 workflows CRM aprovados e os dois gates de escopo
+F251/F252 bloqueados, preservando `deploy_approved=false`. Esses resultados
+não aprovam antecipadamente a nova candidata Agents.
+
+A validação local da candidata passou nove testes de admissão e 17 do
+pacote, com revisão cruzada dos diffs. A aceitação desta HEAD requer sua
+própria CI, com os 22 grupos, e a conferência independente do artefato
+contra o SHA candidato e digest do manifesto obtidos da CI exata.
+O V2 continua com três TARs de fontes, manifesto e `SHA256SUMS`;
+a associação original dos imports P67/P68 é verificada na CI e não
+revalidada offline. Não é instalador nem recuperação distribuída.
+
+Contrato desta atualização:
+[N8N-OWNER-COMPONENTS-CRM-664-CANDIDATE](docs/reviews/N8N-OWNER-COMPONENTS-CRM-664-CANDIDATE.md).
+O contrato e o registro histórico da #482 permanecem abaixo e não substituem
+os resultados da nova HEAD. **DRAFT / NO-MERGE / NO-DEPLOY.**
+
 ## 2026-11-18 — pacote seletivo dos providers nativo e de rascunhos owner
 
 A branch `integrate/n8n-owner-provider-components-2026-11-18` é uma filha

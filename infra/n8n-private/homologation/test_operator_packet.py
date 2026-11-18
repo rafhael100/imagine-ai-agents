@@ -24,6 +24,8 @@ import operator_packet as packet
 class OperatorPacketTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.public_required_crm = frozenset(packet.REQUIRED["crm"])
+        cls.public_crm_pin = packet.FIXED_PINS["crm"]
         cls.workspace = tempfile.TemporaryDirectory(prefix="operator-packet-unit-")
         cls.root = Path(cls.workspace.name)
         cls.repo = cls.root / "repo"
@@ -242,14 +244,18 @@ class OperatorPacketTests(unittest.TestCase):
     def test_older_crm_packet_and_missing_candidate_lineage_are_denied(self):
         self.make_packet()
         original = json.loads((self.directory / "manifest.json").read_bytes())
-        previous_crm = copy.deepcopy(original)
-        previous_crm["sources"]["crm"]["commit"] = "e1b3b7f118eff0350a00789aecc7bb2bb2331464"
-        with self.assertRaisesRegex(packet.Denied, "SOURCE_PIN_DENIED"):
-            packet.manifest_checks(previous_crm, self.commit)
-        missing_ancestor = copy.deepcopy(original)
-        missing_ancestor["lineage"].pop("candidate_479")
-        with self.assertRaisesRegex(packet.Denied, "MANIFEST_POLICY_DENIED"):
-            packet.manifest_checks(missing_ancestor, self.commit)
+        for previous_pin in ("e1b3b7f118eff0350a00789aecc7bb2bb2331464",
+                             "96dbf1aed2d1cf3237bc3631c4594540a0168d2a"):
+            previous_crm = copy.deepcopy(original)
+            previous_crm["sources"]["crm"]["commit"] = previous_pin
+            with patch.dict(packet.FIXED_PINS, {"crm": self.public_crm_pin}):
+                with self.assertRaisesRegex(packet.Denied, "SOURCE_PIN_DENIED"):
+                    packet.manifest_checks(previous_crm, self.commit)
+        for ancestor in ("candidate_479", "candidate_482"):
+            missing_ancestor = copy.deepcopy(original)
+            missing_ancestor["lineage"].pop(ancestor)
+            with self.assertRaisesRegex(packet.Denied, "MANIFEST_POLICY_DENIED"):
+                packet.manifest_checks(missing_ancestor, self.commit)
         unexecuted_bridge = copy.deepcopy(original)
         unexecuted_bridge["observations"]["checks"].pop("crm_backup_bridge_contracts")
         with self.assertRaisesRegex(packet.Denied, "FIELDS_DENIED"):
@@ -258,6 +264,73 @@ class OperatorPacketTests(unittest.TestCase):
         wrong_scope["boundaries"]["owner_monitor_35_tables_exercised_here"] = True
         with self.assertRaisesRegex(packet.Denied, "MANIFEST_POLICY_DENIED"):
             packet.manifest_checks(wrong_scope, self.commit)
+
+    def test_crm_migration_sources_required_for_creation_and_offline_inspection(self):
+        # Public source membership is not a claim that CRM migration CI ran here.
+        # Each omitted path has a coherent synthetic Git identity, so missing
+        # source admission is the reason for denial, not a stale tree/checksum.
+        added_sources = {
+            "infra/homologation/schema.sql",
+            "infra/homologation/20-runtime-roles.sh",
+            "infra/homologation/s2s/install-candidate.sql",
+            "infra/homologation/s2s/outbound-candidate.sql",
+            "infra/homologation/s2s/owner-drafts.sql",
+            "infra/homologation/migrations/001_automation_ledger_candidate.sql",
+            "scripts/ops/private_crm_owner_drafts_ci.py",
+            "scripts/ops/private_crm_owner_monitor_migration.py",
+            "scripts/ops/test-private-crm-owner-monitor-migration.py",
+            "scripts/ops/private_crm_base_monitor_migration.py",
+            "scripts/ops/test-private-crm-base-monitor-migration.py",
+            "tests/owner_draft_ci_admission_test.py",
+            "tests/base_monitor_migration_contract_test.py",
+            "scripts/ci/test_automation_incremental_drift.py",
+            "scripts/ci/check_automation_incremental.sql",
+            ".github/workflows/ci-crm-owner-agents-drafts.yml",
+            ".github/workflows/central-auto-incremental-migration.yml",
+            "docs/automation/CRM-AUTOMATION-MIGRATION-DRIFT.md",
+            "docs/desenvolvimento/CRM-OWNER-MONITOR-INCREMENTAL-MIGRATION-2026-11-18.md",
+            "docs/desenvolvimento/CRM-BASE-MONITOR-INCREMENTAL-MIGRATION-2026-11-18.md",
+        }
+        self.assertEqual(len(added_sources), 20)
+        self.assertTrue(added_sources <= self.public_required_crm)
+        existing_paths = {path for path, mode, data in self.files}
+        complete = self.files + [(path, "100644", b"synthetic public source fixture\n")
+                                 for path in sorted(self.public_required_crm - existing_paths)]
+
+        def identity_for(files):
+            tree = packet.tree_hash(files)
+            original_commit = base64.b64decode(self.identity["commit_object_b64"])
+            commit = b"tree " + tree.encode() + b"\n" + original_commit.split(b"\n", 1)[1]
+            return {**self.identity, "tree": tree, "commit": packet.git_hash("commit", commit),
+                    "commit_object_b64": base64.b64encode(commit).decode()}
+
+        required = {**self.required, "crm": set(self.public_required_crm)}
+        with patch.object(packet, "REQUIRED", required):
+            complete_identity = identity_for(complete)
+            sources = {name: (self.files, self.identity) for name in packet.REPOSITORIES}
+            sources["crm"] = (complete, complete_identity)
+            with patch.dict(packet.FIXED_PINS, {"crm": complete_identity["commit"]}):
+                result = packet.write_packet(sources, self.observations, self.directory)
+                verified = packet.verify_packet(self.directory, self.commit, result["manifest_sha256"])
+                self.assertEqual(verified["source_archives"], 3)
+                self.assertFalse(verified["ci_observations_authenticated_offline"])
+
+            for index, missing in enumerate(sorted(added_sources)):
+                with self.subTest(missing=missing):
+                    files = [entry for entry in complete if entry[0] != missing]
+                    identity = identity_for(files)
+                    raw = packet.archive_bytes(files)
+                    descriptor = {**identity, "archive_bytes": len(raw),
+                                  "sha256": hashlib.sha256(raw).hexdigest(),
+                                  "file_count": len(files), "source_bytes": sum(len(entry[2]) for entry in files)}
+                    with self.assertRaisesRegex(packet.Denied, "BUILD_SOURCE_INCOMPLETE"):
+                        packet.inspect_archive(raw, descriptor, required["crm"])
+                    sources["crm"] = (files, identity)
+                    denied_output = Path(self.temp.name) / ("missing-crm-source-" + str(index))
+                    with patch.dict(packet.FIXED_PINS, {"crm": identity["commit"]}):
+                        with self.assertRaisesRegex(packet.Denied, "BUILD_SOURCE_INCOMPLETE"):
+                            packet.write_packet(sources, self.observations, denied_output)
+                    self.assertFalse(denied_output.exists())
 
     def test_selected_imports_cannot_claim_ancestry_or_unproved_product_scope(self):
         self.make_packet()

@@ -11,7 +11,7 @@ deny() { printf 'N8N_PRIVATE_CANDIDATE_DENY_%s\n' "$1" >&2; exit 2; }
 [[ "${GITHUB_REPOSITORY:-}" == rafhael100/imagine-ai-agents ]] || deny WRONG_REPOSITORY
 [[ "${N8N_CANDIDATE_REPOSITORY_PRIVATE:-}" == false ]] || deny PUBLIC_REPOSITORY_REQUIRED
 [[ "${GITHUB_EVENT_NAME:-}" == push ]] || deny PUSH_REQUIRED
-[[ "${GITHUB_REF:-}" == refs/heads/integrate/n8n-owner-provider-components-2026-11-18 ]] || deny BRANCH
+[[ "${GITHUB_REF:-}" == refs/heads/integrate/n8n-owner-components-crm-664-2026-11-18 ]] || deny BRANCH
 [[ "${GITHUB_SHA:-}" =~ ^[a-f0-9]{40}$ ]] || deny SOURCE_SHA
 [[ "${GITHUB_RUN_ID:-}" =~ ^[0-9]{1,20}$ ]] || deny RUN_ID
 [[ "${GITHUB_RUN_ATTEMPT:-}" =~ ^[0-9]{1,4}$ ]] || deny RUN_ATTEMPT
@@ -24,6 +24,7 @@ repo=$(git rev-parse --show-toplevel)
 cd "$repo"
 candidate_sha=$(git rev-parse HEAD)
 candidate_tree=$(git rev-parse 'HEAD^{tree}')
+integrated_parent_sha=ce004ad4a8fa5fb59ef38cdd250126d0f0e99b46
 native_parent_sha=64f52f0dcd44a5545d1bfc6c1d685b33c158601f
 owner_source_sha=85f4c37a6d905b91923d3e31ba9068b2c35d7657
 candidate_source_sha=3d30b2f7977b37d3bb86d6ff11bc63728145f5fd
@@ -31,7 +32,7 @@ central_source_sha=dfa4685cd5df4a9499c3420f580980e769a1981d
 domain_source_sha=05e4ea7942e530055f4e455544d82f5d3edbd56d
 operator_source_sha=c08688b16e61d8d1ecc4d8c0ed4da8758a687ee8
 adapter_sha=8b04d0e936168c77db028160b5aeb1758db497c4
-crm_sha=96dbf1aed2d1cf3237bc3631c4594540a0168d2a
+crm_sha=7e1b00a0c173bcfcac3a9051ef6cad3aededcdb8
 crm="$repo/_crm_feedback_pinned"
 owner_reference="$repo/_owner_components_pinned"
 packet="$RUNNER_TEMP/n8n-private-candidate-packet"
@@ -41,7 +42,7 @@ packet="$RUNNER_TEMP/n8n-private-candidate-packet"
 test "$(git rev-parse --is-shallow-repository)" = false
 git diff --quiet
 git diff --cached --quiet
-for source_sha in "$native_parent_sha" "$candidate_source_sha" "$central_source_sha" "$domain_source_sha" "$operator_source_sha" "$adapter_sha"; do
+for source_sha in "$integrated_parent_sha" "$native_parent_sha" "$candidate_source_sha" "$central_source_sha" "$domain_source_sha" "$operator_source_sha" "$adapter_sha"; do
   test "$(git cat-file -t "$source_sha")" = commit
   git merge-base --is-ancestor "$source_sha" "$candidate_sha"
 done
@@ -49,6 +50,7 @@ done
 test "$(git -C "$crm" rev-parse HEAD)" = "$crm_sha"
 test "$(git -C "$crm" rev-parse --is-shallow-repository)" = false
 git -C "$crm" merge-base --is-ancestor e1b3b7f118eff0350a00789aecc7bb2bb2331464 "$crm_sha"
+git -C "$crm" merge-base --is-ancestor 96dbf1aed2d1cf3237bc3631c4594540a0168d2a "$crm_sha"
 git -C "$crm" diff --quiet
 git -C "$crm" diff --cached --quiet
 [[ -d "$owner_reference" && ! -L "$owner_reference" ]] || deny OWNER_SOURCE_CHECKOUT
@@ -440,12 +442,13 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
     echo
     printf -- '- Actual candidate commit: `%s`\n' "$candidate_sha"
     printf -- '- Actual candidate tree: `%s`\n' "$candidate_tree"
+    printf -- '- Ancestor provider components #482: `%s`\n' "$integrated_parent_sha"
     printf -- '- Ancestor native/CRM #481: `%s`\n' "$native_parent_sha"
     printf -- '- Ancestor consolidated #479: `%s`\n' "$candidate_source_sha"
     printf -- '- Preserved Central #475: `%s`\n' "$central_source_sha"
     printf -- '- Preserved lead domain #468: `%s`\n' "$domain_source_sha"
     printf -- '- Preserved native operator P30 #464: `%s`\n' "$operator_source_sha"
-    printf -- '- Pinned CRM #660: `%s`\n' "$crm_sha"
+    printf -- '- Pinned CRM #664: `%s`\n' "$crm_sha"
     printf -- '- Historical replay adapter: `%s`\n' "$adapter_sha"
     printf -- '- Verified packet manifest SHA256: `%s`\n' "$packet_manifest_sha"
     echo '- Direct source build; no temporary merge tree or domain checkout supplied missing files.'
@@ -456,8 +459,9 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
     echo '- The candidate imports fourteen selected P67/P68 files; those source branches are not claimed as ancestors or the complete Agents product.'
     echo '- Public archives and manifest are source evidence, not a backup, installer or operational approval.'
     echo '- The review artifact is retained for seven days; keep its trusted CI manifest digest for later verification.'
-    echo '- The native feedback restore uses the 33-table monitor profile from CRM #660 and its required closed catalog.'
-    echo '- CRM #660 owns separate human session/MFA/browser and owner-plus-monitor 35-table evidence; the owner provider groups here do not exercise that CRM journey.'
+    echo '- The native feedback restore uses the unchanged 33-table monitor profile from CRM #664 and its required closed catalog.'
+    echo '- CRM #664 owns separate human session/MFA/browser and owner-plus-monitor 35-table evidence; the owner provider groups here do not exercise that CRM journey.'
+    echo '- The corrected ledger migration and the 25-to-33/33-to-35 migrators are included as public source; their execution belongs to the CRM CI, not these 22 groups.'
     echo '- DRAFT / NO-GO: no real operator, external backup, registry publication, paid AI or installation.'
   } >> "$GITHUB_STEP_SUMMARY"
 fi
