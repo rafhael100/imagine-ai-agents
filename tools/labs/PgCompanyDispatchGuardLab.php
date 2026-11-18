@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgSyntheticReplayGate.php';
+require_once __DIR__.'/PgCapturedLeadProofLab.php';
 
 use PDO;
 use Throwable;
@@ -50,6 +51,17 @@ SQL);
             return false;
         }
         try{
+            $job=$this->db->prepare('SELECT canonical_event,event_hash FROM public.aia_lab_n8n_outbox_p6 '
+                .'WHERE tenant_ref=:tenant AND event_ref=:event FOR SHARE');
+            $job->execute([':tenant'=>$tenant,':event'=>$event]);$row=$job->fetch(PDO::FETCH_ASSOC);
+            if(!is_array($row)||!hash_equals($row['event_hash'],$payloadHash)
+                ||!hash_equals(hash('sha256',$row['canonical_event']),$payloadHash))return false;
+            $task=LabAutomationTaskContract::decode($row['canonical_event']);
+            if($task===null||$task['tenant_ref']!==$tenant||$task['event_ref']!==$event)return false;
+            $proof=new PgCapturedLeadProofLab($this->db);
+            if(LabAutomationTaskContract::isLead($row['canonical_event']))
+                return $proof->stagedMatches($company,$tenant,$row['canonical_event'],$payloadHash);
+            if($proof->hasCapturedProof($tenant,$event))return false;
             $q=$this->db->prepare(<<<'SQL'
 SELECT payload_hash FROM aia_p42_lab.consumed_transport_proofs
 WHERE company_id=CAST(:company AS uuid)

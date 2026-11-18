@@ -5,6 +5,7 @@ namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgSyntheticReplayGate.php';
 require_once __DIR__.'/../../src/MockOrchestration/MockN8nOutboxContract.php';
+require_once __DIR__.'/PgCapturedLeadProofLab.php';
 
 use ImagineAI\MockOrchestration\MockN8nOutboxContract;
 use PDO;
@@ -38,8 +39,32 @@ final class PgTransportOwnerLineageAuditLab
         try{
             $this->db->beginTransaction();
             $this->db->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY');
-            $rows=$this->db->query(<<<'SQL'
+            // Each source is explicit. An installation exercising only the
+            // captured-lead path need not fabricate the historical P7 tables.
+            $legacy=$this->exists('aia_p42_lab.consumed_transport_proofs')
+                ?"SELECT 'P7'::text AS source_kind,company_id,tenant_ref,event_ref,
+                    request_id::text,nonce::text,payload_hash::text
+                   FROM aia_p42_lab.consumed_transport_proofs"
+                :"SELECT 'P7'::text AS source_kind,NULL::uuid AS company_id,
+                    NULL::text AS tenant_ref,NULL::text AS event_ref,NULL::text AS request_id,
+                    NULL::text AS nonce,NULL::text AS payload_hash WHERE false";
+            $captured=$this->exists('aia_lead_ingest_lab.captured_job_sources')
+                ?"SELECT 'CAPTURED_LEAD'::text AS source_kind,company_id,tenant_ref,event_ref,
+                    NULL::text AS request_id,NULL::text AS nonce,task_payload_hash AS payload_hash
+                   FROM aia_lead_ingest_lab.captured_job_sources"
+                :"SELECT 'CAPTURED_LEAD'::text AS source_kind,NULL::uuid AS company_id,
+                    NULL::text AS tenant_ref,NULL::text AS event_ref,NULL::text AS request_id,
+                    NULL::text AS nonce,NULL::text AS payload_hash WHERE false";
+            $admitted=$this->exists('central_auto_lab.mtls_nonce_ledger')
+                ?"SELECT company_id,request_id,nonce,issuer,audience FROM central_auto_lab.mtls_nonce_ledger"
+                :"SELECT NULL::uuid AS company_id,NULL::text AS request_id,NULL::text AS nonce,
+                    NULL::text AS issuer,NULL::text AS audience WHERE false";
+            $rows=$this->db->query(<<<SQL
+WITH transport AS ($legacy),captured AS ($captured),
+ provenance AS (SELECT * FROM transport UNION ALL SELECT * FROM captured),
+ admitted AS ($admitted)
 SELECT
+ t.source_kind,
  t.company_id::text AS tc,t.tenant_ref AS tt,t.event_ref AS te,
  t.request_id AS t_request,t.nonce AS t_nonce,t.payload_hash AS th,
  g.company_id::text AS gc,g.tenant_ref AS gt,g.event_ref AS ge,
@@ -48,26 +73,28 @@ SELECT
  m.tenant_ref AS mapped_tenant,
  n.nonce AS admitted_nonce,
  l.payload_hash AS replay_hash,
- o.event_hash AS outbox_hash,o.canonical_event,
+ o.event_hash AS outbox_hash,o.canonical_event,o.tenant_ref AS ot,o.event_ref AS oe,
  k.public_key_b64,k.fingerprint
-FROM aia_p42_lab.consumed_transport_proofs t
+FROM provenance t
 FULL OUTER JOIN aia_p44_lab.consumed_owner_grants g
  ON g.company_id=t.company_id AND g.tenant_ref=t.tenant_ref
  AND g.event_ref=t.event_ref
+FULL OUTER JOIN public.aia_lab_n8n_outbox_p6 o
+ ON o.tenant_ref=COALESCE(t.tenant_ref,g.tenant_ref)
+ AND o.event_ref=COALESCE(t.event_ref,g.event_ref)
 LEFT JOIN aia_p41_lab.company_tenant_links m
  ON m.company_id=COALESCE(t.company_id,g.company_id)
-LEFT JOIN central_auto_lab.mtls_nonce_ledger n
+LEFT JOIN admitted n
  ON n.company_id=t.company_id AND n.request_id=t.request_id
  AND n.nonce=t.nonce AND n.issuer='portal-automation-admin'
  AND n.audience='crm-automation-state'
 LEFT JOIN aia_p16_lab.event_replay l
  ON l.tenant_ref=COALESCE(t.tenant_ref,g.tenant_ref)
  AND l.event_ref=COALESCE(t.event_ref,g.event_ref)
-LEFT JOIN public.aia_lab_n8n_outbox_p6 o
- ON o.tenant_ref=COALESCE(t.tenant_ref,g.tenant_ref)
- AND o.event_ref=COALESCE(t.event_ref,g.event_ref)
 LEFT JOIN aia_p44_lab.owner_keys k
  ON k.company_id=g.company_id AND k.key_id=g.signer_key_id
+WHERE t.company_id IS NOT NULL OR g.company_id IS NOT NULL
+ OR o.canonical_event LIKE '{"contract":"SYNTHETIC_CRM_LEAD_INGEST_V1",%'
 ORDER BY COALESCE(t.tenant_ref,g.tenant_ref),
  COALESCE(t.event_ref,g.event_ref)
 SQL)->fetchAll(PDO::FETCH_ASSOC);
@@ -79,19 +106,21 @@ SQL)->fetchAll(PDO::FETCH_ASSOC);
             }
             $issues=[];
             foreach($rows as $r){
-                $tenant=$r['tt']??$r['gt'];
-                $event=$r['te']??$r['ge'];
+                $tenant=$r['tt']??$r['gt']??$r['ot'];
+                $event=$r['te']??$r['ge']??$r['oe'];
                 $why=null;
                 if($r['tc']===null){
-                    $why='OWNER_GRANT_WITHOUT_TRANSPORT_PROOF';
+                    $why=$r['gc']!==null?'OWNER_GRANT_WITHOUT_TRANSPORT_PROOF':
+                        'LEAD_JOB_WITHOUT_SOURCE_PROOF';
                 }elseif($r['gc']===null){
-                    $why='P42_EVENT_WITHOUT_OWNER_GRANT';
+                    $why=$r['source_kind']==='CAPTURED_LEAD'?'LEAD_JOB_WITHOUT_OWNER_GRANT':
+                        'P42_EVENT_WITHOUT_OWNER_GRANT';
                 }elseif($r['tc']!==$r['gc']||$r['tt']!==$r['gt']
                     ||$r['te']!==$r['ge']){
                     $why='COMPANY_TENANT_EVENT_SCOPE_MISMATCH';
                 }elseif($r['mapped_tenant']!==$r['tt']){
                     $why='COMPANY_TENANT_MAPPING_DRIFT';
-                }elseif($r['admitted_nonce']===null){
+                }elseif($r['source_kind']==='P7'&&$r['admitted_nonce']===null){
                     $why='MISSING_ORIGINAL_MTLS_ADMISSION';
                 }elseif(!is_string($r['replay_hash'])
                     ||!is_string($r['outbox_hash'])
@@ -101,8 +130,17 @@ SQL)->fetchAll(PDO::FETCH_ASSOC);
                     ||!hash_equals($r['th'],$r['replay_hash'])
                     ||!hash_equals($r['th'],$r['outbox_hash'])
                     ||!hash_equals($r['th'],hash('sha256',$r['canonical_event']))
-                    ||MockN8nOutboxContract::decode($r['canonical_event'])===null){
+                    ||LabAutomationTaskContract::decode($r['canonical_event'])===null){
                     $why='EVENT_LINEAGE_HASH_MISMATCH';
+                }elseif($r['source_kind']==='CAPTURED_LEAD'
+                    &&(!LabAutomationTaskContract::isLead($r['canonical_event'])
+                        ||!(new PgCapturedLeadProofLab($this->db))->stagedMatches(
+                            $r['tc'],$r['tt'],$r['canonical_event'],$r['th'],false))){
+                    $why='CAPTURED_LEAD_LINEAGE_INVALID';
+                }elseif($r['source_kind']==='P7'
+                    &&(MockN8nOutboxContract::decode($r['canonical_event'])===null
+                        ||(new PgCapturedLeadProofLab($this->db))->hasCapturedProof($r['tt'],$r['te']))){
+                    $why='P7_PROOF_CANNOT_AUTHORIZE_CAPTURED_LEAD';
                 }else{
                     $why=self::signedOwnerReason($r);
                 }
@@ -150,7 +188,8 @@ SQL)->fetchAll(PDO::FETCH_ASSOC);
             if($d['schema']!=='AIA_OWNER_DECISION_V1'
                 ||$d['issuer']!=='SYNTHETIC_CRM_POLICY_OWNER'
                 ||$d['audience']!=='imagine-ai-agents'
-                ||$d['operation']!=='run.status.project'
+                ||$d['operation']!==LabAutomationTaskContract::operation($r['canonical_event'])
+                ||!in_array($d['operation'],['run.status.project','lead.ingest'],true)
                 ||$d['decision']!=='ALLOW_NO_AI_LAB'
                 ||$d['company_id']!==$r['gc']
                 ||$d['tenant_ref']!==$r['gt']
@@ -186,6 +225,12 @@ SQL)->fetchAll(PDO::FETCH_ASSOC);
         }catch(Throwable){
             return 'OWNER_DECISION_SCHEMA_INVALID';
         }
+    }
+
+    private function exists(string $relation):bool
+    {
+        $q=$this->db->prepare('SELECT to_regclass(:relation)');
+        $q->execute([':relation'=>$relation]);return is_string($q->fetchColumn());
     }
 
     /** @return array{decision:string,checked:int,issues:array,ai_calls:int,external_calls:int} */

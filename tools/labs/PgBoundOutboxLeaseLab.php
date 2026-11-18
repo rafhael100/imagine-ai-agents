@@ -6,10 +6,9 @@ namespace ImagineAI\Convergence;
 require_once __DIR__.'/PgSyntheticReplayGate.php';
 require_once __DIR__.'/PgCompanyDispatchGuardLab.php';
 require_once __DIR__.'/PgOwnerExecutionGuardLab.php';
-require_once __DIR__.'/../../src/MockOrchestration/MockN8nOutboxContract.php';
+require_once __DIR__.'/LabAutomationTaskContract.php';
 
-use ImagineAI\AutomationFirst\MockP7ToAutoIaAdapter;
-use ImagineAI\MockOrchestration\MockN8nOutboxContract;
+use ImagineAI\MockOrchestration\CapturedLeadTaskContract;
 use PDO;
 use Throwable;
 
@@ -96,7 +95,7 @@ SQL);
             $ledger=$proof->fetch(PDO::FETCH_ASSOC);
             $canonical=$row['canonical_event'];
             $event=is_string($canonical)
-                ? MockN8nOutboxContract::decode($canonical)
+                ? LabAutomationTaskContract::decode($canonical)
                 : null;
             if(!is_array($ledger) || !is_array($event)
                 || !is_string($row['event_hash'])
@@ -106,6 +105,17 @@ SQL);
                 || !hash_equals($ledger['payload_hash'],$row['event_hash'])) {
                 $this->db->rollBack();
                 return self::out('DENY', 'CROSS_TABLE_BINDING_INVALID');
+            }
+
+            $lead=LabAutomationTaskContract::isLead($canonical);
+            if($lead&&(!$ownerGrantRequired||$companyId===null||$trustedRevision===null)){
+                $this->db->rollBack();return self::out('DENY','LEAD_FULL_AUTHORITY_REQUIRED');
+            }
+            if($lead){
+                $now=time();
+                if(!CapturedLeadTaskContract::fresh($event,$now)){
+                    $this->db->rollBack();return self::out('DENY','LEAD_TASK_NOT_CURRENT');
+                }
             }
 
             if($companyId!==null && !(new PgCompanyDispatchGuardLab($this->db))
@@ -126,7 +136,7 @@ SQL);
 
             // Historical derivation is a consistency check only, NEVER a
             // fresh authorization, service token or live trust decision.
-            $check=MockP7ToAutoIaAdapter::propose(
+            $check=LabAutomationTaskContract::propose(
                 $canonical,$tenant,(int)$event['occurred_at']+5
             );
             $p=$check['proposal'] ?? null;
@@ -154,6 +164,19 @@ SQL);
             if($update->rowCount()!==1){
                 $this->db->rollBack();
                 return self::out('DENY','LOST_LOCK_OR_CONCURRENT_CONFLICT');
+            }
+            if($lead){
+                $after=time();
+                if($until<=$after||!CapturedLeadTaskContract::fresh($event,$after)
+                    ||!$this->authorityCurrent($tenant,$trustedRevision)
+                    ||!(new PgCompanyDispatchGuardLab($this->db))->mappingCurrent(
+                        $companyId,$tenant,$companyRevision)
+                    ||!(new PgCompanyDispatchGuardLab($this->db))->eventMatches(
+                        $companyId,$tenant,$row['event_ref'],$row['event_hash'])
+                    ||!(new PgOwnerExecutionGuardLab($this->db))->grantCurrent(
+                        $companyId,$tenant,$row['event_ref'],$row['event_hash'],$after)){
+                    $this->db->rollBack();return self::out('DENY','LEAD_POST_WAIT_AUTHORITY_DENIED');
+                }
             }
             $this->db->commit();
             return self::out('LAB_LEASE_RESERVED_NO_DELIVERY', 'NO_REAL_IAM_OR_TRANSPORT',
