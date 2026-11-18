@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgSyntheticReplayGate.php';
+require_once __DIR__.'/LabAutomationTaskContract.php';
 
 use PDO;
 use Throwable;
@@ -121,6 +122,13 @@ SQL);
             ||strlen($decisionCanonical)>1024
             ||strlen($signatureB64)!==88) return 'DENY_OWNER_ARGUMENTS';
         try{
+            $task=LabAutomationTaskContract::decode($canonicalEvent);
+            $operation=LabAutomationTaskContract::operation($canonicalEvent);
+            if($task===null||$task['tenant_ref']!==$tenant||$task['event_ref']!==$event
+                ||!in_array($operation,['run.status.project','lead.ingest'],true)
+                ||($operation==='lead.ingest'&&$task['company_id']!==$company))
+                return 'DENY_OWNER_TASK_SCOPE';
+            if($operation==='lead.ingest')$now=time();
             $d=json_decode($decisionCanonical,true,5,JSON_THROW_ON_ERROR);
             if(!is_array($d)||array_keys($d)!==self::FIELDS)return 'DENY_OWNER_SCHEMA';
             $encoded=json_encode($d,JSON_THROW_ON_ERROR
@@ -137,7 +145,7 @@ SQL);
             if($d['schema']!=='AIA_OWNER_DECISION_V1'
                 ||$d['issuer']!=='SYNTHETIC_CRM_POLICY_OWNER'
                 ||$d['audience']!=='imagine-ai-agents'
-                ||$d['operation']!=='run.status.project'
+                ||$d['operation']!==$operation
                 ||$d['decision']!=='ALLOW_NO_AI_LAB'
                 ||$d['company_id']!==$company
                 ||$d['tenant_ref']!==$tenant
@@ -181,6 +189,12 @@ SQL);
                 ||!hash_equals(hash('sha256',$pub),$row['fingerprint'])
                 ||!sodium_crypto_sign_verify_detached($sig,$decisionCanonical,$pub)){
                 return 'DENY_OWNER_SIGNATURE';
+            }
+            if($operation==='lead.ingest'){
+                $current=time();
+                if(!\ImagineAI\MockOrchestration\CapturedLeadTaskContract::fresh($task,$current)
+                    ||$d['issued_at']>$current+5||$d['issued_at']<$current-60
+                    ||$d['expires_at']<=$current)return 'DENY_OWNER_EXPIRED';
             }
             $insert=$this->db->prepare(<<<'SQL'
 INSERT INTO aia_p44_lab.consumed_owner_grants

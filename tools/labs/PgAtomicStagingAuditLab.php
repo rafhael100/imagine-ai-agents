@@ -6,6 +6,7 @@ namespace ImagineAI\Convergence;
 require_once __DIR__.'/PgSyntheticReplayGate.php';
 require_once __DIR__.'/../../src/MockOrchestration/MockN8nOutboxContract.php';
 require_once __DIR__.'/../../_auto_ia_pinned_source/tools/auto_ia/convergence/MockP7ToAutoIaAdapter.php';
+require_once __DIR__.'/LabAutomationTaskContract.php';
 
 use ImagineAI\MockOrchestration\MockN8nOutboxContract;
 use ImagineAI\AutomationFirst\MockP7ToAutoIaAdapter;
@@ -58,7 +59,7 @@ SQL)->fetchAll(PDO::FETCH_ASSOC);
                     $reason='STORED_HASH_MISMATCH';
                 }else{
                     $canonical=$row['outbox_canonical'];
-                    $event=is_string($canonical) ? MockN8nOutboxContract::decode($canonical) : null;
+                    $event=is_string($canonical) ? LabAutomationTaskContract::decode($canonical) : null;
                     if($event===null){
                         $reason='INVALID_OUTBOX_CANONICAL';
                     }elseif($event['tenant_ref']!==$row['replay_tenant']
@@ -69,7 +70,7 @@ SQL)->fetchAll(PDO::FETCH_ASSOC);
                     }else{
                         // Historical offline reconstruction uses the recorded event timestamp,
                         // NEVER the current wall clock. This does NOT establish current validity.
-                        $proposalResult=MockP7ToAutoIaAdapter::propose(
+                        $proposalResult=LabAutomationTaskContract::propose(
                             $canonical, $row['replay_tenant'], (int)$event['occurred_at'] + 5
                         );
                         $proposal=$proposalResult['proposal'] ?? null;

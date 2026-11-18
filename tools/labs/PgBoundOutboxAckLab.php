@@ -6,10 +6,9 @@ namespace ImagineAI\Convergence;
 require_once __DIR__.'/PgBoundOutboxLeaseLab.php';
 require_once __DIR__.'/PgCompanyDispatchGuardLab.php';
 require_once __DIR__.'/PgOwnerExecutionGuardLab.php';
-require_once __DIR__.'/../../src/MockOrchestration/MockN8nOutboxContract.php';
+require_once __DIR__.'/LabAutomationTaskContract.php';
 
-use ImagineAI\AutomationFirst\MockP7ToAutoIaAdapter;
-use ImagineAI\MockOrchestration\MockN8nOutboxContract;
+use ImagineAI\MockOrchestration\CapturedLeadTaskContract;
 use PDO;
 use Throwable;
 
@@ -122,7 +121,7 @@ SQL);
             $ledger=$proof->fetch(PDO::FETCH_ASSOC);
             $canonical=$row['canonical_event'];
             $decoded=is_string($canonical)
-                ? MockN8nOutboxContract::decode($canonical)
+                ? LabAutomationTaskContract::decode($canonical)
                 : null;
             if(!is_array($ledger)||!is_array($decoded)
                 ||!is_string($row['event_hash'])
@@ -132,6 +131,18 @@ SQL);
                 ||!hash_equals($row['event_hash'],$ledger['payload_hash'])) {
                 $this->db->rollBack();
                 return self::deny('CANONICAL_OR_LEDGER_MISMATCH');
+            }
+
+            $lead=LabAutomationTaskContract::isLead($canonical);
+            if($lead&&(!$ownerGrantRequired||$companyId===null
+                ||$trustedRevision===null||!$signedEvidenceRequested)){
+                $this->db->rollBack();return self::deny('LEAD_FULL_SIGNED_AUTHORITY_REQUIRED');
+            }
+            if($lead){
+                $now=time();
+                if((int)$row['lease_expires']<=$now||!CapturedLeadTaskContract::fresh($decoded,$now)){
+                    $this->db->rollBack();return self::deny('LEAD_LEASE_OR_TASK_EXPIRED');
+                }
             }
 
             // P43: only P42-originated events with one matching consumed
@@ -162,7 +173,7 @@ SQL);
 
             // Recorded timestamp is only for reconstruction of synthetic refs.
             // No historical reconstruction grants live service access.
-            $replayed=MockP7ToAutoIaAdapter::propose(
+            $replayed=LabAutomationTaskContract::propose(
                 $canonical,$tenant,(int)$decoded['occurred_at']+5
             );
             $proposal=$replayed['proposal']??null;
@@ -234,6 +245,24 @@ SQL);
                 if($e->rowCount()!==1){
                     $this->db->rollBack();
                     return self::deny('ACK_EVIDENCE_NOT_INSERTED');
+                }
+            }
+            if($lead){
+                $after=time();
+                $lateReceipt=MockContentBoundExecutorReceiptV2::verify(
+                    $canonicalSignedReceipt,$receiptSignatureB64,$receiptPublicKey,
+                    $tenant,$eventRef,$worker,$attempt,$trustedRevision,$after);
+                if((int)$row['lease_expires']<=$after||!CapturedLeadTaskContract::fresh($decoded,$after)
+                    ||$lateReceipt['decision']!=='LAB_SIGNED_CONTENT_BOUND_RECEIPT'
+                    ||!$this->authorityCurrent($tenant,$trustedRevision)
+                    ||!$this->signerKeyCurrent($tenant,$trustedExecutorKeyId,$expectedExecutorKeyFingerprint)
+                    ||!(new PgCompanyDispatchGuardLab($this->db))->mappingCurrent(
+                        $companyId,$tenant,$companyRevision)
+                    ||!(new PgCompanyDispatchGuardLab($this->db))->eventMatches(
+                        $companyId,$tenant,$eventRef,$row['event_hash'])
+                    ||!(new PgOwnerExecutionGuardLab($this->db))->grantCurrent(
+                        $companyId,$tenant,$eventRef,$row['event_hash'],$after)){
+                    $this->db->rollBack();return self::deny('LEAD_POST_WAIT_SIGNED_AUTHORITY_DENIED');
                 }
             }
             $this->db->commit();

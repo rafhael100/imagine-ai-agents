@@ -3,7 +3,9 @@ declare(strict_types=1);
 namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgSyntheticReplayGate.php';
+require_once __DIR__.'/LabAutomationTaskContract.php';
 
+use ImagineAI\MockOrchestration\CapturedLeadTaskContract;
 use PDO;
 use Throwable;
 
@@ -35,6 +37,19 @@ final class PgOwnerExecutionGuardLab
             ||preg_match('/\A[a-f0-9]{64}\z/D',$payloadHash)!==1
             ||$now<0||$now>4102444800) return false;
         try{
+            // Derive the operation from the protected persisted job, never
+            // from a caller's choice or the owner decision being verified.
+            $job=$this->db->prepare('SELECT canonical_event,event_hash FROM public.aia_lab_n8n_outbox_p6 '
+                .'WHERE tenant_ref=:tenant AND event_ref=:event FOR SHARE');
+            $job->execute([':tenant'=>$tenant,':event'=>$event]);$row=$job->fetch(PDO::FETCH_ASSOC);
+            if(!is_array($row)||!hash_equals($row['event_hash'],$payloadHash)
+                ||!hash_equals(hash('sha256',$row['canonical_event']),$payloadHash))return false;
+            $task=LabAutomationTaskContract::decode($row['canonical_event']);
+            $operation=LabAutomationTaskContract::operation($row['canonical_event']);
+            if($task===null||$task['tenant_ref']!==$tenant||$task['event_ref']!==$event
+                ||!in_array($operation,['run.status.project','lead.ingest'],true)
+                ||($operation==='lead.ingest'&&$task['company_id']!==$company))return false;
+            if($operation==='lead.ingest')$now=time();
             // Both rows stay locked until the caller's P28/P30 commit.
             $q=$this->db->prepare(<<<'SQL'
 SELECT grant_ref,payload_hash,signed_decision_sha256,
@@ -64,7 +79,7 @@ SQL);
             if($d['schema']!=='AIA_OWNER_DECISION_V1'
                 ||$d['issuer']!=='SYNTHETIC_CRM_POLICY_OWNER'
                 ||$d['audience']!=='imagine-ai-agents'
-                ||$d['operation']!=='run.status.project'
+                ||$d['operation']!==$operation
                 ||$d['decision']!=='ALLOW_NO_AI_LAB'
                 ||$d['company_id']!==$company
                 ||$d['tenant_ref']!==$tenant
@@ -90,6 +105,12 @@ SQL);
                 ||(int)$signer['revision']!==$d['owner_revision'])return false;
             $pub=base64_decode($signer['public_key_b64'],true);
             $sig=base64_decode($grant['signature_b64'],true);
+            if($operation==='lead.ingest'){
+                $current=time();
+                if(!CapturedLeadTaskContract::fresh($task,$current)
+                    ||$d['issued_at']>$current+5||$d['issued_at']<$current-60
+                    ||$d['expires_at']<=$current)return false;
+            }
             return is_string($pub)
                 &&strlen($pub)===SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES
                 &&hash_equals(hash('sha256',$pub),$signer['fingerprint'])

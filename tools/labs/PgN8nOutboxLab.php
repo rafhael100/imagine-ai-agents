@@ -2,6 +2,9 @@
 declare(strict_types=1);
 namespace ImagineAI\Labs;
 
+require_once __DIR__.'/LabAutomationTaskContract.php';
+
+use ImagineAI\Convergence\LabAutomationTaskContract;
 use ImagineAI\MockOrchestration\MockN8nOutboxContract;
 use PDO;
 use Throwable;
@@ -90,8 +93,8 @@ final readonly class PgN8nOutboxLab
     /** @return 'CREATED'|'REPLAY'|null */
     private function enqueueCore(string $canonical, bool $ownTransaction): ?string
     {
-        $event=MockN8nOutboxContract::decode($canonical);
-        if ($event===null) return null;
+        $event=LabAutomationTaskContract::decode($canonical);
+        if ($event===null || ($ownTransaction&&LabAutomationTaskContract::isLead($canonical))) return null;
         $tenant=$event['tenant_ref'];
         $ref=$event['event_ref'];
         $hash=hash('sha256',$canonical);
@@ -140,7 +143,8 @@ final readonly class PgN8nOutboxLab
             $dead=$this->db->prepare('UPDATE '.self::TABLE.'
                 SET state=\'DEAD\',lease_owner=NULL,lease_expires=NULL
                 WHERE tenant_ref=:tenant AND state=\'LEASED\'
-                  AND attempts>=3 AND lease_expires<=:now');
+                  AND attempts>=3 AND lease_expires<=:now
+                  AND canonical_event::jsonb->>\'contract\'=\'SYNTHETIC_AIA_AUTOMATION_V1\'');
             $dead->execute(['tenant'=>$tenant,'now'=>$now]);
             $select=$this->db->prepare('SELECT event_ref,canonical_event,attempts
                 FROM '.self::TABLE.'
@@ -149,6 +153,7 @@ final readonly class PgN8nOutboxLab
                         state=\'LEASED\' AND lease_expires<=:now
                     )
                 ) AND attempts<3
+                AND canonical_event::jsonb->>\'contract\'=\'SYNTHETIC_AIA_AUTOMATION_V1\'
                 ORDER BY event_ref LIMIT 1
                 FOR UPDATE SKIP LOCKED');
             $select->execute(['tenant'=>$tenant,'now'=>$now]);
@@ -156,6 +161,11 @@ final readonly class PgN8nOutboxLab
             if (!is_array($row)) {
                 $this->db->commit();
                 return null;
+            }
+            // Captured lead tasks require the owner/company-bound dispatcher.
+            // The original raw P6 API must not bypass its current guards.
+            if(MockN8nOutboxContract::decode($row['canonical_event'])===null){
+                $this->db->rollBack();return null;
             }
             $attempt=(int)$row['attempts']+1;
             $leaseUntil=$now+60;
@@ -198,7 +208,8 @@ final readonly class PgN8nOutboxLab
                 SET state=\'ACKED\',lease_owner=NULL,lease_expires=NULL
                 WHERE tenant_ref=:tenant AND event_ref=:event
                   AND state=\'LEASED\' AND lease_owner=:worker
-                  AND attempts=:attempt AND lease_expires>:now');
+                  AND attempts=:attempt AND lease_expires>:now
+                  AND canonical_event::jsonb->>\'contract\'=\'SYNTHETIC_AIA_AUTOMATION_V1\'');
             $stmt->execute([
                 'tenant'=>$tenant,'event'=>$event,
                 'worker'=>$worker,'attempt'=>$attempt,'now'=>$now,
