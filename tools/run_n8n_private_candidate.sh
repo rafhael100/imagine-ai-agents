@@ -11,7 +11,7 @@ deny() { printf 'N8N_PRIVATE_CANDIDATE_DENY_%s\n' "$1" >&2; exit 2; }
 [[ "${GITHUB_REPOSITORY:-}" == rafhael100/imagine-ai-agents ]] || deny WRONG_REPOSITORY
 [[ "${N8N_CANDIDATE_REPOSITORY_PRIVATE:-}" == false ]] || deny PUBLIC_REPOSITORY_REQUIRED
 [[ "${GITHUB_EVENT_NAME:-}" == push ]] || deny PUSH_REQUIRED
-[[ "${GITHUB_REF:-}" == refs/heads/feat/n8n-private-candidate-bundle-2026-11-18 ]] || deny BRANCH
+[[ "${GITHUB_REF:-}" == refs/heads/integrate/n8n-candidate-crm-660-2026-11-18 ]] || deny BRANCH
 [[ "${GITHUB_SHA:-}" =~ ^[a-f0-9]{40}$ ]] || deny SOURCE_SHA
 [[ "${GITHUB_RUN_ID:-}" =~ ^[0-9]{1,20}$ ]] || deny RUN_ID
 [[ "${GITHUB_RUN_ATTEMPT:-}" =~ ^[0-9]{1,4}$ ]] || deny RUN_ATTEMPT
@@ -24,11 +24,12 @@ repo=$(git rev-parse --show-toplevel)
 cd "$repo"
 candidate_sha=$(git rev-parse HEAD)
 candidate_tree=$(git rev-parse 'HEAD^{tree}')
+candidate_source_sha=3d30b2f7977b37d3bb86d6ff11bc63728145f5fd
 central_source_sha=dfa4685cd5df4a9499c3420f580980e769a1981d
 domain_source_sha=05e4ea7942e530055f4e455544d82f5d3edbd56d
 operator_source_sha=c08688b16e61d8d1ecc4d8c0ed4da8758a687ee8
 adapter_sha=8b04d0e936168c77db028160b5aeb1758db497c4
-crm_sha=e1b3b7f118eff0350a00789aecc7bb2bb2331464
+crm_sha=96dbf1aed2d1cf3237bc3631c4594540a0168d2a
 crm="$repo/_crm_feedback_pinned"
 packet="$RUNNER_TEMP/n8n-private-candidate-packet"
 
@@ -37,12 +38,14 @@ packet="$RUNNER_TEMP/n8n-private-candidate-packet"
 test "$(git rev-parse --is-shallow-repository)" = false
 git diff --quiet
 git diff --cached --quiet
-for source_sha in "$central_source_sha" "$domain_source_sha" "$operator_source_sha" "$adapter_sha"; do
+for source_sha in "$candidate_source_sha" "$central_source_sha" "$domain_source_sha" "$operator_source_sha" "$adapter_sha"; do
   test "$(git cat-file -t "$source_sha")" = commit
   git merge-base --is-ancestor "$source_sha" "$candidate_sha"
 done
 [[ -d "$crm" && ! -L "$crm" ]] || deny CRM_CHECKOUT
 test "$(git -C "$crm" rev-parse HEAD)" = "$crm_sha"
+test "$(git -C "$crm" rev-parse --is-shallow-repository)" = false
+git -C "$crm" merge-base --is-ancestor e1b3b7f118eff0350a00789aecc7bb2bb2331464 "$crm_sha"
 git -C "$crm" diff --quiet
 git -C "$crm" diff --cached --quiet
 [[ ! -e "$packet" && ! -L "$packet" ]] || deny PACKET_ALREADY_EXISTS
@@ -91,7 +94,6 @@ for file in \
   runtime/central-auto/lead-ingest-capture.sql \
   infra/n8n-private/homologation/check_crm_lead_capture.py \
   runtime/central-auto/p29-json-probe.php \
-  infra/n8n-private/homologation/check_crm_execution_feedback.py \
   runtime/central-auto/feedback-crm-probe.php \
   runtime/central-auto/feedback-crm-monitor-probe.php \
   runtime/central-auto/feedback-http-probe.php \
@@ -101,6 +103,14 @@ for file in \
   infra/n8n-private/homologation/check_p29_ingress_boundaries.py; do
   test "$(git rev-parse "$central_source_sha:$file")" = "$(git rev-parse "$candidate_sha:$file")"
 done
+
+# The only changed member of the source's 82 exact bindings is the CRM
+# feedback checker. Its preimage stays pinned to #479; the reviewed adaptation
+# and its support module/tests are bound individually below, without wildcard.
+test "$(git rev-parse "$candidate_source_sha:infra/n8n-private/homologation/check_crm_execution_feedback.py")" = 98292744b96437decf2e307b7284a2063e7550fd
+test "$(git rev-parse "$candidate_sha:infra/n8n-private/homologation/check_crm_execution_feedback.py")" = 667616ca435856412196a780c628503e58bf7b0d
+test "$(git rev-parse "$candidate_sha:infra/n8n-private/homologation/crm_feedback_backup.py")" = 45e283e1543252403035e1fa9869b2debe368b1e
+test "$(git rev-parse "$candidate_sha:infra/n8n-private/homologation/test_crm_feedback_backup.py")" = 64a453db670211067a9fe46ea00620611903fcc7
 
 # Pin the reviewed Agents domain extension and the original regression suites.
 for file in \
@@ -267,6 +277,7 @@ php_syntax() {
 }
 (
   cd "$root"
+  run_check crm_backup_bridge_contracts python3 -m unittest discover -s infra/n8n-private/homologation -p 'test_crm_feedback_backup.py' -v
   run_check php_syntax php_syntax
   run_check p2_safety_contracts python3 -m unittest discover -s infra/n8n-private/homologation -p 'test_p2*.py' -v
   run_check native_contracts python3 -m unittest discover -s runtime/central-auto/lab-executor -p 'test*_contract.py' -v
@@ -381,10 +392,11 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
     echo
     printf -- '- Actual candidate commit: `%s`\n' "$candidate_sha"
     printf -- '- Actual candidate tree: `%s`\n' "$candidate_tree"
+    printf -- '- Ancestor consolidated #479: `%s`\n' "$candidate_source_sha"
     printf -- '- Preserved Central #475: `%s`\n' "$central_source_sha"
     printf -- '- Preserved lead domain #468: `%s`\n' "$domain_source_sha"
     printf -- '- Preserved native operator P30 #464: `%s`\n' "$operator_source_sha"
-    printf -- '- Pinned CRM #654: `%s`\n' "$crm_sha"
+    printf -- '- Pinned CRM #660: `%s`\n' "$crm_sha"
     printf -- '- Historical replay adapter: `%s`\n' "$adapter_sha"
     printf -- '- Verified packet manifest SHA256: `%s`\n' "$packet_manifest_sha"
     echo '- Direct source build; no temporary merge tree or domain checkout supplied missing files.'
@@ -393,7 +405,8 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
     echo '- Remote image digests and local PHP build IDs are recorded separately in the verified packet.'
     echo '- Public archives and manifest are source evidence, not a backup, installer or operational approval.'
     echo '- The review artifact is retained for seven days; keep its trusted CI manifest digest for later verification.'
-    echo '- Human CRM session/MFA/browser evidence remains in CRM #654; no browser rerun is claimed here.'
+    echo '- The native feedback restore uses the 33-table monitor profile from CRM #660 and its required closed catalog.'
+    echo '- CRM #660 owns separate human session/MFA/browser and owner-plus-monitor 35-table evidence; this lab does not exercise owner actions.'
     echo '- DRAFT / NO-GO: no real operator, external backup, registry publication, paid AI or installation.'
   } >> "$GITHUB_STEP_SUMMARY"
 fi

@@ -221,6 +221,26 @@ class OperatorPacketTests(unittest.TestCase):
         self.assertFalse(self.directory.exists())
         self.assertNotIn("unavailable-observations", stderr.getvalue())
 
+    def test_older_crm_packet_and_missing_candidate_lineage_are_denied(self):
+        self.make_packet()
+        original = json.loads((self.directory / "manifest.json").read_bytes())
+        previous_crm = copy.deepcopy(original)
+        previous_crm["sources"]["crm"]["commit"] = "e1b3b7f118eff0350a00789aecc7bb2bb2331464"
+        with self.assertRaisesRegex(packet.Denied, "SOURCE_PIN_DENIED"):
+            packet.manifest_checks(previous_crm, self.commit)
+        missing_ancestor = copy.deepcopy(original)
+        missing_ancestor["lineage"].pop("candidate_479")
+        with self.assertRaisesRegex(packet.Denied, "MANIFEST_POLICY_DENIED"):
+            packet.manifest_checks(missing_ancestor, self.commit)
+        unexecuted_bridge = copy.deepcopy(original)
+        unexecuted_bridge["observations"]["checks"].pop("crm_backup_bridge_contracts")
+        with self.assertRaisesRegex(packet.Denied, "FIELDS_DENIED"):
+            packet.manifest_checks(unexecuted_bridge, self.commit)
+        wrong_scope = copy.deepcopy(original)
+        wrong_scope["boundaries"]["owner_monitor_35_tables_exercised_here"] = True
+        with self.assertRaisesRegex(packet.Denied, "MANIFEST_POLICY_DENIED"):
+            packet.manifest_checks(wrong_scope, self.commit)
+
 
 if __name__ == "__main__":
     unittest.main()

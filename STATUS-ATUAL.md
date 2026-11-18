@@ -1,5 +1,29 @@
 # Imagine AI Agents — estado atual
 
+## 2026-11-18 — candidata n8n com o CRM #660 e catálogo de recuperação completo
+
+A branch `integrate/n8n-candidate-crm-660-2026-11-18` deriva da #479 em
+`3d30b2f7977b37d3bb86d6ff11bc63728145f5fd` e fixa o CRM #660 em
+`96dbf1aed2d1cf3237bc3631c4594540a0168d2a`. A branch #479 original conserva seu
+pin #654 e sua evidência. O novo workflow admite somente push desta branch
+no repositório público Agents e runner hospedado, com checkout e ancestralidade
+conferidos antes de criar recursos de laboratório.
+
+O checker de feedback passa a carregar contract/catalog/snapshot da mesma
+fonte CRM, e a capturar perfil, segurança, catálogo, linhas e pg_dump sob o
+mesmo snapshot exportado. A restauração exige `source_catalog`, conserva a
+comparação fechada do catálogo e registra seus hashes/igualdades e a regra
+PG16 efetivamente usada. O pacote público exige o pin novo e a linhagem #479;
+rejeita a substituição pelo pin antigo, omissão da nova regressão e atribuição
+indevida da prova owner de 35 tabelas ao ensaio nativo de 33 tabelas.
+
+**Validação local:** 7 regressões de compatibilidade + 11 do pacote passaram;
+Bash, Python e YAML foram inspecionados. Não houve execução Docker/PHP/n8n
+local. CI completa da candidata ainda pendente: a previsão é 19 grupos de
+comandos e o registro inicial de integridade, sem somar suítes sobrepostas.
+[Escopo e critérios](infra/n8n-private/homologation/CRM-660-CANDIDATE.md).
+**DRAFT / NO-MERGE / NO-DEPLOY**; nenhuma aprovação operacional é derivada do pacote.
+
 ## 2026-11-18 — contexto completo de fontes e pacote de revisão do n8n privado
 
 A candidata `feat/n8n-private-candidate-bundle-2026-11-18` reúne a Central
