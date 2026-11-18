@@ -60,17 +60,33 @@ class OperatorPacketTests(unittest.TestCase):
                          "crm": {"composer.lock"}, "adapter": {"run.sh"}}
         self.pins_patch = patch.dict(packet.FIXED_PINS, {"crm": self.commit, "adapter": self.commit})
         self.required_patch = patch.object(packet, "REQUIRED", self.required)
+        blobs = {path: packet.git_hash("blob", data) for path, mode, data in self.files}
+        self.imports = {
+            "owner_drafts": {"repository": packet.AGENTS_REPOSITORY, "source_commit": self.commit,
+                "relationship": "SELECTED_FILES_NOT_ANCESTRY", "files": {
+                    "src/contract.php": {"mode": "100644", "source_blob": blobs["src/contract.php"],
+                        "candidate_blob": blobs["src/contract.php"], "adaptation": "NONE"}}},
+            "owner_draft_recovery": {"repository": packet.AGENTS_REPOSITORY, "source_commit": self.commit,
+                "relationship": "SELECTED_FILES_NOT_ANCESTRY", "files": {
+                    "run.sh": {"mode": "100755", "source_blob": blobs["run.sh"],
+                        "candidate_blob": blobs["run.sh"], "adaptation": "NONE"}}},
+        }
+        self.imports_patch = patch.object(packet, "IMPORTED_COMPONENTS", self.imports)
         self.pins_patch.start()
         self.required_patch.start()
+        self.imports_patch.start()
         self.addCleanup(self.pins_patch.stop)
         self.addCleanup(self.required_patch.stop)
+        self.addCleanup(self.imports_patch.stop)
         self.addCleanup(self.temp.cleanup)
         self.observations = {
             "schema": packet.OBSERVATIONS_SCHEMA, "run_id": "1", "run_attempt": "1", "source_sha": self.commit,
             "remote_images": {"n8n": packet.N8N_IMAGE, "n8n_postgres": "postgres@sha256:" + "a" * 64,
                               "agents_postgres": "postgres@sha256:" + "b" * 64, "nginx": "nginx@sha256:" + "c" * 64},
-            "local_build_images": {"agents_php": "sha256:" + "d" * 64, "crm_php": "sha256:" + "e" * 64},
+            "local_build_images": {"agents_php": "sha256:" + "d" * 64, "crm_php": "sha256:" + "e" * 64,
+                                   "owner_php": "sha256:" + "f" * 64},
             "checks": dict.fromkeys(packet.CHECKS, "PASS"), "p30": copy.deepcopy(packet.P30),
+            "owner_p67": copy.deepcopy(packet.OWNER_P67), "owner_p68": copy.deepcopy(packet.OWNER_P68),
         }
 
     def source_for(self, raw, files=None):
@@ -100,6 +116,8 @@ class OperatorPacketTests(unittest.TestCase):
         verified = packet.verify_packet(self.directory, self.commit, result["manifest_sha256"])
         self.assertTrue(verified["git_commit_and_tree_identity_verified"])
         self.assertFalse(verified["go_for_installation"])
+        self.assertTrue(verified["imported_component_candidate_blobs_verified"])
+        self.assertFalse(verified["import_origins_verified_offline"])
         self.assertEqual({p.name for p in self.directory.iterdir()}, packet.PACKET_FILES)
         with self.assertRaises(FileExistsError):
             self.make_packet()
@@ -240,6 +258,119 @@ class OperatorPacketTests(unittest.TestCase):
         wrong_scope["boundaries"]["owner_monitor_35_tables_exercised_here"] = True
         with self.assertRaisesRegex(packet.Denied, "MANIFEST_POLICY_DENIED"):
             packet.manifest_checks(wrong_scope, self.commit)
+
+    def test_selected_imports_cannot_claim_ancestry_or_unproved_product_scope(self):
+        self.make_packet()
+        original = json.loads((self.directory / "manifest.json").read_bytes())
+        self.assertNotIn("owner_drafts", original["lineage"])
+        self.assertEqual(original["imported_components"], self.imports)
+        for mutate in (
+            lambda x: x["lineage"].update(owner_drafts=self.commit),
+            lambda x: x["lineage"].pop("candidate_481"),
+            lambda x: x["boundaries"].update(complete_agents_product=True),
+            lambda x: x["boundaries"].update(import_origins_verified_offline=True),
+            lambda x: x["boundaries"].update(owner_human_crm_session_verified=True),
+            lambda x: x["boundaries"].update(combined_distributed_recovery=True),
+            lambda x: x["imported_components"]["owner_drafts"].update(relationship="ANCESTOR"),
+            lambda x: x["imported_components"]["owner_drafts"].update(source_commit="a" * 40),
+            lambda x: x["imported_components"]["owner_drafts"]["files"].pop("src/contract.php"),
+            lambda x: x["imported_components"]["owner_drafts"]["files"]["src/contract.php"].update(candidate_blob="a" * 40),
+        ):
+            changed = copy.deepcopy(original)
+            mutate(changed)
+            with self.assertRaises(packet.Denied):
+                packet.manifest_checks(changed, self.commit)
+
+    def test_changed_component_is_denied_even_with_recomputed_valid_git_identity(self):
+        self.make_packet()
+        manifest = json.loads((self.directory / "manifest.json").read_bytes())
+        changed = [(path, mode, data + b"unreviewed owner mutation" if path == "src/contract.php" else data)
+                   for path, mode, data in self.files]
+        tree = packet.tree_hash(changed)
+        commit = base64.b64decode(self.identity["commit_object_b64"])
+        commit = b"tree " + tree.encode() + b"\n" + commit.split(b"\n", 1)[1]
+        new_sha = packet.git_hash("commit", commit)
+        archive = packet.archive_bytes(changed)
+        manifest["sources"]["candidate"].update(
+            commit=new_sha, tree=tree, commit_object_b64=base64.b64encode(commit).decode(),
+            sha256=hashlib.sha256(archive).hexdigest(), archive_bytes=len(archive),
+            source_bytes=sum(len(entry[2]) for entry in changed))
+        manifest["observations"]["source_sha"] = new_sha
+        (self.directory / "candidate.tar.gz").write_bytes(archive)
+        (self.directory / "manifest.json").write_bytes(packet.canonical(manifest))
+        files = {name: (self.directory / name).read_bytes() for name in packet.PACKET_FILES - {"SHA256SUMS"}}
+        (self.directory / "SHA256SUMS").write_bytes(packet.checksum_bytes(files))
+        # The source/commit/tree/checksum checks are all internally valid. The
+        # independently closed component binding must still reject the change.
+        packet.manifest_checks(manifest, new_sha)
+        with self.assertRaisesRegex(packet.Denied, "IMPORTED_COMPONENT_CANDIDATE_BLOB_DENIED"):
+            packet.verify_packet(self.directory, new_sha)
+
+    def test_owner_checks_images_and_runtime_limits_are_mandatory(self):
+        mutations = [
+            lambda x: x.pop("owner_p67"),
+            lambda x: x.pop("owner_p68"),
+            lambda x: x["local_build_images"].pop("owner_php"),
+            lambda x: x["local_build_images"].update(owner_php="owner:latest"),
+            lambda x: x["local_build_images"].update(owner_php=x["local_build_images"]["agents_php"]),
+            lambda x: x["local_build_images"].update(owner_php=x["local_build_images"]["crm_php"]),
+            lambda x: x["owner_p67"].update(executed=True),
+            lambda x: x["owner_p67"].update(human_crm_session_verified=True),
+            lambda x: x["owner_p67"].update(positive_http=True),
+            lambda x: x["owner_p67"].update(secret="not a permitted report field"),
+            lambda x: x["owner_p68"].update(zero_rpo_or_distributed_recovery_proven=True),
+            lambda x: x["owner_p68"].update(independent_disaster_authority_available=True),
+            lambda x: x["owner_p68"].update(current_authority_from_still_live_fixture_source=False),
+            lambda x: x["owner_p68"].update(restored_datasets=35),
+        ]
+        for check in ("owner_provider_admission_contracts", "owner_draft_contracts", "owner_draft_recovery"):
+            changed = copy.deepcopy(self.observations)
+            changed["checks"].pop(check)
+            with self.assertRaisesRegex(packet.Denied, "FIELDS_DENIED"):
+                packet.validate_observations(changed)
+        for mutate in mutations:
+            changed = copy.deepcopy(self.observations)
+            mutate(changed)
+            with self.assertRaises(packet.Denied):
+                packet.validate_observations(changed)
+
+    def test_owner_envelope_binds_result_to_source_run_image_and_component(self):
+        identity = {"source_sha": self.commit, "source_tree": self.identity["tree"],
+                    "run_id": "1", "run_attempt": "1", "owner_php_image": "sha256:" + "f" * 64}
+        for component, report in (("p67", packet.OWNER_P67), ("p68", packet.OWNER_P68)):
+            envelope = {"schema": "OWNER_PROVIDER_COMPONENT_RESULT_V1", "component": component,
+                        **identity, "import_source_sha": self.commit, "result": copy.deepcopy(report),
+                        "go_for_installation": False, "separate_from_native_feedback": True}
+            self.assertEqual(packet.owner_component_result(envelope, component, **identity), report)
+            for key, value in (("source_sha", "a" * 40), ("source_tree", "b" * 40),
+                               ("run_id", "2"), ("run_attempt", "2"),
+                               ("owner_php_image", "sha256:" + "a" * 64),
+                               ("import_source_sha", "c" * 40), ("component", "p68" if component == "p67" else "p67"),
+                               ("go_for_installation", True), ("separate_from_native_feedback", False)):
+                changed = copy.deepcopy(envelope)
+                changed[key] = value
+                with self.assertRaisesRegex(packet.Denied, "OWNER_COMPONENT_CI_BINDING_DENIED"):
+                    packet.owner_component_result(changed, component, **identity)
+            changed = copy.deepcopy(envelope)
+            changed["unreviewed"] = "must not be silently projected away"
+            with self.assertRaisesRegex(packet.Denied, "FIELDS_DENIED"):
+                packet.owner_component_result(changed, component, **identity)
+
+    def test_original_component_membership_uses_pinned_git_objects(self):
+        reference = Path(self.temp.name) / "owner-reference"
+        subprocess.run(["git", "clone", "--quiet", "--no-hardlinks", str(self.repo), str(reference)],
+                       check=True, capture_output=True)
+        packet.verify_import_origins(reference)
+        mutated = copy.deepcopy(self.imports)
+        mutated["owner_drafts"]["files"]["src/contract.php"]["source_blob"] = "f" * 40
+        with patch.object(packet, "IMPORTED_COMPONENTS", mutated):
+            with self.assertRaisesRegex(packet.Denied, "OWNER_COMPONENT_SOURCE_BLOB_DENIED"):
+                packet.verify_import_origins(reference)
+        mutated = copy.deepcopy(self.imports)
+        mutated["owner_drafts"]["files"]["src/contract.php"]["mode"] = "100755"
+        with patch.object(packet, "IMPORTED_COMPONENTS", mutated):
+            with self.assertRaisesRegex(packet.Denied, "OWNER_COMPONENT_SOURCE_BLOB_DENIED"):
+                packet.verify_import_origins(reference)
 
 
 if __name__ == "__main__":

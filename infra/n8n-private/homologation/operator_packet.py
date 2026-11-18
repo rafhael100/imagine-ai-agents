@@ -22,12 +22,13 @@ import sys
 import tarfile
 import zlib
 
-SCHEMA = "N8N_PRIVATE_OPERATOR_PACKET_V1"
-OBSERVATIONS_SCHEMA = "N8N_PRIVATE_CANDIDATE_OBSERVATIONS_V1"
+SCHEMA = "N8N_PRIVATE_OPERATOR_PACKET_V2"
+OBSERVATIONS_SCHEMA = "N8N_PRIVATE_CANDIDATE_OBSERVATIONS_V2"
 AGENTS_REPOSITORY = "rafhael100/imagine-ai-agents"
 REPOSITORIES = {"candidate": AGENTS_REPOSITORY, "crm": "rafhael100/imagine-crm", "adapter": AGENTS_REPOSITORY}
 FIXED_PINS = {"crm": "96dbf1aed2d1cf3237bc3631c4594540a0168d2a", "adapter": "8b04d0e936168c77db028160b5aeb1758db497c4"}
 LINEAGE = {
+    "candidate_481": "64f52f0dcd44a5545d1bfc6c1d685b33c158601f",
     "candidate_479": "3d30b2f7977b37d3bb86d6ff11bc63728145f5fd",
     "central_475": "dfa4685cd5df4a9499c3420f580980e769a1981d",
     "domain_468": "05e4ea7942e530055f4e455544d82f5d3edbd56d",
@@ -41,14 +42,151 @@ CHECKS = (
     "p53_review_queue", "p60_signed_review_queue", "crm_lead_capture", "crm_lead_execution",
     "crm_execution_feedback", "p25_agents_state_restore", "p28_candidate_state_restore",
     "p30_native_operator_mfa", "operator_packet_contracts",
+    "owner_provider_admission_contracts", "owner_draft_contracts", "owner_draft_recovery",
 )
 P30 = {"n8n_version_verified": "2.47.7", "synthetic_nominal_operators": 1,
        "mfa_enforced_instance_wide": False, "mandatory_mfa_policy_gate_closed": False,
        "go_for_installation": False}
+
+# Fixed public component origins, distinct from actual candidate ancestors.
+IMPORTED_COMPONENTS = {'owner_drafts': {'repository': 'rafhael100/imagine-ai-agents',
+                  'source_commit': '0c722eee6bd53a7ee46c4ba68ab70200fc191b78',
+                  'relationship': 'SELECTED_FILES_NOT_ANCESTRY',
+                  'files': {'runtime/central-auto/crm-owner-drafts/Dockerfile': {'mode': '100644',
+                                                                                 'source_blob': '5aa7d966c429ec62f89922d5713c2d9c712fa338',
+                                                                                 'candidate_blob': '5aa7d966c429ec62f89922d5713c2d9c712fa338',
+                                                                                 'adaptation': 'NONE'},
+                            'runtime/central-auto/crm-owner-drafts/nginx.conf': {'mode': '100644',
+                                                                                 'source_blob': '3c1b58c11fc2e70dc5953f20bd5ef1c97cbd3e56',
+                                                                                 'candidate_blob': '3c1b58c11fc2e70dc5953f20bd5ef1c97cbd3e56',
+                                                                                 'adaptation': 'NONE'},
+                            'runtime/central-auto/crm-owner-drafts/endpoint.php': {'mode': '100644',
+                                                                                   'source_blob': '61b4b01ac7630a1020c4d0f68135f6a809efac33',
+                                                                                   'candidate_blob': '61b4b01ac7630a1020c4d0f68135f6a809efac33',
+                                                                                   'adaptation': 'NONE'},
+                            'runtime/central-auto/crm-owner-drafts/create-fpm.conf': {'mode': '100644',
+                                                                                      'source_blob': '04e0cedcf0e6c91507a1c87e031fcb37299c569e',
+                                                                                      'candidate_blob': '04e0cedcf0e6c91507a1c87e031fcb37299c569e',
+                                                                                      'adaptation': 'NONE'},
+                            'runtime/central-auto/crm-owner-drafts/create.php': {'mode': '100644',
+                                                                                 'source_blob': '797de085ba7565cb1a04096e823a4d4ce9567331',
+                                                                                 'candidate_blob': '797de085ba7565cb1a04096e823a4d4ce9567331',
+                                                                                 'adaptation': 'NONE'},
+                            'runtime/central-auto/crm-owner-drafts/OwnerDraftContract.php': {'mode': '100644',
+                                                                                             'source_blob': '7963f62e0d3619cbcd26111f47804386da08f2ef',
+                                                                                             'candidate_blob': '7963f62e0d3619cbcd26111f47804386da08f2ef',
+                                                                                             'adaptation': 'NONE'},
+                            'runtime/central-auto/crm-owner-drafts/schema.sql': {'mode': '100644',
+                                                                                 'source_blob': '296eebc35899c0d6406b3a527efa2a49478002a8',
+                                                                                 'candidate_blob': '296eebc35899c0d6406b3a527efa2a49478002a8',
+                                                                                 'adaptation': 'NONE'},
+                            'runtime/central-auto/crm-owner-drafts/read-fpm.conf': {'mode': '100644',
+                                                                                    'source_blob': 'e02ce246adfa96a7decfc2910d5fd03a7a8ed934',
+                                                                                    'candidate_blob': 'e02ce246adfa96a7decfc2910d5fd03a7a8ed934',
+                                                                                    'adaptation': 'NONE'},
+                            'runtime/central-auto/crm-owner-drafts/read.php': {'mode': '100644',
+                                                                               'source_blob': 'abfa0c74d86a7aa2d936e91e3f75ce71e37b5639',
+                                                                               'candidate_blob': 'abfa0c74d86a7aa2d936e91e3f75ce71e37b5639',
+                                                                               'adaptation': 'NONE'},
+                            'tools/check_p67_owner_draft_lab.py': {'mode': '100644',
+                                                                   'source_blob': 'ae872c721c1bd9c07071f9f3e63f82340b38be62',
+                                                                   'candidate_blob': '5fcaf922e226e8bc82687ca67e9e4b26b9b3d7e2',
+                                                                   'adaptation': 'SCENARIO_API_EXTRACTION'},
+                            'tools/p67-owner-draft-probe.php': {'mode': '100644',
+                                                                'source_blob': '9f97bbe9a81f10af409c0f32fb821c9d3742fa42',
+                                                                'candidate_blob': '9f97bbe9a81f10af409c0f32fb821c9d3742fa42',
+                                                                'adaptation': 'NONE'}}},
+ 'owner_draft_recovery': {'repository': 'rafhael100/imagine-ai-agents',
+                          'source_commit': '85f4c37a6d905b91923d3e31ba9068b2c35d7657',
+                          'relationship': 'SELECTED_FILES_NOT_ANCESTRY',
+                          'files': {'tools/check_p68_owner_draft_recovery.py': {'mode': '100644',
+                                                                                'source_blob': '3e094557a83cffec5d5ad3f91335ad97d7ce61ca',
+                                                                                'candidate_blob': '8b7bc20f0dbef4dd7ac6c14a78a436110ca8d991',
+                                                                                'adaptation': 'SCENARIO_API_EXTRACTION'},
+                                    'tools/p68-owner-draft-recovery-probe.php': {'mode': '100644',
+                                                                                 'source_blob': '9746018d31b92889f164481b60f5fe97f2144e84',
+                                                                                 'candidate_blob': '9746018d31b92889f164481b60f5fe97f2144e84',
+                                                                                 'adaptation': 'NONE'},
+                                    'tools/run_p68_owner_draft_recovery.py': {'mode': '100644',
+                                                                              'source_blob': '21555f3f53d72050544f3efd98dbfef58d8181a5',
+                                                                              'candidate_blob': '21555f3f53d72050544f3efd98dbfef58d8181a5',
+                                                                              'adaptation': 'NONE'}}}}
+
+# Complete sanitized reports emitted by the original P67/P68 scenario bodies.
+OWNER_P67 = {'schema': 'P67_OWNER_DRAFT_LAB_RESULT_V1',
+ 'result': 'PASS',
+ 'positive_http': 16,
+ 'negative_http_and_sql': 113,
+ 'response_binding_negatives': 21,
+ 'real_pg_lock_races': 13,
+ 'drafts': 4,
+ 'nonces': 18,
+ 'audit': 18,
+ 'postgresql_16': True,
+ 'https_mutual_tls': True,
+ 'historical_author_preserved': True,
+ 'read_no_business_mutation': True,
+ 'reads_write_technical_nonce_and_audit': True,
+ 'late_denial_partial_writes': False,
+ 'service_attestations_synthetic': True,
+ 'human_crm_session_verified': False,
+ 'crm_rule_source_verified': False,
+ 'host_ports': False,
+ 'runtime_egress': False,
+ 'external_ai': False,
+ 'operational': False,
+ 'executed': False,
+ 'release': 'NO_GO'}
+OWNER_P68 = {'schema': 'P68_OWNER_DRAFT_RECOVERY_RESULT_V1',
+ 'result': 'PASS',
+ 'pg16_clusters': 2,
+ 'restored_datasets': 6,
+ 'restored_functions': 9,
+ 'source_positive_http': 3,
+ 'source_revocation_denials': 2,
+ 'restored_positive_http': 5,
+ 'restored_negative_http': 5,
+ 'current_authority_negative_probes': 2,
+ 'source_passwords_rejected': 2,
+ 'drafts': 2,
+ 'audit': 8,
+ 'consistent_exported_snapshot': True,
+ 'ownership_acl_rls_preserved': True,
+ 'historical_authorship_preserved': True,
+ 'idempotency_and_nonce_preserved': True,
+ 'durability_boundary': 'EXPORTED_SNAPSHOT',
+ 'post_snapshot_commits_recovered': False,
+ 'zero_rpo_or_distributed_recovery_proven': False,
+ 'sequence_continued': True,
+ 'current_revocations_applied_before_login': True,
+ 'missing_current_authority_fails_closed': True,
+ 'source_preserved': True,
+ 'current_authority_from_still_live_fixture_source': True,
+ 'independent_disaster_authority_available': False,
+ 'external_backup_verified': False,
+ 'real_crm_schema_restored': False,
+ 'human_crm_session_verified': False,
+ 'secret_or_dump_artifacts': False,
+ 'runtime_egress': False,
+ 'host_ports': False,
+ 'operational': False,
+ 'executed': False,
+ 'release': 'NO_GO'}
+OWNER_P67_FIELDS = tuple(OWNER_P67)
+OWNER_P68_FIELDS = tuple(OWNER_P68)
+OWNER_REPORTS = {"p67": OWNER_P67, "p68": OWNER_P68}
+
 BOUNDARIES = {
     "source": "PUBLIC_TRACKED_GIT_OBJECTS_ONLY", "runtime_profile": "DISPOSABLE_CI_ONLY",
     "crm_schema_profile": "synthetic-private-s2s-execution-monitor-v1",
     "crm_native_restore_tables": 33, "owner_monitor_35_tables_exercised_here": False,
+    "owner_scope": "CREATE_READ_DRAFT_AND_DISPOSABLE_RECOVERY",
+    "complete_agents_product": False, "owner_execution": False,
+    "owner_human_crm_session_verified": False, "combined_distributed_recovery": False,
+    "owner_and_native_use_separate_profiles": True,
+    "import_origins_checked_by_ci": True, "import_origins_verified_offline": False,
+    "owner_current_authority_from_still_live_fixture": True,
+    "independent_disaster_authority_available": False,
     "source_ancestry_checked_by_ci": True, "full_history_verified_offline": False,
     "source_links_authenticate_approvals": False, "image_identity_verified_offline": False,
     "ci_observations_authenticated_offline": False, "checksums_are_ci_attestation": False,
@@ -91,6 +229,10 @@ REQUIRED = {
             "scripts/ops/private_crm_backup_snapshot.py"},
     "adapter": {"tools/auto_ia/convergence/MockP7ToAutoIaAdapter.php", "tools/auto_ia/pg/003_signed_ingress_lab.sql"},
 }
+REQUIRED["candidate"].update(path for component in IMPORTED_COMPONENTS.values() for path in component["files"])
+REQUIRED["candidate"].update({"tools/run_owner_component_candidate.py",
+                              "tests/test_owner_component_candidate_admission.py"})
+
 SHA1 = re.compile(r"[a-f0-9]{40}")
 SHA256 = re.compile(r"[a-f0-9]{64}")
 MAX_FILES = 20_000
@@ -263,10 +405,71 @@ def inspect_archive(raw, source, required):
     need(required <= seen, "BUILD_SOURCE_INCOMPLETE")
     need(tree_hash(files) == source["tree"], "ARCHIVE_TREE_DENIED")
     need(archive_bytes(files) == raw, "NON_CANONICAL_ARCHIVE")
+    return files
+
+
+def verify_component_files(files):
+    """Bind each selected component to bytes in the actual candidate archive.
+
+    The source commit-to-path membership is checked by CI against its separate
+    pinned checkout, not reconstructed from the three offline source archives.
+    """
+    actual = {path: (mode, git_hash("blob", data)) for path, mode, data in files}
+    for component in IMPORTED_COMPONENTS.values():
+        for path, expected in component["files"].items():
+            need(actual.get(path) == (expected["mode"], expected["candidate_blob"]),
+                 "IMPORTED_COMPONENT_CANDIDATE_BLOB_DENIED")
+
+
+def verify_import_origins(owner_repo):
+    """Check original Git membership only during legitimate CI creation."""
+    need(owner_repo.is_absolute() and owner_repo.is_dir() and not owner_repo.is_symlink()
+         and owner_repo.resolve() == owner_repo, "OWNER_COMPONENT_CHECKOUT_DENIED")
+    recovery = IMPORTED_COMPONENTS["owner_draft_recovery"]["source_commit"]
+    need(git(owner_repo, "rev-parse", "HEAD").decode().strip() == recovery,
+         "OWNER_COMPONENT_CHECKOUT_PIN_DENIED")
+    git(owner_repo, "diff", "--quiet")
+    git(owner_repo, "diff", "--cached", "--quiet")
+    for component in IMPORTED_COMPONENTS.values():
+        original = component["source_commit"]
+        git(owner_repo, "merge-base", "--is-ancestor", original, recovery)
+        for path, expected in component["files"].items():
+            rows = git(owner_repo, "ls-tree", "-z", original, "--", path).split(b"\0")
+            need(len(rows) == 2 and rows[-1] == b"", "OWNER_COMPONENT_SOURCE_ENTRY_DENIED")
+            metadata, original_path = rows[0].split(b"\t", 1)
+            need(metadata.split() == [expected["mode"].encode(), b"blob", expected["source_blob"].encode()]
+                 and original_path.decode() == path, "OWNER_COMPONENT_SOURCE_BLOB_DENIED")
+
+
+def validate_owner_report(component, report):
+    need(component in OWNER_REPORTS, "OWNER_COMPONENT_NAME_DENIED")
+    fields(report, OWNER_REPORTS[component])
+    # Comparing canonical JSON also rejects booleans where counts are expected.
+    need(canonical(report) == canonical(OWNER_REPORTS[component]), "OWNER_COMPONENT_FACTS_DENIED")
+
+
+def owner_component_result(envelope, component, *, source_sha, source_tree,
+                           run_id, run_attempt, owner_php_image):
+    """Project a sanitized result only after binding its actual CI identities."""
+    need(component in OWNER_REPORTS, "OWNER_COMPONENT_NAME_DENIED")
+    fields(envelope, {"schema", "component", "source_sha", "source_tree", "run_id", "run_attempt",
+                      "import_source_sha", "owner_php_image", "result", "go_for_installation",
+                      "separate_from_native_feedback"})
+    source = "owner_drafts" if component == "p67" else "owner_draft_recovery"
+    expected = {"schema": "OWNER_PROVIDER_COMPONENT_RESULT_V1", "component": component,
+                "source_sha": source_sha, "source_tree": source_tree, "run_id": run_id,
+                "run_attempt": run_attempt,
+                "import_source_sha": IMPORTED_COMPONENTS[source]["source_commit"],
+                "owner_php_image": owner_php_image, "go_for_installation": False,
+                "separate_from_native_feedback": True}
+    need(canonical({key: value for key, value in envelope.items() if key != "result"})
+         == canonical(expected), "OWNER_COMPONENT_CI_BINDING_DENIED")
+    validate_owner_report(component, envelope["result"])
+    return dict(envelope["result"])
 
 
 def validate_observations(value):
-    fields(value, {"schema", "run_id", "run_attempt", "source_sha", "remote_images", "local_build_images", "checks", "p30"})
+    fields(value, {"schema", "run_id", "run_attempt", "source_sha", "remote_images", "local_build_images", "checks", "p30", "owner_p67", "owner_p68"})
     need(value["schema"] == OBSERVATIONS_SCHEMA and isinstance(value["source_sha"], str)
          and SHA1.fullmatch(value["source_sha"]) is not None, "OBSERVATIONS_SOURCE_DENIED")
     need(all(isinstance(value[key], str) and re.fullmatch(r"[1-9][0-9]{0,19}", value[key])
@@ -274,21 +477,28 @@ def validate_observations(value):
     fields(value["checks"], CHECKS)
     need(all(result == "PASS" for result in value["checks"].values()), "INCOMPLETE_CI_CHECKS")
     need(canonical(value["p30"]) == canonical(P30), "P30_FACTS_DENIED")
+    validate_owner_report("p67", value["owner_p67"])
+    validate_owner_report("p68", value["owner_p68"])
     remote = value["remote_images"]
     fields(remote, {"n8n", "n8n_postgres", "agents_postgres", "nginx"})
     need(remote["n8n"] == N8N_IMAGE, "N8N_IMAGE_DENIED")
     for name, repository in (("n8n_postgres", "postgres"), ("agents_postgres", "postgres"), ("nginx", "nginx")):
         need(isinstance(remote[name], str) and re.fullmatch(r"(?:docker.io/library/)?" + repository + r"@sha256:[a-f0-9]{64}", remote[name]), "REMOTE_IMAGE_REFERENCE_DENIED")
-    fields(value["local_build_images"], {"agents_php", "crm_php"})
+    fields(value["local_build_images"], {"agents_php", "crm_php", "owner_php"})
     need(all(isinstance(image, str) and re.fullmatch(r"sha256:[a-f0-9]{64}", image)
              for image in value["local_build_images"].values()), "LOCAL_IMAGE_ID_DENIED")
+    images = value["local_build_images"]
+    need(images["owner_php"] not in (images["agents_php"], images["crm_php"]),
+         "OWNER_IMAGE_SEPARATION_DENIED")
 
 
 def manifest_checks(manifest, expected_candidate):
-    fields(manifest, {"schema", "sources", "lineage", "observations", "gates", "boundaries"})
+    fields(manifest, {"schema", "sources", "lineage", "imported_components", "observations", "gates", "boundaries"})
     need(manifest["schema"] == SCHEMA and canonical(manifest["lineage"]) == canonical(LINEAGE)
          and canonical(manifest["gates"]) == canonical(GATES)
          and canonical(manifest["boundaries"]) == canonical(BOUNDARIES), "MANIFEST_POLICY_DENIED")
+    need(canonical(manifest["imported_components"]) == canonical(IMPORTED_COMPONENTS),
+         "IMPORTED_COMPONENT_POLICY_DENIED")
     validate_observations(manifest["observations"])
     need(manifest["observations"]["source_sha"] == expected_candidate, "EXPECTED_CANDIDATE_DENIED")
     fields(manifest["sources"], REPOSITORIES)
@@ -312,7 +522,9 @@ def checksum_bytes(files):
 
 def write_packet(sources, observations, output):
     validate_observations(observations)
+    verify_component_files(sources["candidate"][0])
     manifest = {"schema": SCHEMA, "sources": {}, "lineage": LINEAGE,
+                "imported_components": IMPORTED_COMPONENTS,
                 "observations": observations, "gates": GATES, "boundaries": BOUNDARIES}
     payloads = {}
     for name in REPOSITORIES:
@@ -349,12 +561,16 @@ def verify_packet(directory, expected_candidate, expected_manifest=None):
     payloads = {"manifest.json": raw}
     for name, source in manifest["sources"].items():
         archive = regular_bytes(directory / source["archive"], MAX_ARCHIVE_BYTES)
-        inspect_archive(archive, source, REQUIRED[name])
+        files = inspect_archive(archive, source, REQUIRED[name])
+        if name == "candidate":
+            verify_component_files(files)
         payloads[source["archive"]] = archive
     need(regular_bytes(directory / "SHA256SUMS", 1024) == checksum_bytes(payloads), "CHECKSUM_FILE_DENIED")
-    return {"schema": "N8N_PRIVATE_OPERATOR_PACKET_VERIFIED_V1", "candidate_commit": expected_candidate,
+    return {"schema": "N8N_PRIVATE_OPERATOR_PACKET_VERIFIED_V2", "candidate_commit": expected_candidate,
             "manifest_sha256": digest, "source_archives": 3, "git_commit_and_tree_identity_verified": True,
             "expected_candidate_pin_from_caller": True,
+            "imported_component_candidate_blobs_verified": True,
+            "import_origins_verified_offline": False,
             "source_bytes_verified": sum(s["source_bytes"] for s in manifest["sources"].values()),
             "expected_manifest_digest_supplied": expected_manifest is not None,
             "image_identity_verified_offline": False, "source_links_authenticate_approvals": False,
@@ -367,7 +583,7 @@ def create_packet(candidate_repo, crm_repo, observations_path, output):
          and os.environ.get("P24_RUNNER_ENVIRONMENT") == "github-hosted"
          and os.environ.get("N8N_CANDIDATE_REPOSITORY_PRIVATE") == "false"
          and os.environ.get("GITHUB_EVENT_NAME") == "push"
-         and os.environ.get("GITHUB_REF") == "refs/heads/integrate/n8n-candidate-crm-660-2026-11-18", "CREATE_HOSTED_CI_ONLY")
+         and os.environ.get("GITHUB_REF") == "refs/heads/integrate/n8n-owner-provider-components-2026-11-18", "CREATE_HOSTED_CI_ONLY")
     observations = closed_json(regular_bytes(observations_path, 32768))
     validate_observations(observations)
     for field, env in (("source_sha", "GITHUB_SHA"), ("run_id", "GITHUB_RUN_ID"), ("run_attempt", "GITHUB_RUN_ATTEMPT")):
@@ -379,6 +595,7 @@ def create_packet(candidate_repo, crm_repo, observations_path, output):
         git(repo, "diff", "--cached", "--quiet")
     for ancestor in (*LINEAGE.values(), FIXED_PINS["adapter"]):
         git(candidate_repo, "merge-base", "--is-ancestor", ancestor, candidate)
+    verify_import_origins(candidate_repo / "_owner_components_pinned")
     sources = {"candidate": git_source(candidate_repo, candidate),
                "crm": git_source(crm_repo, FIXED_PINS["crm"]),
                "adapter": git_source(candidate_repo, FIXED_PINS["adapter"])}
@@ -403,7 +620,7 @@ def main(argv=None):
         return 0
     except (Denied, OSError, ValueError, UnicodeError, tarfile.TarError, subprocess.SubprocessError):
         # Paths, arbitrary Git errors and untrusted metadata never enter logs.
-        print(json.dumps({"schema": "N8N_PRIVATE_OPERATOR_PACKET_DENIED_V1", "reason": "PACKET_DENIED", "go_for_installation": False}), file=sys.stderr)
+        print(json.dumps({"schema": "N8N_PRIVATE_OPERATOR_PACKET_DENIED_V2", "reason": "PACKET_DENIED", "go_for_installation": False}), file=sys.stderr)
         return 2
 
 
