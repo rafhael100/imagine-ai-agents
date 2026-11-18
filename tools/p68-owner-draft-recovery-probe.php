@@ -31,7 +31,8 @@ function p68Capture(PDO $db): array
         $tables[$name]=['rows'=>count($rows),'sha256'=>p68Hash($rows)];
     }
     $schemaAcl=p68Acl("coalesce(n.nspacl,acldefault('n',n.nspowner))");
-    $relationAcl=p68Acl("coalesce(c.relacl,acldefault(CASE WHEN c.relkind='S' THEN 'S'::\"char\" ELSE 'r'::\"char\" END,c.relowner))");
+    // pg_class uses 'S'; acldefault uses 's' for SEQUENCE ('S' is FOREIGN SERVER).
+    $relationAcl=p68Acl("coalesce(c.relacl,acldefault(CASE WHEN c.relkind='S' THEN 's'::\"char\" ELSE 'r'::\"char\" END,c.relowner))");
     $columnAcl=p68Acl('a.attacl');
     $functionAcl=p68Acl("coalesce(p.proacl,acldefault('f',p.proowner))");
     $defaultAcl=p68Acl('d.defaclacl');
@@ -51,6 +52,14 @@ function p68Capture(PDO $db): array
     foreach ($queries as $name=>$query) {
         $rows=p68Rows($db,$query);
         $security[$name]=['rows'=>count($rows),'sha256'=>p68Hash($rows)];
+        if ($name==='relations') {
+            $security[$name]['items']=[];
+            foreach ($rows as $row) {
+                $relation=$row['relname'];unset($row['relname']);
+                $row['acl']=json_decode($row['acl'],true,8,JSON_THROW_ON_ERROR);
+                $security[$name]['items'][$relation]=$row;
+            }
+        }
     }
     p68Need($security['relations']['rows']===7 && $security['functions']['rows']===9
         && $security['roles']['rows']===3 && $security['policies']['rows']===6,'EXACT_P67_INVENTORY');

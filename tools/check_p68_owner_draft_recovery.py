@@ -111,9 +111,22 @@ def capture(lab, snapshot=None):
     need(set(result) == {"schema", "tables", "security", "sequence"}
          and result["schema"] == "P68_P67_STATE_V1" and set(result["tables"]) == TABLES,
          "CAPTURE_CLOSED_SHAPE")
-    for item in list(result["tables"].values()) + list(result["security"].values()):
-        need(set(item) == {"rows", "sha256"} and type(item["rows"]) is int and item["rows"] >= 0
-             and re.fullmatch(r"[a-f0-9]{64}", item["sha256"]), "CAPTURE_FINGERPRINT")
+    for group in ("tables", "security"):
+        for name, item in result[group].items():
+            fields = {"rows", "sha256"} | ({"items"} if (group, name) == ("security", "relations") else set())
+            need(set(item) == fields and type(item["rows"]) is int and item["rows"] >= 0
+                 and re.fullmatch(r"[a-f0-9]{64}", item["sha256"]), "CAPTURE_FINGERPRINT")
+    relations = result["security"]["relations"]["items"]
+    need(set(relations) == TABLES | {"audit_id_seq"}, "RELATION_DIAGNOSTIC_SCOPE")
+    roles = {"PUBLIC", "postgres", "pg_database_owner", "aia_p67_owner", "aia_p67_create", "aia_p67_read"}
+    privileges = {"SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER", "USAGE"}
+    for row in relations.values():
+        need(set(row) == {"relkind", "owner", "relrowsecurity", "relforcerowsecurity", "acl"}
+             and row["relkind"] in ("r", "S") and row["owner"] in roles
+             and type(row["relrowsecurity"]) is bool and type(row["relforcerowsecurity"]) is bool
+             and isinstance(row["acl"], list), "RELATION_DIAGNOSTIC_FIELDS")
+        need(all(isinstance(acl, list) and len(acl) == 4 and acl[0] in roles and acl[1] in roles
+                 and acl[2] in privileges and type(acl[3]) is bool for acl in row["acl"]), "RELATION_DIAGNOSTIC_ACL")
     need(set(result["sequence"]) == {"last_value", "is_called"}
          and type(result["sequence"]["last_value"]) is int
          and result["sequence"]["is_called"] is True, "USED_AUDIT_SEQUENCE")
@@ -125,6 +138,17 @@ def compare_state(actual, expected, label):
     for group in ("tables", "security"):
         need(set(actual[group]) == set(expected[group]), label + "_INVENTORY")
         for name in expected[group]:
+            if (group, name) == ("security", "relations") and actual[group][name] != expected[group][name]:
+                for relation in sorted(TABLES | {"audit_id_seq"}):
+                    before = expected[group][name]["items"][relation]
+                    after = actual[group][name]["items"][relation]
+                    fields = [field for field in before if before[field] != after[field]]
+                    if fields:
+                        # Only the seven fixed schema objects and validated public
+                        # owner/kind/RLS/ACL metadata can reach this diagnostic.
+                        print(json.dumps({"check": "P68_RELATION_DIFFERENCE", "relation": relation,
+                              "expected": {field: before[field] for field in fields},
+                              "actual": {field: after[field] for field in fields}}, sort_keys=True), flush=True)
             need(actual[group][name] == expected[group][name], label + "_" + group.upper() + "_" + name.upper())
     need(actual["sequence"] == expected["sequence"], label + "_SEQUENCE")
 
