@@ -21,12 +21,13 @@ from urllib.parse import urlencode
 
 from check_p63_verifiable_proposal_detail import DetailLab, DetailScan
 from check_p62_live_signed_review import Failure, require, run
+from check_p56_live_pg_readonly_http import READ_CSP, is_imagine_logo
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = "/p64-create-drafts-local.php"
 READER = "http://127.0.0.1:8786/p56-live-pg-review-local.php"
 ORIGIN = "http://127.0.0.1:8787"
-CSP = ("default-src 'none'; style-src 'unsafe-inline'; form-action 'self' " + READER
+CSP = ("default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'self' " + READER
        + "; base-uri 'none'; frame-ancestors 'none'")
 
 
@@ -39,9 +40,13 @@ class FormScan(HTMLParser):
         self.proposals: list[str] = []
         self.forms: list[dict] = []
         self.remotes: list[str] = []
+        self.logos = 0
+        self.links: list[dict] = []
 
     def handle_starttag(self, tag, attrs):
         values = dict(attrs)
+        if tag in ("a", "img") and len(attrs) != len(values):
+            self.remotes.append("DUPLICATE_PRESENTATION_ATTRIBUTE")
         if tag == "form":
             self.forms.append(values)
         if tag == "input" and values.get("name") == "csrf":
@@ -51,8 +56,15 @@ class FormScan(HTMLParser):
                              ("data-p64-proposal", self.proposals)):
             if name in values:
                 target.append(values[name])
-        if tag in ("script", "iframe", "img", "link") and (values.get("src") or values.get("href")):
-            self.remotes.append(values.get("src") or values["href"])
+        if tag == "img":
+            if is_imagine_logo(attrs):
+                self.logos += 1
+            else:
+                self.remotes.append("UNEXPECTED_IMAGE")
+        if tag == "a":
+            self.links.append(values)
+        if tag in ("script", "iframe", "link", "object", "embed", "source", "video", "audio", "svg") or any(name.startswith("on") for name, _ in attrs):
+            self.remotes.append("UNEXPECTED_ACTIVE_CONTENT")
 
 
 def decode(result: subprocess.CompletedProcess) -> dict:
@@ -179,6 +191,11 @@ def form(response: dict) -> tuple[str, FormScan]:
             "P64_CSRF_TOKEN")
     require(scan.remotes == [] and all(item == {"method": "post", "action": PAGE} for item in scan.forms),
             "P64_FORM_FIXED_LOCAL_ACTIONS")
+    require(scan.logos == 1 and scan.links == [
+        {"class": "skip-link", "data-imagine-skip": "true", "href": "#main-content"},
+        {"href": PAGE, "data-imagine-nav": "create", "aria-current": "page"},
+        {"href": READER, "data-imagine-nav": "review"},
+    ], "P64_CANONICAL_LOGO_AND_FIXED_NAVIGATION")
     require("#F9941D" in body and "NO-GO operacional" in body, "P64_PRODUCT_PAGE")
     for forbidden in ("SYNTHETIC_P64_AUTHOR", "password", "canonical_vote", "signature_b64", "public_key_b64"):
         require(forbidden not in body, "P64_NO_SECRET_OR_AUTHOR_ID_IN_FORM")
@@ -211,13 +228,14 @@ def assert_saved(response: dict, refs: list[str]):
 
 
 def assert_detail(lab: CreationLab, proposal: str):
-    status, body, _ = lab.http("?proposal=" + proposal)
+    status, body, headers = lab.http("?proposal=" + proposal)
     require(status == 200, "P64_P63_DETAIL_AVAILABLE")
-    scan = DetailScan()
+    require(headers.get("content-security-policy") == READ_CSP, "P64_READER_EXACT_CSP")
+    scan = DetailScan(allow_create=True)
     scan.feed(body)
     require(scan.detail_states == ["VERIFIED"] and scan.detail_proposals == [proposal]
             and scan.operators == ["gte"] and scan.current == ["available"]
-            and scan.actions == [] and scan.remotes == [], "P64_DETAIL_SAME_VERIFIED_QUEUE")
+            and scan.actions == [] and scan.remotes == [] and scan.valid_shell(), "P64_DETAIL_SAME_VERIFIED_QUEUE")
     require("Autoria sintética vinculada e verificada" in body
             and "Insumos originais da simulação" in body, "P64_ORIGINAL_INPUTS_AND_AUTHOR")
 
@@ -316,6 +334,7 @@ def exercise(lab: CreationLab) -> dict:
     negatives = [
         ({"fields": {**save, "csrf": "0" * 64}}, 403),
         ({"fields": save, "origin": "https://foreign.invalid"}, 403),
+        ({"fields": save, "origin": "null"}, 403),
         ({"fields": save, "origin": ""}, 403),
         ({"fields": save, "host": "localhost:8787"}, 403),
         ({"fields": {**save, "tenant_ref": "SYNTHETIC_TENANT_B"}}, 400),

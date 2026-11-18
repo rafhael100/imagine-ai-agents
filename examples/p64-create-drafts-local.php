@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 /** P64: isolated synthetic form; credentials and authority never come from HTTP. */
 require_once __DIR__.'/../tools/labs/PgAuthoredDraftStagingLab.php';
+require_once __DIR__.'/../tools/labs/ImagineLabPresentation.php';
 
 use ImagineAI\Automation\DeterministicFunnelProjector;
 use ImagineAI\Automation\DeterministicRuleEngine;
 use ImagineAI\Convergence\PgAuthoredDraftStagingLab;
 use ImagineAI\Convergence\PgScopedDraftWriterLab;
+use ImagineAI\Presentation\ImagineLabPresentation;
 
 const P64_ORIGIN='http://127.0.0.1:8787';
 const P64_PAGE='/p64-create-drafts-local.php';
@@ -18,8 +20,10 @@ const P64_MAX_PREVIEWS=5;
 header('Cache-Control: no-store, private');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
-header('Referrer-Policy: no-referrer');
-header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; form-action 'self' ".P64_READER."; base-uri 'none'; frame-ancestors 'none'");
+// Native same-origin form POSTs must retain Origin for the existing CSRF gate.
+// Cross-origin navigation still receives no Referer under this policy.
+header('Referrer-Policy: same-origin');
+header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'self' ".P64_READER."; base-uri 'none'; frame-ancestors 'none'");
 
 function p64Deny(int $status):never
 {
@@ -210,6 +214,9 @@ if(session_status()===PHP_SESSION_ACTIVE)session_write_close();
 $projection=$inputs===null?null:DeterministicFunnelProjector::project(
     $inputs['command']['weekly_visits'],$inputs['command']['lead_rate_bp'],$inputs['command']['client_rate_bp']
 );
+try{
+    $logo=ImagineLabPresentation::logo((string)@file_get_contents(__DIR__.'/assets/logo-imagine.png'));
+}catch(Throwable){p64Deny(503);}
 header('Content-Type: text/html; charset=utf-8');
 ?>
 <!doctype html>
@@ -218,25 +225,28 @@ header('Content-Type: text/html; charset=utf-8');
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <title>Imagine · Criar rascunhos</title>
-<style>
-:root{--orange:#F9941D;--ink:#1c2635;--muted:#64748b;--line:#e5eaf0;--bg:#f6f8fb}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
-.shell{max-width:1030px;margin:auto;padding:30px 22px 60px}.top,.heading{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.top{margin-bottom:38px}.logo{font-size:28px;font-weight:850;letter-spacing:-.055em}.logo b{color:var(--orange)}.flag{font-size:12px;color:#804e0b;background:#fff3df;padding:6px 12px;border-radius:80px;font-weight:750}
-h1{font-size:clamp(28px,4.5vw,42px);letter-spacing:-.045em;line-height:1.15;margin:0 0 12px}h2{font-size:21px;letter-spacing:-.025em;margin:0 0 10px}p{margin:0 0 16px}.muted{color:var(--muted)}a{color:#334155;text-underline-offset:4px}.intro{max-width:690px;margin-bottom:28px}.layout{display:grid;grid-template-columns:1.15fr 1fr;gap:20px}.card{background:white;border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 7px 20px #1c263504}.step{color:#956010;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
-label{display:block;font-size:13px;font-weight:750;margin:18px 0 6px}input:not([type=hidden]){width:100%;border:1px solid #cbd5e1;border-radius:10px;padding:12px;font:inherit;color:var(--ink);background:#fff}input:focus{outline:3px solid #f9941d40;border-color:var(--orange)}.rates{display:grid;grid-template-columns:1fr 1fr;gap:14px}.help{font-size:12px;color:var(--muted);margin:6px 0 0}button{border:0;border-radius:11px;background:var(--orange);color:#392305;font:inherit;font-weight:800;padding:13px 19px;cursor:pointer;margin-top:22px}button:hover{background:#ed8712}button:focus-visible,a:focus-visible{outline:3px solid #1c2635;outline-offset:3px}.wide{width:100%}.rule{border-top:1px solid var(--line);padding:14px 0}.rule strong{display:block}.rule:last-child{padding-bottom:0}.notice{padding:15px 18px;border:1px solid #ecc994;background:#fff8ec;border-radius:12px;margin-bottom:20px}.preview{margin-top:22px}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}.metric{background:#f7f9fc;border-radius:12px;padding:15px}.metric b{display:block;font-size:26px;letter-spacing:-.04em}.metric span{color:var(--muted);font-size:12px}.draft{padding:14px 0;border-top:1px solid var(--line)}.draft strong{display:block}.pill{display:inline-block;font-size:11px;background:#f1f5f9;padding:3px 8px;border-radius:8px;color:#475569;margin-top:5px}.footer{font-size:12px;color:var(--muted);margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}@media(max-width:720px){.layout{grid-template-columns:1fr}.card{padding:21px}.metrics{gap:7px}.metric{padding:11px}.metric b{font-size:23px}.rates{grid-template-columns:1fr}.shell{padding:22px 15px}}
-</style>
+<style><?= ImagineLabPresentation::styles() ?></style>
 </head>
-<body><main class="shell" data-p64-local-form="true">
-<div class="top"><div class="logo">Imagine<b>.</b></div><span class="flag">Ambiente sintético · NO-GO operacional</span></div>
-<div class="heading"><h1>Da prévia ao rascunho.</h1><a href="<?= p64Escape(P64_READER) ?>">Ver fila de revisão →</a></div>
-<p class="intro muted">Simule o funil, confira as propostas e guarde o lote para consulta. Cada rascunho recebe a mesma autoria de laboratório, junto com as entradas usadas no cálculo.</p>
+<body>
+<a class="skip-link" data-imagine-skip="true" href="#main-content">Ir para o conteúdo</a>
+<div class="app-shell">
+<aside class="sidebar" aria-label="Imagine Agents">
+<div class="brand"><?= $logo ?><p class="product-name">Agentes IA</p></div>
+<?= ImagineLabPresentation::navigation('create') ?>
+<p class="sidebar-note">Ambiente de homologação<br>Dados fictícios</p>
+</aside>
+<main class="shell" id="main-content" tabindex="-1" data-p64-local-form="true">
+<header class="workspace-header"><p class="eyebrow">Criar rascunhos</p><span class="flag">Homologação · NO-GO operacional</span></header>
+<h1>Da prévia ao rascunho.</h1>
+<p class="intro">Simule o funil, confira as propostas e guarde os rascunhos para revisão. Use apenas números fictícios.</p>
 <?php if($notice!==''): ?><div class="notice" role="status"><?= p64Escape($notice) ?></div><?php endif; ?>
 <div class="layout"><section class="card"><div class="step">1 · Simular</div><h2>Defina o cenário</h2><p class="muted">Use números fictícios. As taxas são aplicadas em sequência.</p>
 <form method="post" action="<?= P64_PAGE ?>">
 <input type="hidden" name="action" value="preview"><input type="hidden" name="csrf" value="<?= p64Escape($csrf) ?>">
-<label for="visits">Visitas por semana</label><input id="visits" name="weekly_visits" inputmode="numeric" pattern="[0-9]+" maxlength="9" required value="<?= p64Escape($values['weekly_visits']) ?>">
-<div class="rates"><div><label for="lead-rate">Conversão em leads (%)</label><input id="lead-rate" name="lead_rate" inputmode="decimal" maxlength="6" required value="<?= p64Escape($values['lead_rate']) ?>"></div><div><label for="client-rate">Conversão em clientes (%)</label><input id="client-rate" name="client_rate" inputmode="decimal" maxlength="6" required value="<?= p64Escape($values['client_rate']) ?>"></div></div>
-<p class="help">Taxas de 0 a 100%, com até duas casas decimais. Projeções não representam clientes reais.</p><button class="wide" type="submit">Ver prévia</button>
+<label for="visits">Visitas por semana</label><input id="visits" name="weekly_visits" aria-describedby="visits-help" inputmode="numeric" pattern="[0-9]+" maxlength="9" required value="<?= p64Escape($values['weekly_visits']) ?>">
+<p class="help" id="visits-help">Número inteiro, de 0 a 100.000.000.</p>
+<div class="rates"><div><label for="lead-rate">Conversão em leads (%)</label><input id="lead-rate" name="lead_rate" aria-describedby="rates-help" inputmode="decimal" maxlength="6" required value="<?= p64Escape($values['lead_rate']) ?>"></div><div><label for="client-rate">Conversão em clientes (%)</label><input id="client-rate" name="client_rate" aria-describedby="rates-help" inputmode="decimal" maxlength="6" required value="<?= p64Escape($values['client_rate']) ?>"></div></div>
+<p class="help" id="rates-help">Taxas de 0 a 100%, com até duas casas decimais. Projeções não representam clientes reais.</p><button class="wide" type="submit">Ver prévia</button>
 </form></section>
 <aside class="card"><div class="step">Regras desta simulação · revisão 1</div><h2>O que pode virar rascunho</h2><div class="rule"><strong>12 ou mais leads projetados</strong><span class="muted">Uma proposta para revisão humana.</span></div><div class="rule"><strong>2 ou mais clientes projetados</strong><span class="muted">Um rascunho de tarefa CRM.</span></div><div class="rule"><strong>Você confere antes de guardar</strong><span class="muted">As propostas só entram na fila quando o lote inteiro e sua autoria podem ser registrados juntos.</span></div></aside></div>
 <?php if($preview!==null&&$projection!==null): ?>
@@ -246,5 +256,5 @@ label{display:block;font-size:13px;font-weight:750;margin:18px 0 6px}input:not([
 <?php if($preview['matched_rules']>0): ?><form method="post" action="<?= P64_PAGE ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="csrf" value="<?= p64Escape($csrf) ?>"><input type="hidden" name="preview_id" value="<?= p64Escape($previewId) ?>"><button type="submit">Guardar <?= p64Escape($preview['matched_rules']) ?> <?= $preview['matched_rules']===1?'rascunho':'rascunhos' ?></button></form><p class="help">Esta prévia vale por dez minutos. Repetir a confirmação recupera o mesmo lote, sem duplicá-lo.</p>
 <?php else: ?><p class="muted">Nenhuma regra deste cenário gerou um rascunho. Ajuste os números para preparar outra prévia.</p><?php endif; ?></section>
 <?php endif; ?>
-<footer class="footer">Autoria de laboratório, sem identidade humana autenticada. Guardar registra rascunhos sintéticos; não aprova propostas, cria tarefas no CRM, chama n8n ou usa IA paga. A fila mostra os pareceres e o histórico disponíveis no momento da consulta.</footer>
-</main></body></html>
+<footer class="footer">Autoria de laboratório, sem identidade humana autenticada. Guardar registra rascunhos sintéticos; não aprova propostas nem executa tarefas no CRM. Nenhum serviço externo é acionado.</footer>
+</main></div></body></html>
