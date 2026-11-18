@@ -167,3 +167,7 @@ A candidata P66/RC77 atende à pendência visual aprovada na [issue #289](https:
 O primeiro ensaio Chromium também revelou a incompatibilidade entre `Referrer-Policy: no-referrer` e a origem obrigatória dos POSTs nativos da criação. A correção usa `same-origin` no escritor, preserva a verificação de Origin/Host/CSRF e acrescenta a contraprova de origem `null`; a nova execução deve comprovar o fluxo sem injeção de cabeçalhos no navegador.
 
 As entregas permanecem candidatas DRAFT, sem merge, deploy, acesso a clientes ou APIs pagas. As próximas dependências operacionais continuam sendo identidade/permissões reais entre serviços, MFA administrativo obrigatório, destino/custódia de backup externo e pareceres correspondentes. Os registros históricos deste arquivo preservam o estado da linha integrada e não representam a HEAD dessas candidatas.
+
+## P67 — continuidade do fluxo owner aprovado
+
+A aprovação específica do responsável autorizou implementar criação e consulta de rascunhos pelo owner ativo do CRM em homologação fictícia. A candidata P67 acrescenta recebimento mTLS fechado, operações e chaves distintas, persistência/idempotência e autoria histórica atestada pelo CRM. Não altera o motor comercial nem os contratos e autores sintéticos anteriores. O CRM correspondente mantém intenção commitada antes do transporte e reconciliação por consulta sob autoridade atual. [Contrato e evidência](docs/reviews/AIA-P67-CRM-OWNER-DRAFTS.md). Resultados efetivos são registrados na PR da SHA testada; candidatura DRAFT, sem merge/deploy/IA externa ou GO operacional.

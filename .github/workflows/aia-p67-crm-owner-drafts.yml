@@ -1,0 +1,64 @@
+name: AIA P67 CRM owner draft receiver
+on:
+  pull_request:
+    branches:
+      - feat/aia-p66-imagine-operator-ui-2026-11-17
+permissions:
+  contents: read
+concurrency:
+  group: aia-p67-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  real-mtls-postgres-owner-drafts:
+    if: >-
+      github.repository == 'rafhael100/imagine-ai-agents' &&
+      github.event.repository.private == false &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.base.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: c08688b16e61d8d1ecc4d8c0ed4da8758a687ee8
+          path: _central_p30_pinned
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify the actual candidate and preserve historical source bytes
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          git diff --check
+          for file in runtime/central-auto/crm-owner-drafts/*.php tools/p67-owner-draft-probe.php; do php -l "$file"; done
+          python3 -m py_compile tools/run_p67_owner_drafts.py tools/check_p67_owner_draft_lab.py
+          python3 tools/run_p67_owner_drafts.py --preflight
+          python3 tools/run_p67_owner_drafts.py --prepare
+      - name: Build the exact receiver and resolve disposable runtime images
+        run: |
+          set -euo pipefail
+          docker pull postgres:16 >/dev/null
+          docker pull nginx:stable-alpine >/dev/null
+          p67_pg="$(docker image inspect postgres:16 --format '{{index .RepoDigests 0}}')"
+          p67_nginx="$(docker image inspect nginx:stable-alpine --format '{{index .RepoDigests 0}}')"
+          test -n "$p67_pg"
+          test -n "$p67_nginx"
+          docker build --quiet -f "$AIA_P67_SOURCE_DIR/runtime/central-auto/crm-owner-drafts/Dockerfile" -t "imagine-p67-php:$GITHUB_RUN_ID" "$AIA_P67_SOURCE_DIR" >/dev/null
+          p67_php="$(docker image inspect "imagine-p67-php:$GITHUB_RUN_ID" --format '{{.Id}}')"
+          test -n "$p67_php"
+          echo "AGENTS_PG_IMAGE=$p67_pg" >> "$GITHUB_ENV"
+          echo "AGENTS_NGINX_IMAGE=$p67_nginx" >> "$GITHUB_ENV"
+          echo "AGENTS_PHP_IMAGE=$p67_php" >> "$GITHUB_ENV"
+          echo "AIA_P67_PHP_IMAGE=$p67_php" >> "$GITHUB_ENV"
+      - name: Real PostgreSQL, mTLS, idempotency, authorization and expiry races
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          python3 tools/run_p67_owner_drafts.py --run
