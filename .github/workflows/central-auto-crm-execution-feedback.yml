@@ -1,0 +1,89 @@
+name: CENTRAL-AUTO CRM execution feedback and durable history
+on:
+  push:
+    branches:
+      - feat/n8n-crm-execution-feedback-2026-11-17
+permissions:
+  contents: read
+concurrency:
+  group: central-auto-crm-execution-feedback-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  crm-execution-feedback:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      N8N_IMAGE: ghcr.io/n8n-io/n8n@sha256:b4b90747b81fcda7e76550c0d3aa7f0f64917a1e9573cff40d6834eaf2e0f8ea
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 05e4ea7942e530055f4e455544d82f5d3edbd56d
+          path: _agents_lead_pinned
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-crm
+          ref: be9c1243a45ab867309a89f8c40d61dc44b7a7f4
+          path: _crm_feedback_pinned
+          persist-credentials: false
+      - name: Validate the exact candidate and disposable runner
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$P24_RUNNER_ENVIRONMENT" = github-hosted
+          test "$(git -C _agents_lead_pinned rev-parse HEAD)" = 05e4ea7942e530055f4e455544d82f5d3edbd56d
+          test "$(git -C _crm_feedback_pinned rev-parse HEAD)" = be9c1243a45ab867309a89f8c40d61dc44b7a7f4
+          python3 --version
+          php --version
+          docker compose version
+          openssl version
+          bash -n tools/run_crm_execution_feedback_virtual_tree.sh
+      - name: Prepare images before the isolated recovery
+        run: |
+          set -euo pipefail
+          docker pull "$N8N_IMAGE" >/dev/null
+          docker pull postgres:17 >/dev/null
+          docker pull postgres:16 >/dev/null
+          docker pull nginx:stable-alpine >/dev/null
+          n8n_pg="$(docker image inspect postgres:17 --format '{{index .RepoDigests 0}}')"
+          agents_pg="$(docker image inspect postgres:16 --format '{{index .RepoDigests 0}}')"
+          test -n "$n8n_pg"
+          test -n "$agents_pg"
+          agents_nginx="$(docker image inspect nginx:stable-alpine --format '{{index .RepoDigests 0}}')"
+          test -n "$agents_nginx"
+          # Runtime source and the reviewed task decoder are from one exact virtual tree.
+          # Only public Git blobs enter the build context; no runtime key is present.
+          git fetch --quiet --no-tags --no-write-fetch-head "$GITHUB_WORKSPACE/_agents_lead_pinned" 05e4ea7942e530055f4e455544d82f5d3edbd56d
+          virtual_merge="$(git merge-tree --write-tree --name-only "$GITHUB_SHA" 05e4ea7942e530055f4e455544d82f5d3edbd56d)"
+          virtual_tree="$(printf '%s\n' "$virtual_merge" | sed -n '1p')"
+          [[ "$virtual_tree" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git cat-file -t "$virtual_tree")" = tree
+          context="$(mktemp -d "$RUNNER_TEMP/crm-feedback-build-XXXXXX")"
+          trap 'rm -rf -- "$context"' EXIT
+          git archive "$virtual_tree" | tar --extract --file=- --directory="$context" --no-same-owner --no-same-permissions
+          docker build --quiet -f "$context/runtime/central-auto/Dockerfile" -t "imagine-crm-lead-execution-php:$GITHUB_RUN_ID" "$context" >/dev/null
+          agents_php="$(docker image inspect "imagine-crm-lead-execution-php:$GITHUB_RUN_ID" --format '{{.Id}}')"
+          test -n "$agents_php"
+          docker build --quiet -f _crm_feedback_pinned/infra/homologation/Dockerfile -t "imagine-crm-feedback-php:$GITHUB_RUN_ID" _crm_feedback_pinned >/dev/null
+          crm_php="$(docker image inspect "imagine-crm-feedback-php:$GITHUB_RUN_ID" --format '{{.Id}}')"
+          test -n "$crm_php"
+          echo "CRM_FEEDBACK_PHP_IMAGE=$crm_php" >> "$GITHUB_ENV"
+          echo "N8N_PG_IMAGE=$n8n_pg" >> "$GITHUB_ENV"
+          echo "AGENTS_PG_IMAGE=$agents_pg" >> "$GITHUB_ENV"
+          echo "AGENTS_PHP_IMAGE=$agents_php" >> "$GITHUB_ENV"
+          echo "AGENTS_NGINX_IMAGE=$agents_nginx" >> "$GITHUB_ENV"
+      - name: Verify signed CRM result tracking, native n8n and recovery
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          bash tools/run_crm_execution_feedback_virtual_tree.sh

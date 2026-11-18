@@ -1,5 +1,11 @@
 # Imagine AI Agents — estado atual
 
+## Continuidade — status de execução assinado e retorno ao CRM
+
+Após a execução nativa de leads [#469](https://github.com/rafhael100/imagine-ai-agents/pull/469), este recorte acrescenta uma API privada separada de acompanhamento e sua integração com uma projeção e histórico no CRM. O recibo P27 de ingresso conserva o contrato original. A leitura de execução exige grant próprio, mTLS e assinatura, valida origem/tarefa/ledger/evidência em snapshot consistente e não executa ou reconcilia a fila.
+
+O [contrato e critérios de prova](infra/n8n-private/homologation/CRM-EXECUTION-FEEDBACK.md) descrevem os estados, o hash estável das observações e o significado limitado de `PREPARED`. O workflow fixa domínio Agents e CRM por commit e exige a troca real sintética via HTTPS, n8n nativo e persistência CRM, além das regressões anteriores. Os resultados efetivos ficam na PR da HEAD testada; não se antecipa aprovação. DRAFT / NO-MERGE / NO-DEPLOY; identidade operacional, VPS e backup externo não verificados.
+
 ## 2026-11-17 — candidata CRM → fila → execução n8n de lead
 
 A branch `feat/n8n-crm-lead-execution-2026-11-17` acrescenta o fluxo nativo
