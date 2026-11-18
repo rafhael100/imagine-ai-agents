@@ -1,0 +1,61 @@
+name: Agents P29 - 10-worker bounded lease race and fencing
+
+on:
+  push:
+    branches:
+      - review/aia-p29-bound-lease-race-2026-11-16
+  pull_request:
+    branches:
+      - review/aia-p28-bound-outbox-lease-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  p29-bound-lease-race:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      AIA_P6_PG_LAB: 'true'
+      AIA_P16_PG_LAB: 'true'
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: imagine_agents_ci
+      DB_USERNAME: postgres
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 8b04d0e936168c77db028160b5aeb1758db497c4
+          path: _auto_ia_pinned_source
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, sodium, pdo_pgsql, pgsql
+          coverage: none
+      - name: Verify source pin and PHP syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _auto_ia_pinned_source rev-parse HEAD)" = "8b04d0e936168c77db028160b5aeb1758db497c4"
+          php -l tools/p29_lease_worker.php
+          php -l tools/check_p29_bound_lease_race.php
+      - name: Test ten workers, bounded retries, stale ACK and tenant isolation
+        run: php tools/check_p29_bound_lease_race.php

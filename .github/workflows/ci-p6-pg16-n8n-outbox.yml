@@ -1,0 +1,64 @@
+name: Agents P6 - synthetic n8n contract and PostgreSQL16 outbox
+
+on:
+  push:
+    branches:
+      - dev/aia-p6-n8n-outbox-contract-2026-11-16
+  pull_request:
+    branches:
+      - dev/aia-p5-ai-or-automation-routing-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  outbox-pg16:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      AIA_P6_PG_LAB: 'true'
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: imagine_agents_ci
+      DB_USERNAME: postgres
+      DB_PASSWORD: ci-only-password
+    steps:
+      - name: Checkout reviewed candidate with no persistent credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: PHP 8.4 with PDO PostgreSQL
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_pgsql, pgsql
+          coverage: none
+      - name: Inspect no-network contract and fixture source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "rafhael100/imagine-ai-agents"
+          test "$DB_HOST" = "127.0.0.1"
+          test "$DB_DATABASE" = "imagine_agents_ci"
+          php -l src/MockOrchestration/MockN8nOutboxContract.php
+          php -l tools/labs/PgN8nOutboxLab.php
+          php -l tools/check_p6_n8n_outbox.php
+      - name: Run real PG16 outbox SKIP LOCKED, ACK and dead-letter proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p6_n8n_outbox.php
+          echo 'P6_PG16_OUTBOX_SYNTHETIC_ONLY n8n_calls=0 webhook=none provider_calls=0 real_authorization=false operational_decision=NO_GO' >> "$GITHUB_STEP_SUMMARY"

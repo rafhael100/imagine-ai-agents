@@ -1,0 +1,97 @@
+name: Agents P3 - isolated loopback Docker demo (NO-GO)
+
+on:
+  push:
+    branches:
+      - dev/aia-p3-isolated-demo-serving-2026-11-16
+  pull_request:
+    branches:
+      - dev/aia-p2-sales-workbench-domain-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  docker-demo-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact branch without write token
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: PHP 8.4 with UTF-8 validation
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring
+          coverage: none
+      - name: Validate strict server and frontend source
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^FROM python:3.13-alpine@sha256:9ef1a599f863231c3d91e941389bfdc4a2d6070557243d54df1a4e57015b960e' deploy/agent-demo/Dockerfile
+          python3 -m py_compile deploy/agent-demo/server.py
+          python3 tools/check_p0_sales_demo.py
+          node tools/check_p1_sales_workbench.js
+          php tools/check_p2_sales_domain.php
+          node tools/check_p2_sales_parity.js
+      - name: Select an unused loopback port in this disposable runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          selected="$(python3 -c 'import socket; sock=socket.socket(); sock.bind(("127.0.0.1",0)); print(sock.getsockname()[1]); sock.close()')"
+          test "$selected" -ge 1024
+          echo "AIA_DEMO_BIND_PORT=$selected" >> "$GITHUB_ENV"
+      - name: Build and start fully isolated Compose on selected local port
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker compose -f deploy/agent-demo/compose.yaml config --quiet
+          docker compose -f deploy/agent-demo/compose.yaml config --format json | python3 -c 'import sys,json,os; p=json.load(sys.stdin)["services"]["preview"]["ports"]; assert len(p)==1 and str(p[0]["published"])==os.environ["AIA_DEMO_BIND_PORT"] and p[0]["host_ip"]=="127.0.0.1"'
+          docker compose -f deploy/agent-demo/compose.yaml up --build --detach --wait
+          cid="$(docker compose -f deploy/agent-demo/compose.yaml ps -q preview)"
+          docker inspect "$cid" --format '{{json .NetworkSettings.Ports}}'
+      - name: Verify HTTP headers, single static document and no business ingress
+        shell: bash
+        run: |
+          set -euo pipefail
+          bind="$(docker compose -f deploy/agent-demo/compose.yaml port preview 8080)"
+          echo "$bind" | grep -Eq '^127\.0\.0\.1:[0-9]+$'
+          port="${bind##*:}"
+          test "$port" -ge 1024
+          curl -fsS -D headers.txt "http://127.0.0.1:$port/" -o body.html
+          grep -q 'Imagine Agentes de IA' body.html
+          grep -qi '^Content-Security-Policy:.*connect-src.*none' headers.txt
+          grep -qi '^Cache-Control:.*no-store' headers.txt
+          grep -qi '^X-Frame-Options: DENY' headers.txt
+          grep -qi '^X-Content-Type-Options: nosniff' headers.txt
+          test "$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port/healthz")" = 200
+          for path in /api/agents/op01/leads /api/crm/leads /admin /robots.txt /index.html.bak; do
+            code="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port$path")"
+            test "$code" = 404
+          done
+          test "$(curl -s -X POST -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port/")" = 404
+          docker compose -f deploy/agent-demo/compose.yaml exec -T preview python -c "from pathlib import Path; p=Path('/srv/demo/unauthorized'); assert not p.exists(); exec('try:\\n p.write_text(\"bad\")\\nexcept OSError:\\n pass'); assert not p.exists()"
+          echo 'P3_STATIC_DEMO_HTTP_PASS bind=loopback_only health=simulated api=404 rootfs=readonly real_access=none operational_decision=NO_GO' >> "$GITHUB_STEP_SUMMARY"
+      - name: Package checked HTML preview for manual testing
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp examples/p0-assistente-comercial-demo.html dist/index.html
+          (cd dist && sha256sum index.html > SHA256SUMS && sha256sum -c SHA256SUMS)
+          printf '%s\n' 'Imagine Agentes de IA — Demonstração local' 'Extraia os arquivos e abra index.html no navegador.' 'Sem servidor, login, CRM, IA, n8n ou cobrança. Dados fictícios.' 'Não utilizar com dados de clientes.' > dist/LEIA-ME.txt
+          echo 'P3_OFFLINE_HTML_PREVIEW_ARTIFACT_READY checksum=SHA256SUMS' >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload temporary HTML demo as a CI artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: imagine-agentes-demo-html
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Destroy all disposable containers and networks
+        if: always()
+        shell: bash
+        run: |
+          docker compose -f deploy/agent-demo/compose.yaml down --volumes --remove-orphans || true

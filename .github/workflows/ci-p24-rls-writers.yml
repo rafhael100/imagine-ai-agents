@@ -1,0 +1,60 @@
+name: Agents P24 - tenant scoped RLS writer without privileged application role
+
+on:
+  push:
+    branches:
+      - review/aia-p24-rls-writer-boundary-2026-11-16
+  pull_request:
+    branches:
+      - review/aia-p23-staging-integrity-audit-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  p24-tenant-writers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      AIA_P6_PG_LAB: 'true'
+      AIA_P16_PG_LAB: 'true'
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: imagine_agents_ci
+      DB_USERNAME: postgres
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 8b04d0e936168c77db028160b5aeb1758db497c4
+          path: _auto_ia_pinned_source
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, sodium, pdo_pgsql, pgsql
+          coverage: none
+      - name: Verify immutable adapter and PHP syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _auto_ia_pinned_source rev-parse HEAD)" = "8b04d0e936168c77db028160b5aeb1758db497c4"
+          php -l tools/check_p24_rls_writers.php
+      - name: Verify database writer privilege isolation with two logins
+        run: php tools/check_p24_rls_writers.php

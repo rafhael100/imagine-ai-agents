@@ -1,5 +1,35 @@
 # Imagine AI Agents — estado atual
 
+## 2026-11-18 — contexto completo de fontes e pacote de revisão do n8n privado
+
+A candidata `feat/n8n-private-candidate-bundle-2026-11-18` reúne a Central
+[#475](https://github.com/rafhael100/imagine-ai-agents/pull/475), o domínio
+[#468](https://github.com/rafhael100/imagine-ai-agents/pull/468) e a prova MFA
+[#464](https://github.com/rafhael100/imagine-ai-agents/pull/464) em um checkout.
+A #475 isolada dependia de uma árvore virtual para fornecer o contrato PHP
+copiado pelo Dockerfile; a consolidação fornece esse arquivo sem modificar
+os blobs originais de runtime, domínio ou driver P30. O histórico abaixo
+permanece preservado.
+
+O [handoff do operador](infra/n8n-private/homologation/OPERATOR-PACKET.md)
+fixa as fontes e critérios para CI direta, arquivos públicos reproduzíveis
+e manifesto com HEAD/árvore e imagens observadas. Builds PHP conservam bases
+mutáveis: IDs locais não são imagens publicadas nem builds reproduzíveis bit
+a bit. O pacote não é backup, instalador ou Compose operacional completo.
+P30 usa Stack separado, sem afirmar MFA sobre o n8n restaurado.
+
+**Candidata DRAFT:** conferir evidência e artefato da HEAD no workflow
+`n8n-private-candidate.yml`; as CIs históricas verdes das fontes não aprovam
+antecipadamente esta consolidação. O inventário Leaseweb de 16/11 é
+histórico, 17990 não está reservada e a sessão desta rodada requer login legítimo.
+MFA individual foi provado; política global permaneceu false. Ingresso
+obrigatório, autoridade/custódia reais, licença, coexistência atual, restore
+externo deste pacote e plano exato de instalação continuam pendentes.
+Preservar o piloto histórico R2 e INF-DEV-03 (diário/30 dias, verificação
+semanal, restore mensal, simulação trimestral); revisão interna cruzada com
+IA e aceite final da Direção, sem exigir contratação externa. P67/P68 e os
+rascunhos do owner seguem em linha própria. **DRAFT / NO-MERGE / NO-DEPLOY.**
+
 ## Continuidade — histórico real no leitor da tela CRM
 
 A candidata filha da [PR #472](https://github.com/rafhael100/imagine-ai-agents/pull/472)

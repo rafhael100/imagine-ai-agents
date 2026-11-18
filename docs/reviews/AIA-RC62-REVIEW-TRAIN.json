@@ -1,0 +1,29 @@
+{
+  "schema": "AIA_RC62_REVIEW_TRAIN_V1",
+  "base_commit": "658a26b798c57ab4446eb146df064dbdc3111293",
+  "reviewed_head_commit": "ab040500f62b041ab9e4a591bf16412bd5d0cdd4",
+  "increment_start": 14,
+  "increment_end": 61,
+  "release_decision": "NO_GO",
+  "runtime_effects": {
+    "production_deploy": false,
+    "merge_to_main": false,
+    "n8n_operational_delivery": false,
+    "paid_ai_calls": 0,
+    "crm_customer_data_access": false,
+    "commercial_credits_debited": 0
+  },
+  "release_gates": {
+    "crm_owner_real_identity": "NOT_VERIFIED_NO_GO",
+    "portal_s2s_operation_scope": "NOT_VERIFIED_NO_GO",
+    "business_tenant_access_control": "NOT_VERIFIED_NO_GO",
+    "n8n_real_private_delivery_and_ack": "NOT_VERIFIED_NO_GO",
+    "crm_api_live_approval": "NOT_VERIFIED_NO_GO",
+    "consent_and_lgpd_retention": "NOT_VERIFIED_NO_GO",
+    "vault_kms_key_custody": "NOT_VERIFIED_NO_GO",
+    "leaseweb_backup_restore_rollback": "NOT_VERIFIED_NO_GO",
+    "independent_security_review": "NOT_VERIFIED_NO_GO",
+    "human_release_acceptance": "NOT_VERIFIED_NO_GO"
+  },
+  "review_instructions": "DRAFT_ONLY_REVIEW_SECURITY_AND_INTEGRATION_NO_AUTO_MERGE"
+}
