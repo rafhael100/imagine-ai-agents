@@ -64,3 +64,7 @@ O desenho, os limites e a matriz de verificação estão em
 [`CRM-LEAD-EXECUTION.md`](../../infra/n8n-private/homologation/CRM-LEAD-EXECUTION.md).
 A CI precisa aprovar os SHAs exatos da Central e do domínio; o perfil continua
 exclusivo de homologação descartável, sem aprovação de instalação.
+
+## Acompanhamento de execução no CRM
+
+A extensão [CRM execution feedback](../../infra/n8n-private/homologation/CRM-EXECUTION-FEEDBACK.md) oferece um contrato privado separado do recibo P27, com grant de leitura próprio e resposta assinada. Ela projeta somente fatos do ledger existente, sem chamada ao n8n ou mutação da fila. O CRM persiste a observação e seu histórico em transação, preservando a confirmação de entrega original. A instalação continua restrita a CI sintética e não cria permissão operacional.

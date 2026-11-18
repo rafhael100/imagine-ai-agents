@@ -4,6 +4,11 @@ WORKDIR /var/www/html
 COPY runtime/central-auto/index.php runtime/central-auto/index.php
 COPY runtime/central-auto/strict-json.php runtime/central-auto/strict-json.php
 COPY runtime/central-auto/event-status.php runtime/central-auto/event-status.php
+COPY runtime/central-auto/execution-status.php runtime/central-auto/execution-status.php
+COPY runtime/central-auto/execution-contract.php runtime/central-auto/execution-contract.php
+COPY src/MockOrchestration/CapturedLeadTaskContract.php src/MockOrchestration/CapturedLeadTaskContract.php
+COPY infra/n8n-private/workflows/native-crm-lead-noai.workflow.json infra/n8n-private/workflows/native-crm-lead-noai.workflow.json
+RUN php -r 'if (!extension_loaded("sodium")) { exit(1); }'
 RUN printf 'display_errors=Off\nlog_errors=On\nzend.exception_ignore_args=On\nexpose_php=Off\n' > /usr/local/etc/php/conf.d/private.ini
 USER www-data
 CMD ["php-fpm"]

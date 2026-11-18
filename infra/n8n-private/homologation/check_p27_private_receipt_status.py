@@ -270,7 +270,10 @@ class ReceiptLab(AgentsRecovery):
             args += self.mount(path, "/run/secrets/" + name)
         self.service("fpm", args + [self.php_image])
         config = (ROOT / "runtime/central-auto/nginx.conf").read_text()
-        require(config.count("fastcgi_pass agents-app:9000;") == 2, "P27_EXPECTED_UPSTREAMS")
+        require(config.count("fastcgi_pass agents-app:9000;") == 3 and
+                all(config.count("location = " + path + " {") == 1 for path in
+                    ("/private/events", "/private/events/receipt", "/private/events/execution")),
+                "P27_EXPECTED_THREE_EXACT_PRIVATE_ROUTES")
         config = config.replace("fastcgi_pass agents-app:9000;", "fastcgi_pass 127.0.0.1:9000;")
         nginx = self.private_file("nginx-ci.conf", config.encode())
         args = ["--user", "101:101", "--tmpfs", "/var/cache/nginx:rw,noexec,nosuid,size=16m,mode=1777",
