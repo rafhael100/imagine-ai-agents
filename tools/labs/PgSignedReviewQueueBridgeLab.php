@@ -6,6 +6,7 @@ namespace ImagineAI\Convergence;
 require_once __DIR__.'/PgScopedReviewQueueBridgeLab.php';
 require_once __DIR__.'/PgSignedDraftReviewLab.php';
 require_once __DIR__.'/PgHistoricalSignedReviewAuditLab.php';
+require_once __DIR__.'/PgVerifiableProposalDetailLab.php';
 require_once __DIR__.'/../../src/Automation/SignedReviewQueueReadModel.php';
 
 use ImagineAI\Automation\SignedReviewQueueReadModel;
@@ -30,12 +31,16 @@ final class PgSignedReviewQueueBridgeLab
     public function __construct(private PDO $db){}
 
     /** @return array<string,mixed> */
-    public function read(string $tenant):array
+    public function read(string $tenant,?string $proposal=null):array
     {
         if(getenv('AIA_P62_SIGNED_REVIEW_LAB')!=='true'
             ||getenv('GITHUB_ACTIONS')!=='true'
             ||getenv('GITHUB_REPOSITORY')!=='rafhael100/imagine-ai-agents'
             ||$this->db->inTransaction()){
+            return self::deny();
+        }
+        if($proposal!==null&&(getenv('AIA_P63_PROPOSAL_DETAIL_LAB')!=='true'
+            ||preg_match('/\ASYNTHETIC_PROPOSAL_[A-F0-9]{24}\z/D',$proposal)!==1)){
             return self::deny();
         }
         try{
@@ -105,8 +110,21 @@ final class PgSignedReviewQueueBridgeLab
                     return self::deny();
                 }
             }
+            $detail=null;
+            if($proposal!==null){
+                $detail=(new PgVerifiableProposalDetailLab($this->db))
+                    ->readInsideReadOnlySnapshot($tenant,$proposal);
+                if($detail['decision']!=='LAB_PROPOSAL_DETAIL_NO_GO'
+                    ||!array_key_exists($proposal,$statuses)){
+                    $this->db->rollBack();
+                    return self::deny();
+                }
+                // P61/P59 already verified this exact proposal's sealed
+                // author in this snapshot. Do not expose identity or keys.
+                $detail['author_provenance_verified']=true;
+            }
             $this->db->commit();
-            return [
+            $result=[
                 'schema'=>'AIA_P62_SIGNED_REVIEW_SNAPSHOT_V1',
                 'decision'=>'LAB_SIGNED_REVIEW_SNAPSHOT_NO_GO',
                 'tenant_ref'=>$tenant,
@@ -128,6 +146,9 @@ final class PgSignedReviewQueueBridgeLab
                 'ai_api_calls'=>0,
                 'service_effects'=>0,
             ];
+            // Original P62 callers retain their exact closed return shape.
+            if($proposal!==null)$result['detail']=$detail;
+            return $result;
         }catch(Throwable){
             if($this->db->inTransaction())$this->db->rollBack();
             return self::deny();

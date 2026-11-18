@@ -20,6 +20,7 @@ use Throwable;
  */
 final class PgDeterministicDraftRegistryLab
 {
+    private const MAX_INPUT_BYTES=8192;
     private DeterministicRuleEngine $engine;
 
     public function __construct(private PDO $db)
@@ -48,6 +49,33 @@ CREATE TABLE IF NOT EXISTS aia_p51_lab.preview_batches(
  PRIMARY KEY(tenant_ref,request_ref),
  UNIQUE(tenant_ref,request_ref,ruleset_ref,revision)
 )
+SQL);
+        // P63 is additive. Existing batches stay explicitly legacy; their
+        // inputs cannot be reconstructed from a hash or a later replay.
+        $this->db->exec(<<<'SQL'
+ALTER TABLE aia_p51_lab.preview_batches
+ ADD COLUMN IF NOT EXISTS command_canonical TEXT,
+ ADD COLUMN IF NOT EXISTS ruleset_canonical TEXT,
+ ADD COLUMN IF NOT EXISTS inputs_version SMALLINT NOT NULL DEFAULT 0;
+DO $p63$
+BEGIN
+ IF NOT EXISTS (
+  SELECT 1 FROM pg_constraint
+  WHERE conrelid='aia_p51_lab.preview_batches'::regclass
+    AND conname='p63_canonical_inputs_bound'
+ ) THEN
+  ALTER TABLE aia_p51_lab.preview_batches
+   ADD CONSTRAINT p63_canonical_inputs_bound CHECK (
+    (inputs_version=0 AND command_canonical IS NULL AND ruleset_canonical IS NULL)
+    OR (inputs_version=1 AND command_canonical IS NOT NULL
+        AND ruleset_canonical IS NOT NULL
+        AND octet_length(command_canonical)>=2
+        AND octet_length(ruleset_canonical)>=2
+        AND octet_length(command_canonical)+octet_length(ruleset_canonical)<=8192)
+   );
+ END IF;
+END;
+$p63$;
 SQL);
         $this->db->exec(<<<'SQL'
 CREATE TABLE IF NOT EXISTS aia_p51_lab.review_drafts(
@@ -96,8 +124,15 @@ SQL);
             $rulesetRef=$result['ruleset_ref'];
             $revision=$result['revision'];
             $count=$result['matched_rules'];
-            $cmdSha=hash('sha256',json_encode($command,
-                JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
+            $commandCanonical=json_encode($command,
+                JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+            $rulesetCanonical=json_encode($ruleset,
+                JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+            if(strlen('{"command":'.$commandCanonical.',"ruleset":'.
+                $rulesetCanonical.'}')>self::MAX_INPUT_BYTES){
+                return self::out('DENY','CANONICAL_INPUT_LIMIT');
+            }
+            $cmdSha=hash('sha256',$commandCanonical);
             $resultSha=hash('sha256',json_encode($result,
                 JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
             if($result['status']!=='LAB_PROPOSALS_ONLY'
@@ -112,15 +147,19 @@ SQL);
             $insert=$this->db->prepare(<<<'SQL'
 INSERT INTO aia_p51_lab.preview_batches
  (tenant_ref,request_ref,ruleset_ref,revision,
-  command_sha256,ruleset_sha256,preview_sha256,proposal_count)
-VALUES (:t,:request,:ruleset,:rev,:command,:rs_hash,:out_hash,:count)
+  command_sha256,ruleset_sha256,preview_sha256,proposal_count,
+  command_canonical,ruleset_canonical,inputs_version)
+VALUES (:t,:request,:ruleset,:rev,:command,:rs_hash,:out_hash,:count,
+        :command_canonical,:ruleset_canonical,1)
 ON CONFLICT DO NOTHING RETURNING preview_sha256
 SQL);
             $insert->execute([
                 ':t'=>$tenant,':request'=>$request,
                 ':ruleset'=>$rulesetRef,':rev'=>$revision,
                 ':command'=>$cmdSha,':rs_hash'=>$result['ruleset_sha256'],
-                ':out_hash'=>$resultSha,':count'=>$count
+                ':out_hash'=>$resultSha,':count'=>$count,
+                ':command_canonical'=>$commandCanonical,
+                ':ruleset_canonical'=>$rulesetCanonical,
             ]);
             if($insert->fetchColumn()!==false){
                 $write=$this->db->prepare(<<<'SQL'
@@ -162,7 +201,7 @@ SQL);
             // and compare all hashes; never amend in place or resurrect.
             $read=$this->db->prepare(<<<'SQL'
 SELECT ruleset_ref,revision,command_sha256,ruleset_sha256,
- preview_sha256,proposal_count
+ preview_sha256,proposal_count,command_canonical,ruleset_canonical,inputs_version
 FROM aia_p51_lab.preview_batches
 WHERE tenant_ref=:t AND request_ref=:request FOR UPDATE
 SQL);
@@ -177,6 +216,17 @@ SQL);
                 ||(int)$r['proposal_count']!==$count){
                 $this->db->rollBack();
                 return self::out('DENY','REPLAY_INPUT_CHANGED_OR_TAMPERED');
+            }
+            $legacy=(int)$r['inputs_version']===0
+                &&$r['command_canonical']===null&&$r['ruleset_canonical']===null;
+            $captured=(int)$r['inputs_version']===1
+                &&is_string($r['command_canonical'])
+                &&is_string($r['ruleset_canonical'])
+                &&hash_equals($commandCanonical,$r['command_canonical'])
+                &&hash_equals($rulesetCanonical,$r['ruleset_canonical']);
+            if(!$legacy&&!$captured){
+                $this->db->rollBack();
+                return self::out('DENY','STORED_CANONICAL_INPUTS_CHANGED');
             }
             $exists=$this->db->prepare(<<<'SQL'
 SELECT proposal_ref,draft_sha256 FROM aia_p51_lab.review_drafts

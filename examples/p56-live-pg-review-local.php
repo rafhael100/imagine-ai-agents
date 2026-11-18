@@ -37,9 +37,17 @@ $local=PHP_SAPI==='cli-server'
     )===1;
 if(!$ci||!$local)p56Deny(403);
 if(($_SERVER['REQUEST_METHOD']??'')!=='GET')p56Deny(405);
-if(array_keys($_GET)!==[]&&array_keys($_GET)!==['kind'])p56Deny(400);
+$signedMode=getenv('AIA_P62_SIGNED_REVIEW_LAB')==='true';
+$detailMode=$signedMode&&getenv('AIA_P63_PROPOSAL_DETAIL_LAB')==='true';
+$allowed=$detailMode?['kind','proposal']:['kind'];
+if(array_diff(array_keys($_GET),$allowed)!==[])p56Deny(400);
 $kind=$_GET['kind']??'all';
 if(!is_string($kind)||!in_array($kind,['all','human','task','notice'],true)){
+    p56Deny(400);
+}
+$selected=$_GET['proposal']??null;
+if($selected!==null&&(!is_string($selected)
+    ||preg_match('/\ASYNTHETIC_PROPOSAL_[A-F0-9]{24}\z/D',$selected)!==1)){
     p56Deny(400);
 }
 
@@ -61,12 +69,12 @@ try{
         'aia_p55_ci_read_a',$password,
         [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_TIMEOUT=>3]
     );
-    $signedMode=getenv('AIA_P62_SIGNED_REVIEW_LAB')==='true';
     $snapshot=null;
+    $detail=null;
     $signedItems=[];
     if($signedMode){
         $snapshot=(new PgSignedReviewQueueBridgeLab($pdo))->read(
-            'SYNTHETIC_TENANT_A'
+            'SYNTHETIC_TENANT_A',$selected
         );
         if(($snapshot['decision']??null)!==
                 'LAB_SIGNED_REVIEW_SNAPSHOT_NO_GO'
@@ -76,6 +84,16 @@ try{
             p56Deny(503);
         }
         $model=$snapshot['queue'];
+        if($selected!==null){
+            $detail=$snapshot['detail']??null;
+            if(!is_array($detail)
+                ||$detail['schema']!=='AIA_P63_VERIFIABLE_PROPOSAL_DETAIL_V1'
+                ||$detail['decision']!=='LAB_PROPOSAL_DETAIL_NO_GO'
+                ||$detail['proposal']['proposal_ref']!==$selected
+                ||$detail['author_provenance_verified']!==true){
+                p56Deny(503);
+            }
+        }
         if($snapshot['current_review_available']){
             foreach($snapshot['signed_review']['items'] as $item){
                 $signedItems[$item['proposal_ref']]=$item;
@@ -170,8 +188,12 @@ h2{font-size:19px;letter-spacing:-.025em}
 .metric strong{display:block;font-size:22px}
 .mono{font:11px/1.6 ui-monospace,Consolas,monospace;color:#778499;overflow-wrap:anywhere}
 .state{font-size:11px;color:#84510c;font-weight:700;background:#fff2df;display:inline-block;padding:5px 9px;border-radius:7px;margin-top:8px}
+.detail-link{display:inline-block;margin-top:12px;color:#804b06;font-weight:700}
+.proposal-detail{margin-top:24px}.condition{font-size:clamp(20px,3vw,28px);font-weight:800;letter-spacing:-.025em}
+.inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.inputs dt{color:var(--muted);font-size:13px}.inputs dd{margin:4px 0 0;font-size:20px;font-weight:700}
+.detail-notice{background:#fff3df;border-radius:10px;padding:12px 16px}
 .footer{border-top:1px solid var(--line);padding-top:18px;margin-top:36px;color:var(--muted);font-size:13px}
-@media(max-width:650px){.shell{padding:18px 14px}.cards{grid-template-columns:1fr}.draft{grid-template-columns:1fr}.metric{text-align:left}}
+@media(max-width:650px){.shell{padding:18px 14px}.cards,.inputs{grid-template-columns:1fr}.draft{grid-template-columns:1fr}.metric{text-align:left}}
 </style>
 </head>
 <body>
@@ -227,6 +249,9 @@ h2{font-size:19px;letter-spacing:-.025em}
 <?php else: ?>
 <span class="state">AGUARDANDO REVISÃO · NÃO EXECUTADO</span>
 <?php endif; ?>
+<?php if($detailMode): ?>
+<div><a class="detail-link" data-proposal-detail="<?= p56E($proposal['proposal_ref']) ?>" href="?kind=<?= p56E($kind) ?>&amp;proposal=<?= p56E($proposal['proposal_ref']) ?>#proposal-detail">Ver condição e insumos</a></div>
+<?php endif; ?>
 </div>
 <div class="metric">
 <strong><?= p56E($proposal['observed']) ?></strong>
@@ -237,6 +262,41 @@ h2{font-size:19px;letter-spacing:-.025em}
 <?php endif; ?>
 </div>
 </section>
+<?php if($detail!==null): ?>
+<section class="card proposal-detail" id="proposal-detail" aria-labelledby="detail-title" data-detail-state="<?= p56E($detail['state']) ?>" data-detail-proposal="<?= p56E($selected) ?>">
+<h2 id="detail-title">Por que esta proposta foi criada?</h2>
+<p class="mono"><?= p56E($detail['proposal']['request_ref']) ?> · <?= p56E($detail['proposal']['ruleset_ref']) ?> · revisão <?= p56E($detail['proposal']['revision']) ?></p>
+<?php if($detail['state']==='VERIFIED'): ?>
+<?php
+$explanation=$detail['explanation'];
+$rule=$explanation['rule'];
+$input=$explanation['inputs'];
+$operator=['gte'=>'≥','lte'=>'≤','eq'=>'='][$rule['operator']];
+$comparison=['gte'=>'maior ou igual a','lte'=>'menor ou igual a','eq'=>'igual a'][$rule['operator']];
+?>
+<p>Esta proposta de <?= p56E(strtolower($names[$rule['draft_kind']])) ?> foi criada pela condição de <?= p56E(strtolower($metricNames[$rule['metric']])) ?>.</p>
+<p class="condition" data-detail-operator="<?= p56E($rule['operator']) ?>"><?= p56E($explanation['observed']) ?> <?= p56E($operator) ?> <?= p56E($rule['threshold']) ?></p>
+<p>O valor calculado foi <?= p56E($explanation['observed']) ?>. A regra exige um valor <?= p56E($comparison) ?> <?= p56E($rule['threshold']) ?>.</p>
+<h3>Insumos originais da simulação</h3>
+<dl class="inputs">
+<div><dt>Visitas semanais</dt><dd><?= p56E($input['weekly_visits']) ?></dd></div>
+<div><dt>Conversão em leads</dt><dd><?= p56E(number_format($input['lead_rate_bp']/100,2,',','.')) ?>%</dd></div>
+<div><dt>Conversão em clientes</dt><dd><?= p56E(number_format($input['client_rate_bp']/100,2,',','.')) ?>%</dd></div>
+</dl>
+<p><small>Condição reavaliada com os insumos preservados do mesmo lote. <?= p56E($explanation['matched_rules']) ?> de <?= p56E($explanation['evaluated_rules']) ?> regras geraram rascunhos. Proposta não executada.</small></p>
+<?php else: ?>
+<p class="detail-notice"><strong>Entradas originais indisponíveis.</strong> Este lote foi gravado sem os insumos completos. Não é possível reconstruir a condição que o originou a partir dos valores ou dos identificadores.</p>
+<?php endif; ?>
+<p><small>Autoria sintética vinculada e verificada nesta consulta.</small></p>
+<?php if($snapshot['current_review_available']): ?>
+<?php $selectedReview=$signedItems[$selected]; ?>
+<p><strong><?= p56E($reviewNames[$selectedReview['review_state']]) ?></strong> · <?= p56E($selectedReview['signed_observations']) ?> pareceres · <?= p56E(implode(' / ',$selectedReview['review_roles'])?:'Nenhum papel observado') ?></p>
+<?php else: ?>
+<p><strong>Parecer atual indisponível.</strong> O histórico foi verificado separadamente e não concede autorização.</p>
+<?php endif; ?>
+<p><small>Detalhe, fila, autoria e pareceres pertencem à mesma consulta. Não há aprovação ou execução disponível.</small></p>
+</section>
+<?php endif; ?>
 <footer class="footer">
 <strong>NO-GO operacional.</strong> Demonstração localhost em CI, com conexão PostgreSQL temporária de usuário somente leitura. Não há IAM de cliente, aprovação, execução, envio de mensagem, consumo de IA ou serviços externos.
 </footer>
