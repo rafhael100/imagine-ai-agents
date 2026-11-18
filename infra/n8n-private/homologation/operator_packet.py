@@ -26,15 +26,16 @@ SCHEMA = "N8N_PRIVATE_OPERATOR_PACKET_V1"
 OBSERVATIONS_SCHEMA = "N8N_PRIVATE_CANDIDATE_OBSERVATIONS_V1"
 AGENTS_REPOSITORY = "rafhael100/imagine-ai-agents"
 REPOSITORIES = {"candidate": AGENTS_REPOSITORY, "crm": "rafhael100/imagine-crm", "adapter": AGENTS_REPOSITORY}
-FIXED_PINS = {"crm": "e1b3b7f118eff0350a00789aecc7bb2bb2331464", "adapter": "8b04d0e936168c77db028160b5aeb1758db497c4"}
+FIXED_PINS = {"crm": "96dbf1aed2d1cf3237bc3631c4594540a0168d2a", "adapter": "8b04d0e936168c77db028160b5aeb1758db497c4"}
 LINEAGE = {
+    "candidate_479": "3d30b2f7977b37d3bb86d6ff11bc63728145f5fd",
     "central_475": "dfa4685cd5df4a9499c3420f580980e769a1981d",
     "domain_468": "05e4ea7942e530055f4e455544d82f5d3edbd56d",
     "operator_464": "c08688b16e61d8d1ecc4d8c0ed4da8758a687ee8",
 }
 N8N_IMAGE = "ghcr.io/n8n-io/n8n@sha256:b4b90747b81fcda7e76550c0d3aa7f0f64917a1e9573cff40d6834eaf2e0f8ea"
 CHECKS = (
-    "source_integrity", "php_syntax", "p2_safety_contracts", "native_contracts",
+    "source_integrity", "crm_backup_bridge_contracts", "php_syntax", "p2_safety_contracts", "native_contracts",
     "execution_contract", "crm_execution_receipt_contract", "captured_lead_contract",
     "p48_deterministic_noai", "p49_deterministic_rules", "p50_offline_cli",
     "p53_review_queue", "p60_signed_review_queue", "crm_lead_capture", "crm_lead_execution",
@@ -46,6 +47,8 @@ P30 = {"n8n_version_verified": "2.47.7", "synthetic_nominal_operators": 1,
        "go_for_installation": False}
 BOUNDARIES = {
     "source": "PUBLIC_TRACKED_GIT_OBJECTS_ONLY", "runtime_profile": "DISPOSABLE_CI_ONLY",
+    "crm_schema_profile": "synthetic-private-s2s-execution-monitor-v1",
+    "crm_native_restore_tables": 33, "owner_monitor_35_tables_exercised_here": False,
     "source_ancestry_checked_by_ci": True, "full_history_verified_offline": False,
     "source_links_authenticate_approvals": False, "image_identity_verified_offline": False,
     "ci_observations_authenticated_offline": False, "checksums_are_ci_attestation": False,
@@ -76,12 +79,16 @@ REQUIRED = {
         "infra/n8n-private/homologation/check_p30_native_operator_mfa.py",
         "infra/n8n-private/homologation/check_crm_execution_feedback.py",
         "infra/n8n-private/homologation/operator_packet.py",
+        "infra/n8n-private/homologation/crm_feedback_backup.py",
+        "infra/n8n-private/homologation/test_crm_feedback_backup.py",
     },
     "crm": {"infra/homologation/Dockerfile", "composer.json", "composer.lock", "bootstrap/app.php",
             "app/Homologation/ExecutionMonitor.php", "app/Homologation/S2S/AgentsExecutionReconciler.php",
             "infra/homologation/s2s/execution-feedback-candidate.sql",
             "infra/homologation/s2s/execution-monitor-candidate.sql",
-            "resources/views/partials/crm-execution-monitor.blade.php"},
+            "resources/views/partials/crm-execution-monitor.blade.php",
+            "scripts/ops/private_crm_backup_contract.py", "scripts/ops/private_crm_backup_catalog.py",
+            "scripts/ops/private_crm_backup_snapshot.py"},
     "adapter": {"tools/auto_ia/convergence/MockP7ToAutoIaAdapter.php", "tools/auto_ia/pg/003_signed_ingress_lab.sql"},
 }
 SHA1 = re.compile(r"[a-f0-9]{40}")
@@ -357,7 +364,10 @@ def verify_packet(directory, expected_candidate, expected_manifest=None):
 
 def create_packet(candidate_repo, crm_repo, observations_path, output):
     need(os.environ.get("GITHUB_ACTIONS") == "true" and os.environ.get("GITHUB_REPOSITORY") == AGENTS_REPOSITORY
-         and os.environ.get("P24_RUNNER_ENVIRONMENT") == "github-hosted", "CREATE_HOSTED_CI_ONLY")
+         and os.environ.get("P24_RUNNER_ENVIRONMENT") == "github-hosted"
+         and os.environ.get("N8N_CANDIDATE_REPOSITORY_PRIVATE") == "false"
+         and os.environ.get("GITHUB_EVENT_NAME") == "push"
+         and os.environ.get("GITHUB_REF") == "refs/heads/integrate/n8n-candidate-crm-660-2026-11-18", "CREATE_HOSTED_CI_ONLY")
     observations = closed_json(regular_bytes(observations_path, 32768))
     validate_observations(observations)
     for field, env in (("source_sha", "GITHUB_SHA"), ("run_id", "GITHUB_RUN_ID"), ("run_attempt", "GITHUB_RUN_ATTEMPT")):

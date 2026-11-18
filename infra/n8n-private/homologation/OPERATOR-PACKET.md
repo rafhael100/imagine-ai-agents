@@ -2,12 +2,27 @@
 
 **Candidata DRAFT.** Conferir a evidência desta HEAD e seu artefato no workflow
 `n8n-private-candidate.yml`, da branch
-`feat/n8n-private-candidate-bundle-2026-11-18`. As CIs abaixo pertencem às
+`integrate/n8n-candidate-crm-660-2026-11-18`. As CIs abaixo pertencem às
 SHAs originais e não aprovam antecipadamente esta consolidação. O pacote é
 um contexto completo de fontes para build e revisão. Não é instalador, Compose
 operacional completo, backup ou autorização de acesso.
 
-## Lacuna concreta e composição
+## Integração com o CRM #660
+
+Esta branch filha preserva a fonte [#479](https://github.com/rafhael100/imagine-ai-agents/pull/479)
+em `3d30b2f7977b37d3bb86d6ff11bc63728145f5fd` e atualiza o pin do CRM
+para `96dbf1aed2d1cf3237bc3631c4594540a0168d2a`. A CI #479 pertence ao CRM #654;
+ela não comprova a integração nova. O contrato de backup atual exige o catálogo
+completo e seus módulos irmãos. O checker usa agora os três módulos canônicos
+da mesma fonte e um snapshot exportado para segurança, catálogo, dados e dump.
+
+[Escopo, exceção revisada de blob e critérios de validação](CRM-660-CANDIDATE.md).
+O perfil nativo permanece com **33 tabelas**; a jornada owner e a recuperação
+combinada de 35 tabelas têm provas próprias no CRM #660. Os arquivos owner
+fazem parte do arquivo público do CRM, mas suas rotas e tabelas não são
+instaladas por este laboratório. O pacote não atribui essas provas ao n8n.
+
+## Lacuna concreta e composição histórica
 
 A Central #475 foi validada numa árvore temporária combinada com o domínio
 #468. Seu Dockerfile copia
@@ -22,7 +37,8 @@ da #475 foi preservada na resolução do conflito documental.
 | [Central #475](https://github.com/rafhael100/imagine-ai-agents/pull/475) | `dfa4685cd5df4a9499c3420f580980e769a1981d` | [CI 44225455499 — success](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44225455499) |
 | [Domínio #468](https://github.com/rafhael100/imagine-ai-agents/pull/468) | `05e4ea7942e530055f4e455544d82f5d3edbd56d` | [CI 44208519874 — success na composição com Central #469](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44208519874) |
 | [MFA P30 #464](https://github.com/rafhael100/imagine-ai-agents/pull/464) | `c08688b16e61d8d1ecc4d8c0ed4da8758a687ee8` | [CI 44203383716 — success](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44203383716) |
-| [CRM #654](https://github.com/rafhael100/imagine-crm/pull/654) | `e1b3b7f118eff0350a00789aecc7bb2bb2331464` | [Tela](https://github.com/rafhael100/imagine-crm/actions/runs/44224140953) e [backup/snapshot](https://github.com/rafhael100/imagine-crm/actions/runs/44224140836) aprovados nessa SHA |
+| [Candidata #479](https://github.com/rafhael100/imagine-ai-agents/pull/479) | `3d30b2f7977b37d3bb86d6ff11bc63728145f5fd` | [CI 44236540149](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44236540149), com o pin histórico CRM #654 |
+| [CRM #660](https://github.com/rafhael100/imagine-crm/pull/660) | `96dbf1aed2d1cf3237bc3631c4594540a0168d2a` | Evidência própria desta integração deve ser conferida no novo run; não herdar aprovação da #654 |
 | [Adapter histórico](https://github.com/rafhael100/imagine-ai-agents/commit/8b04d0e936168c77db028160b5aeb1758db497c4) | `8b04d0e936168c77db028160b5aeb1758db497c4` | Dependência pública pinada do replay existente; não é fonte de autoridade atual |
 
 O commit e a árvore **reais desta candidata** são obtidos do checkout da CI
@@ -35,7 +51,7 @@ continuam dependências públicas separadas, com seus commits e árvores própri
 O workflow `.github/workflows/n8n-private-candidate.yml` e o runner
 `tools/run_n8n_private_candidate.sh` destinam-se exclusivamente ao runner
 descartável autorizado. Verificam a preservação das fontes e exigem os checks
-da #475 no checkout consolidado e o driver P30 original antes do pacote.
+da #475 no checkout consolidado, a compatibilidade de backup CRM #660 e o driver P30 original antes do pacote. Dos 82 vínculos de fontes anteriores, 81 permanecem idênticos. O checker de feedback e os dois arquivos novos são fixados por blobs próprios revisados.
 O build usa o arquivo de fontes da HEAD completa e o CRM pinado; o adapter
 histórico é acrescentado somente ao ambiente dos testes depois do build.
 
@@ -49,7 +65,7 @@ operator_packet.py verify DIRETORIO --expected-candidate-sha SHA40
 
 O diretório de saída deve ser novo. O runner usa
 `$RUNNER_TEMP/n8n-private-candidate-packet` e verifica o pacote antes do upload.
-O artefato `n8n-private-candidate-${{ github.sha }}-${{ github.run_attempt }}` contém
+O artefato `n8n-crm660-candidate-${{ github.sha }}-${{ github.run_attempt }}` contém
 somente `candidate.tar.gz`, `crm.tar.gz`, `adapter.tar.gz`, `manifest.json` e
 `SHA256SUMS`, com retenção de sete dias no GitHub. As fontes podem ser
 regeneradas dos mesmos objetos Git públicos após esse prazo. Essa retenção
@@ -68,7 +84,7 @@ python3 infra/n8n-private/homologation/operator_packet.py verify \
 
 O verificador é offline, sem Docker, SQL ou rede. Confere hashes, bytes, tipos e
 caminhos das entradas e suas árvores Git contra os commits públicos incluídos.
-O `create` confere também a ancestralidade das três fontes no checkout da CI;
+O `create` confere também a ancestralidade das três fontes históricas e da #479 no checkout da CI;
 a verificação offline não reivindica revalidar o histórico Git completo.
 
 O artefato contém arquivos de fontes públicas reproduzíveis e um manifesto
@@ -152,8 +168,9 @@ outros produtos não são modificados por este handoff.
 As linhas [P67 #476](https://github.com/rafhael100/imagine-ai-agents/pull/476),
 [P68 #477](https://github.com/rafhael100/imagine-ai-agents/pull/477) e
 [CRM #658](https://github.com/rafhael100/imagine-crm/pull/658) tratam dos
-rascunhos do owner e sua recuperação em paralelo. Não fazem parte desta
-consolidação; este pacote não duplica nem declara concluído esse trabalho.
+rascunhos do owner e sua recuperação em paralelo. As fontes owner estão no arquivo do CRM #660, mas esta prova nativa não instala
+seu perfil de 35 tabelas nem executa a jornada owner; não declara essa
+integração nativa específica concluída.
 
 **DRAFT / NO-MERGE / NO-DEPLOY / NO-GO operacional.** Fontes públicas e
 evidência de CI não concedem acesso a clientes, instalação, operação de

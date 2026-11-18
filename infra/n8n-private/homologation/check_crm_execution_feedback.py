@@ -11,7 +11,6 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
-import importlib.util
 import json
 import os
 import re
@@ -36,6 +35,7 @@ from check_crm_lead_execution import (
     CASE_IDS, TABLES, lineage, n8n_snapshot, readonly_audits, rpc, source_of,
 )
 from p25_agents_recovery import AgentsRecovery
+from crm_feedback_backup import capture_crm_backup, load_crm_backup
 
 sys.path.insert(0, str(ROOT / "runtime/central-auto/lab-executor"))
 from native_contract import (  # noqa: E402
@@ -201,11 +201,7 @@ class CrmLab(AgentsRecovery):
         require(re.fullmatch(r"sha256:[a-f0-9]{64}", self.php_image) is not None, "FEEDBACK_CRM_IMAGE_ID")
         self.secrets: dict[str, Path] = {}
         self.admins: dict[str, str] = {}
-        spec = importlib.util.spec_from_file_location("feedback_crm_backup_contract",
-                  source / "scripts/ops/private_crm_backup_contract.py")
-        require(spec is not None and spec.loader is not None, "FEEDBACK_BACKUP_CONTRACT_SOURCE")
-        self.backup = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(self.backup)
+        self.backup, self.backup_snapshot = load_crm_backup(source)
         self.base_tables = re.findall(r"^CREATE TABLE (crm_[a-z0-9_]+)\s*\(",
                                      (source / "infra/homologation/schema.sql").read_text(), re.MULTILINE)
 
@@ -688,19 +684,20 @@ def restore_crm(crm: CrmLab, lab: FeedbackLab, stack: Stack, directory: Path) ->
     # The existing CRM backup contract compares owners/ACLs/RLS, functions,
     # constraints and triggers. Only actual data produced by this HTTP proof
     # are restored here; encryption remains in the CRM backup regression suite.
-    profile, metadata = crm.backup.detect_profile(crm.sql, crm.base_tables)
     original = crm.snapshot()
+    require(len(original) == 33, "FEEDBACK_CRM_NATIVE_RESTORE_TABLE_SCOPE")
     native_before, agents_before = n8n_snapshot(stack), agents_snapshot(lab)
     monitor_cases = [(COMPANY_A, CASE_IDS[case]) for case in ("MAIN", "UNKNOWN", "PENDING")]
     monitor_cases += [(COMPANY_A, None), (COMPANY_B, CASE_IDS["MAIN"])]
     original_monitors = {(company, event): read_monitor(crm, event, company=company)
                          for company, event in monitor_cases}
     require(crm.snapshot() == original, "FEEDBACK_MONITOR_PRE_DUMP_READ_MUTATED_CRM")
-    dump = directory / "crm-feedback.dump"
-    run(["docker", "exec", crm.containers["src"], "pg_dump", "-p", "5433", "-U", "crm_homologation_owner",
-         "-d", CRM_DATABASE, "--format", "custom"], "FEEDBACK_CRM_DUMP", output=dump)
-    contents = dump.read_bytes()
-    require(contents.startswith(b"PGDMP") and len(contents) < 64 * 1024 * 1024, "FEEDBACK_CRM_DUMP_FORMAT")
+    captured = capture_crm_backup(crm.backup, crm.backup_snapshot, crm.containers["src"],
+                                  crm.base_tables, table_snapshot)
+    profile, metadata, source_catalog = captured["profile"], captured["security"], captured["catalog"]
+    require(captured["rows"] == original and crm.snapshot() == original,
+            "FEEDBACK_CRM_SNAPSHOT_DIFFERS_FROM_MONITOR_STATE")
+    contents = captured["contents"]
     revoke = ("UPDATE crm_auto_service.execution_read_grants SET active=false,revision=revision+1 WHERE active; "
               "UPDATE crm_auto_service.outbound_grants SET active=false,revision=revision+1 WHERE active;")
     crm.sql(revoke)
@@ -713,7 +710,8 @@ def restore_crm(crm: CrmLab, lab: FeedbackLab, stack: Stack, directory: Path) ->
          "crm_homologation_restore", "-d", CRM_DATABASE, "--exit-on-error"],
         "FEEDBACK_CRM_RESTORE_OWNER_ACL", stdin=contents)
     restored_query = lambda sql: crm._sql("dst", sql)
-    crm.backup.verify_restored_security(restored_query, profile, metadata, crm.base_tables)
+    fidelity = crm.backup.verify_restored_security(restored_query, profile, metadata, crm.base_tables,
+                                                   source_catalog=source_catalog)
     require(crm.snapshot("dst") == original, "FEEDBACK_CRM_RESTORED_BYTES_OR_HISTORY_DIFFER")
     crm._sql("dst", revoke)
     require(crm.snapshot("dst") == revoked, "FEEDBACK_CRM_POST_SNAPSHOT_REVOCATIONS_DIFFER")
@@ -744,6 +742,9 @@ def restore_crm(crm: CrmLab, lab: FeedbackLab, stack: Stack, directory: Path) ->
     return {"schema": "CRM_EXECUTION_FEEDBACK_RESTORE_V1", "profile": profile["name"],
             "table_snapshots": len(original), "http_evidence_history_projection_exact": True,
             "security_manifest_preserved": True, "roles_nologin_without_memberships": True,
+            "source_security_catalog_rows_and_dump_same_snapshot": True,
+            "snapshot_exported_at_utc": captured["snapshot_exported_at_utc"],
+            "catalog_fidelity": fidelity,
             "post_snapshot_read_and_outbound_revocations_applied": True,
             "monitor_app_role_and_offline_php_preserved": True,
             "monitor_restore_ignored_fields": ["generated_at"],
@@ -966,7 +967,8 @@ def main() -> dict:
                      "infra/homologation/s2s/execution-feedback-candidate.sql",
                      "infra/homologation/s2s/execution-monitor-candidate.sql",
                      "app/Homologation/ExecutionMonitor.php", "app/Homologation/S2S/StrictJson.php",
-                     "scripts/ops/private_crm_backup_contract.py"):
+                     "scripts/ops/private_crm_backup_contract.py",
+                     "scripts/ops/private_crm_backup_catalog.py", "scripts/ops/private_crm_backup_snapshot.py"):
         require((source / relative).is_file() and not (source / relative).is_symlink(), "FEEDBACK_CRM_PUBLIC_SOURCE_REQUIRED")
     require(MONITOR_PROBE.is_file() and not MONITOR_PROBE.is_symlink(), "FEEDBACK_MONITOR_PROBE_REQUIRED")
     require(hashlib.sha256((ROOT / "runtime/central-auto/index.php").read_bytes()).hexdigest() == INDEX_SHA256,
