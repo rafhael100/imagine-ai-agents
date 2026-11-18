@@ -49,6 +49,11 @@ ao envelope antes de reutilizar a admissão P29.
 - O ensaio novo restaura o banco em outro cluster e compara explicitamente o
   conteúdo capturado e os controles de acesso. O baseline P28 de 17 tabelas
   não é usado como evidência suficiente para uma tabela que ele não conhecia.
+- O PostgreSQL pode restaurar a ACL padrão como `NULL`, enquanto a origem a
+  representa explicitamente. A comparação expande ambas para permissões,
+  concedentes, destinatários e capacidade de concessão ordenados. Essa
+  equivalência não altera as verificações de RLS, proprietário, funções ou
+  ausência de acesso direto para o transporte; constraints continuam exatas.
 
 ## Recebimento e execução têm contratos separados
 

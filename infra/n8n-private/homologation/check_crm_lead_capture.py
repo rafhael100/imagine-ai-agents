@@ -230,7 +230,14 @@ def capture_metadata(lab: CaptureLab, which: str) -> dict:
     # Include raw constraints: any change across pg_dump/pg_restore is a failure
     # that needs explicit investigation, never silently normalize definitions.
     query = """SELECT jsonb_build_object(
-      'table',(SELECT jsonb_build_object('owner',pg_get_userbyid(relowner),'acl',relacl::text,
+      'table',(SELECT jsonb_build_object('owner',pg_get_userbyid(relowner),'acl',
+                 (SELECT jsonb_agg(jsonb_build_array(pg_get_userbyid(a.grantor),
+                    CASE WHEN a.grantee=0 THEN 'PUBLIC' ELSE pg_get_userbyid(a.grantee) END,
+                    a.privilege_type,a.is_grantable)
+                    ORDER BY pg_get_userbyid(a.grantor),
+                    CASE WHEN a.grantee=0 THEN 'PUBLIC' ELSE pg_get_userbyid(a.grantee) END,
+                    a.privilege_type,a.is_grantable)
+                  FROM aclexplode(COALESCE(relacl,acldefault('r',relowner))) a),
                  'rls',relrowsecurity,'force_rls',relforcerowsecurity) FROM pg_class
                  WHERE oid='auto_ia_lab.lead_ingest_payloads'::regclass),
       'columns',(SELECT jsonb_agg(jsonb_build_array(attname,format_type(atttypid,atttypmod),attnotnull)
