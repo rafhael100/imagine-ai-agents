@@ -11,7 +11,7 @@ deny() { printf 'N8N_PRIVATE_CANDIDATE_DENY_%s\n' "$1" >&2; exit 2; }
 [[ "${GITHUB_REPOSITORY:-}" == rafhael100/imagine-ai-agents ]] || deny WRONG_REPOSITORY
 [[ "${N8N_CANDIDATE_REPOSITORY_PRIVATE:-}" == false ]] || deny PUBLIC_REPOSITORY_REQUIRED
 [[ "${GITHUB_EVENT_NAME:-}" == push ]] || deny PUSH_REQUIRED
-[[ "${GITHUB_REF:-}" == refs/heads/integrate/n8n-candidate-crm-660-2026-11-18 ]] || deny BRANCH
+[[ "${GITHUB_REF:-}" == refs/heads/integrate/n8n-owner-provider-components-2026-11-18 ]] || deny BRANCH
 [[ "${GITHUB_SHA:-}" =~ ^[a-f0-9]{40}$ ]] || deny SOURCE_SHA
 [[ "${GITHUB_RUN_ID:-}" =~ ^[0-9]{1,20}$ ]] || deny RUN_ID
 [[ "${GITHUB_RUN_ATTEMPT:-}" =~ ^[0-9]{1,4}$ ]] || deny RUN_ATTEMPT
@@ -24,6 +24,8 @@ repo=$(git rev-parse --show-toplevel)
 cd "$repo"
 candidate_sha=$(git rev-parse HEAD)
 candidate_tree=$(git rev-parse 'HEAD^{tree}')
+native_parent_sha=64f52f0dcd44a5545d1bfc6c1d685b33c158601f
+owner_source_sha=85f4c37a6d905b91923d3e31ba9068b2c35d7657
 candidate_source_sha=3d30b2f7977b37d3bb86d6ff11bc63728145f5fd
 central_source_sha=dfa4685cd5df4a9499c3420f580980e769a1981d
 domain_source_sha=05e4ea7942e530055f4e455544d82f5d3edbd56d
@@ -31,6 +33,7 @@ operator_source_sha=c08688b16e61d8d1ecc4d8c0ed4da8758a687ee8
 adapter_sha=8b04d0e936168c77db028160b5aeb1758db497c4
 crm_sha=96dbf1aed2d1cf3237bc3631c4594540a0168d2a
 crm="$repo/_crm_feedback_pinned"
+owner_reference="$repo/_owner_components_pinned"
 packet="$RUNNER_TEMP/n8n-private-candidate-packet"
 
 [[ "$candidate_sha" == "$GITHUB_SHA" ]] || deny CHECKOUT_SHA
@@ -38,7 +41,7 @@ packet="$RUNNER_TEMP/n8n-private-candidate-packet"
 test "$(git rev-parse --is-shallow-repository)" = false
 git diff --quiet
 git diff --cached --quiet
-for source_sha in "$candidate_source_sha" "$central_source_sha" "$domain_source_sha" "$operator_source_sha" "$adapter_sha"; do
+for source_sha in "$native_parent_sha" "$candidate_source_sha" "$central_source_sha" "$domain_source_sha" "$operator_source_sha" "$adapter_sha"; do
   test "$(git cat-file -t "$source_sha")" = commit
   git merge-base --is-ancestor "$source_sha" "$candidate_sha"
 done
@@ -48,6 +51,12 @@ test "$(git -C "$crm" rev-parse --is-shallow-repository)" = false
 git -C "$crm" merge-base --is-ancestor e1b3b7f118eff0350a00789aecc7bb2bb2331464 "$crm_sha"
 git -C "$crm" diff --quiet
 git -C "$crm" diff --cached --quiet
+[[ -d "$owner_reference" && ! -L "$owner_reference" ]] || deny OWNER_SOURCE_CHECKOUT
+test "$(git -C "$owner_reference" rev-parse HEAD)" = "$owner_source_sha"
+test "$(git -C "$owner_reference" rev-parse --is-shallow-repository)" = false
+git -C "$owner_reference" diff --quiet
+git -C "$owner_reference" diff --cached --quiet
+git -C "$owner_reference" merge-base --is-ancestor 0c722eee6bd53a7ee46c4ba68ab70200fc191b78 "$owner_source_sha"
 [[ ! -e "$packet" && ! -L "$packet" ]] || deny PACKET_ALREADY_EXISTS
 
 # The reviewed Central 475 implementation and regressions must remain exact.
@@ -180,15 +189,24 @@ cleanup() {
 trap cleanup EXIT
 root="$workspace/candidate"
 crm_build="$workspace/crm"
-mkdir "$root" "$crm_build" "$workspace/checks"
+owner_root="$workspace/owner"
+mkdir "$root" "$crm_build" "$owner_root" "$workspace/checks"
 # These are actual commit archives; no untracked workspace file enters either build.
 git archive "$candidate_sha" | tar --extract --file=- --directory="$root" --no-same-owner --no-same-permissions
+# Owner scenarios get a clean export with no adapter/CRM directories appended.
+git -c tar.umask=0022 archive "$candidate_sha" | tar --extract --file=- --directory="$owner_root" --no-same-owner --no-same-permissions
 git -C "$crm" archive "$crm_sha" | tar --extract --file=- --directory="$crm_build" --no-same-owner --no-same-permissions
 bootstrap="$root/infra/n8n-private/10-runtime-role.sh"
 test -f "$bootstrap" && test ! -L "$bootstrap"
 chmod 0644 "$bootstrap"
 # Source is public; different container uids must be able to read mounted files.
-chmod -R a+rX "$root" "$crm_build"
+chmod -R a+rX "$root" "$crm_build" "$owner_root"
+export AIA_OWNER_COMPONENTS_CHECKOUT="$repo"
+export AIA_OWNER_COMPONENTS_ARCHIVE="$owner_root"
+export AIA_OWNER_COMPONENTS_TREE="$candidate_tree"
+# Read-only admission validates the actual event, archive, source preimages,
+# dependency blobs and local daemon before the owner image is built.
+python3 "$owner_root/tools/run_owner_component_candidate.py" preflight
 printf 'source_integrity\tPASS\n' > "$workspace/checks.tsv"
 printf 'N8N_PRIVATE_CANDIDATE_SOURCE commit=%s tree=%s crm=%s\n' "$candidate_sha" "$candidate_tree" "$crm_sha"
 
@@ -217,14 +235,23 @@ export N8N_PG_IMAGE AGENTS_PG_IMAGE AGENTS_NGINX_IMAGE
 
 agents_tag="imagine-n8n-private-agents-php:$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
 crm_tag="imagine-n8n-private-crm-php:$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+owner_tag="imagine-n8n-owner-components-php:$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
 docker build --quiet -f "$root/runtime/central-auto/Dockerfile" -t "$agents_tag" "$root" >/dev/null
 docker build --quiet -f "$crm_build/infra/homologation/Dockerfile" -t "$crm_tag" "$crm_build" >/dev/null
+docker build --quiet -f "$owner_root/runtime/central-auto/crm-owner-drafts/Dockerfile" \
+  --label "imagine.owner.source_sha=$candidate_sha" \
+  --label imagine.owner.dockerfile_blob=5aa7d966c429ec62f89922d5713c2d9c712fa338 \
+  -t "$owner_tag" "$owner_root" >/dev/null
 # These two identities are local builds, not published registry digests.
 AGENTS_PHP_IMAGE=$(docker image inspect "$agents_tag" --format '{{.Id}}')
 CRM_FEEDBACK_PHP_IMAGE=$(docker image inspect "$crm_tag" --format '{{.Id}}')
+OWNER_PROVIDER_PHP_IMAGE=$(docker image inspect "$owner_tag" --format '{{.Id}}')
 [[ "$AGENTS_PHP_IMAGE" =~ ^sha256:[a-f0-9]{64}$ ]] || deny AGENTS_PHP_IMAGE_ID
 [[ "$CRM_FEEDBACK_PHP_IMAGE" =~ ^sha256:[a-f0-9]{64}$ ]] || deny CRM_PHP_IMAGE_ID
-export AGENTS_PHP_IMAGE CRM_FEEDBACK_PHP_IMAGE
+[[ "$OWNER_PROVIDER_PHP_IMAGE" =~ ^sha256:[a-f0-9]{64}$ ]] || deny OWNER_PHP_IMAGE_ID
+[[ "$OWNER_PROVIDER_PHP_IMAGE" != "$AGENTS_PHP_IMAGE" && "$OWNER_PROVIDER_PHP_IMAGE" != "$CRM_FEEDBACK_PHP_IMAGE" ]] || deny OWNER_IMAGE_SEPARATION
+NATIVE_PROVIDER_PHP_IMAGE="$AGENTS_PHP_IMAGE"
+export AGENTS_PHP_IMAGE CRM_FEEDBACK_PHP_IMAGE OWNER_PROVIDER_PHP_IMAGE NATIVE_PROVIDER_PHP_IMAGE
 
 # Add external, pinned public test sources only after the direct candidate build.
 mkdir "$root/_auto_ia_pinned_source"
@@ -300,6 +327,11 @@ php_syntax() {
   # P30 owns a fresh, separate Stack. Its operator state is not the feedback
   # snapshot and individual enrollment does not establish global enforcement.
   run_check p30_native_operator_mfa python3 infra/n8n-private/homologation/check_p30_native_operator_mfa.py
+  run_check owner_provider_admission_contracts python3 -m unittest discover -s "$owner_root/tests" -p 'test_owner_component_candidate_admission.py' -v
+  # Only the image selection changes in each owner child process. GitHub's
+  # repository, event, SHA, run and ref remain the actual hosted context.
+  run_check owner_draft_contracts env AGENTS_PHP_IMAGE="$OWNER_PROVIDER_PHP_IMAGE" python3 "$owner_root/tools/run_owner_component_candidate.py" p67
+  run_check owner_draft_recovery env AGENTS_PHP_IMAGE="$OWNER_PROVIDER_PHP_IMAGE" python3 "$owner_root/tools/run_owner_component_candidate.py" p68
 )
 
 # Construct observations only after every real command succeeds. Never copy
@@ -307,6 +339,8 @@ php_syntax() {
 python3 - "$workspace" <<'PY_OBSERVATIONS'
 import json, os, pathlib, sys
 workspace = pathlib.Path(sys.argv[1])
+sys.path.insert(0, str(workspace / 'candidate/infra/n8n-private/homologation'))
+from operator_packet import OBSERVATIONS_SCHEMA, owner_component_result
 checks = {}
 for line in (workspace / 'checks.tsv').read_text().splitlines():
     name, status = line.split('\t')
@@ -331,7 +365,7 @@ if (p30.get('n8n_image') != os.environ['N8N_IMAGE'] or
             'mfa_enforced_instance_wide', 'mandatory_mfa_policy_gate_closed', 'go_for_installation'))):
     raise SystemExit('N8N_PRIVATE_CANDIDATE_P30_POLICY_CHANGED')
 report = {
-    'schema': 'N8N_PRIVATE_CANDIDATE_OBSERVATIONS_V1',
+    'schema': OBSERVATIONS_SCHEMA,
     'run_id': os.environ['GITHUB_RUN_ID'],
     'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
     'source_sha': os.environ['GITHUB_SHA'],
@@ -344,12 +378,26 @@ report = {
     'local_build_images': {
         'agents_php': os.environ['AGENTS_PHP_IMAGE'],
         'crm_php': os.environ['CRM_FEEDBACK_PHP_IMAGE'],
+        'owner_php': os.environ['OWNER_PROVIDER_PHP_IMAGE'],
     },
     'checks': checks,
     'p30': {name: p30[name] for name in (
         'n8n_version_verified', 'synthetic_nominal_operators',
         'mfa_enforced_instance_wide', 'mandatory_mfa_policy_gate_closed', 'go_for_installation')},
 }
+for component, group in (('p67', 'owner_draft_contracts'), ('p68', 'owner_draft_recovery')):
+    envelopes = []
+    for line in (workspace / ('checks/' + group + '.log')).read_text().splitlines():
+        if line.startswith('{'):
+            value = json.loads(line)
+            if value.get('schema') == 'OWNER_PROVIDER_COMPONENT_RESULT_V1':
+                envelopes.append(value)
+    if len(envelopes) != 1:
+        raise SystemExit('N8N_OWNER_COMPONENT_REPORT_MISSING')
+    report['owner_' + component] = owner_component_result(
+        envelopes[0], component, source_sha=os.environ['GITHUB_SHA'],
+        source_tree=os.environ['AIA_RC66_VIRTUAL_TREE_SHA'], run_id=os.environ['GITHUB_RUN_ID'],
+        run_attempt=os.environ['GITHUB_RUN_ATTEMPT'], owner_php_image=os.environ['OWNER_PROVIDER_PHP_IMAGE'])
 with (workspace / 'observations.json').open('x') as target:
     json.dump(report, target, sort_keys=True, separators=(',', ':'))
     target.write('\n')
@@ -392,6 +440,7 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
     echo
     printf -- '- Actual candidate commit: `%s`\n' "$candidate_sha"
     printf -- '- Actual candidate tree: `%s`\n' "$candidate_tree"
+    printf -- '- Ancestor native/CRM #481: `%s`\n' "$native_parent_sha"
     printf -- '- Ancestor consolidated #479: `%s`\n' "$candidate_source_sha"
     printf -- '- Preserved Central #475: `%s`\n' "$central_source_sha"
     printf -- '- Preserved lead domain #468: `%s`\n' "$domain_source_sha"
@@ -403,10 +452,12 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
     echo '- Existing contracts, lead/native execution, signed CRM history, scoped monitor and recovery checks passed.'
     echo '- The original P30 driver passed in its separate disposable Stack; global MFA enforcement remains false.'
     echo '- Remote image digests and local PHP build IDs are recorded separately in the verified packet.'
+    echo '- Owner create/read and owner recovery passed as separate component groups using a separately built owner PHP image.'
+    echo '- The candidate imports fourteen selected P67/P68 files; those source branches are not claimed as ancestors or the complete Agents product.'
     echo '- Public archives and manifest are source evidence, not a backup, installer or operational approval.'
     echo '- The review artifact is retained for seven days; keep its trusted CI manifest digest for later verification.'
     echo '- The native feedback restore uses the 33-table monitor profile from CRM #660 and its required closed catalog.'
-    echo '- CRM #660 owns separate human session/MFA/browser and owner-plus-monitor 35-table evidence; this lab does not exercise owner actions.'
+    echo '- CRM #660 owns separate human session/MFA/browser and owner-plus-monitor 35-table evidence; the owner provider groups here do not exercise that CRM journey.'
     echo '- DRAFT / NO-GO: no real operator, external backup, registry publication, paid AI or installation.'
   } >> "$GITHUB_STEP_SUMMARY"
 fi

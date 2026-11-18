@@ -1,5 +1,45 @@
 # Imagine AI Agents — estado atual
 
+## 2026-11-18 — pacote seletivo dos providers nativo e de rascunhos owner
+
+A branch `integrate/n8n-owner-provider-components-2026-11-18` é uma filha
+da [#481](https://github.com/rafhael100/imagine-ai-agents/pull/481), fixada em
+`64f52f0dcd44a5545d1bfc6c1d685b33c158601f`. A #481 permanece como evidência
+estável: [CI 44247275249](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44247275249),
+attempt 1, passou os 19 grupos executados e o registro inicial de integridade.
+A contagem da prova de feedback foi uma execução nativa e seis observações
+CRM; outros grupos possuem execuções próprias e não são somados a ela.
+
+Esta filha acrescenta **14 arquivos selecionados**: runtime owner P67 e suas
+provas P67/P68, com 12 imports literais e duas extrações de API de cenário.
+As origens P67/P68 são registradas por commit/caminho/blob em
+`imported_components`, separadamente da linhagem Git. A branch P68 inteira
+e os incrementos P62–P66 não são incorporados. O pacote oferece fontes dos
+dois providers; não declara consolidado todo o produto Agents.
+
+A admissão integrada verifica o push real, checkout, árvore, origens fixas,
+dependências e a imagem owner observada antes dos cenários. Os guards dos
+entrypoints históricos continuam preservados. O build owner é separado dos
+builds nativo/CRM; P67/P68 usam processos e bancos descartáveis próprios.
+O runner mantém os 19 grupos anteriores e adiciona três grupos obrigatórios:
+contratos da admissão, rascunhos e recuperação owner — **22 grupos executados
+e um registro inicial de integridade**. A CI desta nova HEAD ainda precisa
+ser concluída; a evidência da #481 não a aprova antecipadamente.
+
+O pacote V2 mantém três arquivos de fontes (`candidate`, `crm`, `adapter`).
+A CI verifica a associação commit→caminho→blob das origens num checkout P68
+fixo. O verificador offline confere a árvore candidata e seus 14 blobs
+selecionados; não revalida a associação original P67/P68, pois essas árvores
+históricas não são incluídas como arquivos independentes.
+
+**Validação local:** 16 testes do pacote passaram, incluindo alterações com
+identidade Git recalculada, vínculos de run/imagem e limites de autoridade.
+Não houve execução Docker/PHP/n8n local desta candidata.
+[Escopo, fontes e critérios](docs/reviews/N8N-OWNER-COMPONENTS-CANDIDATE.md).
+CRM nativo permanece em 33 tabelas; owner+monitor de 35 tabelas, sessão humana
+CRM, execução owner e recuperação distribuída não são provas desta CI.
+**DRAFT / NO-MERGE / NO-DEPLOY / NO-GO operacional.**
+
 ## 2026-11-18 — candidata n8n com o CRM #660 e catálogo de recuperação completo
 
 A branch `integrate/n8n-candidate-crm-660-2026-11-18` deriva da #479 em

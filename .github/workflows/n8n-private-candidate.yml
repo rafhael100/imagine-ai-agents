@@ -1,12 +1,12 @@
-name: Private n8n candidate with CRM 660 and catalog recovery
+name: Private n8n and owner provider components candidate
 on:
   push:
     branches:
-      - integrate/n8n-candidate-crm-660-2026-11-18
+      - integrate/n8n-owner-provider-components-2026-11-18
 permissions:
   contents: read
 concurrency:
-  group: n8n-crm660-candidate-${{ github.ref }}
+  group: n8n-owner-components-candidate-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   consolidated-candidate:
@@ -28,6 +28,13 @@ jobs:
           fetch-depth: 0
           path: _crm_feedback_pinned
           persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 85f4c37a6d905b91923d3e31ba9068b2c35d7657
+          path: _owner_components_pinned
+          fetch-depth: 0
+          persist-credentials: false
       - name: Verify direct build, execution, recovery and native operator MFA
         env:
           P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
@@ -39,7 +46,7 @@ jobs:
       - name: Retain verified public source packet
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: n8n-crm660-candidate-${{ github.sha }}-${{ github.run_attempt }}
+          name: n8n-owner-components-candidate-${{ github.sha }}-${{ github.run_attempt }}
           path: |
             ${{ runner.temp }}/n8n-private-candidate-packet/candidate.tar.gz
             ${{ runner.temp }}/n8n-private-candidate-packet/crm.tar.gz
