@@ -1,5 +1,14 @@
 # CENTRAL-AUTO-P19 — ingresso privado candidato
 
+## Captura imutável para processamento posterior
+
+O modo de servidor `AGENTS_PRIVATE_LEAD_CAPTURE=immutable-v1` conserva os
+bytes autenticados de `CRM_LEAD_EVENT_V1` na mesma transação da inbox.
+A configuração padrão mantém o caminho anterior; modos desconhecidos falham
+fechados. O ACK continua confirmando apenas recebimento com `DISABLED`.
+Contrato, duplicidade, rollback, restauração e limites em
+[CRM-LEAD-CAPTURE](../../infra/n8n-private/homologation/CRM-LEAD-CAPTURE.md).
+
 Base #446; árvore consolidada P17 + #435 + Agents P60 é exportada somente no runner pelo procedimento P18 existente, com os quatro arquivos endurecidos P17 preservados. Estes arquivos de runtime são sobrepostos explicitamente para executar a integração na mesma árvore; isso não faz merge de branches.
 
 O endpoint pertence ao produto Agents e usa a inbox, catálogo NO_AI, chave assinada e semântica de duplicidade existentes em AUTO-IA-08/10. Nova entrada autentica mTLS por FastCGI reservado e vínculo persistente empresa/certificado/operação/tenant; os locks de grant e chave permanecem até commit. Payload assinado vincula UUID de empresa, evento e lead. Somente lead.created/lead.ingest; nenhum motor de regras comercial novo.

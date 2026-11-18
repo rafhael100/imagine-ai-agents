@@ -1,5 +1,22 @@
 # Imagine AI Agents — estado atual
 
+## Candidata de captura durável CRM — 17/11/2026
+
+Branch isolada `feat/n8n-crm-lead-capture-2026-11-17`, derivada da P29 #463
+em `1838e7e13667c2f2c33d19b5b3eb469637a7c431`. A P29 foi aprovada na
+[CI 44203009721](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44203009721).
+
+O receptor passa a oferecer captura explícita e imutável dos bytes mínimos de
+`CRM_LEAD_EVENT_V1`, junto da admissão da inbox, em uma transação. O objetivo
+é fornecer origem durável para a futura operação `lead.ingest`. Repetição,
+falha na gravação e expiração preservam a atomicidade; a captura tem prova
+própria de restauração e não altera o significado do ACK de recebimento.
+
+Procedimento e limites:
+[CRM-LEAD-CAPTURE](infra/n8n-private/homologation/CRM-LEAD-CAPTURE.md).
+Validação integrada deve ser conferida na HEAD desta candidata; a CI da base
+não aprova estes novos cenários. **DRAFT / NO-GO operacional.**
+
 ## Candidata P29 / RC71 — 17/11/2026
 
 Continuação da [P28 #462](https://github.com/rafhael100/imagine-ai-agents/pull/462),

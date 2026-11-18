@@ -5,6 +5,9 @@ require_once __DIR__.'/strict-json.php';
 header('Content-Type: application/json');header('Cache-Control: no-store');
 function deny(int $status):never {http_response_code($status);echo '{"error":"EVENT_DENIED"}';exit;}
 if(getenv('AGENTS_PRIVATE_S2S_PROFILE')!=='synthetic-private-v1')deny(404);
+$capture=getenv('AGENTS_PRIVATE_LEAD_CAPTURE');
+// Server configuration only. Unknown modes must not silently lose the payload.
+if($capture!==false&&$capture!==''&&$capture!=='immutable-v1')deny(503);
 if(($_SERVER['IMAGINE_MTLS_VERIFY']??'')!=='SUCCESS'||isset($_SERVER['HTTP_COOKIE'])||isset($_SERVER['HTTP_AUTHORIZATION'])||$_SERVER['REQUEST_METHOD']!=='POST'||($_SERVER['CONTENT_TYPE']??'')!=='application/json'||!empty($_SERVER['QUERY_STRING']))deny(403);
 try {
  $cert=rawurldecode($_SERVER['IMAGINE_MTLS_CERT']??'');$fp=openssl_x509_fingerprint($cert,'sha256');if(!$fp||strlen($cert)>8192)deny(403);
@@ -28,7 +31,16 @@ try {
  $db=new PDO(getenv('AGENTS_PRIVATE_DSN'),'aia_private_transport',trim(file_get_contents(getenv('AGENTS_PRIVATE_DB_PASSWORD_FILE'))),[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_EMULATE_PREPARES=>false]);
  $db->exec("SET statement_timeout='2000ms'; SET lock_timeout='1000ms'");
  $role=$db->query('SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname=current_user')->fetchColumn();if($role)deny(503);
- $q=$db->prepare('SELECT auto_ia_lab.receive_company_signed_no_ai(CAST(? AS uuid),?,CAST(? AS jsonb))');$q->execute([$v['company_id'],$fp,json_encode($v['envelope'],JSON_THROW_ON_ERROR)]);$decision=$q->fetchColumn();
+ $arguments=[$v['company_id'],$fp,json_encode($v['envelope'],JSON_THROW_ON_ERROR)];
+ if($capture==='immutable-v1'){
+  // One SQL statement commits the authenticated inbox and its exact content.
+  // No execution authority, lease or n8n dispatch follows this capture.
+  $query='SELECT auto_ia_lab.receive_company_signed_lead(CAST(? AS uuid),?,CAST(? AS jsonb),?)';
+  $arguments[]=$payload;
+ }else{
+  $query='SELECT auto_ia_lab.receive_company_signed_no_ai(CAST(? AS uuid),?,CAST(? AS jsonb))';
+ }
+ $q=$db->prepare($query);$q->execute($arguments);$decision=$q->fetchColumn();
  if(!in_array($decision,['LAB_RECEIVED_NO_DELIVERY','LAB_DUPLICATE_NO_DELIVERY'],true))deny(403);
  $reply=['schema'=>'AUTO_IA_ACK_V1','company_id'=>$v['company_id'],'event_ref'=>$v['envelope']['event_ref'],'payload_hash'=>$v['envelope']['payload_hash'],'decision'=>$decision,'dispatch'=>'DISABLED'];
  $key=file_get_contents(getenv('AGENTS_PRIVATE_ACK_KEY_FILE'));if(!is_string($key)||strlen($key)<32)deny(503);
