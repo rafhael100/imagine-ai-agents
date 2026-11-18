@@ -1,14 +1,37 @@
 # Imagine AI Agents — estado atual
 
-**14/11/2026.** GitHub. **Produção: NO-GO.**
+**Consolidação das candidatas verificadas por SHA/run. Produção: NO-GO.**
 
 ## Estado executivo
 
-**Fase:** offline.
+**Fase vigente:** integração CRM → Agents executada em homologação fictícia isolada, com jornada humana de sessão/MFA, planejamento comercial nativo e criação/consulta de rascunhos pelo `owner` ativo. A autorização específica desse fluxo já foi dada; não é necessário decidir novamente quem pode criar ou consultar. A continuidade autorizada de desenvolvimento permanece, com limites de escopo e evidência por SHA.
+
+As quatro candidatas abaixo estão **OPEN/DRAFT, sem merge**. Esta atualização registra autorização e resultados existentes; não concede autoridade de runtime nem autoriza instalação, deploy, produção ou gastos.
+
+## Candidatas verificadas
+
+| Recorte | HEAD verificada | Evidência aprovada |
+| --- | --- | --- |
+| [Agents P67 #476](https://github.com/rafhael100/imagine-ai-agents/pull/476): receptor de rascunhos com autoria e idempotência | `0c722eee6bd53a7ee46c4ba68ab70200fc191b78` | [CI 44230030310](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44230030310) |
+| [Agents P68 #477](https://github.com/rafhael100/imagine-ai-agents/pull/477): recuperação descartável dos seis conjuntos P67 | `85f4c37a6d905b91923d3e31ba9068b2c35d7657` | [CI 44233999376](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44233999376) |
+| [CRM #658](https://github.com/rafhael100/imagine-crm/pull/658): jornada owner e recuperação inerte do addon | `e390c56af2a544d8191cce86752637efe6a35e43` | [CI 44237380307](https://github.com/rafhael100/imagine-crm/actions/runs/44237380307) |
+| [CRM #659](https://github.com/rafhael100/imagine-crm/pull/659): comparação correta da ACL padrão de sequências no backup legado | `b86f6f7005b3c8aa79e64fa8dfe9abecab99ad01` | [CI 44234701904](https://github.com/rafhael100/imagine-crm/actions/runs/44234701904) |
+
+A CRM #658 executou o receptor **original P67 fixado na SHA acima**, com 407 verificações/52 requisições HTTP e 607 verificações Chromium, quatro PNGs e três idiomas. Sessão/MFA, fonte nativa, empresa resolvida no backend, member recusado e consultas sob autoridade atual foram exercitados na aplicação real com dados fictícios. A prova humana é **externa, no CRM**: os ensaios internos P67/P68 continuam declarando corretamente `human_crm_session_verified=false`; o P67 também conserva `crm_rule_source_verified=false`. [Contrato e separação das evidências](docs/reviews/AIA-P67-CRM-OWNER-DRAFTS.md).
+
+Na mesma HEAD CRM #658, passaram as regressões [OP-01](https://github.com/rafhael100/imagine-crm/actions/runs/44237380328), [jornada privada](https://github.com/rafhael100/imagine-crm/actions/runs/44237380315), [backup base/S2S](https://github.com/rafhael100/imagine-crm/actions/runs/44237380311) e [reconciliação P22](https://github.com/rafhael100/imagine-crm/actions/runs/44237380304). A recuperação própria do addon passou 836 verificações, 27 tabelas, 13 negativas SQL, 18 mutações negativas e 15 equivalências fechadas de representação PostgreSQL; os catálogos brutos são explicitamente diferentes. A #659 preserva a recusa do addon no backup legado. [Limites da recuperação Agents e da evidência CRM](docs/reviews/AIA-P68-OWNER-DRAFT-RECOVERY.md).
+
+**Próximo marco concreto:** disponibilizar o mesmo fluxo owner criar/consultar em homologação persistente, com o contrato, a autoridade atual e a autoria histórica já definidos. Preparar a mudança revisável e a validação da jornada nesse ambiente, sem reabrir a decisão de papel do owner. A configuração e a disponibilidade do ambiente alvo devem ser verificadas; estas CIs não demonstram falta de infraestrutura, R2, MFA ou credenciais. Não há alegação de recuperação distribuída, RPO zero ou GO operacional.
+
+## Registro histórico da linha offline — posição de 14/11/2026
+
+As seções históricas preservam decisões, métricas e pendências das respectivas datas. Expressões como “offline”, “CRM não executado” ou “nenhuma rota autorizada” nesses registros não substituem o estado e a autorização específica das candidatas acima.
+
+**Fase registrada naquela data:** offline.
 
 **Branch:** `dev/ft01-aia-core-mocks-2026-11-06`; `main` intacta. **879 testes PHP / lint 110 + Python/DOM**; EVID-43,EVID-44,EVID-45,EVID-46,EVID-47,EVID-48,EVID-49,EVID-50,EVID-51,EVID-52; #293/#294 (43605185307,43605619299), #296/#297 (43606939495,43607272003), #299/#300/#301 (43609511492,43610007078,43610242488); 43038243942,43088648397. **NO-GO**.
 
-## Últimas entregas verificadas
+## Entregas históricas verificadas da linha offline
 
 **SEC-60/F187:** #261 CI #43019868566 (cross-Run); #262 CI #43020983307 (JSON), **810 testes PHP / lint 100**. [EVID-42](docs/AIA-R01-EVID-42-SEC60-F187-CI-POSTMERGE.md). **NO-GO**.
 
@@ -95,13 +118,13 @@ EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=117 EXPECTED_CASES=879 bash to
 
 O comando acima exige PHP e Python já instalados, não emite credenciais e não acessa CRM real. O sucesso não abre gates operacionais.
 
-## Pacote formal de revisão entregue, sem aceite (10/11/2026)
+## Registro histórico — pacote formal de revisão entregue, sem aceite (10/11/2026)
 
 O [PR #184](https://github.com/rafhael100/imagine-ai-agents/pull/184) integrou um [pacote JSON de aceite bilateral](docs/evidencias/op01-pacote-aceite-bilateral.json) que correlaciona **7 decisões OP01-R01..R07**, **14 gates** e **13 cenários não executados**, com propostas de responsáveis e evidências pendentes. A [CI pós-merge #42770907072](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42770907072) passou. Consulte [EVID-19](docs/AIA-R01-EVID-19-PACOTE-BILATERAL-OP01.md).
 
 O registro foi comunicado no CRM PR #57 **sem aprovação ou merge**. Os dados deste pacote não provam a execução de testes reais e permanecem **NO-GO**.
 
-## Bloqueadores de integração CRM ↔ Agents
+## Registro histórico — bloqueadores do pacote CRM ↔ Agents de 10/11/2026
 
 O [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) permanece **OPEN/DRAFT, não integrado e não homologado** em 10/11/2026. A versão documental revisada foi reconciliada com o Agents em [EVID-17](docs/AIA-R01-EVID-17-RECONCILIACAO-CRM-PR57-2026-11-10.md), usando HEAD CRM `97bc1e8d6ce4cf4b52378472c31cb49de6a66d51` e blob `cefb390ec41a76d486b137279d92627f097d1d47`; isso **não** aprova nenhum gate. A proposta é documental; nenhuma rota, API real ou permissão foi autorizada. As decisões precisam de aceite independente por área:
 
@@ -113,7 +136,7 @@ O [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) permanece **OP
 
 **Todos os gates R01-G01..G11 e CRM CORE/SEG/AUT seguem ABERTOS/NO-GO.** Nenhum teste sintético, CI verde ou comentário em PR substitui a aprovação e a evidência de runtime requeridas.
 
-## Referências atuais e histórico preservado
+## Referências da linha histórica e arquivo preservado
 
 - [Dossiê técnico EVID-16](docs/AIA-R01-EVID-16-SEGURANCA-TOOL-397.md) — SEC-18/19, evidências e limites.
 - [Handoff EVID-15](docs/AIA-R01-EVID-15-HANDOFF-READ-TOOL-389.md) e [EVID-14](docs/AIA-R01-EVID-14-CHECKPOINT-LEITURA-OP01.md) — entregas anteriores.
@@ -124,7 +147,7 @@ O [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) permanece **OP
 **Restrições mantidas:** nenhuma modificação em `main`, VPS ou produção, sem dados de cliente, segredos, chamadas pagas ou novos contratos. A continuidade permitida é revisão e desenvolvimento controlado em `dev`, não autorização de ativação comercial.
 
 
-## Continuidade funcional Agents P62–P64 — 18/11/2026 UTC
+## Registro histórico da preparação Agents P62–P64 — 18/11/2026 UTC
 
 A linha Agents mantém uma composição temporária e verificada com a Central
 P30 `c08688b16e61d8d1ecc4d8c0ed4da8758a687ee8`, sem merge entre as linhas.
@@ -156,7 +179,7 @@ Contrato da nova jornada:
 [LOCAL-AUTHORED-DRAFT-JOURNEY](docs/reviews/AIA-P64-LOCAL-AUTHORED-DRAFT-JOURNEY.md).
 **DRAFT / NO-GO operacional; main e ambientes operacionais sem alteração.**
 
-## Continuidade em homologação isolada — 17/11/2026
+## Registro histórico da continuidade em homologação isolada — 17/11/2026
 
 As candidatas P62/P63/P64 concluíram a composição de fila assinada, detalhe verificável e criação atômica com autoria. A [P65 #471](https://github.com/rafhael100/imagine-ai-agents/pull/471), SHA `740abafc813dbde70f5a2ad6e138402ed7945276`, acrescentou o consumidor mínimo e passou 6 casos positivos/85 negativos na [CI 44213754313](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44213754313). A [RC76 #473](https://github.com/rafhael100/imagine-ai-agents/pull/473), SHA `bd50ab49113e775490cb55d76b088731ec108cc9`, passou na [CI 44217619259](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44217619259), executando toda a matriz e o consumidor original na árvore combinada `cd4b6fba353a20f02b00facec4614be4f052a18f` com a Central P30.
 
@@ -166,8 +189,8 @@ A candidata P66/RC77 atende à pendência visual aprovada na [issue #289](https:
 
 O primeiro ensaio Chromium também revelou a incompatibilidade entre `Referrer-Policy: no-referrer` e a origem obrigatória dos POSTs nativos da criação. A correção usa `same-origin` no escritor, preserva a verificação de Origin/Host/CSRF e acrescenta a contraprova de origem `null`; a nova execução deve comprovar o fluxo sem injeção de cabeçalhos no navegador.
 
-As entregas permanecem candidatas DRAFT, sem merge, deploy, acesso a clientes ou APIs pagas. As próximas dependências operacionais continuam sendo identidade/permissões reais entre serviços, MFA administrativo obrigatório, destino/custódia de backup externo e pareceres correspondentes. Os registros históricos deste arquivo preservam o estado da linha integrada e não representam a HEAD dessas candidatas.
+As entregas dessa etapa permaneceram candidatas DRAFT, sem merge, deploy, acesso a clientes ou APIs pagas. Os requisitos operacionais de identidade/permissões, MFA administrativo, backup e pareceres continuam sujeitos à validação do respectivo ambiente; este registro não é um inventário de disponibilidade desses recursos. O estado vigente das candidatas owner está no início deste arquivo.
 
 ## P67 — continuidade do fluxo owner aprovado
 
-A aprovação específica do responsável autorizou implementar criação e consulta de rascunhos pelo owner ativo do CRM em homologação fictícia. A candidata P67 acrescenta recebimento mTLS fechado, operações e chaves distintas, persistência/idempotência e autoria histórica atestada pelo CRM. Não altera o motor comercial nem os contratos e autores sintéticos anteriores. O CRM correspondente mantém intenção commitada antes do transporte e reconciliação por consulta sob autoridade atual. [Contrato e evidência](docs/reviews/AIA-P67-CRM-OWNER-DRAFTS.md). Resultados efetivos são registrados na PR da SHA testada; candidatura DRAFT, sem merge/deploy/IA externa ou GO operacional.
+A aprovação específica do responsável autorizou implementar criação e consulta de rascunhos pelo owner ativo do CRM em homologação fictícia. A candidata P67 acrescenta recebimento mTLS fechado, operações e chaves distintas, persistência/idempotência e autoria histórica atestada pelo CRM. Não altera o motor comercial nem os contratos e autores sintéticos anteriores. O CRM correspondente mantém intenção commitada antes do transporte e reconciliação por consulta sob autoridade atual. A execução bilateral já ocorreu na CRM #658, contra P67 exato, conforme os resultados consolidados no início deste arquivo. [Contrato e evidência](docs/reviews/AIA-P67-CRM-OWNER-DRAFTS.md). Candidaturas DRAFT, sem merge/deploy/IA externa ou GO operacional.

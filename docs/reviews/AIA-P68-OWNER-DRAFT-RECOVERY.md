@@ -7,10 +7,14 @@ conjuntos persistidos pelo P67. O ensaio usa exclusivamente fixtures técnicas
 geradas no job, dois PostgreSQL 16 descartáveis e o receptor PHP/FPM/mTLS
 original. Não altera o runtime, as permissões de produto ou a regra comercial.
 
-Estado nesta entrega: código e revisão estática preparados; a execução real
-depende da CI da PR P68. A ausência de PHP, Docker e PostgreSQL no ambiente local
-impede declarar um resultado de runtime local. O marcador `PASS` só é emitido
-depois de todas as verificações e da remoção dos recursos próprios.
+Estado verificado: [PR P68 #477](https://github.com/rafhael100/imagine-ai-agents/pull/477),
+HEAD `85f4c37a6d905b91923d3e31ba9068b2c35d7657`, aprovada na
+[CI 44233999376](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44233999376).
+A execução real restaurou seis conjuntos e nove funções em dois PG16, com cinco
+HTTP positivos e cinco negativos no destino, duas contraprovas de autoridade
+atual e duas senhas antigas recusadas. Terminou com dois drafts, oito auditorias,
+cleanup aprovado e zero artifacts. A preparação local havia sido somente
+estática; o resultado de runtime pertence à CI citada.
 
 - Base exata P67: `0c722eee6bd53a7ee46c4ba68ab70200fc191b78`.
 - Central original: `c08688b16e61d8d1ecc4d8c0ed4da8758a687ee8`.
@@ -18,8 +22,9 @@ depois de todas as verificações e da remoção dos recursos próprios.
 - Base da PR: `feat/aia-p67-crm-owner-drafts-2026-11-17`.
 - Resultado de produto permanece `NO_GO`, `executed=false`, `operational=false`.
 
-O sucesso anterior do [P67](AIA-P67-CRM-OWNER-DRAFTS.md), quando disponível na
-composição, comprova o seu recorte de admissão. O P68 acrescenta uma evidência de
+O [P67](AIA-P67-CRM-OWNER-DRAFTS.md) passou na
+[CI 44230030310](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44230030310)
+da base exata acima. O P68 acrescenta uma evidência de
 durabilidade desses registros; não substitui a autenticação humana real feita
 pelo CRM nem atesta recuperação completa do CRM.
 
@@ -159,7 +164,17 @@ O P68 não acessa R2, VPS, produção ou dados reais e não infere indisponibili
 de nenhum destino já existente. Também não atesta a autenticação pessoal do
 criador: as chamadas exercitam atestações técnicas fictícias no contrato P67.
 
-## Lacuna correta do backup legado do CRM
+A prova humana externa já foi executada pela
+[CRM #658](https://github.com/rafhael100/imagine-crm/pull/658), HEAD
+`e390c56af2a544d8191cce86752637efe6a35e43`, na
+[CI 44237380307](https://github.com/rafhael100/imagine-crm/actions/runs/44237380307),
+contra o receptor P67 original fixado. Isso complementa o P68 sem transformar
+`human_crm_session_verified=false` em true dentro deste ensaio. A criação/consulta
+pelo owner já foi decidida e provada nesse recorte; a próxima etapa é sua
+disponibilização em homologação persistente, com as fontes e condições do
+ambiente verificadas, sem inferir GO operacional.
+
+## Inspeção histórica do backup legado e prova posterior do addon CRM
 
 A inspeção do CRM em `fe88dd15d42dbda0bab206dfdbc9f8ce65093212` identificou que
 o [backup privado legado](https://github.com/rafhael100/imagine-crm/blob/fe88dd15d42dbda0bab206dfdbc9f8ce65093212/scripts/ops/backup-private-crm.py)
@@ -171,11 +186,26 @@ exige igualdade exata de relações e ainda não inclui
 Com essas tabelas presentes, o caminho é recusado por
 `Incomplete or unknown private backup relation profile.`
 
-Essa conclusão é de inspeção de código, sem executar o backup legado. A recusa
+Naquele registro, a conclusão era de inspeção de código, sem executar o backup legado. A recusa
 é correta: acrescentar nomes à lista sem atualizar e provar o perfil fechado
 de RLS/ACL e restauração daria uma cobertura incompleta. O P68 não modifica esse
-contrato. Recuperar também as intenções/grants locais do CRM exige seu próprio
-recorte de fixture, snapshot, perfil e reconciliação.
+contrato. O recorte próprio de recuperação das intenções/grants locais foi
+posteriormente executado pela CRM #658 na CI citada acima: 836 verificações,
+27 tabelas, cinco roles inertes, 13 negativas SQL, 18 mutações negativas e
+15 equivalências fechadas de representação PG16. Os catálogos brutos são
+diferentes; o relatório declara `catalog_raw_equal=false` e identifica a regra
+de equivalência `CRM_PG16_VARCHAR_LITERAL_ARRAY_CAST_V1`. Foram provados o fluxo
+snapshot pendente → origem viva confirmada → cópia restaurada pendente,
+cifragem/adulteração e a recusa do addon pelo classificador legado. O destino
+permanece inerte, sem restauração de autoridade atual, reutilização de sessão
+ou ativação de runtime; não há prova de recuperação distribuída CRM + Agents.
+
+A [CRM #659](https://github.com/rafhael100/imagine-crm/pull/659), HEAD
+`b86f6f7005b3c8aa79e64fa8dfe9abecab99ad01`, passou na
+[CI 44234701904](https://github.com/rafhael100/imagine-crm/actions/runs/44234701904).
+Ela corrige o fallback da ACL padrão de sequência (`relkind='S'` corresponde
+a `acldefault('s', owner)`) e acrescenta a regressão real do backup base/S2S.
+Não amplia inventário, roles, grants ou aceitação do addon no backup legado.
 
 Os ensaios Agents P25/P28 anteriores tampouco bastam para os seis conjuntos
 P67. Suas [roles de recuperação](https://github.com/rafhael100/imagine-ai-agents/blob/c08688b16e61d8d1ecc4d8c0ed4da8758a687ee8/runtime/central-auto/p25-recovery-roles.sql)
