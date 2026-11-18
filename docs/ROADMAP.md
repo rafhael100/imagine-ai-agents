@@ -1,8 +1,18 @@
 # Imagine AI Agents — roadmap operacional
 
-**14/11/2026:** Histórico: [Histórico](historico/ROADMAP-ANTES-CONSOLIDACAO-2026-11-10.md). Estado: [STATUS-ATUAL.md](../STATUS-ATUAL.md), [EVID-49](AIA-R01-EVID-49-CRM-AGENTS-POSTMERGE.md), [EVID-50](AIA-R01-EVID-50-REAL-FACADE-CORE-CRM-POSTMERGE.md), [EVID-51](AIA-R01-EVID-51-OP01-CAMINHO-CRITICO-POSTMERGE.md), EVID-52.
+**Estado verificado por SHA/run:** fontes em [STATUS-ATUAL.md](../STATUS-ATUAL.md). A integração owner criar/consultar já foi aprovada e executada na CI de homologação CRM #658 contra o receptor P67 original. P67, P68, CRM #658 e CRM #659 estão verdes nas SHAs registradas e permanecem DRAFT/sem merge. Produção continua NO-GO.
 
-## Fase A — base de demonstração offline
+## Próximo marco — fluxo owner em homologação persistente
+
+Disponibilizar o mesmo fluxo autenticado de criação e consulta de rascunhos em homologação persistente, preservando regra comercial, resolução de empresa no CRM, autoria histórica, grants atuais, mTLS e reconciliação. A decisão de permitir esse fluxo ao owner ativo já está tomada; o próximo incremento prepara sua disponibilização e verificação no ambiente alvo.
+
+O resultado revisável deve identificar as fontes exatas e a configuração efetivamente disponível, apresentar a jornada owner → planejamento existente → rascunho → nova consulta e registrar persistência/continuidade no ambiente. As provas de recuperação atuais cobrem seus snapshots e limites declarados; não demonstram recuperação distribuída ou RPO zero. Não presumir ausência de infraestrutura, R2, MFA ou credenciais a partir de uma CI descartável.
+
+Esta sequência registra a continuidade autorizada; o arquivo não instala serviços, concede grants ou autoriza deploy/produção. Os limites do [P67](reviews/AIA-P67-CRM-OWNER-DRAFTS.md) e do [P68](reviews/AIA-P68-OWNER-DRAFT-RECOVERY.md) permanecem.
+
+## Registro histórico — Fase A, base de demonstração offline
+
+Os registros A/B abaixo preservam a posição histórica consolidada em 14/11/2026, com [EVID-49](AIA-R01-EVID-49-CRM-AGENTS-POSTMERGE.md), [EVID-50](AIA-R01-EVID-50-REAL-FACADE-CORE-CRM-POSTMERGE.md), [EVID-51](AIA-R01-EVID-51-OP01-CAMINHO-CRITICO-POSTMERGE.md) e EVID-52. As restrições dos mocks não reclassificam as autorizações e provas posteriores. [Arquivo histórico integral](historico/ROADMAP-ANTES-CONSOLIDACAO-2026-11-10.md).
 
 **Entregue na branch de desenvolvimento para avaliação técnica, não para clientes.** F1-12 a F1-30, SEC-11 a SEC-40 e os demais incrementos documentados criaram contratos sintéticos, borda OP-01, política fake de owner, prevenção de replay local, leitura de ferramenta governada, sugestões fixas e trilha limitada.
 
@@ -68,7 +78,7 @@ SEC-48: 613 PHP, [EVID-33](AIA-R01-EVID-33-SEC48-CI-POSTMERGE.md) e CI #42924834
 
 [SEC-50](AIA-FT01-SEC-50-CAPABILITY-RECHECK-POS-FERRAMENTA.md): 629 PHP / 83 lint; revogação pós READ/SUGGEST, U72-01..08. Gate em revisão/NO-GO.
 
-## Fase B — contrato bilateral e autorização (caminho crítico)
+## Registro histórico — Fase B, pacote bilateral OP-01 de 10/11/2026
 
 **Pacote de revisão disponível, aguardando decisões independentes:** [OP-01 JSON](evidencias/op01-pacote-aceite-bilateral.json) e [EVID-19](AIA-R01-EVID-19-PACOTE-BILATERAL-OP01.md) relacionam sete responsáveis sugeridos a 14 gates e 13 cenários ainda não homologados. [CI pós-merge #42770907072](https://github.com/rafhael100/imagine-ai-agents/actions/runs/42770907072) success no arquivo gerado. **Este é um checklist, não um GO.** Registrar pareceres de CRM CORE/SEG/AUT, Privacidade, Infra e Direção com evidências reais; não abrir API antes da liberação.
 
@@ -85,12 +95,14 @@ Sem parecer itemizado e evidência verificável, permanecer em NO-GO. Não marca
 
 ## Fase C — implementação OP-01 real em homologação
 
-**Condicionada à Fase B, não iniciada.** Sequência planejada após liberação: criar cliente/contrato versionado de somente leitura, integrar ao autorizador real CRM e ao serviço autenticado, aplicar timeouts e falha fechada, executar OP01-N01..N11 / OP01-P01-P02 com dados de teste e revisão independente. O CRM retém a decisão de acesso ao lead. **Não abrir OP-05/OP-06, escrita ou uso de dados reais por analogia** com a OP-01.
+**Executada nos recortes expressamente aprovados de homologação fictícia.** A consulta humana mínima OP-01 foi exercitada nas CRM #649/#651 e no consumidor P65. Em seguida, a autorização específica owner permitiu criação/consulta de rascunhos; a [CRM #658](https://github.com/rafhael100/imagine-crm/pull/658) executou sessão/MFA e fonte nativa reais contra o P67 fixado, na [CI 44237380307](https://github.com/rafhael100/imagine-crm/actions/runs/44237380307). O CRM conserva a decisão de acesso e a autoria atestada.
+
+Essa prova externa complementa os ensaios internos P67/P68, que continuam declarando `human_crm_session_verified=false`. Ela não encerra automaticamente os treze cenários históricos de delegação nem abre OP-05/OP-06, execução de ações ou uso de dados reais por analogia. O próximo marco é a disponibilização persistente descrita acima.
 
 ## Fase D — piloto restrito e avaliação de produção
 
 **Não iniciada e não autorizada por este arquivo.** Requer autorização distinta de piloto, indicadores operacionais, rollback testado, privacidade e orçamento confirmado. Produção exige novo aceite independente e controles operacionais permanentes.
 
-## Regra permanente de execução
+## Regra vigente de continuidade e limites
 
-Somente trabalho inerte e verificável em `dev/ft01-aia-core-mocks-2026-11-06` enquanto os gates reais estiverem abertos. Não alterar `main`, implantar VPS, usar credenciais, clientes ou provedores pagos, nem afirmar conclusão do produto por contagem de testes. Consulte [AGENTS.md](../AGENTS.md) e o [dossiê EVID-16](AIA-R01-EVID-16-SEGURANCA-TOOL-397.md) antes de alterar arquitetura.
+Continuar autonomamente o desenvolvimento e as verificações dos recortes já autorizados, em branches isoladas e com evidência da SHA executada, sem exigir nova decisão rotineira sobre owner criar/consultar. Esta documentação não amplia o escopo para novos efeitos, clientes, provedores pagos, merge em `main`/DEV ou implantação. A mudança concreta de disponibilização deve ser revisável antes de qualquer ação no ambiente alvo; produção e ativação comercial permanecem NO-GO. Consulte [AGENTS.md](../AGENTS.md), as autorizações específicas registradas e os contratos do recorte; o [dossiê EVID-16](AIA-R01-EVID-16-SEGURANCA-TOOL-397.md) conserva a evidência histórica.
