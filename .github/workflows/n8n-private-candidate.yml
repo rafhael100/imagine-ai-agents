@@ -16,8 +16,6 @@ jobs:
     env:
       N8N_IMAGE: ghcr.io/n8n-io/n8n@sha256:b4b90747b81fcda7e76550c0d3aa7f0f64917a1e9573cff40d6834eaf2e0f8ea
       N8N_CANDIDATE_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
-      P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
-      P30_RUNNER_ENVIRONMENT: ${{ runner.environment }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -30,6 +28,9 @@ jobs:
           path: _crm_feedback_pinned
           persist-credentials: false
       - name: Verify direct build, execution, recovery and native operator MFA
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+          P30_RUNNER_ENVIRONMENT: ${{ runner.environment }}
         run: |
           set -euo pipefail
           bash -n tools/run_n8n_private_candidate.sh
