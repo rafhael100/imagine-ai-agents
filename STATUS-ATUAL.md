@@ -1,5 +1,20 @@
 # Imagine AI Agents — estado atual
 
+## Continuidade — histórico real no leitor da tela CRM
+
+A candidata filha da [PR #472](https://github.com/rafhael100/imagine-ai-agents/pull/472)
+fixa o CRM [#654](https://github.com/rafhael100/imagine-crm/pull/654) em
+`e1b3b7f118eff0350a00789aecc7bb2bb2331464` para verificar a função SQL e o
+modelo PHP de apresentação com as observações reais do ensaio n8n/mTLS.
+A leitura usa a credencial app separada, transação READ ONLY e recuperação
+com roles NOLOGIN. A prova humana de sessão/MFA/HTTP/navegador permanece na CI
+do CRM; o harness não relaxa o perfil de identidade para a porta do laboratório.
+
+[Escopo e critérios](infra/n8n-private/homologation/CRM-EXECUTION-MONITOR-EVIDENCE.md).
+O resultado executado deve ser conferido na CI da HEAD publicada. Não há
+aprovação antecipada nem nova autoridade operacional: DRAFT / NO-MERGE /
+NO-DEPLOY, sem clientes, VPS, backup externo verificado ou custos.
+
 ## Continuidade — status de execução assinado e retorno ao CRM
 
 Após a execução nativa de leads [#469](https://github.com/rafhael100/imagine-ai-agents/pull/469), este recorte acrescenta uma API privada separada de acompanhamento e sua integração com uma projeção e histórico no CRM. O recibo P27 de ingresso conserva o contrato original. A leitura de execução exige grant próprio, mTLS e assinatura, valida origem/tarefa/ledger/evidência em snapshot consistente e não executa ou reconcilia a fila.

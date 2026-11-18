@@ -17,7 +17,7 @@ agents_sha=05e4ea7942e530055f4e455544d82f5d3edbd56d
 central_base_sha=8f22801a71b6a4cb9e262dd0cad13fca07650388
 agents="$repo/_agents_lead_pinned"
 crm="$repo/_crm_feedback_pinned"
-crm_sha=be9c1243a45ab867309a89f8c40d61dc44b7a7f4
+crm_sha=e1b3b7f118eff0350a00789aecc7bb2bb2331464
 
 test "$central_sha" = "$GITHUB_SHA"
 git diff --quiet
@@ -87,6 +87,7 @@ for file in \
   runtime/central-auto/p29-json-probe.php \
   infra/n8n-private/homologation/check_crm_execution_feedback.py \
   runtime/central-auto/feedback-crm-probe.php \
+  runtime/central-auto/feedback-crm-monitor-probe.php \
   runtime/central-auto/feedback-http-probe.php \
   infra/n8n-private/homologation/check_crm_lead_execution.py \
   runtime/central-auto/lab-executor/lead-probe.php \
@@ -173,6 +174,7 @@ printf 'CRM_EXECUTION_FEEDBACK_SOURCE central=%s agents=%s tree=%s\n' "$central_
   php -l runtime/central-auto/execution-status.php
   php -l runtime/central-auto/execution-contract.php
   php -l runtime/central-auto/feedback-crm-probe.php
+  php -l runtime/central-auto/feedback-crm-monitor-probe.php
   php -l runtime/central-auto/feedback-http-probe.php
   php -l runtime/central-auto/event-status.php
   php -l runtime/central-auto/p27-receipt-probe.php
@@ -237,6 +239,8 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
     echo '- CRM lead capture is bound to its own owner-authorized queue task and native preparation receipt.'
     printf -- '- Pinned CRM candidate: `%s`\n' "$crm_sha"
     echo '- Signed execution status is persisted as a separate CRM projection and transition history.'
+    echo '- The scoped CRM monitor reader and actual PHP presentation model consume the same native execution evidence.'
+    echo '- Monitor reads use only the app credential; human session/MFA/browser evidence remains in CRM PR #654.'
     echo '- PREPARED does not alter commercial lead fields or authorize operational deployment.'
     echo '- No remote merge, real S2S authority, external backup, paid AI or installation approval.'
   } >> "$GITHUB_STEP_SUMMARY"
