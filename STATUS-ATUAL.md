@@ -1,5 +1,18 @@
 # Imagine AI Agents — estado atual
 
+## 2026-11-18 — validação isolada da retomada de staging
+
+A PR #485 inclui verificadores do Compose e um ensaio sintético para a retomada
+ordenada dos contêineres existentes, com Docker descartável. O ensaio verifica
+readiness, dois start consecutivos, persistência e importação de dump em banco
+sintético isolado. O PostgreSQL de teste usa um digest fixo de fixture; o digest
+da receita operacional ainda depende do pacote revisado da candidata.
+
+A política usa o Compose para esperar o PostgreSQL antes do n8n, com
+`restart: "no"` por contêiner. O início no boot requer gate administrativo
+separado. CRM privado, identidade nominal, MFA obrigatório, licença e custódia
+de chaves seguem em revisão. **NO-GO operacional.**
+
 ## 2026-11-18 — contexto completo de fontes e pacote de revisão do n8n privado
 
 A candidata `feat/n8n-private-candidate-bundle-2026-11-18` reúne a Central
