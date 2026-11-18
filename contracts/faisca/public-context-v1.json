@@ -1,0 +1,39 @@
+{
+  "schema": "faisca.public-context.v1",
+  "scope": "public_comercial",
+  "knowledgeVersion": "faisca-editorial-2",
+  "knowledgeDigest": "fe7daf5ab310acc5a0a600803254344ed02eff7bbd860b731cdf033dcbe4ead7",
+  "sourceIds": [
+    "comercial.services@209bd893:faisca-1",
+    "comercial.faq@209bd893:faisca-1",
+    "comercial.process@209bd893:faisca-1",
+    "faisca.journeys@1"
+  ],
+  "actionIds": [
+    "sell",
+    "faq",
+    "after_sales",
+    "human",
+    "home",
+    "goal_presence",
+    "goal_campaign",
+    "goal_sales",
+    "goal_ads",
+    "compare_sites",
+    "pricing",
+    "process",
+    "support_status",
+    "support_issue",
+    "support_billing",
+    "support_cancel",
+    "summary",
+    "materials_ready",
+    "materials_help",
+    "channel_google",
+    "channel_meta",
+    "channel_compare",
+    "results",
+    "privacy",
+    "scope"
+  ]
+}

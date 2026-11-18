@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__.'/../src/Automation/DeterministicAutomationService.php';
 require_once __DIR__.'/../src/Automation/DeterministicRuleEngine.php';
 
 use ImagineAI\Automation\DeterministicRuleEngine;

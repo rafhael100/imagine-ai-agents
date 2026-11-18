@@ -6,6 +6,7 @@ namespace ImagineAI\Convergence;
 require_once __DIR__.'/PgSyntheticReplayGate.php';
 require_once __DIR__.'/PgDraftFingerprintLab.php';
 require_once __DIR__.'/PgScopedDraftWriterLab.php';
+require_once __DIR__.'/../../src/Automation/DeterministicAutomationService.php';
 require_once __DIR__.'/../../src/Automation/DeterministicRuleEngine.php';
 
 use ImagineAI\Automation\DeterministicRuleEngine;

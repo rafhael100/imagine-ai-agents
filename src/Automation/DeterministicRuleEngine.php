@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace ImagineAI\Automation;
 
-require_once __DIR__.'/DeterministicAutomationService.php';
-
 use InvalidArgumentException;
 
 /**
