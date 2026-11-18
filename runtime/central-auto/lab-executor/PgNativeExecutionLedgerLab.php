@@ -3,14 +3,14 @@ declare(strict_types=1);
 namespace ImagineAI\NativeLab;
 
 require_once __DIR__.'/../../../tools/labs/PgOwnerBoundSignedDispatchLab.php';
-require_once __DIR__.'/../../../src/MockOrchestration/MockN8nOutboxContract.php';
+require_once __DIR__.'/../../../tools/labs/LabAutomationTaskContract.php';
 
 use ImagineAI\Convergence\PgSyntheticReplayGate;
 use ImagineAI\Convergence\PgCompanyDispatchGuardLab;
 use ImagineAI\Convergence\PgOwnerExecutionGuardLab;
 use ImagineAI\Convergence\PgOwnerBoundSignedDispatchLab;
 use ImagineAI\Convergence\PgSyntheticSignerRegistryLab;
-use ImagineAI\MockOrchestration\MockN8nOutboxContract;
+use ImagineAI\Convergence\LabAutomationTaskContract;
 use PDO;
 use Throwable;
 
@@ -21,10 +21,12 @@ use Throwable;
 final class PgNativeExecutionLedgerLab
 {
     public const TEMPLATE_SHA256='85311c9621967bd3b31a0935a358bf9b61d51cd2266954293ef8c124096e41c8';
+    public const LEAD_TEMPLATE_SHA256='8d3ee7e2abe2f852212ee10904fa20032265578358992e98abc99835fd5833a4';
     private const FIELDS=['company_id','tenant_ref','event_ref','worker_ref','attempt',
         'authority_revision','mapping_revision','executor_key_id','canonical_event',
         'payload_hash','template_sha256','workflow_id','workflow_sha256'];
     private const NODES=['Disparo manual','Referencias tecnicas','Projetar estado da execucao'];
+    private const LEAD_NODES=['Disparo manual','Referencias do lead','Preparar lead recebido'];
     private const JSON=JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE;
 
     public function __construct(private PDO $db) { new PgSyntheticReplayGate($db); }
@@ -47,11 +49,37 @@ final class PgNativeExecutionLedgerLab
         return ['decision'=>$decision,'reason'=>$reason,'state'=>$state,'execute_again'=>false];
     }
 
-    public static function inputs(array $c):array {
-        $event=MockN8nOutboxContract::decode($c['canonical_event']);
-        self::require(is_array($event)&&$event['kind']==='mock.run.completed'
+    /** The queue contract selects one exact graph, never a caller-supplied path
+     * or a generic NO_AI label. Lead preparation retains its own source hash.
+     */
+    private static function profile(array $c):array {
+        $event=LabAutomationTaskContract::decode($c['canonical_event']);
+        self::require(is_array($event)
             &&$event['tenant_ref']===$c['tenant_ref']&&$event['event_ref']===$c['event_ref'],
             'P26_CANONICAL_SCOPE');
+        if($event['contract']==='SYNTHETIC_AIA_AUTOMATION_V1'
+            &&$event['kind']==='mock.run.completed'){
+            return ['event'=>$event,'sha'=>self::TEMPLATE_SHA256,'nodes'=>self::NODES,
+                'workflow_ref'=>'SYNTHETIC_P26_RUN_STATUS_V1','prefix'=>'p26',
+                'file'=>'native-run-status-noai.workflow.json'];
+        }
+        self::require($event['contract']==='SYNTHETIC_CRM_LEAD_INGEST_V1'
+            &&$event['kind']==='crm.lead.ingest'
+            &&$event['company_id']===($c['company_id']??null),'LEAD_CANONICAL_SCOPE');
+        return ['event'=>$event,'sha'=>self::LEAD_TEMPLATE_SHA256,'nodes'=>self::LEAD_NODES,
+            'workflow_ref'=>'SYNTHETIC_CRM_LEAD_INGEST_V1','prefix'=>'lead',
+            'file'=>'native-crm-lead-noai.workflow.json'];
+    }
+
+    public static function inputs(array $c):array {
+        $profile=self::profile($c);$event=$profile['event'];
+        if($event['contract']==='SYNTHETIC_CRM_LEAD_INGEST_V1'){
+            return ['company_id'=>$event['company_id'],'tenant_ref'=>$c['tenant_ref'],
+                'event_ref'=>$c['event_ref'],'lead_id'=>$event['lead_id'],
+                'source_payload_hash'=>$event['source_payload_hash'],'payload_hash'=>$c['payload_hash'],
+                'worker_ref'=>$c['worker_ref'],'attempt'=>$c['attempt'],
+                'template_sha256'=>$profile['sha'],'workflow_ref'=>$profile['workflow_ref']];
+        }
         return ['tenant_ref'=>$c['tenant_ref'],'event_ref'=>$c['event_ref'],
             'run_ref'=>$event['run_ref'],'reference_ref'=>$event['reference_ref'],
             'payload_hash'=>$c['payload_hash'],'worker_ref'=>$c['worker_ref'],
@@ -79,11 +107,12 @@ final class PgNativeExecutionLedgerLab
         self::require(is_string($c['canonical_event'])&&strlen($c['canonical_event'])<=512
             &&hash_equals(hash('sha256',$c['canonical_event']),$c['payload_hash']),
             'P26_CONTEXT_EVENT_HASH');
-        self::require($c['template_sha256']===self::TEMPLATE_SHA256
-            &&$c['workflow_id']==='p26'.substr($c['payload_hash'],0,20),'P26_WORKFLOW_ID');
-        $path=__DIR__.'/../../../infra/n8n-private/workflows/native-run-status-noai.workflow.json';
+        $profile=self::profile($c);
+        self::require($c['template_sha256']===$profile['sha']
+            &&$c['workflow_id']===$profile['prefix'].substr($c['payload_hash'],0,20),'P26_WORKFLOW_ID');
+        $path=__DIR__.'/../../../infra/n8n-private/workflows/'.$profile['file'];
         self::require(is_file($path)&&!is_link($path)
-            &&hash_file('sha256',$path)===self::TEMPLATE_SHA256,'P26_TEMPLATE_PIN');
+            &&hash_file('sha256',$path)===$profile['sha'],'P26_TEMPLATE_PIN');
         $flow=json_decode(file_get_contents($path),false,32,JSON_THROW_ON_ERROR);
         $input=self::inputs($c);
         foreach($flow->nodes[1]->parameters->assignments->assignments as $assignment)
@@ -167,22 +196,29 @@ final class PgNativeExecutionLedgerLab
     private static function validResult(array $c,mixed $payload):bool {
         try{
             if(!is_array($payload)||strlen(self::json($payload))>262144)return false;
+            $profile=self::profile($c);$nodes=$profile['nodes'];
             $result=$payload['data']['resultData']??null;
             if(!is_array($result)||($result['error']??null)!==null
-                ||($result['lastNodeExecuted']??null)!==self::NODES[2])return false;
+                ||($result['lastNodeExecuted']??null)!==$nodes[2])return false;
             $runs=$result['runData']??null;
             if(!is_array($runs))return false;
-            $keys=array_keys($runs);sort($keys);$expected=self::NODES;sort($expected);
+            $keys=array_keys($runs);sort($keys);$expected=$nodes;sort($expected);
             if($keys!==$expected)return false;
-            foreach(self::NODES as $node)
+            foreach($nodes as $node)
                 if(!is_array($runs[$node])||count($runs[$node])!==1
                     ||($runs[$node][0]['executionStatus']??null)!=='success')return false;
             $input=self::inputs($c);
-            $output=['schema'=>'AIA_NATIVE_RUN_STATUS_V1']+$input+[
-                'operation'=>'run.status.project','run_status'=>'COMPLETED',
-                'ai_api_calls'=>0,'operational_authorization'=>false];
+            if($profile['event']['contract']==='SYNTHETIC_CRM_LEAD_INGEST_V1'){
+                $output=['schema'=>'AIA_NATIVE_LEAD_INGEST_V1']+$input+[
+                    'operation'=>'lead.ingest','lead_status'=>'PREPARED','crm_mutated'=>false,
+                    'ai_api_calls'=>0,'operational_authorization'=>false];
+            }else{
+                $output=['schema'=>'AIA_NATIVE_RUN_STATUS_V1']+$input+[
+                    'operation'=>'run.status.project','run_status'=>'COMPLETED',
+                    'ai_api_calls'=>0,'operational_authorization'=>false];
+            }
             foreach([1=>$input,2=>$output] as $index=>$wanted){
-                $items=$runs[self::NODES[$index]][0]['data']['main']??null;
+                $items=$runs[$nodes[$index]][0]['data']['main']??null;
                 if(!is_array($items)||count($items)!==1||!is_array($items[0])
                     ||count($items[0])!==1||!self::same($wanted,$items[0][0]['json']??null))return false;
             }

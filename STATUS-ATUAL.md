@@ -1,5 +1,25 @@
 # Imagine AI Agents — estado atual
 
+## 2026-11-17 — candidata CRM → fila → execução n8n de lead
+
+A branch `feat/n8n-crm-lead-execution-2026-11-17` acrescenta o fluxo nativo
+`lead.ingest` à captura #467. A Central consome o domínio #468 no SHA
+`05e4ea7942e530055f4e455544d82f5d3edbd56d`, composto somente em árvore
+temporária de CI. Reutiliza a fila, o ledger e a evidência assinada existentes.
+
+O resultado do workflow é um recibo `PREPARED` com identificadores e hashes
+da origem; `crm_mutated=false`. Não representa atualização comercial no CRM.
+Receber o evento e autorizar sua execução continuam sendo decisões distintas.
+
+A matriz nova parte do POST mTLS, cobre staging concorrente, execução real do
+n8n, retomada de resultado sem executar novamente, revogação e restauração
+conjunta. A aprovação depende da CI do SHA exato; o desenho e testes locais
+não substituem a execução dessa matriz. Documentação:
+[CRM-LEAD-EXECUTION](infra/n8n-private/homologation/CRM-LEAD-EXECUTION.md).
+
+**NO-GO operacional:** identidade e chaves sintéticas, sem instalação na VPS,
+backup externo verificado ou autorização operacional de clientes.
+
 ## Candidata de captura durável CRM — 17/11/2026
 
 Branch isolada `feat/n8n-crm-lead-capture-2026-11-17`, derivada da P29 #463
