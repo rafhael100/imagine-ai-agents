@@ -1,0 +1,34 @@
+name: AIA P65 private CRM minimal projection consumer
+on:
+  push:
+    branches:
+      - feat/aia-p65-crm-minimal-read-consumer-2026-11-17
+permissions:
+  contents: read
+concurrency:
+  group: aia-p65-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  closed-response-contract:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify the exact candidate and PHP runtime
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = rafhael100/imagine-ai-agents
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          php -r 'exit(PHP_VERSION_ID >= 80300 ? 0 : 1);'
+          php --version
+          git diff --check
+      - name: Validate the closed projection and rejection cases
+        run: |
+          set -euo pipefail
+          php -l src/Integration/Crm/MinimalLeadProjection.php
+          php -l tools/check_p65_crm_minimal_read.php
+          php -l tools/p65-crm-minimal-read-probe.php
+          php tools/check_p65_crm_minimal_read.php
