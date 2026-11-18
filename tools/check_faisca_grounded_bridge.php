@@ -226,7 +226,8 @@ try {
         f06Assert($spy->calls === 1 && $spy->fields === [
             'ref' => 'SYNTHETIC_' . strtoupper($case['request']['requestFingerprint']),
             'stage' => 'SYNTHETIC_' . strtoupper($case['request']['candidateDigest']),
-            'text' => 'SYNTHETIC_' . strtoupper($reference),
+            // R05 sends the source text, not its shorter factValue field.
+            'text' => 'SYNTHETIC_FAISCA_CONTEXT_' . strtoupper($reference),
         ], 'original_provider_only_synthetic');
         f06Denied('unavailable', fn () => $bridge->deliver(1029), 'delivery_once');
         f06Denied('unavailable', fn () => $bridge->prepare($body, 1000), 'prepare_once');
