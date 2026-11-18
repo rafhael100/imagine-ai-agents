@@ -1,0 +1,19 @@
+# Apply with docker-compose.yml only. Administrative ingress is separately reviewed.
+services:
+  n8n:
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
+    environment:
+      N8N_LOG_LEVEL: warn
+      EXECUTIONS_DATA_SAVE_ON_ERROR: none
+      EXECUTIONS_DATA_SAVE_ON_PROGRESS: "false"
+      EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS: "false"
+  n8n-db:
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
