@@ -1,0 +1,65 @@
+name: Agents P4 - durable PG16 quotas, idempotency and human approvals
+
+on:
+  push:
+    branches:
+      - dev/aia-p4-pg16-durable-quotas-approvals-2026-11-16
+  pull_request:
+    branches:
+      - dev/aia-p3-isolated-demo-serving-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  pg16-workbench:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      GITHUB_REPOSITORY: rafhael100/imagine-ai-agents
+      AIA_P4_PG_LAB: 'true'
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: imagine_agents_ci
+      DB_USERNAME: postgres
+      DB_PASSWORD: ci-only-password
+    steps:
+      - name: Checkout exact candidate without persistent credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: PHP 8.4 and PostgreSQL
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_pgsql, pgsql
+          coverage: none
+      - name: Check isolated CI database and permitted synthetic files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "rafhael100/imagine-ai-agents"
+          test "$DB_HOST" = "127.0.0.1"
+          test "$DB_DATABASE" = "imagine_agents_ci"
+          php -l tools/labs/PgSalesWorkbenchLab.php
+          php -l tools/p4_pg_workbench_worker.php
+          php -l tools/check_p4_pg_workbench.php
+      - name: Test 12 simultaneous independent PHP processes and PG16 approvals
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p4_pg_workbench.php
+          echo 'P4_REAL_POSTGRES_CI_ONLY durable_events=true durable_reviews=true external_calls=0 operational_decision=NO_GO' >> "$GITHUB_STEP_SUMMARY"

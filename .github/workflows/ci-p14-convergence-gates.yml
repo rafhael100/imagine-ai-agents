@@ -1,0 +1,23 @@
+name: Agents P14 - fail-closed convergence policy gates
+
+on:
+  push:
+    branches:
+      - review/aia-p14-convergence-gates-2026-11-16
+  pull_request:
+    branches:
+      - review/aia-p13-p12-autoia-convergence-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  p14-policy-guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify fail-closed compatibility policy and adversarial mutations
+        run: python3 tools/check_p14_convergence_gates.py

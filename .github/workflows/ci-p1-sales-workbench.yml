@@ -1,0 +1,33 @@
+name: Agents P1 - commercial workbench with real DOM simulation
+
+on:
+  push:
+    branches:
+      - dev/aia-p1-commercial-workbench-2026-11-16
+  pull_request:
+    branches:
+      - dev/aia-p0-sales-agent-demo-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  workbench-offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Read-only checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Existing static + pure business tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/check_p0_sales_demo.py
+      - name: Full in-memory DOM journey with no third-party dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/check_p1_sales_workbench.js
+          echo 'P1_WORKBENCH_UI_TESTED data=synthetic runs_budget=8 agent_drafts=5 external_calls=0 operational_decision=NO_GO' >> "$GITHUB_STEP_SUMMARY"

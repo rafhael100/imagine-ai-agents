@@ -1,0 +1,28 @@
+name: Agents P0 - sales assistant interactive offline demo
+
+on:
+  push:
+    branches:
+      - dev/aia-p0-sales-agent-demo-2026-11-16
+  pull_request:
+    branches:
+      - review/agents-f229-f251-integrated-2026-11-15
+
+permissions:
+  contents: read
+
+jobs:
+  sales-demo-no-go:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Read-only checkout of exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Validate pure browser logic, HTML and strict CSP
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/check_p0_sales_demo.py
+          echo 'P0_DEMO_ONLY ai_provider_connected=false crm_connected=false external_calls=0 operational_decision=NO_GO' >> "$GITHUB_STEP_SUMMARY"

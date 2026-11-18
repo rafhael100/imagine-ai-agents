@@ -1,0 +1,49 @@
+name: Private n8n consolidated candidate and operator packet
+on:
+  push:
+    branches:
+      - feat/n8n-private-candidate-bundle-2026-11-18
+permissions:
+  contents: read
+concurrency:
+  group: n8n-private-candidate-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  consolidated-candidate:
+    if: github.event.repository.private == false && github.repository == 'rafhael100/imagine-ai-agents'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      N8N_IMAGE: ghcr.io/n8n-io/n8n@sha256:b4b90747b81fcda7e76550c0d3aa7f0f64917a1e9573cff40d6834eaf2e0f8ea
+      N8N_CANDIDATE_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+      P30_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-crm
+          ref: e1b3b7f118eff0350a00789aecc7bb2bb2331464
+          path: _crm_feedback_pinned
+          persist-credentials: false
+      - name: Verify direct build, execution, recovery and native operator MFA
+        run: |
+          set -euo pipefail
+          bash -n tools/run_n8n_private_candidate.sh
+          bash tools/run_n8n_private_candidate.sh
+      - name: Retain verified public source packet
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: n8n-private-candidate-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/n8n-private-candidate-packet/candidate.tar.gz
+            ${{ runner.temp }}/n8n-private-candidate-packet/crm.tar.gz
+            ${{ runner.temp }}/n8n-private-candidate-packet/adapter.tar.gz
+            ${{ runner.temp }}/n8n-private-candidate-packet/manifest.json
+            ${{ runner.temp }}/n8n-private-candidate-packet/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0

@@ -1,0 +1,47 @@
+name: Agents P2 - PHP business domain and JS UI parity
+
+on:
+  push:
+    branches:
+      - dev/aia-p2-sales-workbench-domain-2026-11-16
+  pull_request:
+    branches:
+      - dev/aia-p1-commercial-workbench-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  p2-offline-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - name: Checkout exact branch, read-only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: PHP 8.4 with UTF-8 validation
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring
+          coverage: none
+      - name: Validate backend PHP syntax and bounded domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l src/MockPilot/MockSalesWorkbenchSession.php
+          php -l tools/check_p2_sales_domain.php
+          php tools/check_p2_sales_domain.php
+      - name: Verify existing P0/P1 UI regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/check_p0_sales_demo.py
+          node tools/check_p1_sales_workbench.js
+      - name: Verify source parity between PHP and actual demo JS
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/check_p2_sales_parity.js
+          echo 'P2_OFFLINE_DOMAIN_PHP_JS_PARITY_PASS backend_io=none provider_calls=0 crm_access=none operational_decision=NO_GO' >> "$GITHUB_STEP_SUMMARY"

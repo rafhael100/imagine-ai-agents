@@ -1,0 +1,47 @@
+name: AIA RC64 - execute P20 and RC62 tests from virtual merged source tree
+
+on:
+  push:
+    branches:
+      - review/aia-rc64-ephemeral-unified-lab-2026-11-16
+  pull_request:
+    branches:
+      - review/aia-rc63-p20-crosslane-gates-2026-11-16
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aia-rc64-virtual-tree
+  cancel-in-progress: true
+
+jobs:
+  virtual-source-tree:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    steps:
+      - name: Checkout RC64 Git history read-only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Checkout independent Central P20 at exact SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 3cf31b78f745d539425b46b754edbe3c48e9d088
+          path: _central_p20_pinned
+          persist-credentials: false
+      - name: PHP 8.4 for deterministic Agents suites
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, sodium
+          coverage: none
+      - name: Virtual merge-tree only, run original P20 security and Agents NO_AI tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n tools/run_rc64_virtual_tree.sh
+          bash tools/run_rc64_virtual_tree.sh
+          echo 'RC64: virtual tree tested in temporary GitHub runner; runtime integration and release remain NO_GO.' >> "$GITHUB_STEP_SUMMARY"

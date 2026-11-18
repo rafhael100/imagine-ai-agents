@@ -1,0 +1,293 @@
+name: Agents P45 - owner-service grant revocation and expiration fence execution
+
+on:
+  push:
+    branches:
+      - review/aia-p45-owner-revocation-execution-2026-11-16
+  pull_request:
+    branches:
+      - review/aia-p44-owner-decision-gate-2026-11-16
+
+permissions:
+  contents: read
+
+jobs:
+  p45-owner-execution-fence-full-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: imagine_agents_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d imagine_agents_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      AIA_P6_PG_LAB: 'true'
+      AIA_P8_PG_LAB: 'true'
+      AIA_P11_SIGNED_PROOFS: 'true'
+      AIA_P16_PG_LAB: 'true'
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: imagine_agents_ci
+      DB_USERNAME: postgres
+      DB_PASSWORD: ci-only-password
+    steps:
+      - name: Checkout read-only candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Checkout independently fixed AUTO-IA adapter, read-only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 8b04d0e936168c77db028160b5aeb1758db497c4
+          path: _auto_ia_pinned_source
+          persist-credentials: false
+      - name: Checkout independent AUTO-IA RC04 candidate at immutable reviewed SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: d3860e1e3d95b79ca3a2c6376651a62028820141
+          path: _auto_ia_rc04_pinned
+          persist-credentials: false
+      - name: Checkout CENTRAL-AUTO-P7 independently reviewed mTLS source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: 7bd4b85a9621f518274800d9c0eb248abfbfff3b
+          path: _central_auto_p7_pinned
+          persist-credentials: false
+      - name: Checkout CRM original classes for P7 transport test
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-crm
+          ref: 9afa6683e6b3463f12bd80a25f455f925828c0af
+          path: _central_auto_p7_pinned/_crm_contract_pin
+          persist-credentials: false
+      - name: Checkout Portal original classes for P7 transport test
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-portal
+          ref: 9d3877dfaa81524faf2c08f80244b485968316ec
+          path: _central_auto_p7_pinned/_portal_contract_pin
+          persist-credentials: false
+      - name: Install PHP 8.4 with ephemeral PG16 extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, sodium, pdo_pgsql, pgsql
+          coverage: none
+      - name: P13/P14 pinned convergence and zero-provider governance
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "rafhael100/imagine-ai-agents"
+          test "$DB_HOST" = "127.0.0.1"
+          test "$DB_DATABASE" = "imagine_agents_ci"
+          test "$(git -C _auto_ia_pinned_source rev-parse HEAD)" = "8b04d0e936168c77db028160b5aeb1758db497c4"
+          ln -s "$PWD" _auto_ia_pinned_source/_p7_pinned_source
+          php _auto_ia_pinned_source/tools/auto_ia/convergence/check_convergence_02.php
+          python3 tools/check_p14_convergence_gates.py
+          php tools/check_p5_ai_routing.php
+          python3 _auto_ia_pinned_source/tools/auto_ia/check_rc02_release.py
+      - name: P15/P20 policy, synthetic signing and manual workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p15_policy_bound_ingress.php
+          node tools/check_p20_noai_workflow_guard.cjs
+          php tools/check_p20_routes.php
+      - name: P8/P11 signed credit accounting regressions (synthetic)
+        run: php tools/check_p8_credit_reservation.php
+      - name: P6 original outbox and P16 replay under PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p6_n8n_outbox.php
+          php tools/check_p16_pg_replay.php
+      - name: P17/P18 atomic staging and fault injection
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p17_atomic_staging.php
+          php tools/check_p18_crash_race.php
+      - name: P19 tenant-bound read isolation with restricted PostgreSQL users
+        run: php tools/check_p19_rls_isolation.php
+      - name: P22 SQL identity check
+        run: php tools/check_p22_db_identity.php
+      - name: P23/P25 cross-table and request/nonce consistency
+        run: php tools/check_p23_staging_audit.php
+      - name: P24 tenant-scoped PostgreSQL writer role least privilege
+        run: php tools/check_p24_rls_writers.php
+      - name: P27 SQL-native checks reject invalid synthetic references and canonical payload size
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/labs/PgSyntheticReplayGate.php
+          php -l tools/labs/PgN8nOutboxLab.php
+          php -l tools/check_p27_sql_constraints.php
+          php tools/check_p27_sql_constraints.php
+      - name: P28/P29 bound lease, concurrency and exactly one worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p28_bound_lease.php
+          php tools/check_p29_bound_lease_race.php
+      - name: P30 guarded acknowledgement and P31 end-to-end facade
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p30_bound_ack.php
+          php -l tools/labs/PgGuardedAutomationCycleLab.php
+          php tools/check_p31_guarded_cycle.php
+      - name: P32 prove 24 NO_AI events never reserve, hold or debit credits
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/check_p32_no_ai_credit.php
+          php tools/check_p32_no_ai_credit.php
+      - name: P33 verify two independent pins and zero-IA contract against RC04
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _auto_ia_rc04_pinned rev-parse HEAD)" = "d3860e1e3d95b79ca3a2c6376651a62028820141"
+          python3 _auto_ia_rc04_pinned/tools/auto_ia/check_rc04_integrity.py
+          python3 _auto_ia_rc04_pinned/tools/auto_ia/demo/verify_n8n_execution.py --self-test
+          python3 tools/check_p33_rc04_contract.py
+          php tools/check_p33_rc04_routes.php
+      - name: P34 revocation serializes leases and ACK in disposable PG16
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/labs/PgBoundOutboxLeaseLab.php
+          php -l tools/labs/PgBoundOutboxAckLab.php
+          php -l tools/labs/PgTenantAuthorityLab.php
+          php -l tools/check_p34_revocation_fence.php
+          php tools/check_p34_revocation_fence.php
+      - name: P35 verify Ed25519 synthetic receipt before revision-bound ACK
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/labs/MockSignedN8nAckReceipt.php
+          php -l tools/check_p35_signed_executor_ack.php
+          php tools/check_p35_signed_executor_ack.php
+      - name: P36 exact signed payload digest is checked under ACK row lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/labs/MockContentBoundExecutorReceiptV2.php
+          php -l tools/labs/PgBoundOutboxAckLab.php
+          php -l tools/check_p36_content_bound_ack.php
+          php tools/check_p36_content_bound_ack.php
+      - name: P37 rotate/revoke Ed25519 signer under ACK transaction lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/labs/PgSyntheticSignerRegistryLab.php
+          php -l tools/labs/PgBoundOutboxAckLab.php
+          php -l tools/check_p37_signer_rotation.php
+          php tools/check_p37_signer_rotation.php
+      - name: P38 force ACK rollback if signed evidence cannot be committed
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/labs/PgSyntheticAckEvidenceLab.php
+          php -l tools/labs/PgBoundOutboxAckLab.php
+          php -l tools/check_p38_atomic_ack_evidence.php
+          php tools/check_p38_atomic_ack_evidence.php
+      - name: P39 verify historical signatures with read-only PostgreSQL snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/labs/PgSignedEvidenceAuditLab.php
+          php -l tools/check_p39_signed_evidence_audit.php
+          php tools/check_p39_signed_evidence_audit.php
+      - name: P40 prove independent source pins, original CRM/Portal and transport contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C _central_auto_p7_pinned rev-parse HEAD)" = "7bd4b85a9621f518274800d9c0eb248abfbfff3b"
+          test "$(git -C _central_auto_p7_pinned/_crm_contract_pin rev-parse HEAD)" = "9afa6683e6b3463f12bd80a25f455f925828c0af"
+          test "$(git -C _central_auto_p7_pinned/_portal_contract_pin rev-parse HEAD)" = "9d3877dfaa81524faf2c08f80244b485968316ec"
+          python3 tools/check_p40_mtls_boundaries.py
+          php -l _central_auto_p7_pinned/tools/auto_ia/central_transport/check_replay_after_restart.php
+          python3 -m py_compile _central_auto_p7_pinned/tools/auto_ia/central_transport/mtls_crm_lab_server.py
+          bash -n _central_auto_p7_pinned/tools/auto_ia/central_transport/run_loopback_mtls.sh
+      - name: P40 configure independent P7 PostgreSQL16 ephemeral scoped nonce ledger
+        env:
+          PGPASSWORD: ci-only-password
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -h 127.0.0.1 -U postgres -d imagine_agents_ci -v ON_ERROR_STOP=1             -f _central_auto_p7_pinned/tools/auto_ia/central_transport/001_pg_durable_nonce.sql
+          psql -h 127.0.0.1 -U postgres -d imagine_agents_ci -At -v ON_ERROR_STOP=1             -c "SELECT to_regclass('central_auto_lab.mtls_nonce_ledger') IS NOT NULL"
+      - name: P40 exercise original HTTPS/mTLS CRM/Portal processes and persistent nonce
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash _central_auto_p7_pinned/tools/auto_ia/central_transport/run_loopback_mtls.sh
+          bash _central_auto_p7_pinned/tools/auto_ia/central_transport/check_pg_nonce_race.sh
+      - name: P41 verify approved company-to-tenant mapping from original P7 nonce ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/labs/PgSyntheticCompanyTenantBridgeLab.php
+          php -l tools/check_p41_company_tenant_bridge.php
+          php tools/check_p41_company_tenant_bridge.php
+      - name: P42 consume one P7 mTLS admission and atomically commit P16+P6
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/labs/PgSyntheticCompanyTenantBridgeLab.php
+          php -l tools/labs/PgSyntheticAtomicStager.php
+          php -l tools/labs/PgAtomicCompanyTenantStageLab.php
+          php -l tools/check_p42_atomic_company_stage.php
+          php tools/check_p42_atomic_company_stage.php
+      - name: P43 CRM company mapping revocation at lease and signed ACK
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/labs/PgCompanyDispatchGuardLab.php
+          php -l tools/labs/PgBoundOutboxLeaseLab.php
+          php -l tools/labs/PgBoundOutboxAckLab.php
+          php -l tools/labs/PgCompanyBoundSignedDispatchLab.php
+          php -l tools/check_p43_company_bound_dispatch.php
+          php tools/check_p43_company_bound_dispatch.php
+      - name: P44 reject transport-only admission and verify signed owner decision in atomic stage
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/labs/PgOwnerDecisionLab.php
+          php -l tools/labs/PgAtomicCompanyTenantStageLab.php
+          php -l tools/check_p44_owner_decision.php
+          php tools/check_p44_owner_decision.php
+      - name: P45 revalidate signed owner-service grants before both lease and ACK
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/labs/PgOwnerDecisionLab.php
+          php -l tools/labs/PgOwnerExecutionGuardLab.php
+          php -l tools/labs/PgBoundOutboxLeaseLab.php
+          php -l tools/labs/PgBoundOutboxAckLab.php
+          php -l tools/labs/PgOwnerBoundSignedDispatchLab.php
+          php -l tools/check_p45_owner_execution_fence.php
+          php tools/check_p45_owner_execution_fence.php
+      - name: P40 re-run P39 signed ACK evidence tests after mTLS to prove isolated schemas
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/check_p39_signed_evidence_audit.php
+          echo 'P40 original CRM/Portal mTLS loopback and P39 synthetic signed evidence PASS; production NO_GO.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish conservative machine-readable review status only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/check_p26_candidate_readiness.py | tee /tmp/aia-p26-report.json
+          echo 'P45 owner revocation lease ACK and transport CI: PASS (if all steps green), production decision: NO_GO; not merge/deploy/real IAM/n8n/AI.' >> "$GITHUB_STEP_SUMMARY"

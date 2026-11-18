@@ -1,0 +1,226 @@
+#!/usr/bin/env python3
+"""Offline serialization/security tests with an isolated, synthetic Git repo.
+
+These fixtures do not run or impersonate GitHub Actions, n8n or an operator.
+"""
+from __future__ import annotations
+
+import copy
+import contextlib
+import base64
+import gzip
+import hashlib
+import io
+import json
+from pathlib import Path
+import subprocess
+import tempfile
+import unittest
+from unittest.mock import patch
+
+import operator_packet as packet
+
+
+class OperatorPacketTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.workspace = tempfile.TemporaryDirectory(prefix="operator-packet-unit-")
+        cls.root = Path(cls.workspace.name)
+        cls.repo = cls.root / "repo"
+        cls.repo.mkdir()
+        for path, content in {
+            ".gitattributes": b"/.github export-ignore\n",
+            ".github/workflows/example.yml": b"name: synthetic-test-only\n",
+            "Dockerfile": b"FROM scratch\nCOPY src/contract.php /contract.php\n",
+            "src/contract.php": b"<?php // synthetic public fixture\n",
+            "composer.lock": b'{"packages":[]}\n',
+            "docs/a/b/c/ação.md": b"public-source fixture\n",
+            "empty": b"",
+            "run.sh": b"#!/bin/sh\nexit 0\n",
+        }.items():
+            target = cls.repo / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(content)
+        (cls.repo / "run.sh").chmod(0o755)
+        for args in (("init", "-q"), ("config", "user.name", "Synthetic Unit Fixture"),
+                     ("config", "user.email", "unit@example.invalid"), ("add", "."),
+                     ("commit", "-q", "-m", "Synthetic public source fixture")):
+            subprocess.run(["git", "-C", str(cls.repo), *args], check=True, capture_output=True)
+        cls.commit = packet.git(cls.repo, "rev-parse", "HEAD").decode().strip()
+        cls.files, cls.identity = packet.git_source(cls.repo, cls.commit)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.workspace.cleanup()
+
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(dir=self.root)
+        self.directory = Path(self.temp.name) / "packet"
+        self.required = {"candidate": {"Dockerfile", "src/contract.php"},
+                         "crm": {"composer.lock"}, "adapter": {"run.sh"}}
+        self.pins_patch = patch.dict(packet.FIXED_PINS, {"crm": self.commit, "adapter": self.commit})
+        self.required_patch = patch.object(packet, "REQUIRED", self.required)
+        self.pins_patch.start()
+        self.required_patch.start()
+        self.addCleanup(self.pins_patch.stop)
+        self.addCleanup(self.required_patch.stop)
+        self.addCleanup(self.temp.cleanup)
+        self.observations = {
+            "schema": packet.OBSERVATIONS_SCHEMA, "run_id": "1", "run_attempt": "1", "source_sha": self.commit,
+            "remote_images": {"n8n": packet.N8N_IMAGE, "n8n_postgres": "postgres@sha256:" + "a" * 64,
+                              "agents_postgres": "postgres@sha256:" + "b" * 64, "nginx": "nginx@sha256:" + "c" * 64},
+            "local_build_images": {"agents_php": "sha256:" + "d" * 64, "crm_php": "sha256:" + "e" * 64},
+            "checks": dict.fromkeys(packet.CHECKS, "PASS"), "p30": copy.deepcopy(packet.P30),
+        }
+
+    def source_for(self, raw, files=None):
+        selected = self.files if files is None else files
+        return {**self.identity, "archive_bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest(),
+                "file_count": len(selected), "source_bytes": sum(len(entry[2]) for entry in selected)}
+
+    def make_packet(self):
+        return packet.write_packet({name: (self.files, self.identity) for name in packet.REPOSITORIES},
+                                   self.observations, self.directory)
+
+    def test_complete_tree_ignores_export_ignore_and_untracked_worktree(self):
+        # An untracked secret and a changed worktree file cannot enter Git blobs.
+        (self.repo / ".env").write_text("SYNTHETIC_UNTRACKED_SECRET_DO_NOT_PACKAGE\n")
+        (self.repo / "src/contract.php").write_text("worktree-only alteration\n")
+        files, identity = packet.git_source(self.repo, self.commit)
+        self.assertEqual(files, self.files)
+        self.assertIn(".github/workflows/example.yml", {entry[0] for entry in files})
+        self.assertNotIn(".env", {entry[0] for entry in files})
+        self.assertEqual(identity["tree"], packet.git(self.repo, "rev-parse", self.commit + "^{tree}").decode().strip())
+
+    def test_deterministic_archives_and_verified_full_packet(self):
+        raw = packet.archive_bytes(self.files)
+        self.assertEqual(raw, packet.archive_bytes(list(reversed(self.files))))
+        packet.inspect_archive(raw, self.source_for(raw), self.required["candidate"])
+        result = self.make_packet()
+        verified = packet.verify_packet(self.directory, self.commit, result["manifest_sha256"])
+        self.assertTrue(verified["git_commit_and_tree_identity_verified"])
+        self.assertFalse(verified["go_for_installation"])
+        self.assertEqual({p.name for p in self.directory.iterdir()}, packet.PACKET_FILES)
+        with self.assertRaises(FileExistsError):
+            self.make_packet()
+
+    def test_tar_mutations_and_incomplete_build_sources_are_denied(self):
+        altered = [(path, mode, data + b"tampered" if path == "src/contract.php" else data)
+                   for path, mode, data in self.files]
+        for files in (altered, self.files + [("extra", "100644", b"x")],
+                      self.files + [self.files[0]], [f for f in self.files if f[0] != "src/contract.php"]):
+            with self.subTest(paths=[f[0] for f in files]):
+                raw = packet.archive_bytes(files)
+                with self.assertRaises(packet.Denied):
+                    packet.inspect_archive(raw, self.source_for(raw, files), self.required["candidate"])
+        for path in ("../escape", "/absolute", "C:/absolute", "a//b", "a\\b", "a/./b", ".git/config", ".env", "key.pem"):
+            with self.subTest(path=path), self.assertRaises(packet.Denied):
+                packet.archive_bytes([(path, "100644", b"x")])
+
+    def test_symlink_duplicate_and_trailer_archives_denied(self):
+        import tarfile
+        output = io.BytesIO()
+        with tarfile.open(fileobj=output, mode="w:gz") as archive:
+            item = tarfile.TarInfo("src/contract.php")
+            item.type, item.linkname = tarfile.SYMTYPE, "/etc/passwd"
+            archive.addfile(item)
+        raw = output.getvalue()
+        with self.assertRaises(packet.Denied):
+            packet.inspect_archive(raw, self.source_for(raw), set())
+
+    def test_gzip_pax_expansion_is_bounded_before_tar_parser(self):
+        import tarfile
+        header = tarfile.TarInfo("pax-header")
+        header.type, header.size = tarfile.XHDTYPE, 65536
+        raw = gzip.compress(header.tobuf() + b"x" * 65536, mtime=0)
+        with patch.object(packet, "MAX_TAR_BYTES", 2048), patch.object(packet.tarfile, "open") as parser:
+            with self.assertRaisesRegex(packet.Denied, "ARCHIVE_DECOMPRESSION_LIMIT"):
+                packet.inspect_archive(raw, self.source_for(raw), set())
+            parser.assert_not_called()
+        raw = b"not a gzip archive"
+        with self.assertRaisesRegex(packet.Denied, "ARCHIVE_ENCODING_DENIED"):
+            packet.inspect_archive(raw, self.source_for(raw), set())
+        raw = bytearray(gzip.compress(b"x" * 1024, mtime=0))
+        raw[10] = 7  # Reserved DEFLATE block type, before any tar header.
+        raw = bytes(raw)
+        with self.assertRaisesRegex(packet.Denied, "ARCHIVE_ENCODING_DENIED"):
+            packet.inspect_archive(raw, self.source_for(raw), set())
+        raw = packet.archive_bytes(self.files) + b"unreviewed trailer"
+        with self.assertRaises(packet.Denied):
+            packet.inspect_archive(raw, self.source_for(raw), set())
+
+    def test_packet_file_tampering_extra_files_and_symlinks_denied(self):
+        self.make_packet()
+        archive = self.directory / "candidate.tar.gz"
+        raw = archive.read_bytes()
+        archive.write_bytes(raw[:-1] + bytes([raw[-1] ^ 1]))
+        with self.assertRaises(packet.Denied):
+            packet.verify_packet(self.directory, self.commit)
+        archive.write_bytes(raw)
+        extra = self.directory / "private.log"
+        extra.write_text("must not enter operator artifact")
+        with self.assertRaises(packet.Denied):
+            packet.verify_packet(self.directory, self.commit)
+        extra.unlink()
+        archive.unlink()
+        archive.symlink_to(self.repo / "composer.lock")
+        with self.assertRaises(packet.Denied):
+            packet.verify_packet(self.directory, self.commit)
+
+    def test_closed_json_schema_and_operational_claims_denied(self):
+        for raw in (b'{"source_sha":"a","source_sha":"b"}', b'{"x":NaN}'):
+            with self.assertRaises(packet.Denied):
+                packet.closed_json(raw)
+        for mutate in (lambda x: x.update(secret="forbidden"),
+                       lambda x: x["checks"].pop("p30_native_operator_mfa"),
+                       lambda x: x["p30"].update(mfa_enforced_instance_wide=True),
+                       lambda x: x["local_build_images"].update(agents_php="docker.io/private:latest"),
+                       lambda x: x["remote_images"].update(n8n_postgres="postgres:17")):
+            changed = copy.deepcopy(self.observations)
+            mutate(changed)
+            with self.assertRaises(packet.Denied):
+                packet.validate_observations(changed)
+
+    def test_independent_commit_and_manifest_pins_deny_rewritten_metadata(self):
+        result = self.make_packet()
+        with self.assertRaises(packet.Denied):
+            packet.verify_packet(self.directory, "f" * 40)
+        path = self.directory / "manifest.json"
+        manifest = json.loads(path.read_bytes())
+        manifest["observations"]["local_build_images"]["agents_php"] = "sha256:" + "f" * 64
+        path.write_bytes(packet.canonical(manifest))
+        files = {name: (self.directory / name).read_bytes() for name in packet.PACKET_FILES - {"SHA256SUMS"}}
+        (self.directory / "SHA256SUMS").write_bytes(packet.checksum_bytes(files))
+        # Hashes inside an untrusted packet cannot authenticate CI observations.
+        with self.assertRaises(packet.Denied):
+            packet.verify_packet(self.directory, self.commit, result["manifest_sha256"])
+
+    def test_commit_tree_counts_and_approval_mutations_denied(self):
+        self.make_packet()
+        original = json.loads((self.directory / "manifest.json").read_bytes())
+        for mutate in (
+            lambda x: x["sources"]["candidate"].update(tree="a" * 40),
+            lambda x: x["sources"]["candidate"].update(commit_object_b64=base64.b64encode(b"forged commit").decode()),
+            lambda x: x["sources"]["candidate"].update(file_count=packet.MAX_FILES + 1),
+            lambda x: x["sources"]["candidate"].update(source_bytes=packet.MAX_SOURCE_BYTES + 1),
+            lambda x: x["sources"]["candidate"].update(archive="../candidate.tar.gz"),
+            lambda x: x["boundaries"].update(go_for_installation=True),
+            lambda x: x["boundaries"].update(ci_observations_authenticated_offline=True),
+        ):
+            changed = copy.deepcopy(original)
+            mutate(changed)
+            with self.assertRaises(packet.Denied):
+                packet.manifest_checks(changed, self.commit)
+
+    def test_create_cannot_run_outside_hosted_ci(self):
+        stderr = io.StringIO()
+        with patch.dict("os.environ", {}, clear=True), contextlib.redirect_stderr(stderr):
+            result = packet.main(["create", "--candidate-repo", str(self.repo), "--crm-repo", str(self.repo),
+                                  "--observations", "/unavailable-observations", "--output-dir", str(self.directory)])
+        self.assertEqual(result, 2)
+        self.assertFalse(self.directory.exists())
+        self.assertNotIn("unavailable-observations", stderr.getvalue())
+
+
+if __name__ == "__main__":
+    unittest.main()
