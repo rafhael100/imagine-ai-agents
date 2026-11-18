@@ -24,5 +24,6 @@ jobs:
         run: python3 -m unittest discover -s infra/n8n-private/homologation -p test_staging_config.py -v
       - name: Rehearse boot and recovery on this disposable Docker daemon
         run: |
+          bash -n infra/n8n-private/homologation/resume_staging.sh
           bash -n infra/n8n-private/homologation/rehearse_staging_boot.sh
           bash infra/n8n-private/homologation/rehearse_staging_boot.sh --disposable-docker
