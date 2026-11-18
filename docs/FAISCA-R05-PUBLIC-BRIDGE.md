@@ -149,3 +149,20 @@ EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=131 EXPECTED_CASES=879 bash to
 O inventário da candidata contém 131 PHP em `src`, `tests/Unit` e `examples`: 129 da P67 e dois novos. Os testes R05 ficam separados dos 879 casos legados. O gate R01 e o scanner permanecem intactos. A CI deve exigir PHP real e registrar o resultado na SHA exata; ausência do interpretador não conta como teste aprovado. Resultados executados e links da CI pertencem à PR correspondente.
 
 Não é necessário chamar runners PostgreSQL, Central, n8n, composição entre branches ou scripts de migração. A ponte usa apenas CPU e memória locais, sem banco, credenciais, serviços externos ou instalação operacional.
+
+## Regressão herdada de carregamento e correção
+
+A primeira candidata R05, SHA `babada9bb388fcea896da9c43dad1fac118432cd` da PR #478, executou os 256 checks da ponte, incluindo 29 subprocessos PHP reais. O gate completo parou depois no scanner de isolamento: uma ocorrência de `dynamic_php_execution` entre 79 arquivos de `src`.
+
+A causa era o `require_once` de `DeterministicAutomationService.php` dentro de `src/Automation/DeterministicRuleEngine.php`, já presente na base P67 `0c722eee6bd53a7ee46c4ba68ab70200fc191b78`. O scanner recusa imports executáveis em `src`; as chamadas nullsafe da ponte não originam essa categoria. Não houve mudança no scanner, nas categorias de recusa ou no gate.
+
+A correção move somente o carregamento da dependência para os quatro consumidores explícitos do engine em `tools`: `check_p49_deterministic_rules.php`, `preview_noai_automation.php`, `labs/PgDeterministicDraftRegistryLab.php` e `labs/PgVerifiableProposalDetailLab.php`. Os consumidores indiretos P63/P64 continuam entrando pelos mesmos loaders. As classes de domínio, o cálculo, os contratos, as permissões e as operações PostgreSQL permanecem iguais; nenhum I/O foi acrescentado em `src`.
+
+Além de repetir o scanner e o gate completo na SHA corrigida, a CI exige as verificações originais dos consumidores afetados:
+
+```bash
+php tools/check_p49_deterministic_rules.php
+python3 tools/check_p50_offline_cli.py
+```
+
+Os totais esperados são 2.530 checks P49 (incluindo 2.500 casos determinísticos de fuzz) e 19 checks P50 com processos PHP reais. Os resultados efetivos da SHA corrigida devem ser registrados na PR; a primeira passagem da ponte não aprova o gate completo.

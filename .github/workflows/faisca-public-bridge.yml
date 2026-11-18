@@ -41,6 +41,11 @@ jobs:
           php -l tools/faisca_public_bridge.php
           php -l tools/check_faisca_public_bridge.php
           php tools/check_faisca_public_bridge.php
+      - name: Verificar carregamento explícito do motor determinístico existente
+        run: |
+          set -euo pipefail
+          php tools/check_p49_deterministic_rules.php
+          python3 tools/check_p50_offline_cli.py
       - name: Executar o gate offline existente sem ampliar permissões
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}

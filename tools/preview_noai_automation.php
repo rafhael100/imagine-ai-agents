@@ -8,6 +8,7 @@ declare(strict_types=1);
  * IAM, S2S authorization, workflow deploy or n8n connector. No provider,
  * filesystem storage, network, persistence, side effects or paid API.
  */
+require_once __DIR__.'/../src/Automation/DeterministicAutomationService.php';
 require_once __DIR__.'/../src/Automation/DeterministicRuleEngine.php';
 
 use ImagineAI\Automation\DeterministicRuleEngine;
