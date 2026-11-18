@@ -35,6 +35,14 @@ def verify(config):
         for key, vol in config["volumes"].items()
     ):
         raise ValueError("volume is not staging-owned")
+    if any(service.get("restart") != "no" for service in services.values()):
+        raise ValueError("independent container auto-start would bypass ordering")
+    if services["n8n-db"]["healthcheck"]["test"] != [
+        "CMD", "pg_isready", "-h", "127.0.0.1", "-U", "n8n_bootstrap_admin", "-d", "n8n"
+    ]:
+        raise ValueError("postgres healthcheck must wait for TCP after initdb")
+    if services["n8n"]["depends_on"]["n8n-db"]["condition"] != "service_healthy":
+        raise ValueError("n8n must wait for PostgreSQL readiness")
     env = services["n8n"]["environment"]
     for key, value in {
         "N8N_LOG_LEVEL": "warn",

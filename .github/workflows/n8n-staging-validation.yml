@@ -1,0 +1,28 @@
+name: n8n staging validation
+
+on:
+  pull_request:
+    paths:
+      - 'infra/n8n-private/**'
+      - '.github/workflows/n8n-staging-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  staging:
+    name: Compose safety and synthetic recovery
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Render Compose, run existing checkers and exercise negative cases
+        run: python3 -m unittest discover -s infra/n8n-private/homologation -p test_staging_config.py -v
+      - name: Rehearse boot and recovery on this disposable Docker daemon
+        run: |
+          bash -n infra/n8n-private/homologation/rehearse_staging_boot.sh
+          bash infra/n8n-private/homologation/rehearse_staging_boot.sh --disposable-docker

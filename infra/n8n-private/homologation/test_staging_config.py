@@ -54,3 +54,23 @@ class StagingConfigTest(unittest.TestCase):
         config["services"]["n8n"]["environment"]["EXECUTIONS_DATA_SAVE_ON_ERROR"] = "all"
         with self.assertRaises(ValueError):
             verify(config)
+
+
+    def test_boot_requires_postgresql_readiness(self):
+        config = copy.deepcopy(self.config)
+        config["services"]["n8n"]["depends_on"]["n8n-db"]["condition"] = "service_started"
+        with self.assertRaises(ValueError):
+            verify(config)
+
+    def test_independent_restart_policy_is_rejected(self):
+        config = copy.deepcopy(self.config)
+        config["services"]["n8n"]["restart"] = "always"
+        with self.assertRaises(ValueError):
+            verify(config)
+
+    def test_initdb_socket_is_not_valid_readiness(self):
+        config = copy.deepcopy(self.config)
+        test = config["services"]["n8n-db"]["healthcheck"]["test"]
+        del test[2:4]
+        with self.assertRaises(ValueError):
+            verify(config)

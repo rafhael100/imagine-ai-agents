@@ -12,6 +12,9 @@ services:
       EXECUTIONS_DATA_SAVE_ON_PROGRESS: "false"
       EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS: "false"
   n8n-db:
+    healthcheck:
+      # The initdb server listens only on its Unix socket.
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "n8n_bootstrap_admin", "-d", "n8n"]
     logging:
       driver: local
       options:
