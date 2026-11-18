@@ -159,13 +159,13 @@ printf 'CRM_LEAD_CAPTURE_SOURCE central=%s agents=%s tree=%s\n' "$central_sha" "
   python3 tools/check_p50_offline_cli.py
   php tools/check_p53_review_queue_view.php
   php tools/check_p60_signed_review_queue.php
+  # Reuse P27/P29 against the new receiver, then exercise immutable capture
+  # and a separate PostgreSQL restore. Receipt and processing remain distinct.
+  python3 infra/n8n-private/homologation/check_crm_lead_capture.py
   # Run n8n and actual Agents state recovery through one signed package.
   python3 infra/n8n-private/homologation/check_p25_agents_state_restore.py
   # P28 runs P26 once, then restores that actual state without new execution.
   python3 infra/n8n-private/homologation/check_p28_candidate_state_restore.py
-  # Reuse P27/P29 against the new receiver, then exercise immutable capture
-  # and a separate PostgreSQL restore. Receipt and processing remain distinct.
-  python3 infra/n8n-private/homologation/check_crm_lead_capture.py
 )
 
 cat <<'REPORT'

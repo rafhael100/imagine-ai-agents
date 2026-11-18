@@ -274,7 +274,15 @@ def restore_capture(lab: CaptureLab) -> dict:
              "UPDATE auto_ia_lab.receipt_read_grants SET active=false,revision=revision+1;")
     require(lab.rows("dst") == rows and lab.counts("dst") == counts,
             "CAPTURE_RESTORED_BYTES_OR_ROWS_DIFFER")
-    require(capture_metadata(lab, "dst") == metadata, "CAPTURE_RESTORED_METADATA_DIFFER")
+    restored_metadata = capture_metadata(lab, "dst")
+    if restored_metadata != metadata:
+        # Report only schema metadata, never the captured event or secret keys.
+        # Keep the comparison strict so a restore discrepancy is investigated.
+        differences = {key: {"source": metadata[key], "restored": restored_metadata.get(key)}
+                       for key in metadata if metadata[key] != restored_metadata.get(key)}
+        print("CAPTURE_RESTORE_METADATA_DIFFERENCES " + json.dumps(differences, sort_keys=True),
+              flush=True)
+    require(restored_metadata == metadata, "CAPTURE_RESTORED_METADATA_DIFFER")
     permissions(lab, "dst"); immutable_checks(lab, "dst")
     require(lab._sql("dst", "SELECT count(*) FROM pg_roles WHERE rolname IN (" +
                     ",".join(literal(role) for role in ROLES) +
