@@ -1,0 +1,49 @@
+name: Faísca R05 - PHP public conversation bridge
+
+on:
+  pull_request:
+    paths:
+      - 'src/Integration/Faisca/**'
+      - 'contracts/faisca/**'
+      - 'tools/faisca_public_bridge.php'
+      - 'tools/check_faisca_public_bridge.php'
+      - '.github/workflows/faisca-public-bridge.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: faisca-php-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  synthetic-php-bridge:
+    name: PHP real, contrato Faísca e regressões offline
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout da SHA exata para revisão
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Configurar Node para as regressões DOM existentes
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22'
+      - name: Exigir PHP real e validar o novo transporte
+        run: |
+          set -euo pipefail
+          php -v
+          php -l src/Integration/Faisca/PublicConversationBridge.php
+          php -l src/Integration/Faisca/DenyOnlyEffectGateway.php
+          php -l tools/faisca_public_bridge.php
+          php -l tools/check_faisca_public_bridge.php
+          php tools/check_faisca_public_bridge.php
+      - name: Executar o gate offline existente sem ampliar permissões
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_PHP: '131'
+          EXPECTED_CASES: '879'
+        run: bash tools/run_r01_offline_quality_gate.sh
