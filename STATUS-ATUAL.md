@@ -4,9 +4,13 @@
 
 ## Estado executivo
 
-A candidata atual deste checkout é `feat/aia-faisca-r05-public-bridge-2026-11-18`, filha da P67 `0c722eee6bd53a7ee46c4ba68ab70200fc191b78`. O recorte Faísca R05 liga processos Node e PHP com provedor sintético, sem habilitar modelo externo ou efeitos CRM. O inventário revisto para o gate desta candidata é **131 arquivos PHP e 879 casos legados**, com verificação R05 adicional por processos PHP reais. Resultados de execução pertencem à SHA registrada na PR; desenvolvimento concluído não significa CI já executada.
+A candidata atual deste checkout é `feat/aia-faisca-r06-grounded-knowledge-2026-11-18`, filha da R05 `59d0bae5340c23b37ea1e693e3a1f3915de3c075`. A R06 vincula respostas editoriais a trechos públicos exatos e compõe a ponte sintética R05. O inventário revisto é **133 arquivos PHP e 879 casos legados**, com verificações R05/R06 adicionais por processos PHP reais. Resultados de execução pertencem à SHA registrada na PR; desenvolvimento concluído não significa CI já executada.
 
 O índice histórico da linha `dev/ft01-aia-core-mocks-2026-11-06` continua abaixo: **879 testes PHP / lint 110 + Python/DOM** identifica aquele baseline integrado, não o inventário desta candidata. As provas sintéticas e a homologação isolada não concedem GO operacional.
+
+## Faísca R06 — respostas vinculadas a trechos comerciais — 18/11/2026
+
+Catálogo normativo com 21 passagens UTF-8, procedência e 11 receitas. O PHP resolve seus próprios trechos, recompõe o candidato inteiro, confere o digest e revalida seleção, prazo, revogação e fonte na entrega. As passagens são `UNTRUSTED_DATA`; não concedem autoridade nem seguem como instruções ao provider. A camada própria admite até 3 passagens/1.200 bytes, sem ampliar os mocks R05 de 240/600 bytes. O recibo sintético legado e as citações comerciais têm evidências distintas. CLI separado exige duas flags; provas incluem troca de assunto com digest válido, prosa arbitrária re-hasheada e falhas reais de subprocesso. [Contrato e reprodução](docs/FAISCA-R06-GROUNDED-KNOWLEDGE.md). PHP local ausente: execução real obrigatória na CI da SHA. **DRAFT / NO-GO; sem modelo externo, cliente real, custo, merge ou deploy.**
 
 ## Faísca R05 — ponte pública sintética entre processos — 18/11/2026
 
@@ -65,16 +69,19 @@ Estas métricas e CIs são marcos datados, preservados para rastreabilidade. O e
 
 SEC-20 a SEC-38 consolidaram projeção, objetos canônicos, limites de domínio/uso/catálogos, evidências monotônicas, parser e concessões limitadas. Todas as descrições, PRs, CIs e referências originais estão no [status integral anterior à R05](docs/historico/STATUS-ATUAL-ANTES-FAISCA-R05-2026-11-18.md). F1-30 / SEC-16..19 (PRs #173, #174, #175, #177, #178) e EVID-16 (PR #179) permanecem no [arquivo integral de 10/11/2026](docs/historico/STATUS-ATUAL-ANTES-CONSOLIDACAO-2026-11-10.md).
 
-## Reproduzir o recorte R05 em checkout revisado
+## Reproduzir os recortes R05/R06 em checkout revisado
 
 ```bash
 php -l tools/faisca_public_bridge.php
 php -l tools/check_faisca_public_bridge.php
 php tools/check_faisca_public_bridge.php
-EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=131 EXPECTED_CASES=879 bash tools/run_r01_offline_quality_gate.sh
+php -l tools/faisca_grounded_bridge.php
+php -l tools/check_faisca_grounded_bridge.php
+php tools/check_faisca_grounded_bridge.php
+EXPECTED_SHA="$(git rev-parse HEAD)" EXPECTED_PHP=133 EXPECTED_CASES=879 bash tools/run_r01_offline_quality_gate.sh
 ```
 
-PHP e Python são obrigatórios. A verificação R05 executa processos PHP reais e não admite substituto ou skip. O gate legado permanece inalterado; os dois novos PHP em `src/Integration/Faisca` elevam o inventário revisado de 129 para 131. CI aprovada comprova apenas o recorte da SHA testada e não abre gates operacionais. O [contrato R05](docs/FAISCA-R05-PUBLIC-BRIDGE.md) detalha os comandos e os limites.
+PHP e Python são obrigatórios. As verificações R05/R06 executam processos PHP reais e não admitem substituto ou skip. O gate legado permanece inalterado; a R06 acrescenta dois PHP ao inventário de 131 da R05. CI aprovada comprova apenas o recorte da SHA testada e não abre gates operacionais. Os contratos [R05](docs/FAISCA-R05-PUBLIC-BRIDGE.md) e [R06](docs/FAISCA-R06-GROUNDED-KNOWLEDGE.md) detalham comandos e limites.
 
 ## Gates e pacote histórico CRM ↔ Agents
 
