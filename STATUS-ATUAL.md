@@ -122,3 +122,36 @@ O [CRM PR #57](https://github.com/rafhael100/imagine-crm/pull/57) permanece **OP
 - [Roadmap histórico integral](docs/historico/ROADMAP-ANTES-CONSOLIDACAO-2026-11-10.md) — evolução e ideias anteriores.
 
 **Restrições mantidas:** nenhuma modificação em `main`, VPS ou produção, sem dados de cliente, segredos, chamadas pagas ou novos contratos. A continuidade permitida é revisão e desenvolvimento controlado em `dev`, não autorização de ativação comercial.
+
+
+## Continuidade funcional Agents P62–P64 — 18/11/2026 UTC
+
+A linha Agents mantém uma composição temporária e verificada com a Central
+P30 `c08688b16e61d8d1ecc4d8c0ed4da8758a687ee8`, sem merge entre as linhas.
+A [P30 #464](https://github.com/rafhael100/imagine-ai-agents/pull/464) passou
+na [CI 44203383716](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44203383716).
+
+- **P62 #465:** a fila consulta propostas, autoria, pareceres atuais e histórico
+  no mesmo snapshot de leitura, com estados reais persistidos no laboratório.
+  HEAD `bb1a0e5a348ec68fde6a249f4e081750bc73aeca`,
+  [RC73 aprovada](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44203592593).
+- **P63 #466:** os lotes novos preservam os insumos canônicos; a página reproduz
+  a condição pelo motor original e confere o lote inteiro. Legado sem insumos
+  é declarado indisponível. HEAD `6b65a109799df5f34e6431474ba8f3e58cb0fccc`,
+  [RC74 aprovada](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44205251055).
+- **P64 / RC75 candidata:** formulário local com prévia numérica, confirmação
+  vinculada à sessão e gravação atômica de lote, rascunhos e autoria sintética.
+  Writer por empresa limitado às três tabelas; fila/detalhe em processo de
+  leitura separado. Replay não duplica nem repara autoria ausente. A matriz
+  RC75 deve confirmar a HEAD concreta antes de registrar aprovação.
+
+A jornada é entrada → prévia → guardar rascunhos → fila → detalhe verificável.
+Pareceres continuam observações: `can_approve=false`, `can_execute=false`.
+Primeiro avanço real previsto: OP-01 de leitura em homologação, condicionado
+à autoridade e ao contrato de identidade/empresa/permissão do produto dono.
+Identidade humana, alçadas, efeitos CRM, licença/política MFA obrigatória,
+backup externo e instalação não são concedidos pelas provas sintéticas.
+
+Contrato da nova jornada:
+[LOCAL-AUTHORED-DRAFT-JOURNEY](docs/reviews/AIA-P64-LOCAL-AUTHORED-DRAFT-JOURNEY.md).
+**DRAFT / NO-GO operacional; main e ambientes operacionais sem alteração.**
