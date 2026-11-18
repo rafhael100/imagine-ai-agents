@@ -21,8 +21,9 @@ import tarfile
 
 ROOT = Path(__file__).resolve().parents[1]
 REPOSITORY = "rafhael100/imagine-ai-agents"
-BRANCH = "refs/heads/integrate/n8n-owner-provider-components-2026-11-18"
+BRANCH = "refs/heads/integrate/n8n-owner-components-crm-664-2026-11-18"
 PARENT = "64f52f0dcd44a5545d1bfc6c1d685b33c158601f"
+INTEGRATED_PARENT = "ce004ad4a8fa5fb59ef38cdd250126d0f0e99b46"
 P67 = "0c722eee6bd53a7ee46c4ba68ab70200fc191b78"
 P68 = "85f4c37a6d905b91923d3e31ba9068b2c35d7657"
 MAX_ARCHIVE = 128 * 1024 * 1024
@@ -184,6 +185,12 @@ def verify_archive(directory, archive):
          "ARCHIVE_EXACT_INVENTORY")
 
 
+def verify_candidate_lineage(checkout, sha):
+    # PARENT remains the reviewed source of the nine unchanged dependencies.
+    git(checkout, "merge-base", "--is-ancestor", PARENT, sha)
+    git(checkout, "merge-base", "--is-ancestor", INTEGRATED_PARENT, sha)
+
+
 def admit_sources():
     event_path = Path(os.environ.get("GITHUB_EVENT_PATH", ""))
     need(event_path.is_file() and not event_path.is_symlink()
@@ -201,7 +208,7 @@ def admit_sources():
          and git(checkout, "rev-parse", "--is-shallow-repository").strip() == b"false", "ACTUAL_HEAD")
     git(checkout, "diff", "--quiet")
     git(checkout, "diff", "--cached", "--quiet")
-    git(checkout, "merge-base", "--is-ancestor", PARENT, sha)
+    verify_candidate_lineage(checkout, sha)
     tree = git(checkout, "rev-parse", "HEAD^{tree}").decode().strip()
     need(re.fullmatch(r"[a-f0-9]{40}", tree)
          and tree == os.environ.get("AIA_OWNER_COMPONENTS_TREE"), "ACTUAL_TREE")

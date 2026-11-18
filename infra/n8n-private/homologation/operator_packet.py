@@ -26,8 +26,9 @@ SCHEMA = "N8N_PRIVATE_OPERATOR_PACKET_V2"
 OBSERVATIONS_SCHEMA = "N8N_PRIVATE_CANDIDATE_OBSERVATIONS_V2"
 AGENTS_REPOSITORY = "rafhael100/imagine-ai-agents"
 REPOSITORIES = {"candidate": AGENTS_REPOSITORY, "crm": "rafhael100/imagine-crm", "adapter": AGENTS_REPOSITORY}
-FIXED_PINS = {"crm": "96dbf1aed2d1cf3237bc3631c4594540a0168d2a", "adapter": "8b04d0e936168c77db028160b5aeb1758db497c4"}
+FIXED_PINS = {"crm": "7e1b00a0c173bcfcac3a9051ef6cad3aededcdb8", "adapter": "8b04d0e936168c77db028160b5aeb1758db497c4"}
 LINEAGE = {
+    "candidate_482": "ce004ad4a8fa5fb59ef38cdd250126d0f0e99b46",
     "candidate_481": "64f52f0dcd44a5545d1bfc6c1d685b33c158601f",
     "candidate_479": "3d30b2f7977b37d3bb86d6ff11bc63728145f5fd",
     "central_475": "dfa4685cd5df4a9499c3420f580980e769a1981d",
@@ -226,7 +227,27 @@ REQUIRED = {
             "infra/homologation/s2s/execution-monitor-candidate.sql",
             "resources/views/partials/crm-execution-monitor.blade.php",
             "scripts/ops/private_crm_backup_contract.py", "scripts/ops/private_crm_backup_catalog.py",
-            "scripts/ops/private_crm_backup_snapshot.py"},
+            "scripts/ops/private_crm_backup_snapshot.py",
+            "infra/homologation/schema.sql",
+            "infra/homologation/20-runtime-roles.sh",
+            "infra/homologation/s2s/install-candidate.sql",
+            "infra/homologation/s2s/outbound-candidate.sql",
+            "infra/homologation/s2s/owner-drafts.sql",
+            "infra/homologation/migrations/001_automation_ledger_candidate.sql",
+            "scripts/ops/private_crm_owner_drafts_ci.py",
+            "scripts/ops/private_crm_owner_monitor_migration.py",
+            "scripts/ops/test-private-crm-owner-monitor-migration.py",
+            "scripts/ops/private_crm_base_monitor_migration.py",
+            "scripts/ops/test-private-crm-base-monitor-migration.py",
+            "tests/owner_draft_ci_admission_test.py",
+            "tests/base_monitor_migration_contract_test.py",
+            "scripts/ci/test_automation_incremental_drift.py",
+            "scripts/ci/check_automation_incremental.sql",
+            ".github/workflows/ci-crm-owner-agents-drafts.yml",
+            ".github/workflows/central-auto-incremental-migration.yml",
+            "docs/automation/CRM-AUTOMATION-MIGRATION-DRIFT.md",
+            "docs/desenvolvimento/CRM-OWNER-MONITOR-INCREMENTAL-MIGRATION-2026-11-18.md",
+            "docs/desenvolvimento/CRM-BASE-MONITOR-INCREMENTAL-MIGRATION-2026-11-18.md"},
     "adapter": {"tools/auto_ia/convergence/MockP7ToAutoIaAdapter.php", "tools/auto_ia/pg/003_signed_ingress_lab.sql"},
 }
 REQUIRED["candidate"].update(path for component in IMPORTED_COMPONENTS.values() for path in component["files"])
@@ -583,7 +604,7 @@ def create_packet(candidate_repo, crm_repo, observations_path, output):
          and os.environ.get("P24_RUNNER_ENVIRONMENT") == "github-hosted"
          and os.environ.get("N8N_CANDIDATE_REPOSITORY_PRIVATE") == "false"
          and os.environ.get("GITHUB_EVENT_NAME") == "push"
-         and os.environ.get("GITHUB_REF") == "refs/heads/integrate/n8n-owner-provider-components-2026-11-18", "CREATE_HOSTED_CI_ONLY")
+         and os.environ.get("GITHUB_REF") == "refs/heads/integrate/n8n-owner-components-crm-664-2026-11-18", "CREATE_HOSTED_CI_ONLY")
     observations = closed_json(regular_bytes(observations_path, 32768))
     validate_observations(observations)
     for field, env in (("source_sha", "GITHUB_SHA"), ("run_id", "GITHUB_RUN_ID"), ("run_attempt", "GITHUB_RUN_ATTEMPT")):

@@ -2,7 +2,7 @@ name: Private n8n and owner provider components candidate
 on:
   push:
     branches:
-      - integrate/n8n-owner-provider-components-2026-11-18
+      - integrate/n8n-owner-components-crm-664-2026-11-18
 permissions:
   contents: read
 concurrency:
@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: rafhael100/imagine-crm
-          ref: 96dbf1aed2d1cf3237bc3631c4594540a0168d2a
+          ref: 7e1b00a0c173bcfcac3a9051ef6cad3aededcdb8
           fetch-depth: 0
           path: _crm_feedback_pinned
           persist-credentials: false

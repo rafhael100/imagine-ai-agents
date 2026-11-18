@@ -56,6 +56,37 @@ class OwnerComponentAdmissionTests(unittest.TestCase):
                 mutate(changed)
                 with self.assertRaises(driver.Denied):
                     driver.validate_event(environment, changed)
+            previous_branch = "refs/heads/integrate/n8n-owner-provider-components-2026-11-18"
+            previous_environment = {**environment, "GITHUB_REF": previous_branch}
+            previous_event = {**event, "ref": previous_branch}
+            with self.assertRaisesRegex(driver.Denied, "REAL_HOSTED_PUSH_REQUIRED"):
+                driver.validate_event(previous_environment, previous_event)
+
+    def test_native_ancestor_without_integrated_provider_ancestor_is_denied(self):
+        # Genuine Git ancestry with synthetic commits; no hosted identity or
+        # Docker admission is fabricated to exercise this source boundary.
+        with tempfile.TemporaryDirectory() as temporary:
+            repo = Path(temporary)
+            def fixture_git(*arguments):
+                return subprocess.run(["git", "-C", str(repo), *arguments], check=True,
+                                      capture_output=True).stdout.decode().strip()
+            fixture_git("init", "-q")
+            fixture_git("config", "user.name", "Synthetic Fixture")
+            fixture_git("config", "user.email", "fixture@example.invalid")
+            fixture_git("commit", "--allow-empty", "-q", "-m", "Native source fixture")
+            native = fixture_git("rev-parse", "HEAD")
+            fixture_git("commit", "--allow-empty", "-q", "-m", "Integrated providers fixture")
+            integrated = fixture_git("rev-parse", "HEAD")
+            fixture_git("commit", "--allow-empty", "-q", "-m", "Candidate descendant fixture")
+            candidate = fixture_git("rev-parse", "HEAD")
+            fixture_git("checkout", "-q", "--detach", native)
+            fixture_git("commit", "--allow-empty", "-q", "-m", "Native-only sibling fixture")
+            native_only = fixture_git("rev-parse", "HEAD")
+            with patch.object(driver, "PARENT", native), patch.object(driver, "INTEGRATED_PARENT", integrated):
+                driver.verify_candidate_lineage(repo, candidate)
+                driver.git(repo, "merge-base", "--is-ancestor", native, native_only)
+                with self.assertRaisesRegex(driver.Denied, "COMMAND_DENIED"):
+                    driver.verify_candidate_lineage(repo, native_only)
 
     def test_duplicate_event_names_are_denied(self):
         with self.assertRaisesRegex(driver.Denied, "DUPLICATE_JSON_KEY"):

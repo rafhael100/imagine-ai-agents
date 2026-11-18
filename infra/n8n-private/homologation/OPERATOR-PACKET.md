@@ -2,55 +2,86 @@
 
 **Candidata DRAFT.** Conferir a evidência desta HEAD e seu artefato no workflow
 `n8n-private-candidate.yml`, da branch
-`integrate/n8n-owner-provider-components-2026-11-18`. Esta filha da #481
-acrescenta os componentes selecionados dos providers owner P67/P68 ao contexto
-de fontes do provider nativo. A evidência anterior não aprova antecipadamente
-a nova HEAD. O pacote oferece fontes para build e revisão desses providers;
-não declara consolidado todo o produto Agents. Não é instalador, Compose
-operacional completo, backup ou autorização de acesso.
+`integrate/n8n-owner-components-crm-664-2026-11-18`. Esta filha da #482
+atualiza as fontes CRM do pacote para a #664. Conserva os dois providers,
+os 14 imports owner e os 22 grupos de provas Agents da base; não acrescenta
+execução de migrations CRM a esses grupos. A evidência anterior não aprova
+antecipadamente a nova HEAD. O pacote oferece fontes para build e revisão
+dos providers selecionados; não declara consolidado todo o produto Agents.
+Não é instalador, Compose operacional completo, backup ou autorização de acesso.
 
 ## Componentes owner e linhagem
 
-A base imediata é a [#481](https://github.com/rafhael100/imagine-ai-agents/pull/481)
-em `64f52f0dcd44a5545d1bfc6c1d685b33c158601f`, cuja
-[CI 44247275249](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44247275249)
-passou em attempt 1. Os nove arquivos do runtime owner, checker/probe P67 e
-checker/probe/runner P68 são imports seletivos. Doze permanecem literais;
-nos dois checkers somente a API de cenário foi extraída, conservando os
-entrypoints e guards históricos. A nova admissão usa a identidade real da
-candidata antes de chamar essas APIs.
+A base imediata é a [#482](https://github.com/rafhael100/imagine-ai-agents/pull/482)
+em `ce004ad4a8fa5fb59ef38cdd250126d0f0e99b46`, cuja
+[CI 44251661738](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44251661738)
+passou em attempt 1 com 22 grupos e verificação do pacote. A composição dessa
+base preserva #481 e #479 e os componentes selecionados P67/P68. Os nove
+arquivos do runtime owner, checker/probe P67 e checker/probe/runner P68
+continuam imports seletivos. Doze permanecem literais; nos dois checkers
+somente a API de cenário foi extraída, conservando os entrypoints e guards
+históricos. A admissão integrada usa a identidade real da nova candidata.
 
-`lineage` contém os ancestrais exigidos da candidata, incluindo #481 e #479.
-`imported_components` registra as origens P67/P68 por commit, caminho, modo,
-blob original, blob candidato e adaptação. Essa segunda relação **não é uma
-declaração de ancestralidade nem de merge da branch P68**. O pacote não
-incorpora os incrementos P62–P66. O
-[contrato dos componentes](../../../docs/reviews/N8N-OWNER-COMPONENTS-CANDIDATE.md)
-enumera os arquivos e a diferença P27 já sobrescrita pelo laboratório owner.
+`lineage` contém os ancestrais exigidos, incluindo #482, #481 e #479.
+`imported_components` registra as origens P67/P68 por commit, caminho,
+modo, blob original, blob candidato e adaptação. Essa segunda relação
+**não é uma declaração de ancestralidade nem de merge da branch P68**.
+O pacote não incorpora os incrementos P62–P66. O
+[contrato histórico dos componentes](../../../docs/reviews/N8N-OWNER-COMPONENTS-CANDIDATE.md)
+permanece preservado e enumera os arquivos e a diferença P27 já sobrescrita
+pelo laboratório owner. A admissão continua vinculando suas nove dependências
+à #481, além de exigir a ancestralidade real da #482 nesta branch.
 
-A criação exige os 19 grupos anteriores e mais três: admissão integrada,
-P67 e P68. São **22 grupos executados mais o registro inicial de integridade**.
-P67/P68 compartilham uma imagem PHP owner observada, em subprocessos próprios;
-o provider nativo e o CRM conservam seus builds e perfis distintos. Não se
-exige imagem ou banco comum entre a prova owner e a prova de feedback nativo.
-O pacote registra os três IDs locais sem atribuir a eles publicação em registry.
+A criação conserva os 19 grupos anteriores à #482 e os três grupos owner:
+admissão integrada, P67 e P68. São **22 grupos executados mais o registro
+inicial de integridade**. P67/P68 compartilham uma imagem PHP owner observada,
+em subprocessos próprios; o provider nativo e o CRM conservam seus builds e
+perfis distintos. Não se exige imagem ou banco comum entre a prova owner e
+a prova de feedback nativo. O pacote registra os três IDs locais sem atribuir
+a eles publicação em registry.
 
-## Integração com o CRM #660
+## Fontes CRM #664 e provas próprias do CRM
 
-A base #481 preservou a fonte [#479](https://github.com/rafhael100/imagine-ai-agents/pull/479)
-em `3d30b2f7977b37d3bb86d6ff11bc63728145f5fd` e atualizou o pin do CRM
-para `96dbf1aed2d1cf3237bc3631c4594540a0168d2a`. A CI #479 pertence ao CRM #654;
-ela não comprova a integração com #660; essa prova pertence à CI #481.
-O contrato de backup atual exige o catálogo completo e seus módulos irmãos.
-O checker usa os três módulos canônicos
-da mesma fonte e um snapshot exportado para segurança, catálogo, dados e dump.
+O pin atual é [CRM #664](https://github.com/rafhael100/imagine-crm/pull/664),
+commit `7e1b00a0c173bcfcac3a9051ef6cad3aededcdb8`,
+árvore `1ca57c0fa3197e83a36d9c6024bf13e77f10ad23`. O TAR do CRM
+contém essa árvore completa. A lista obrigatória do verificador passa de
+12 para 32 caminhos: acrescenta as fontes da migration001 corrigida, os dois
+migradores incrementais, seus ensaios, guard e testes, workflows, inputs
+pinados e documentos correspondentes. A ausência de qualquer fonte adicional
+é recusada na criação e na inspeção offline, mesmo com hashes e identidade
+Git da fixture coerentes.
 
-[Escopo, exceção revisada de blob e critérios de validação](CRM-660-CANDIDATE.md).
-O perfil nativo permanece com **33 tabelas**; a jornada owner e a recuperação
-combinada de 35 tabelas têm provas próprias no CRM #660. Os arquivos owner
-fazem parte do arquivo público do CRM, mas as rotas e tabelas owner do CRM
-não são instaladas pelo ensaio nativo de feedback. O pacote não atribui essas
-provas ao n8n.
+O perfil executado pelo provider nativo permanece com **33 tabelas** e usa os
+três módulos canônicos de backup da mesma fonte, com snapshot exportado para
+segurança, catálogo, dados e dump. As rotas e tabelas owner do CRM não são
+instaladas por esse ensaio. Os 81 vínculos históricos e os três bindings
+próprios do checker/compatibilidade permanecem; a atualização do pin não
+amplia o contrato executado nos Agents.
+
+A [CI própria do CRM #664, run 44262660735, attempt 1](https://github.com/rafhael100/imagine-crm/actions/runs/44262660735)
+concluiu com sucesso. No
+[job owner 134659509281](https://github.com/rafhael100/imagine-crm/actions/runs/44262660735/job/134659509281),
+o ensaio base25→monitor33 registrou 917 chamadas de verificação, com primeira
+aplicação, reaplicação povoada, três recusas e bloqueio real de criação de
+papel seguido de `55P03` e rollback. O ensaio separado monitor33→owner35
+registrou 997 chamadas de verificação, incluindo seus próprios cenários e
+limpeza. Essas contagens incluem preparação e polling; não são números de
+cenários independentes e não devem ser somadas aos 22 grupos dos Agents.
+
+A base25 desse ensaio é `schema.sql` de `96db` mais o script de papéis e já
+contém o ledger. Não se afirma que a migration001 sobre o schema histórico
+`cc173` produz a mesma origem, nem que as duas etapas incrementais foram
+uma execução única 25→35. A prova de ledger e as provas de migrations pertencem
+à CI do CRM. Sua presença como fontes no pacote não cria novos resultados
+PASS ou novas observações de execução no manifesto Agents.
+
+Os contratos específicos estão nos documentos do CRM:
+[migration ledger e drift](https://github.com/rafhael100/imagine-crm/blob/7e1b00a0c173bcfcac3a9051ef6cad3aededcdb8/docs/automation/CRM-AUTOMATION-MIGRATION-DRIFT.md),
+[monitor33→owner35](https://github.com/rafhael100/imagine-crm/blob/7e1b00a0c173bcfcac3a9051ef6cad3aededcdb8/docs/desenvolvimento/CRM-OWNER-MONITOR-INCREMENTAL-MIGRATION-2026-11-18.md)
+e [base25→monitor33](https://github.com/rafhael100/imagine-crm/blob/7e1b00a0c173bcfcac3a9051ef6cad3aededcdb8/docs/desenvolvimento/CRM-BASE-MONITOR-INCREMENTAL-MIGRATION-2026-11-18.md).
+A [compatibilidade histórica CRM #660](CRM-660-CANDIDATE.md) permanece como
+registro da base #481; não substitui a evidência da nova HEAD com CRM #664.
 
 ## Lacuna concreta e composição histórica
 
@@ -69,9 +100,11 @@ da #475 foi preservada na resolução do conflito documental.
 | [MFA P30 #464](https://github.com/rafhael100/imagine-ai-agents/pull/464) | `c08688b16e61d8d1ecc4d8c0ed4da8758a687ee8` | [CI 44203383716 — success](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44203383716) |
 | [Candidata #479](https://github.com/rafhael100/imagine-ai-agents/pull/479) | `3d30b2f7977b37d3bb86d6ff11bc63728145f5fd` | [CI 44236540149](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44236540149), com o pin histórico CRM #654 |
 | [Candidata #481](https://github.com/rafhael100/imagine-ai-agents/pull/481) | `64f52f0dcd44a5545d1bfc6c1d685b33c158601f` | [CI 44247275249 — success](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44247275249), 19 grupos executados com CRM #660 |
+| [Candidata #482](https://github.com/rafhael100/imagine-ai-agents/pull/482) | `ce004ad4a8fa5fb59ef38cdd250126d0f0e99b46` | [CI 44251661738 — success](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44251661738), 22 grupos, três arquivos de fontes e manifesto V2 com CRM #660 |
 | [P67 #476](https://github.com/rafhael100/imagine-ai-agents/pull/476) | `0c722eee6bd53a7ee46c4ba68ab70200fc191b78` | Origem de 11 arquivos selecionados; o mapa de blobs distingue import de ancestralidade |
 | [P68 #477](https://github.com/rafhael100/imagine-ai-agents/pull/477) | `85f4c37a6d905b91923d3e31ba9068b2c35d7657` | Origem de três arquivos selecionados e checkout fixo para validar as origens na CI |
 | [CRM #660](https://github.com/rafhael100/imagine-crm/pull/660) | `96dbf1aed2d1cf3237bc3631c4594540a0168d2a` | [CI owner 44246202205 — success](https://github.com/rafhael100/imagine-crm/actions/runs/44246202205), própria do CRM; não atribuída ao n8n |
+| [CRM #664](https://github.com/rafhael100/imagine-crm/pull/664) | `7e1b00a0c173bcfcac3a9051ef6cad3aededcdb8` | [CI owner 44262660735 — success](https://github.com/rafhael100/imagine-crm/actions/runs/44262660735), migrations em ensaios separados; não atribuídas aos 22 grupos Agents |
 | [Adapter histórico](https://github.com/rafhael100/imagine-ai-agents/commit/8b04d0e936168c77db028160b5aeb1758db497c4) | `8b04d0e936168c77db028160b5aeb1758db497c4` | Dependência pública pinada do replay existente; não é fonte de autoridade atual |
 
 O commit e a árvore **reais desta candidata** são obtidos do checkout da CI
@@ -84,7 +117,7 @@ continuam dependências públicas separadas, com seus commits e árvores própri
 O workflow `.github/workflows/n8n-private-candidate.yml` e o runner
 `tools/run_n8n_private_candidate.sh` destinam-se exclusivamente ao runner
 descartável autorizado. Verificam a preservação das fontes e exigem os checks
-da #475 no checkout consolidado, a compatibilidade de backup CRM #660,
+da #475 no checkout consolidado, a compatibilidade de backup com a fonte CRM #664,
 o driver P30 original e os três grupos owner antes do pacote. A base #481
 preservou 81 dos 82 vínculos de fontes anteriores; o checker de feedback e
 seus dois módulos de compatibilidade são fixados por blobs próprios revisados.
@@ -124,7 +157,7 @@ python3 infra/n8n-private/homologation/operator_packet.py verify \
 
 O verificador é offline, sem Docker, SQL ou rede. Confere hashes, bytes, tipos e
 caminhos das entradas e suas árvores Git contra os commits públicos incluídos.
-O `create` confere também os ancestrais exigidos, incluindo #481 e #479, no
+O `create` confere também os ancestrais exigidos, incluindo #482, #481 e #479, no
 checkout da CI; a verificação offline não reivindica revalidar o histórico
 Git completo. O manifesto e as observações usam os schemas V2.
 
@@ -192,7 +225,7 @@ regressões à contagem de uma única prova de retorno.
 
 | Tema | Evidência disponível e próxima ação |
 | --- | --- |
-| Host | [Inventário real por console em 16/11](https://github.com/rafhael100/imagine-ai-agents/issues/414#issuecomment-6925460120): oito CPUs, oito Compose e 18 contêineres naquele instante. É histórico; a sessão desta rodada encontrou o portal Leaseweb exigindo login. Retomar por autenticação legítima e atualizar a coleta somente leitura. |
+| Host | [Inventário real por console em 16/11](https://github.com/rafhael100/imagine-ai-agents/issues/414#issuecomment-6925460120): oito CPUs, oito Compose e 18 contêineres naquele instante. É histórico; o handoff da #482 registrou o portal Leaseweb exigindo login. Retomar por autenticação legítima e atualizar a coleta somente leitura. |
 | Coexistência | Preservar todos os projetos e listeners, inclusive CRM 18081/18086 e Sites 18090. A porta 17990 foi observada livre em 16/11, **não reservada**. Confirmar recursos, portas, redes, volumes e egress atuais antes de propor instalação. |
 | Acesso e autoridade | Definir contas nominais, ingresso privado com MFA obrigatório, revogação e ausência de bypass; conferir grants por empresa/operação, origem de autoridade e custódia de PKI/chaves reais. Nenhuma fixture fornece essas concessões. |
 | Licença | Manter integrações técnicas fixas da Imagine e regras comerciais no CRM. Rever o recorte real em [LICENSE-P20](LICENSE-P20.md); nenhum entitlement ou gasto novo é aprovado por este pacote. |
@@ -228,13 +261,13 @@ de host, backup ou autoridade ainda não verificada. Gates executáveis de
 outros produtos não são modificados por este handoff.
 
 Os componentes selecionados de [P67 #476](https://github.com/rafhael100/imagine-ai-agents/pull/476)
-e [P68 #477](https://github.com/rafhael100/imagine-ai-agents/pull/477) passam a
-integrar as fontes da candidata. Suas provas permanecem separadas da jornada
-humana no [CRM #660](https://github.com/rafhael100/imagine-crm/pull/660).
+e [P68 #477](https://github.com/rafhael100/imagine-ai-agents/pull/477), incorporados
+na #482, permanecem nas fontes da candidata. Suas provas continuam separadas
+da jornada de sessão do [CRM #664](https://github.com/rafhael100/imagine-crm/pull/664).
 A prova nativa usa o perfil de 33 tabelas; a prova owner+monitor de 35 tabelas
-continua pertencendo à CI do CRM. Acrescentar os providers e seus ensaios não
-equivale a executar essa jornada humana ou a recuperar os três serviços em
-um snapshot distribuído.
+e as migrations incrementais pertencem à CI do CRM. Atualizar as fontes do
+pacote não equivale a executar essa jornada de sessão nos Agents ou a recuperar
+os três serviços em um snapshot distribuído.
 
 **DRAFT / NO-MERGE / NO-DEPLOY / NO-GO operacional.** Fontes públicas e
 evidência de CI não concedem acesso a clientes, instalação, operação de
