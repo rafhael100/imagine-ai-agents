@@ -5,6 +5,7 @@ namespace ImagineAI\Convergence;
 
 require_once __DIR__.'/PgSyntheticReplayGate.php';
 require_once __DIR__.'/PgDraftFingerprintLab.php';
+require_once __DIR__.'/PgScopedDraftWriterLab.php';
 require_once __DIR__.'/../../src/Automation/DeterministicRuleEngine.php';
 
 use ImagineAI\Automation\DeterministicRuleEngine;
@@ -23,14 +24,23 @@ final class PgDeterministicDraftRegistryLab
     private const MAX_INPUT_BYTES=8192;
     private DeterministicRuleEngine $engine;
 
-    public function __construct(private PDO $db)
-    {
-        new PgSyntheticReplayGate($db);
+    public function __construct(
+        private PDO $db,private ?PgScopedDraftWriterLab $writer=null
+    ) {
+        // Existing callers keep the original postgres-only P16 guard.
+        if($writer===null)new PgSyntheticReplayGate($db);
+        else $writer->assertConnection($db);
         $this->engine=new DeterministicRuleEngine();
+    }
+
+    public static function forScopedWriter(PDO $db,PgScopedDraftWriterLab $scope):self
+    {
+        return new self($db,$scope);
     }
 
     public function createTables():void
     {
+        if($this->writer!==null)throw new \RuntimeException('P64_SCHEMA_MUTATION_DENIED');
         $this->db->exec('CREATE SCHEMA IF NOT EXISTS aia_p51_lab');
         $this->db->exec(<<<'SQL'
 CREATE TABLE IF NOT EXISTS aia_p51_lab.preview_batches(
@@ -114,12 +124,42 @@ SQL);
      */
     public function stage(array $command,array $ruleset):array
     {
-        if($this->db->inTransaction()){
-            return self::out('DENY','NESTED_TRANSACTION');
+        if($this->db->inTransaction())return self::out('DENY','NESTED_TRANSACTION');
+        if($this->writer!==null)return self::out('DENY','SCOPED_WRITER_REQUIRES_COMPOSITION');
+        try{
+            $this->db->beginTransaction();
+            $result=$this->stageInsideTransaction($command,$ruleset);
+            if($result['reason']==='CALLER_WRITE_TRANSACTION_REQUIRED'){
+                $result=self::out('DENY','INVALID_INPUT_OR_DISPOSABLE_DB_FAILURE');
+            }
+            if(in_array($result['decision'],[
+                'LAB_DRAFTS_STAGED_NO_ACTION','LAB_DRAFTS_ALREADY_STAGED'
+            ],true))$this->db->commit();
+            else $this->db->rollBack();
+            return $result;
+        }catch(Throwable){
+            if($this->db->inTransaction())$this->db->rollBack();
+            return self::out('DENY','INVALID_INPUT_OR_DISPOSABLE_DB_FAILURE');
+        }
+    }
+
+    /** Caller owns the transaction and must roll back every DENY. */
+    public function stageInsideTransaction(array $command,array $ruleset):array
+    {
+        if(!$this->db->inTransaction()){
+            return self::out('DENY','CALLER_WRITE_TRANSACTION_REQUIRED');
         }
         try{
+            if($this->db->getAttribute(PDO::ATTR_DRIVER_NAME)!=='pgsql'
+                ||$this->db->query('SHOW transaction_read_only')->fetchColumn()!=='off'){
+                return self::out('DENY','CALLER_WRITE_TRANSACTION_REQUIRED');
+            }
+            if($this->writer!==null)$this->writer->assertWriteTransaction($this->db);
             $result=$this->engine->evaluate($command,$ruleset);
             $tenant=$result['tenant_ref'];
+            if($this->writer!==null&&$this->writer->tenant()!==$tenant){
+                return self::out('DENY','SCOPED_WRITER_TENANT_DENIED');
+            }
             $request=$result['request_ref'];
             $rulesetRef=$result['ruleset_ref'];
             $revision=$result['revision'];
@@ -143,7 +183,6 @@ SQL);
                 return self::out('DENY','UNAPPROVED_PREVIEW_RESULT');
             }
 
-            $this->db->beginTransaction();
             $insert=$this->db->prepare(<<<'SQL'
 INSERT INTO aia_p51_lab.preview_batches
  (tenant_ref,request_ref,ruleset_ref,revision,
@@ -188,11 +227,9 @@ SQL);
                         )
                     ]);
                     if($write->rowCount()!==1){
-                        $this->db->rollBack();
                         return self::out('DENY','DRAFT_INSERT_INCOMPLETE');
                     }
                 }
-                $this->db->commit();
                 return self::out('LAB_DRAFTS_STAGED_NO_ACTION',
                     'PERSISTED_ONLY_AWAITING_HUMAN_REVIEW',$count);
             }
@@ -214,7 +251,6 @@ SQL);
                 ||!hash_equals($r['ruleset_sha256'],$result['ruleset_sha256'])
                 ||!hash_equals($r['preview_sha256'],$resultSha)
                 ||(int)$r['proposal_count']!==$count){
-                $this->db->rollBack();
                 return self::out('DENY','REPLAY_INPUT_CHANGED_OR_TAMPERED');
             }
             $legacy=(int)$r['inputs_version']===0
@@ -225,7 +261,6 @@ SQL);
                 &&hash_equals($commandCanonical,$r['command_canonical'])
                 &&hash_equals($rulesetCanonical,$r['ruleset_canonical']);
             if(!$legacy&&!$captured){
-                $this->db->rollBack();
                 return self::out('DENY','STORED_CANONICAL_INPUTS_CHANGED');
             }
             $exists=$this->db->prepare(<<<'SQL'
@@ -251,17 +286,15 @@ SQL);
                 $a['proposal_ref'],$b['proposal_ref']
             ));
             if($stored!==$expected){
-                $this->db->rollBack();
                 return self::out('DENY','STORED_DRAFTS_INCOMPLETE');
             }
-            $this->db->commit();
             return self::out('LAB_DRAFTS_ALREADY_STAGED',
                 'EXACT_REPLAY_NO_NEW_EFFECTS',$count);
         }catch(Throwable){
-            if($this->db->inTransaction())$this->db->rollBack();
             return self::out('DENY','INVALID_INPUT_OR_DISPOSABLE_DB_FAILURE');
         }
     }
+
 
     /** @return array<string,mixed> */
     public function readPending(string $tenant):array

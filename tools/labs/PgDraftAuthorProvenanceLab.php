@@ -54,28 +54,32 @@ SQL);
         }
         try{
             $this->db->beginTransaction();
-            $q=$this->db->prepare(<<<'SQL'
-SELECT request_ref,ruleset_ref,revision,rule_ref,draft_kind,
-       metric,observed,threshold,state,draft_sha256
-FROM aia_p51_lab.review_drafts
-WHERE tenant_ref=:tenant AND proposal_ref=:proposal FOR SHARE
-SQL);
-            $q->execute([':tenant'=>$tenant,':proposal'=>$proposal]);
-            $r=$q->fetch(PDO::FETCH_ASSOC);
-            if(!is_array($r)||$r['state']!=='AWAITING_HUMAN_REVIEW_LAB'){
+            $result=$this->sealInsideTransaction($tenant,$proposal,$author);
+            if($result==='DENY_AUTHOR_SEAL_INPUT')$result='DENY_AUTHOR_SEAL_DATABASE_FAILURE';
+            if(in_array($result,[
+                'LAB_AUTHOR_SEALED_NO_APPROVAL','LAB_AUTHOR_SEAL_REPLAY_NO_ACTION'
+            ],true)){
+                $this->db->commit();
+            }else{
                 $this->db->rollBack();
-                return 'DENY_AUTHOR_DRAFT_MISSING';
             }
-            $hash=PgDraftFingerprintLab::sha256(
-                $tenant,$r['request_ref'],$r['ruleset_ref'],
-                (int)$r['revision'],$proposal,$r['rule_ref'],
-                $r['draft_kind'],$r['metric'],(int)$r['observed'],
-                (int)$r['threshold'],$r['state']
-            );
-            if(!hash_equals($hash,$r['draft_sha256'])){
-                $this->db->rollBack();
-                return 'DENY_AUTHOR_DRAFT_CORRUPTED';
-            }
+            return $result;
+        }catch(Throwable){
+            if($this->db->inTransaction())$this->db->rollBack();
+            return 'DENY_AUTHOR_SEAL_DATABASE_FAILURE';
+        }
+    }
+
+    /** P64 composition owns commit/rollback, including after a DENY. */
+    public function sealInsideTransaction(
+        string $tenant,string $proposal,string $author
+    ):string {
+        if(!$this->writeTransaction()||!self::ref($tenant)
+            ||!self::proposal($proposal)||!self::ref($author)){
+            return 'DENY_AUTHOR_SEAL_INPUT';
+        }
+        try{
+            $hash=$this->lockedDraftHash($tenant,$proposal);
             $add=$this->db->prepare(<<<'SQL'
 INSERT INTO aia_p59_lab.draft_authors
 (tenant_ref,proposal_ref,author_ref,draft_sha256,source)
@@ -86,28 +90,76 @@ SQL);
                 ':tenant'=>$tenant,':proposal'=>$proposal,
                 ':author'=>$author,':digest'=>$hash
             ]);
-            if($add->fetchColumn()!==false){
-                $this->db->commit();
-                return 'LAB_AUTHOR_SEALED_NO_APPROVAL';
-            }
-            $existing=$this->db->prepare(<<<'SQL'
-SELECT author_ref,draft_sha256
+            if($add->fetchColumn()!==false)return 'LAB_AUTHOR_SEALED_NO_APPROVAL';
+            return $this->existingAuthorMatches($tenant,$proposal,$author,$hash)
+                ?'LAB_AUTHOR_SEAL_REPLAY_NO_ACTION'
+                :'DENY_AUTHOR_CHANGE_OR_STALE_REPLAY';
+        }catch(Throwable $error){
+            return in_array($error->getMessage(),[
+                'DENY_AUTHOR_DRAFT_MISSING','DENY_AUTHOR_DRAFT_CORRUPTED'
+            ],true)?$error->getMessage():'DENY_AUTHOR_SEAL_DATABASE_FAILURE';
+        }
+    }
+
+    /** Existing authorship only: replay must never repair a missing binding. */
+    public function verifyExactAuthorInsideTransaction(
+        string $tenant,string $proposal,string $author
+    ):bool {
+        if(!$this->writeTransaction()||!self::ref($tenant)
+            ||!self::proposal($proposal)||!self::ref($author))return false;
+        try{
+            return $this->existingAuthorMatches(
+                $tenant,$proposal,$author,$this->lockedDraftHash($tenant,$proposal)
+            );
+        }catch(Throwable){return false;}
+    }
+
+    private function writeTransaction():bool
+    {
+        if(!self::ci()||!$this->db->inTransaction())return false;
+        try{
+            return $this->db->getAttribute(PDO::ATTR_DRIVER_NAME)==='pgsql'
+                &&$this->db->query('SHOW transaction_read_only')->fetchColumn()==='off';
+        }catch(Throwable){return false;}
+    }
+
+    private function lockedDraftHash(string $tenant,string $proposal):string
+    {
+        $q=$this->db->prepare(<<<'SQL'
+SELECT request_ref,ruleset_ref,revision,rule_ref,draft_kind,
+       metric,observed,threshold,state,draft_sha256
+FROM aia_p51_lab.review_drafts
+WHERE tenant_ref=:tenant AND proposal_ref=:proposal FOR SHARE
+SQL);
+        $q->execute([':tenant'=>$tenant,':proposal'=>$proposal]);
+        $r=$q->fetch(PDO::FETCH_ASSOC);
+        if(!is_array($r)||$r['state']!=='AWAITING_HUMAN_REVIEW_LAB'){
+            throw new \RuntimeException('DENY_AUTHOR_DRAFT_MISSING');
+        }
+        $hash=PgDraftFingerprintLab::sha256(
+            $tenant,$r['request_ref'],$r['ruleset_ref'],(int)$r['revision'],
+            $proposal,$r['rule_ref'],$r['draft_kind'],$r['metric'],
+            (int)$r['observed'],(int)$r['threshold'],$r['state']
+        );
+        if(!hash_equals($hash,$r['draft_sha256'])){
+            throw new \RuntimeException('DENY_AUTHOR_DRAFT_CORRUPTED');
+        }
+        return $hash;
+    }
+
+    private function existingAuthorMatches(
+        string $tenant,string $proposal,string $author,string $hash
+    ):bool {
+        $q=$this->db->prepare(<<<'SQL'
+SELECT author_ref,draft_sha256,source
 FROM aia_p59_lab.draft_authors
 WHERE tenant_ref=:tenant AND proposal_ref=:proposal FOR SHARE
 SQL);
-            $existing->execute([':tenant'=>$tenant,':proposal'=>$proposal]);
-            $e=$existing->fetch(PDO::FETCH_ASSOC);
-            if(!is_array($e)||$e['author_ref']!==$author
-                ||!hash_equals($hash,$e['draft_sha256'])){
-                $this->db->rollBack();
-                return 'DENY_AUTHOR_CHANGE_OR_STALE_REPLAY';
-            }
-            $this->db->commit();
-            return 'LAB_AUTHOR_SEAL_REPLAY_NO_ACTION';
-        }catch(Throwable){
-            if($this->db->inTransaction())$this->db->rollBack();
-            return 'DENY_AUTHOR_SEAL_DATABASE_FAILURE';
-        }
+        $q->execute([':tenant'=>$tenant,':proposal'=>$proposal]);
+        $r=$q->fetch(PDO::FETCH_ASSOC);
+        return is_array($r)&&$r['author_ref']===$author
+            &&$r['source']==='SYNTHETIC_CI_AUTHOR_FIXTURE'
+            &&hash_equals($hash,$r['draft_sha256']);
     }
 
     /**
