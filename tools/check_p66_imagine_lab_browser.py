@@ -322,7 +322,8 @@ def main():
             need(re.fullmatch(r"SYNTHETIC_PROPOSAL_[A-F0-9]{24}", detail), "P66_DETAIL_REFERENCE")
             need(phases == ["preview", "saved", "complete"]
                  and after == {"schema": "AIA_P66_BROWSER_AFTER_V1", "detail_ref": detail,
-                               "screenshots": 6, "posts": 4, "css_200_percent_reflow": True,
+                               "screenshots": 6, "posts": 4, "native_post_origins_verified": 4,
+                               "css_200_percent_reflow": True,
                                "native_browser_zoom_tested": False}, "P66_COMPLETE_JOURNEY")
             # Only the two owned HTTP servers restart; PG, rows and roles stay put.
             lab.remove_owned(lab.project + "-writer-http")
@@ -348,6 +349,7 @@ def main():
                     "before_version_captured_after_journey": True,
                     "same_rows_in_comparison": True, "preview_and_reads_without_db_write": True,
                     "created_batches": 1, "created_drafts": 2, "created_authors": 2,
+                    "native_post_origins_verified": 4,
                     "browser_credential_mounts": 0, "host_published_ports": 0,
                     "network_mode": "shared_none_namespace", "paid_ai_calls": 0,
                     "go_for_installation": False}

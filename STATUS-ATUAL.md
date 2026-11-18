@@ -164,4 +164,6 @@ O recorte funcional expressamente aprovado no CRM passou em [#649](https://githu
 
 A candidata P66/RC77 atende à pendência visual aprovada na [issue #289](https://github.com/rafhael100/imagine-ai-agents/issues/289): logo original, tokens Imagine, navegação, teclado e responsividade na criação P64 e fila/detalhe P56/P63. Reutiliza o domínio e as roles existentes. A prova prevê Chromium isolado, comparação de dados e capturas antes/depois da mesma base; resultados efetivos e limitações ficam na PR da SHA executada. [Escopo e validação](docs/reviews/AIA-P66-IMAGINE-OPERATOR-UI.md).
 
+O primeiro ensaio Chromium também revelou a incompatibilidade entre `Referrer-Policy: no-referrer` e a origem obrigatória dos POSTs nativos da criação. A correção usa `same-origin` no escritor, preserva a verificação de Origin/Host/CSRF e acrescenta a contraprova de origem `null`; a nova execução deve comprovar o fluxo sem injeção de cabeçalhos no navegador.
+
 As entregas permanecem candidatas DRAFT, sem merge, deploy, acesso a clientes ou APIs pagas. As próximas dependências operacionais continuam sendo identidade/permissões reais entre serviços, MFA administrativo obrigatório, destino/custódia de backup externo e pareceres correspondentes. Os registros históricos deste arquivo preservam o estado da linha integrada e não representam a HEAD dessas candidatas.

@@ -30,6 +30,8 @@ As duas páginas mantêm suas condições de admissão, tratamento de entrada, c
 
 A única ampliação da CSP é `img-src data:` para o PNG embutido. Scripts, frames, fontes remotas e recursos externos continuam proibidos. Os scanners conferem exatamente o logo original e os destinos de navegação esperados; não passam a aceitar imagens ou links arbitrários. A matriz P62 comprova a composição sem criação, enquanto P64 e P66 comprovam a navegação com ela habilitada.
 
+A execução inicial do navegador encontrou uma incompatibilidade anterior à P66: o formulário P64 declarava `Referrer-Policy: no-referrer` e exigia `Origin` igual à origem do escritor. O [algoritmo do Fetch Standard](https://fetch.spec.whatwg.org/#append-a-request-origin-header) transforma essa origem em `null` nas navegações POST sob `no-referrer`. O escritor agora declara `same-origin`, permitindo a origem nativa no próprio formulário e omitindo o referenciador para destinos de outra origem. A admissão de Origin/Host/CSRF permanece literal; a prova HTTP acrescenta a recusa explícita de `Origin: null`, e o Chromium confere a origem enviada sem fabricar cabeçalhos.
+
 ## Prova do navegador
 
 O ensaio importa `CreationLab` e prepara um PostgreSQL descartável com zero lotes, rascunhos, autorias e votos. O Chromium usa a imagem oficial Playwright 1.56.1 e o pacote da mesma versão, ambos preparados antes do laboratório. A imagem efetiva é resolvida por ID/digest e conferida contra o tag esperado.

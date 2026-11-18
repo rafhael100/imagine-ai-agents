@@ -20,7 +20,9 @@ const P64_MAX_PREVIEWS=5;
 header('Cache-Control: no-store, private');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
-header('Referrer-Policy: no-referrer');
+// Native same-origin form POSTs must retain Origin for the existing CSRF gate.
+// Cross-origin navigation still receives no Referer under this policy.
+header('Referrer-Policy: same-origin');
 header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'self' ".P64_READER."; base-uri 'none'; frame-ancestors 'none'");
 
 function p64Deny(int $status):never

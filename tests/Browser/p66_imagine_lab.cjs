@@ -40,6 +40,7 @@ async function main() {
   context.setDefaultNavigationTimeout(15000);
   let posts = 0;
   let unexpected = 0;
+  const nativePosts = new Set();
   let writesFinished = mode === 'before';
   await context.route('**/*', async route => {
     const request = route.request();
@@ -60,7 +61,28 @@ async function main() {
   page.on('pageerror', () => { unexpected++; });
   async function navigation(action, status = 200) {
     const response = await action();
-    check(response && response.status() === status, 'P66_NAVIGATION_STATUS');
+    check(response, 'P66_NAVIGATION_RESPONSE_MISSING');
+    const submissions = [];
+    for (let request = response.request(); request; request = request.redirectedFrom()) {
+      if (request.method() !== 'POST') continue;
+      // Observe Chromium's original header, including a POST followed by 303.
+      // Never inject Origin, Referer, cookies or fetch metadata into the request.
+      const origin = await request.headerValue('origin');
+      const category = origin === new URL(WRITER).origin ? 'EXPECTED'
+        : origin === 'null' ? 'NULL' : origin === null ? 'ABSENT' : 'OTHER';
+      submissions.push({ request, category });
+    }
+    const diagnostic = submissions.length ? '_ORIGIN_' + submissions[0].category : '';
+    check(response.status() === status,
+      'P66_NAVIGATION_EXPECTED_' + status + '_ACTUAL_' + response.status() + diagnostic);
+    for (const { request, category } of submissions) {
+      check(mode === 'after' && request.url() === WRITER && category === 'EXPECTED',
+        'P66_NATIVE_POST_ORIGIN_' + category);
+      const submitted = await request.response();
+      check(submitted && await submitted.headerValue('referrer-policy') === 'same-origin',
+        'P66_WRITER_POST_REFERRER_POLICY');
+      nativePosts.add(request);
+    }
     const headers = await response.allHeaders();
     check(headers['cache-control']?.includes('no-store') && headers['x-content-type-options'] === 'nosniff'
       && headers['content-type']?.startsWith('text/html') && headers['x-frame-options'] === 'DENY',
@@ -70,6 +92,8 @@ async function main() {
       && csp.includes("base-uri 'none'") && (mode === 'before' || csp.includes('img-src data:')),
     'P66_PRIVATE_CSP');
     check(!Object.keys(headers).some(key => key.startsWith('access-control-')), 'P66_NO_CORS');
+    const expectedPolicy = mode === 'after' && response.url() === WRITER ? 'same-origin' : 'no-referrer';
+    check(headers['referrer-policy'] === expectedPolicy, 'P66_RESPONSE_REFERRER_POLICY');
     return response;
   }
   const go = url => navigation(() => page.goto(url, { waitUntil: 'domcontentloaded' }));
@@ -276,10 +300,10 @@ async function main() {
     return response;
   });
   check(page.url() === WRITER && await page.locator('[data-p64-local-form]').count() === 1, 'P66_RETURN_TO_CREATION');
-  check(posts === 4 && unexpected === 0, 'P66_ONLY_EXISTING_FORM_ACTIONS');
+  check(posts === 4 && nativePosts.size === 4 && unexpected === 0, 'P66_ONLY_EXISTING_FORM_ACTIONS');
   await checkpoint('complete');
   return { schema: 'AIA_P66_BROWSER_AFTER_V1', detail_ref: detailRef, screenshots: 6,
-    posts, css_200_percent_reflow: true, native_browser_zoom_tested: false };
+    posts, native_post_origins_verified: 4, css_200_percent_reflow: true, native_browser_zoom_tested: false };
 }
 
 (async () => {

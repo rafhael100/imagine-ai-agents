@@ -334,6 +334,7 @@ def exercise(lab: CreationLab) -> dict:
     negatives = [
         ({"fields": {**save, "csrf": "0" * 64}}, 403),
         ({"fields": save, "origin": "https://foreign.invalid"}, 403),
+        ({"fields": save, "origin": "null"}, 403),
         ({"fields": save, "origin": ""}, 403),
         ({"fields": save, "host": "localhost:8787"}, 403),
         ({"fields": {**save, "tenant_ref": "SYNTHETIC_TENANT_B"}}, 400),
