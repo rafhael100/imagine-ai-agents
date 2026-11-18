@@ -1,0 +1,63 @@
+name: AIA P68 owner draft recovery
+on:
+  pull_request:
+    branches:
+      - feat/aia-p67-crm-owner-drafts-2026-11-17
+permissions:
+  contents: read
+concurrency:
+  group: aia-p68-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  real-pg16-owner-draft-recovery:
+    if: >-
+      github.repository == 'rafhael100/imagine-ai-agents' &&
+      github.event.repository.private == false &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.base.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: rafhael100/imagine-ai-agents
+          ref: c08688b16e61d8d1ecc4d8c0ed4da8758a687ee8
+          path: _central_p30_pinned
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify real PR provenance and unchanged P67 source
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          git diff --check
+          php -l tools/p68-owner-draft-recovery-probe.php
+          python3 -m py_compile tools/run_p68_owner_draft_recovery.py tools/check_p68_owner_draft_recovery.py
+          python3 tools/run_p68_owner_draft_recovery.py --prepare
+      - name: Build the original receiver and pin disposable image identities
+        run: |
+          set -euo pipefail
+          docker pull postgres:16 >/dev/null
+          docker pull nginx:stable-alpine >/dev/null
+          p68_pg="$(docker image inspect postgres:16 --format '{{index .RepoDigests 0}}')"
+          p68_nginx="$(docker image inspect nginx:stable-alpine --format '{{index .RepoDigests 0}}')"
+          docker build --quiet -f "$AIA_P68_SOURCE_DIR/runtime/central-auto/crm-owner-drafts/Dockerfile" -t "imagine-p68-php:$GITHUB_RUN_ID" "$AIA_P68_SOURCE_DIR" >/dev/null
+          p68_php="$(docker image inspect "imagine-p68-php:$GITHUB_RUN_ID" --format '{{.Id}}')"
+          test -n "$p68_pg"
+          test -n "$p68_nginx"
+          test -n "$p68_php"
+          echo "AGENTS_PG_IMAGE=$p68_pg" >> "$GITHUB_ENV"
+          echo "AGENTS_NGINX_IMAGE=$p68_nginx" >> "$GITHUB_ENV"
+          echo "AGENTS_PHP_IMAGE=$p68_php" >> "$GITHUB_ENV"
+          echo "AIA_P68_PHP_IMAGE=$p68_php" >> "$GITHUB_ENV"
+      - name: Actual dump, isolated restore, current revocation and HTTP reconciliation
+        env:
+          P24_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          set -euo pipefail
+          python3 tools/run_p68_owner_draft_recovery.py --run
