@@ -1,5 +1,17 @@
 # Imagine AI Agents — estado atual
 
+## Continuidade em homologação isolada — 17/11/2026
+
+As candidatas P62/P63/P64 concluíram a composição de fila assinada, detalhe verificável e criação atômica com autoria. A [P65 #471](https://github.com/rafhael100/imagine-ai-agents/pull/471), SHA `740abafc813dbde70f5a2ad6e138402ed7945276`, acrescentou o consumidor mínimo e passou 6 casos positivos/85 negativos na [CI 44213754313](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44213754313). A [RC76 #473](https://github.com/rafhael100/imagine-ai-agents/pull/473), SHA `bd50ab49113e775490cb55d76b088731ec108cc9`, passou na [CI 44217619259](https://github.com/rafhael100/imagine-ai-agents/actions/runs/44217619259), executando toda a matriz e o consumidor original na árvore combinada `cd4b6fba353a20f02b00facec4614be4f052a18f` com a Central P30.
+
+O recorte funcional expressamente aprovado no CRM passou em [#649](https://github.com/rafhael100/imagine-crm/pull/649) e [#651](https://github.com/rafhael100/imagine-crm/pull/651): consulta humana com sessão/MFA/empresa/participação verificadas, referência e etapa como únicos dados de negócio, auditoria transacional e resumo navegável nos três idiomas. A revisão final do resumo `d3f06599cddfc244f6089d3dac01f29e5a45b8c0` passou 68 leituras HTTP, 247 verificações Chromium e a regressão privada completa. Isso não encerra os treze cenários históricos de delegação S2S ou libera produção.
+
+A candidata P66/RC77 atende à pendência visual aprovada na [issue #289](https://github.com/rafhael100/imagine-ai-agents/issues/289): logo original, tokens Imagine, navegação, teclado e responsividade na criação P64 e fila/detalhe P56/P63. Reutiliza o domínio e as roles existentes. A prova prevê Chromium isolado, comparação de dados e capturas antes/depois da mesma base; resultados efetivos e limitações ficam na PR da SHA executada. [Escopo e validação](docs/reviews/AIA-P66-IMAGINE-OPERATOR-UI.md).
+
+As entregas permanecem candidatas DRAFT, sem merge, deploy, acesso a clientes ou APIs pagas. As próximas dependências operacionais continuam sendo identidade/permissões reais entre serviços, MFA administrativo obrigatório, destino/custódia de backup externo e pareceres correspondentes. Os registros abaixo preservam o estado histórico da linha integrada e não representam a HEAD dessas candidatas.
+
+## Registro histórico da linha integrada
+
 **14/11/2026.** GitHub. **Produção: NO-GO.**
 
 ## Estado executivo

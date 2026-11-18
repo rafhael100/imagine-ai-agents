@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "infra/n8n-private/homologation"))
 from check_p24_full_n8n_restore import Failure, require, run
 from p25_agents_recovery import AgentsRecovery
-from check_p56_live_pg_readonly_http import Scan
+from check_p56_live_pg_readonly_http import CREATE, READ_CSP, Scan
 
 PAGE = "/p56-live-pg-review-local.php"
 TENANT = "SYNTHETIC_TENANT_A"
@@ -34,8 +34,8 @@ STATES = {
 
 
 class PageScan(Scan):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *, allow_create=False, allow_detail=False):
+        super().__init__(allow_create=allow_create, allow_detail=allow_detail)
         self.states: list[str] = []
         self.current: list[str] = []
         self.history: list[str] = []
@@ -198,13 +198,14 @@ class ReviewLab(AgentsRecovery):
 def page(lab: ReviewLab, current: str = "available", query="") -> tuple[str, PageScan]:
     status, body, headers = lab.http(query)
     require(status == 200 and "NO-GO operacional" in body and "#F9941D" in body, "P62_PAGE")
-    require("default-src 'none'" in headers.get("content-security-policy", "")
+    require(headers.get("content-security-policy") == READ_CSP
             and headers.get("x-frame-options") == "DENY"
             and headers.get("x-content-type-options") == "nosniff"
             and headers.get("cache-control", "").startswith("no-store"), "P62_HEADERS")
     parsed = PageScan()
     parsed.feed(body)
-    require(parsed.actions == [] and parsed.remotes == [], "P62_NO_ACTION_OR_REMOTE_ASSET")
+    require(parsed.actions == [] and parsed.remotes == [] and parsed.valid_shell(), "P62_NO_ACTION_OR_REMOTE_ASSET")
+    require(CREATE not in parsed.links, "P62_NO_UNAVAILABLE_CREATION_LINK")
     require(parsed.current == [current] and parsed.history == ["verified"], "P62_CURRENT_AND_HISTORY")
     for hidden in ("SYNTHETIC_P62_PRIVATE_B", "SYNTHETIC_P62_AUTHOR", "SYNTHETIC_P62_PRODUCT",
                    "SYNTHETIC_P62_SECURITY", "canonical_vote", "signature_b64", "public_key_b64"):

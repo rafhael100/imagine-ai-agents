@@ -16,13 +16,13 @@ import sys
 import tempfile
 
 from check_p62_live_signed_review import (
-    Failure, PageScan, ReviewLab, require, run,
+    Failure, PageScan, READ_CSP, ReviewLab, require, run,
 )
 
 
 class DetailScan(PageScan):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *, allow_create=False):
+        super().__init__(allow_create=allow_create, allow_detail=True)
         self.detail_states: list[str] = []
         self.detail_proposals: list[str] = []
         self.operators: list[str] = []
@@ -66,11 +66,11 @@ def detail_page(lab: DetailLab, proposal: str, state: str, operator: str | None 
                 current: str = "available") -> str:
     status, body, headers = lab.http("?kind=all&proposal=" + proposal)
     require(status == 200, "P63_DETAIL_HTTP_OK")
-    require("default-src 'none'" in headers.get("content-security-policy", "")
+    require(headers.get("content-security-policy") == READ_CSP
             and headers.get("cache-control", "").startswith("no-store"), "P63_PRIVATE_HEADERS")
     parsed = DetailScan()
     parsed.feed(body)
-    require(parsed.actions == [] and parsed.remotes == [], "P63_READ_ONLY_LOCAL_PAGE")
+    require(parsed.actions == [] and parsed.remotes == [] and parsed.valid_shell(), "P63_READ_ONLY_LOCAL_PAGE")
     require(parsed.detail_states == [state] and parsed.detail_proposals == [proposal]
             and parsed.operators == ([] if operator is None else [operator]), "P63_EXACT_DETAIL")
     require(parsed.current == [current] and "Autoria sintética vinculada e verificada" in body,

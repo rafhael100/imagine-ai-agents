@@ -8,9 +8,11 @@ declare(strict_types=1);
  */
 require_once __DIR__.'/../tools/labs/PgScopedReviewQueueBridgeLab.php';
 require_once __DIR__.'/../tools/labs/PgSignedReviewQueueBridgeLab.php';
+require_once __DIR__.'/../tools/labs/ImagineLabPresentation.php';
 
 use ImagineAI\Convergence\PgScopedReviewQueueBridgeLab;
 use ImagineAI\Convergence\PgSignedReviewQueueBridgeLab;
+use ImagineAI\Presentation\ImagineLabPresentation;
 
 function p56Deny(int $status):never
 {
@@ -148,11 +150,14 @@ function p56E(string|int $x):string
 {
     return htmlspecialchars((string)$x,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
 }
+try{
+    $logo=ImagineLabPresentation::logo((string)@file_get_contents(__DIR__.'/assets/logo-imagine.png'));
+}catch(Throwable){p56Deny(503);}
 header('Content-Type: text/html; charset=utf-8');
 header('Cache-Control: no-store, private');
 header('X-Frame-Options: DENY');
 header('X-Content-Type-Options: nosniff');
-header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; form-action 'none'; base-uri 'none'; frame-ancestors 'none'");
+header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'; frame-ancestors 'none'");
 header('Referrer-Policy: no-referrer');
 ?>
 <!doctype html>
@@ -161,49 +166,21 @@ header('Referrer-Policy: no-referrer');
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<title>Imagine · Revisão de propostas (PG de laboratório)</title>
-<style>
-:root{--orange:#F9941D;--ink:#1c2635;--muted:#64748b;--line:#e5eaf0;--bg:#f6f8fb;--white:#fff}
-*,*::before,*::after{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
-.shell{max-width:1090px;margin:auto;padding:30px 22px 60px}
-.top,.heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.top{margin-bottom:38px}
-.logo{font-size:28px;font-weight:850;letter-spacing:-.055em}.logo b{color:var(--orange)}
-.flag{font-size:12px;color:#804e0b;background:#fff3df;padding:6px 12px;border-radius:80px;font-weight:750}
-h1{font-size:clamp(28px,4.5vw,42px);letter-spacing:-.045em;margin:0 0 8px;line-height:1.15}
-.subtitle{color:var(--muted);max-width:740px;margin:0 0 28px}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:34px}
-.card,.draft{border:1px solid var(--line);background:var(--white);border-radius:18px;padding:21px;box-shadow:0 4px 20px #1c263507}
-.card strong{display:block;font-size:34px;font-variant-numeric:tabular-nums;line-height:1.3}
-.card span,small{color:var(--muted);font-size:13px}
-.review-status strong{display:inline;font-size:inherit}
-h2{font-size:19px;letter-spacing:-.025em}
-.filters{display:flex;flex-wrap:wrap;gap:6px}
-.filters a{background:#fff;padding:8px 12px;color:#445569;text-decoration:none;font-size:13px;border:1px solid var(--line);border-radius:11px}
-.filters a[aria-current="page"]{border-color:#f4c887;background:#fff2df;color:#804b06;font-weight:800}
-.queue{display:grid;gap:12px;margin-top:12px}
-.draft{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center}
-.draft h3{margin:4px 0;font-size:17px}.metric{text-align:right}
-.metric strong{display:block;font-size:22px}
-.mono{font:11px/1.6 ui-monospace,Consolas,monospace;color:#778499;overflow-wrap:anywhere}
-.state{font-size:11px;color:#84510c;font-weight:700;background:#fff2df;display:inline-block;padding:5px 9px;border-radius:7px;margin-top:8px}
-.detail-link{display:inline-block;margin-top:12px;color:#804b06;font-weight:700}
-.proposal-detail{margin-top:24px}.condition{font-size:clamp(20px,3vw,28px);font-weight:800;letter-spacing:-.025em}
-.inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.inputs dt{color:var(--muted);font-size:13px}.inputs dd{margin:4px 0 0;font-size:20px;font-weight:700}
-.detail-notice{background:#fff3df;border-radius:10px;padding:12px 16px}
-.footer{border-top:1px solid var(--line);padding-top:18px;margin-top:36px;color:var(--muted);font-size:13px}
-@media(max-width:650px){.shell{padding:18px 14px}.cards,.inputs{grid-template-columns:1fr}.draft{grid-template-columns:1fr}.metric{text-align:left}}
-</style>
+<title>Imagine · Fila de revisão</title>
+<style><?= ImagineLabPresentation::styles() ?></style>
 </head>
 <body>
-<main class="shell">
-<header class="top">
-<div class="logo">imagine<b>.</b></div>
-<span class="flag">BANCO PG16 · CI · SOMENTE LEITURA</span>
-</header>
+<a class="skip-link" data-imagine-skip="true" href="#main-content">Ir para o conteúdo</a>
+<div class="app-shell">
+<aside class="sidebar" aria-label="Imagine Agents">
+<div class="brand"><?= $logo ?><p class="product-name">Agentes IA</p></div>
+<?= ImagineLabPresentation::navigation('review',getenv('AIA_P64_CREATE_LAB')==='true') ?>
+<p class="sidebar-note">Ambiente de homologação<br>Dados fictícios</p>
+</aside>
+<main class="shell" id="main-content" tabindex="-1">
+<header class="workspace-header"><p class="eyebrow">Fila de revisão</p><span class="flag">Homologação · NO-GO operacional</span></header>
 <h1>Central de propostas</h1>
-<p class="subtitle">Dados fictícios de rascunhos gravados no PostgreSQL de laboratório, lidos com isolamento por empresa e checagem de integridade. Nenhuma ação ou aprovação está disponível.</p>
+<p class="subtitle">Consulte os rascunhos de homologação, os pareceres e as condições de cada proposta. Esta tela não aprova nem executa ações.</p>
 <section class="cards" aria-label="Contadores de rascunhos">
 <div class="card"><strong><?= p56E($model['total_pending']) ?></strong><span><?= $signedMode?'Propostas nesta consulta':'Propostas aguardando revisão' ?></span></div>
 <div class="card"><strong><?= p56E($model['by_kind']['crm_task_draft']) ?></strong><span>Rascunhos de tarefas CRM</span></div>
@@ -298,8 +275,9 @@ $comparison=['gte'=>'maior ou igual a','lte'=>'menor ou igual a','eq'=>'igual a'
 </section>
 <?php endif; ?>
 <footer class="footer">
-<strong>NO-GO operacional.</strong> Demonstração localhost em CI, com conexão PostgreSQL temporária de usuário somente leitura. Não há IAM de cliente, aprovação, execução, envio de mensagem, consumo de IA ou serviços externos.
+<strong>NO-GO operacional.</strong> Dados fictícios de homologação, com autoria sintética. Consulta somente de leitura; não há aprovação, execução ou envio a serviços externos.
 </footer>
 </main>
+</div>
 </body>
 </html>
