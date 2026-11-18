@@ -1,4 +1,4 @@
-name: Faísca R05 - PHP public conversation bridge
+name: Faísca R05/R06 - PHP conversation and grounded passages
 
 on:
   pull_request:
@@ -7,6 +7,8 @@ on:
       - 'contracts/faisca/**'
       - 'tools/faisca_public_bridge.php'
       - 'tools/check_faisca_public_bridge.php'
+      - 'tools/faisca_grounded_bridge.php'
+      - 'tools/check_faisca_grounded_bridge.php'
       - '.github/workflows/faisca-public-bridge.yml'
   workflow_dispatch:
 
@@ -41,6 +43,14 @@ jobs:
           php -l tools/faisca_public_bridge.php
           php -l tools/check_faisca_public_bridge.php
           php tools/check_faisca_public_bridge.php
+      - name: Exigir recuperação e vínculo reais dos trechos comerciais
+        run: |
+          set -euo pipefail
+          php -l src/Integration/Faisca/PublicPassageCatalog.php
+          php -l src/Integration/Faisca/GroundedConversationBridge.php
+          php -l tools/faisca_grounded_bridge.php
+          php -l tools/check_faisca_grounded_bridge.php
+          php tools/check_faisca_grounded_bridge.php
       - name: Verificar carregamento explícito do motor determinístico existente
         run: |
           set -euo pipefail
@@ -49,6 +59,6 @@ jobs:
       - name: Executar o gate offline existente sem ampliar permissões
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-          EXPECTED_PHP: '131'
+          EXPECTED_PHP: '133'
           EXPECTED_CASES: '879'
         run: bash tools/run_r01_offline_quality_gate.sh
