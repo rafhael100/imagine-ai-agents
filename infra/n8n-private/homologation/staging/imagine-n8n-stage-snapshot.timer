@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily synthetic n8n staging capture
+
+[Timer]
+OnCalendar=*-*-* 03:00:00 UTC
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
