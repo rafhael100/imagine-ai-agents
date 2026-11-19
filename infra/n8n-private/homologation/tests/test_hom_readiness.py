@@ -1,5 +1,9 @@
 """Offline regression tests: negative cases must never emit operational approval."""
 import importlib.util
+import json
+import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -75,6 +79,66 @@ class ReadinessTests(unittest.TestCase):
         obj = fixture()
         obj["gates"] = []
         self.assertEqual(module.analyze(obj, SHA)["status"], "NO_GO")
+
+
+    def test_duplicate_json_keys_fail_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "evidence.json"
+            path.write_text('{"schema":"one","schema":"two"}', encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "DUPLICATE_JSON_KEY"):
+                module.load_evidence(path)
+
+    def test_nested_duplicate_json_keys_fail_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "evidence.json"
+            path.write_text('{"gates":{"HOM-01":{"state":"PENDING","state":"REVIEWED"}}}', encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "DUPLICATE_JSON_KEY"):
+                module.load_evidence(path)
+
+    def test_large_input_refused_before_parse(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "large.json"
+            path.write_bytes(b" " * (module.MAX_BYTES + 1))
+            with self.assertRaisesRegex(ValueError, "EVIDENCE_TOO_LARGE"):
+                module.load_evidence(path)
+
+    def test_symlink_refused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp) / "evidence.json"
+            base.write_text(json.dumps(fixture()), encoding="utf-8")
+            link = Path(tmp) / "link.json"
+            link.symlink_to(base)
+            with self.assertRaisesRegex(ValueError, "NOT_REGULAR_FILE"):
+                module.load_evidence(link)
+
+    def test_nonfinite_refused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "nan.json"
+            path.write_text('{"x":NaN}', encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "NON_FINITE"):
+                module.load_evidence(path)
+
+    def test_cli_complete_still_not_go(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "evidence.json"
+            path.write_text(json.dumps(fixture()), encoding="utf-8")
+            p = subprocess.run([sys.executable, str(MODULE), str(path),
+                                "--expected-candidate-sha", SHA],
+                               capture_output=True, text=True, timeout=5, check=False)
+            self.assertEqual(p.returncode, 0, p.stderr)
+            response = json.loads(p.stdout)
+            self.assertEqual(response["status"], "REVIEW_REQUIRED")
+            self.assertIs(response["operational_authorization"], False)
+
+    def test_cli_duplicate_key_returns_failure(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "evidence.json"
+            path.write_text('{"schema":"one","schema":"two"}', encoding="utf-8")
+            p = subprocess.run([sys.executable, str(MODULE), str(path),
+                                "--expected-candidate-sha", SHA],
+                               capture_output=True, text=True, timeout=5, check=False)
+            self.assertEqual(p.returncode, 2)
+            self.assertIs(json.loads(p.stdout)["operational_authorization"], False)
 
 
 if __name__ == "__main__":
