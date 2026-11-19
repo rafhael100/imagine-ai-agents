@@ -10,6 +10,9 @@
 
 ## Últimas entregas verificadas
 
+
+**HOM-03 a HOM-06 (19/11/2026):** candidata local sobre P23 para [backup diário, recuperação e instalação privada](infra/n8n-private/homologation/staging/PLAN.md). Evidências sintéticas e aceite do armazenamento anteriores reaproveitados. Credencial independente de staging, recuperação pela cópia externa, IdP e identidades reais, licença, revisão interna e instalação seguem pendentes.
+
 **SEC-60/F187:** #261 CI #43019868566 (cross-Run); #262 CI #43020983307 (JSON), **810 testes PHP / lint 100**. [EVID-42](docs/AIA-R01-EVID-42-SEC60-F187-CI-POSTMERGE.md). **NO-GO**.
 
 **F184–SEC-59:** #255–259, CI #43013609438, **800 testes PHP**; [EVID-41](docs/AIA-R01-EVID-41-F184-F186-SEC58-59-CI-POSTMERGE.md). CRM real **NO-GO**.

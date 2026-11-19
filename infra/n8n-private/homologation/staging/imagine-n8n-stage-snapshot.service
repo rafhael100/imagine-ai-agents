@@ -1,0 +1,12 @@
+[Unit]
+Description=Capture synthetic n8n staging snapshot
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.config/imagine-n8n-staging/snapshot.env
+EnvironmentFile=%h/.config/imagine-n8n-staging/r2.env
+ExecStart=/usr/bin/bash ${STAGING_RELEASE_DIR}/infra/n8n-private/homologation/staging/daily_snapshot.sh --quiesce
+ExecStartPost=/usr/bin/python3 ${STAGING_RELEASE_DIR}/infra/n8n-private/homologation/staging/publish_snapshot.py
+UMask=0077
+NoNewPrivileges=yes
+TimeoutStartSec=30min

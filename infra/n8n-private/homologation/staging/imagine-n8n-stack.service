@@ -1,0 +1,19 @@
+[Unit]
+Description=Imagine private n8n Compose stack
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+EnvironmentFile=/etc/imagine-n8n/deployment.env
+ExecStartPre=/usr/bin/env docker compose --project-name imagine-n8n-private-staging --profile homologation -f ${N8N_RELEASE_DIR}/infra/n8n-private/docker-compose.yml config --quiet
+ExecStart=/usr/bin/env docker compose --project-name imagine-n8n-private-staging --profile homologation -f ${N8N_RELEASE_DIR}/infra/n8n-private/docker-compose.yml up --detach --no-build --pull never --wait --wait-timeout 180
+ExecStop=/usr/bin/env docker compose --project-name imagine-n8n-private-staging --profile homologation -f ${N8N_RELEASE_DIR}/infra/n8n-private/docker-compose.yml stop
+TimeoutStartSec=240
+TimeoutStopSec=120
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
