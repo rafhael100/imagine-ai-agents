@@ -36,3 +36,19 @@ procedimento operacional de homologação.
 
 Este checker é intencionalmente incapaz de remover bloqueios externos.
 Não houve merge, deploy, instalação, credencial, dados reais ou custo.
+
+## Robustez adicional — 19 regressões
+
+O leitor JSON agora limita a leitura real a 65.537 bytes, rejeita arquivos
+maiores que 65.536 bytes, links simbólicos e entradas que não sejam arquivos
+regulares. Chaves JSON duplicadas são recusadas em todos os níveis (evita que
+`state` ou `candidate_sha` sejam sobrescritos silenciosamente); NaN/Infinity
+também são negados. O CLI mantém saída `NO_GO` com exit 2 nas entradas inválidas.
+
+Foram acrescentados sete cenários: duplicidade no envelope e no gate, excesso
+de tamanho, link simbólico, número não-finito, CLI completo sem autorização e
+CLI hostil com código de falha. Total: **19 testes definidos**, cuja execução
+real deve ser confirmada no workflow da HEAD exata.
+
+A existência de referência documental ainda não confere procedência,
+assinatura, aprovação humana ou prontidão operacional.
