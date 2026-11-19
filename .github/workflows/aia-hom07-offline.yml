@@ -1,0 +1,47 @@
+name: AIA HOM-07 offline inventory regression
+on:
+  push:
+    branches:
+      - dev/aia-hom-readiness-offline-2026-11-19
+  pull_request:
+    branches:
+      - integrate/n8n-owner-components-crm-664-2026-11-18
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout isolated candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Compile syntax
+        run: python3 -m py_compile infra/n8n-private/homologation/hom_readiness.py infra/n8n-private/homologation/tests/test_hom_readiness.py
+      - name: Execute negative and positive contracts
+        run: python3 -m unittest discover -s infra/n8n-private/homologation/tests -p 'test_hom_readiness.py' -v
+      - name: Prove default NO_GO and no deploy authorization
+        run: |
+          python3 - <<'PY'
+          import json
+          import subprocess
+          import sys
+          cmd = [
+              sys.executable, "infra/n8n-private/homologation/hom_readiness.py",
+              "infra/n8n-private/homologation/fixtures/hom07-pending.json",
+              "--expected-candidate-sha", "85a17f2df9f618735a42d8690528d46c78cc904e"
+          ]
+          p = subprocess.run(cmd, capture_output=True, text=True, timeout=5, check=False)
+          assert p.returncode == 2, (p.returncode, p.stderr, p.stdout)
+          result = json.loads(p.stdout)
+          assert result["status"] == "NO_GO"
+          assert result["operational_authorization"] is False
+          assert result["missing_gates"] == [
+              "HOM-01", "HOM-02", "HOM-03", "HOM-04", "HOM-05", "HOM-06"
+          ]
+          PY
+      - name: Refuse operational authorization
+        run: |
+          ! grep -E '^ *"operational_authorization": true' docs/reviews/AIA-HOM-07-READINESS-INVENTORY.md

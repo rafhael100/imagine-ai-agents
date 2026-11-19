@@ -1,0 +1,30 @@
+{
+  "schema": "IMAGINE_AIA_HOM_READINESS_V1",
+  "candidate_sha": "85a17f2df9f618735a42d8690528d46c78cc904e",
+  "gates": {
+    "HOM-01": {
+      "state": "PENDING",
+      "evidence": []
+    },
+    "HOM-02": {
+      "state": "PENDING",
+      "evidence": []
+    },
+    "HOM-03": {
+      "state": "PENDING",
+      "evidence": []
+    },
+    "HOM-04": {
+      "state": "PENDING",
+      "evidence": []
+    },
+    "HOM-05": {
+      "state": "PENDING",
+      "evidence": []
+    },
+    "HOM-06": {
+      "state": "PENDING",
+      "evidence": []
+    }
+  }
+}
