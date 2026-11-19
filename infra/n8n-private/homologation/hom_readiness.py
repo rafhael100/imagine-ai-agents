@@ -7,6 +7,7 @@ No network, shell, credentials, Docker, or filesystem writes.
 import argparse
 import json
 import re
+import stat
 import sys
 from pathlib import Path
 
@@ -58,6 +59,31 @@ def analyze(data, expected_sha):
     }
 
 
+def reject_duplicate_keys(pairs):
+    obj = {}
+    for key, value in pairs:
+        if key in obj:
+            raise ValueError("DUPLICATE_JSON_KEY")
+        obj[key] = value
+    return obj
+
+
+def load_evidence(path):
+    # Bound the actual bytes read; stat alone can race with file replacement.
+    mode = path.lstat().st_mode
+    if not stat.S_ISREG(mode):
+        raise ValueError("NOT_REGULAR_FILE")
+    with path.open("rb") as handle:
+        payload = handle.read(MAX_BYTES + 1)
+    if len(payload) > MAX_BYTES:
+        raise ValueError("EVIDENCE_TOO_LARGE")
+    return json.loads(
+        payload.decode("utf-8"),
+        object_pairs_hook=reject_duplicate_keys,
+        parse_constant=lambda _: (_ for _ in ()).throw(ValueError("NON_FINITE")),
+    )
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("evidence_json", type=Path)
@@ -66,10 +92,7 @@ def main(argv=None):
     if not SHA40.fullmatch(args.expected_candidate_sha):
         p.error("expected candidate SHA must be 40 lowercase hex characters")
     try:
-        if args.evidence_json.stat().st_size > MAX_BYTES:
-            raise ValueError("EVIDENCE_TOO_LARGE")
-        with args.evidence_json.open("r", encoding="utf-8") as handle:
-            data = json.load(handle, parse_constant=lambda _: (_ for _ in ()).throw(ValueError("NON_FINITE")))
+        data = load_evidence(args.evidence_json)
     except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
         print(json.dumps({"status": "NO_GO", "operational_authorization": False,
                           "errors": [type(exc).__name__], "missing_gates": list(GATES)}, sort_keys=True))
