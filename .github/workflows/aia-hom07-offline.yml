@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - dev/aia-hom-readiness-offline-2026-11-19
+  pull_request:
+    branches:
+      - integrate/n8n-owner-components-crm-664-2026-11-18
   workflow_dispatch:
 permissions:
   contents: read
