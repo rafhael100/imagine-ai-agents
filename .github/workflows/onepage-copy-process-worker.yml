@@ -11,7 +11,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: aia-onepage-process-\${{ github.event.pull_request.number }}
+  group: aia-onepage-process-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 jobs:
   bounded-worker:
@@ -30,11 +30,11 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          ref: \${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: \${{ matrix.php }}
+          php-version: ${{ matrix.php }}
           extensions: mbstring
           coverage: none
       - name: Validate bounded process and schema
