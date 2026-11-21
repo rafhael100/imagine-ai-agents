@@ -95,6 +95,10 @@ $ok($accepted['executionMode'] === 'recorded-provider-response-only',
 $ok($accepted['providerResponseRef'] === $response['id'] &&
     $accepted['providerModel'] === $model,
     'non-secret response ref and explicit fixture model');
+$ok($accepted['agentVersion'] === Worker::VERSION &&
+    $accepted['taskRef'] === $task['taskRef'] &&
+    $accepted['correlationRef'] === $task['correlationRef'],
+    'provider evidence does not lose synthetic worker version or task correlation');
 $ok($accepted['briefRevision'] === 1 &&
     $accepted['briefSha256'] === $task['briefSha256'] &&
     $accepted['taskSha256'] === hash('sha256',$taskJson),
